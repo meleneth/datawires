@@ -50,9 +50,9 @@ export default
       []
   methods:
     add_property: ->
-      if @new_property_type == "object"
-        new_prop = {title: @new_property_name, description: '', properties: {}, type: 'object'}
-        target = pointer.get @schema, "#{@path}/properties"
-        @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
-        @$router.push {name: 'ObjectEdit', params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
+      new_prop = {title: @new_property_name, description: '', properties: {}, type: @new_property_type}
+      target = pointer.get @schema, "#{@path}/properties"
+      @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
+      @new_property_name = ''
+      @$router.push {name: @lookUp(new_prop.type), params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
 </script>
