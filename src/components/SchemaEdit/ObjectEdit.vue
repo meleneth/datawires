@@ -30,6 +30,10 @@
 pointer = require 'json-pointer'
 export default 
   name: 'ObjectEdit'
+  beforeRouteUpdate: (to, from, next) ->
+    @path = to.query.path
+#    @$forceUpdate()
+    next()
   props:
     schema: Object
   data: ->
@@ -41,14 +45,14 @@ export default
     @path = @$route.query.path
   computed:
     myproperties: ->
-      if @path != '' and @schema._id
+      if @schema._id
         return pointer.get @schema, "#{@path}/properties"
       []
   methods:
     add_property: ->
       if @new_property_type == "object"
-        new_prop = {title: @new_property_name, description: '', properties: {}}
+        new_prop = {title: @new_property_name, description: '', properties: {}, type: 'object'}
         target = pointer.get @schema, "#{@path}/properties"
         @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
-        @$router.push {name: 'ObjectEdit', params: {id: @schema._id}, query: {path: "#{@path}properties/#{@new_property_name}"}}
+        @$router.push {name: 'ObjectEdit', params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
 </script>

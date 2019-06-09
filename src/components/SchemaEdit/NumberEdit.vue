@@ -29,7 +29,7 @@
 <script lang="coffee">
 pointer = require 'json-pointer'
 export default 
-  name: 'ObjectEdit'
+  name: 'NumberEdit'
   props:
     schema: Object
   data: ->
