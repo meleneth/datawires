@@ -7,6 +7,11 @@ import Domains from './views/Domains.vue'
 import Schema from './views/Schema.vue'
 import SchemaEdit from './views/SchemaEdit.vue'
 
+import ObjectEdit from './components/SchemaEdit/ObjectEdit.vue'
+import StringEdit from './components/SchemaEdit/StringEdit.vue'
+import ArrayEdit from './components/SchemaEdit/ArrayEdit.vue'
+import NumberEdit from './components/SchemaEdit/NumberEdit.vue'
+
 Vue.use(Router)
 
 export default new Router({
@@ -18,7 +23,14 @@ export default new Router({
     { path: '/domain/:id', name: 'Domain', component: Domain, props: true },
     { path: '/domains', name: 'Domains', component: Domains, props: true },
     { path: '/schema/:id', name: 'Schema', component: Schema, props: true },
-    { path: '/schema/:id/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
+    { path: '/schema/:id/edit', component: SchemaEdit, props: true,
+      children: [
+        { path: "/schema/:id/editObject", name: "ObjectEdit", component: ObjectEdit, props: true },
+        { path: "/schema/:id/editString", name: "StringEdit", component: StringEdit, props: true },
+        { path: "/schema/:id/editArray", name: "ArrayEdit", component: ArrayEdit, props: true },
+        { path: "/schema/:id/editNumber", name: "NumberEdit", component: NumberEdit, props: true }
+      ]
+    },
     {
       path: '/about',
       name: 'about',
