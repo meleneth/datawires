@@ -14,11 +14,11 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     { path: '/', name: 'home', component: Home },
-    { path: '/document/:id', name: 'Document', component: Document },
-    { path: '/domain/:id', name: 'Domain', component: Domain },
-    { path: '/domains', name: 'Domains', component: Domains },
-    { path: '/schema/:id', name: 'Schema', component: Schema },
-    { path: '/schema/:id/edit', name: 'SchemaEdit', component: SchemaEdit },
+    { path: '/document/:id', name: 'Document', component: Document, props: true },
+    { path: '/domain/:id', name: 'Domain', component: Domain, props: true },
+    { path: '/domains', name: 'Domains', component: Domains, props: true },
+    { path: '/schema/:id', name: 'Schema', component: Schema, props: true },
+    { path: '/schema/:id/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
     {
       path: '/about',
       name: 'about',
