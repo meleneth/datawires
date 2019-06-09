@@ -1,10 +1,9 @@
 <template lang="pug">
   div
-    | HomePage!
-    | Check out Domains and Documents and STUFF
+    | Domain
 </template>
 
 <script lang="coffee">
 export default
-  name: 'home'
+  name: 'Domain'
 </script>
