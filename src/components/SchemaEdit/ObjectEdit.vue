@@ -21,7 +21,7 @@
       .md-layout-item
         | {{ property.type }}
       .md-layout-item
-        router-link(:to="{name: lookUp[property.type], params: {id: schema._id}, query: {path: '/properties/' + property.title}}") {{ property.title }}
+        router-link(:to="{name: lookUp[property.type], params: {id: schema._id}, query: {path: path + '/properties/' + property.title}}") {{ property.title }}
       .md-layout-item
         | {{ property.description }}
 </template>
@@ -46,13 +46,14 @@ export default
   computed:
     myproperties: ->
       if @schema._id
-        return pointer.get @schema, "#{@path}/properties"
+        p = "#{@path}/properties"
+        return pointer.get @schema, p
       []
   methods:
     add_property: ->
       new_prop = {title: @new_property_name, description: '', properties: {}, type: @new_property_type}
       target = pointer.get @schema, "#{@path}/properties"
       @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
+      @$router.push {name: @lookUp[new_prop.type], params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
       @new_property_name = ''
-      @$router.push {name: @lookUp(new_prop.type), params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
 </script>

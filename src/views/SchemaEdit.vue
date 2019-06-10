@@ -1,13 +1,12 @@
 <template lang="pug">
   div
-
     h3 {{ schema.dw$schema }}
     .md-layout
       .md-layout-item.md-size-33
         pre(style="text-align: left")
           | {{ renderedJson }}
       .md-layout-item.md-size-66
-        router-link(:to="{name: 'ObjectEdit', params: {id: schema._id}, query: {path: ''}}") Top
+        router-link(:to="{name: 'ObjectEdit', params: {id: schema._id}, query: {path: ''}}" v-if="schema") Top
         router-view(:schema="schema" v-on:addProperty="add_property")
 </template>
 
