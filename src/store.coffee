@@ -46,7 +46,7 @@ export default new Vuex.Store
           new Promise (resolve, reject) ->
             for entry in context.state.entries
               if id == entry._id
-                return resolve(entry)
+                return resolve JSON.parse JSON.stringify entry
             reject Error "Could not find db entry for id #{id}"
     load_db: (context) ->
       if context.state.db_loaded

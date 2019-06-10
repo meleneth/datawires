@@ -7,7 +7,7 @@
           | {{ renderedJson }}
       .md-layout-item.md-size-66
         router-link(:to="{name: 'ObjectEdit', params: {id: schema._id}, query: {path: ''}}" v-if="schema") Top
-        router-view(:schema="schema" v-on:addProperty="add_property")
+        router-view(:schema="schema" v-on:addProperty="add_property" v-on:updateString="update_string")
 </template>
 
 <script lang="coffee">
@@ -28,6 +28,11 @@ export default
     add_property: (data) ->
       target = pointer.get @schema, data.path
       target[data.title] = data.prop
+      @update_rendered_json()
+    update_string: (data) ->
+      target = pointer.get @schema, data.path
+      target.title = data.title
+      target.description = data.description
       @update_rendered_json()
     update_rendered_json: ->
       @renderedJson = JSON.stringify @schema, null, 2
