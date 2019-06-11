@@ -2,6 +2,7 @@
   div
     h1 ObjectEdit
     h5 Path: '{{ path }}'
+    h3 {{ title }}
     .md-layout
       .md-layout-item
         md-field
@@ -32,6 +33,8 @@ export default
   name: 'ObjectEdit'
   beforeRouteUpdate: (to, from, next) ->
     @path = to.query.path
+    if @schema._id
+      @title = pointer.get @schema, "#{@path}/title"
 #    @$forceUpdate()
     next()
   props:
@@ -41,6 +44,10 @@ export default
     new_property_name: ''
     path: ''
     lookUp: {string: 'StringEdit', object: 'ObjectEdit', array: 'ArrayEdit', number: 'NumberEdit'}
+    title: ''
+  watch: ->
+    description: ->
+      @save_changes()
   mounted: ->
     @path = @$route.query.path
   computed:
@@ -56,4 +63,6 @@ export default
       @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
       @$router.push {name: @lookUp[new_prop.type], params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
       @new_property_name = ''
+    save_changes: ->
+      @$emit 'updateArray', {path: @path, description: @description}
 </script>

@@ -2,17 +2,10 @@
   div
     h1 StringEdit
     h5 Path: '{{ path }}'
-    .md-layout
-      .md-layout-item.md-size-66
-        md-field
-          label title
-          md-input(v-model="title")
-        md-field
-          label description
-          md-textarea(v-model="description")
-      .md-layout-item.md-size-33
-      .md-layout-item
-        md-button.md-raised.md-primary(v-on:click="save_changes") ok
+    h3 {{ title }}
+    md-field
+      label description
+      md-textarea(v-model="description")
 </template>
 
 <script lang="coffee">
@@ -21,6 +14,7 @@ export default
   name: 'StringEdit'
   props:
     schema: Object
+    id: String
   data: ->
     path: @$route.query.path
     title: ''
@@ -34,7 +28,9 @@ export default
       if @schema._id
         @title = pointer.get @schema, "#{@path}/title"
         @description = pointer.get @schema, "#{@path}/description"
+    description: ->
+      @save_changes()
   methods:
     save_changes: ->
-      @$emit 'updateString', {path: @path, title: @title, description: @description}
+      @$emit 'updateString', {path: @path, description: @description}
 </script>
