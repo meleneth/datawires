@@ -14,20 +14,15 @@ export default
   name: 'StringEdit'
   props:
     schema: Object
-    id: String
+    current: Object
+    path: String
   data: ->
-    path: @$route.query.path
     title: ''
     description: ''
-  beforeRouteUpdate: (to, from, next) ->
-    @path = to.query.path
-    @title = pointer.get @schema, "#{path}/title"
-    @description = pointer.get @schema, "#{path}/description"
+  mounted: ->
+    @title = @current.title
+    @description = @current.description
   watch:
-    schema: ->
-      if @schema._id
-        @title = pointer.get @schema, "#{@path}/title"
-        @description = pointer.get @schema, "#{@path}/description"
     description: ->
       @save_changes()
   methods:

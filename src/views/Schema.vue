@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     p(v-if="schema.dw$schema") {{ schema.dw$schema }}
-      router-link(:to="{name: 'ObjectEdit', params: {id: schema._id}, query: {path: ''}}")
+      router-link(:to="{name: 'SchemaEdit', params: {id: schema._id}}")
         md-button.md-primary Edit
     ul
       li(v-for="doc in docs")

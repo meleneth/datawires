@@ -22,47 +22,48 @@
       .md-layout-item
         | {{ property.type }}
       .md-layout-item
-        router-link(:to="{name: lookUp[property.type], params: {id: schema._id}, query: {path: path + '/properties/' + property.title}}") {{ property.title }}
+        schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
       .md-layout-item
         | {{ property.description }}
 </template>
 
 <script lang="coffee">
 pointer = require 'json-pointer'
+
+import EventBus from '@/components/SchemaEdit/EventBus'
+import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
+
 export default 
   name: 'ObjectEdit'
-  beforeRouteUpdate: (to, from, next) ->
-    @path = to.query.path
-    if @schema._id
-      @title = pointer.get @schema, "#{@path}/title"
-#    @$forceUpdate()
-    next()
+  components:
+    'schema-edit-link': SchemaEditLink
   props:
     schema: Object
+    current: Object
+    path: String
   data: ->
     new_property_type: ''
     new_property_name: ''
-    path: ''
     lookUp: {string: 'StringEdit', object: 'ObjectEdit', array: 'ArrayEdit', number: 'NumberEdit'}
     title: ''
-  watch: ->
+    description: ''
+  watch:
     description: ->
       @save_changes()
   mounted: ->
-    @path = @$route.query.path
+    @title = @current.title
+    @description = @current.description
   computed:
     myproperties: ->
-      if @schema._id
-        p = "#{@path}/properties"
-        return pointer.get @schema, p
-      []
+      return pointer.get @schema, "#{@path}/properties"
+
   methods:
     add_property: ->
       new_prop = {title: @new_property_name, description: '', properties: {}, type: @new_property_type}
       target = pointer.get @schema, "#{@path}/properties"
       @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
-      @$router.push {name: @lookUp[new_prop.type], params: {id: @schema._id}, query: {path: "#{@path}/properties/#{@new_property_name}"}}
+      EventBus.$emit('navigate', {path: "#{@path}/properties/#{@new_property_name}"})
       @new_property_name = ''
     save_changes: ->
-      @$emit 'updateArray', {path: @path, description: @description}
+      @$emit 'updateObject', {path: @path, description: @description}
 </script>

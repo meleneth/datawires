@@ -5,27 +5,53 @@
       .md-layout-item.md-size-33
         div(id="diffdiv" style="text-align: left")
       .md-layout-item.md-size-66
-        router-link(:to="{name: 'ObjectEdit', params: {id: schema._id}, query: {path: ''}}" v-if="schema") Top
-        router-view(:schema="schema" v-on:addProperty="add_property" v-on:updateString="update_string" v-on:updateArray="update_array" v-on:updateNumber="update_number" v-on:updateObject="update_object")
+        schema-edit-link(:to="''" label="Top")
+        component(:is="selectedComponent"
+                  :current="current"
+                  :schema="schema"
+                  :path="path"
+                  v-on:addProperty="add_property"
+                  v-on:updateString="update_string"
+                  v-on:updateArray="update_array"
+                  v-on:updateNumber="update_number"
+                  v-on:updateObject="update_object"
+                  v-if="selectedComponent")
 </template>
 
 <script lang="coffee">
+import EventBus from '@/components/SchemaEdit/EventBus'
+import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
+import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
+import StringEdit from '@/components/SchemaEdit/StringEdit.vue'
+import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
+import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
+
 pointer = require 'json-pointer'
 difflib = require 'jsdifflib'
 
 contextSize = null
 
+tlookup = {'object': ObjectEdit, 'array': ArrayEdit, 'string': StringEdit, 'number': NumberEdit}
+
 export default 
   name: 'SchemaEdit'
+  components:
+    'schema-edit-link': SchemaEditLink
   props:
     id: String
   data: ->
     schema: {}
     path: ''
+    selectedComponent: false
+    current: {}
     renderedJson: ''
     sourceRenderedJson: ''
+  created: ->
+    EventBus.$on 'navigate', (data) =>
+      @path = data.path
+      @current = pointer.get @schema, @path
+      @selectedComponent = tlookup[@current.type]
   mounted: ->
-    @path = @$route.query.path
     @load_schema()
   methods:
     add_property: (data) ->
@@ -71,7 +97,9 @@ export default
       @$store.dispatch 'get', @id
         .then (schema) =>
           @schema = schema
+          @current = pointer.get @schema, @path
           @sourceRenderedJson = JSON.stringify @schema, null, 2
+          @selectedComponent = tlookup[@current.type]
           @update_rendered_json()
 </script>
 <style>
