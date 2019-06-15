@@ -5,17 +5,18 @@
       .md-layout-item.md-size-33
         div(id="diffdiv" style="text-align: left")
       .md-layout-item.md-size-66
-        schema-edit-link(:to="''" label="Top")
-        component(:is="selectedComponent"
-                  :current="current"
-                  :schema="schema"
-                  :path="path"
-                  v-on:addProperty="add_property"
-                  v-on:updateString="update_string"
-                  v-on:updateArray="update_array"
-                  v-on:updateNumber="update_number"
-                  v-on:updateObject="update_object"
-                  v-if="selectedComponent")
+        md-card
+          schema-edit-link(:to="''" label="Top")
+          component(:is="selectedComponent"
+                    :current="current"
+                    :schema="schema"
+                    :path="path"
+                    v-on:addProperty="add_property"
+                    v-on:updateString="update_string"
+                    v-on:updateArray="update_array"
+                    v-on:updateNumber="update_number"
+                    v-on:updateObject="update_object"
+                    v-if="selectedComponent")
 </template>
 
 <script lang="coffee">

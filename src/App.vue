@@ -1,12 +1,13 @@
-<template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/domains">Domains</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+<template lang="pug">
+  .page-container
+    md-app
+      md-app-toolbar.md-primary
+        span.md-title |)atawires
+      md-app-content
+        <router-link to="/">Home</router-link> |
+        <router-link to="/domains">Domains</router-link> |
+        <router-link to="/about">About</router-link>
+        <router-view/>
 </template>
 <script lang="coffee">
 export default
