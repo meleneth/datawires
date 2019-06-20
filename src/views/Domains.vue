@@ -1,29 +1,40 @@
 <template lang="pug">
   div
     | Domains
-    ul
-      li(v-for="domain in uniqueDomains") {{ domain }}
-    md-button.md-raised.md-primary(v-on:click='select_domain("TIGER")') Primary
-    hr
-    ul
-      li(v-for="domain in domains")
-        router-link(:to="{name: 'Schema', params: {id: domain.id}}") {{ domain.name }}
-
+    div
+      component(:is="selectedComponent" :domains="domains" :selected_domain="selected_domain")
 </template>
-
 <script lang="coffee">
 _ = require 'lodash'
+import EventBus from '@/components/Domains/EventBus'
+import RootDomains from '@/components/Domains/RootDomains'
+import SubDomains from '@/components/Domains/SubDomains'
+import Schemas from '@/components/Domains/Schemas'
 export default
   name: 'Domains'
   data: ->
-    selected_domain: ''
-    selected_subdomains: []
+    selectedComponent: false
+    selected_domain: false
+  created: ->
+    @selectedComponent = RootDomains
+    EventBus.$on 'selectRootDomain', (data) =>
+      @selected_domain = data.domain
+      @selectedComponent = SubDomains
+    EventBus.$on 'selectSubDomain', (data) =>
+      @selected_domain = data.domain
+      @selectedComponent = Schemas
   methods:
     select_domain: (name) ->
-      console.log "Selecting name!"
-      console.log name
-      console.log this
+      @selected_domain = name
+      @selected_basedomains = _.filter @domains, (d) => d.basedomain == @selected_domain
+    select_basedomain: (name) ->
+      @selected_domain = name
+      @selected_basedomains = []
+      @selected_domains = _.filter @domains, (d) => d.domain == @selected_domain
   computed:
+    baseDomains: ->
+      basedomains = _.map @domain_stats, (d) -> d.basedomain
+      _.uniq basedomains
     uniqueDomains: ->
       domains = _.map @domains, (d) -> d.basedomain
       domains = _.uniq domains
@@ -44,7 +55,4 @@ export default
           basedomain = domain_pieces[0]
         domain_stats.push {name: key, id: value, domain: pieces[2], path: pieces[3], basedomain: basedomain}
       _.orderBy domain_stats, ['basedomain', 'domain']
-
-  mounted: ->
-    @$store.dispatch 'load_db'
 </script>
