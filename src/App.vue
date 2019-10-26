@@ -1,5 +1,6 @@
 <template lang="pug">
   .page-container
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
     md-app
       md-app-toolbar.md-primary
         span.md-title |)atawires

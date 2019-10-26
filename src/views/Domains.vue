@@ -1,5 +1,6 @@
 <template lang="pug">
   div
+    md-icon done
     | Domains
     div
       component(:is="selectedComponent" :domains="domains" :selected_domain="selected_domain")
