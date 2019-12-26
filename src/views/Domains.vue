@@ -43,8 +43,8 @@ export default
     domains: ->
       domain_names = {}
       for domain in @$store.state.entries
-        if domain.dw$schema
-          domain_names[domain.dw$schema] = domain._id
+        if domain.$schema
+          domain_names[domain.$schema] = domain._id
       domain_stats = []
       for key, value of domain_names
         pieces = key.match /^([^:]*):\/\/([^/]*)\/([^\#]*)#/

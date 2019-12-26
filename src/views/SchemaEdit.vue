@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    h3 {{ schema.dw$schema }}
+    h3 {{ schema.$schema }}
     .md-layout
       .md-layout-item.md-size-33
         div(id="diffdiv" style="text-align: left")

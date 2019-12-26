@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    p(v-if="schema.dw$schema") {{ schema.dw$schema }}
+    p(v-if="schema.$schema") {{ schema.$schema }}
       router-link(:to="{name: 'SchemaEdit', params: {id: schema._id}}")
         md-button.md-primary Edit
     ul
@@ -29,7 +29,7 @@ export default
       results = []
       if @schema
         for s in @$store.state.entries
-          if s.dw$ref && s.dw$ref == @schema.dw$schema
+          if s.$ref && s.$ref == @schema.$schema
             results.push s
       results
 
