@@ -59,6 +59,8 @@ export default new Vuex.Store
           context.commit 'SET_LOADING', false
       context.commit 'SET_DBLOADED', p
       p
+    post_entry: (context, entry) ->
+      db.post entry
     add_entry: (context, entry) ->
       db.post entry
         .then (result) ->

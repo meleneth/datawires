@@ -5,6 +5,7 @@
       .md-layout-item.md-size-33
         div(id="diffdiv" style="text-align: left")
       .md-layout-item.md-size-66
+        md-button.md-primary.md-raised(v-on:click="save_schema") save
         md-card
           schema-edit-link(:to="''" label="Top")
           component(:is="selectedComponent"
@@ -93,6 +94,12 @@ export default
         newTextName: "new schema"
         contextSize: contextSize
         inline: true
+    save_schema: ->
+      console.log "Saving so easy? lets see you do it.."
+      @$store.dispatch "save_entry", @schema
+        .then (result) ->
+          console.log "I've been away"
+          console.log result
     load_schema: ->
       console.log "Fetching #{@id}"
       @$store.dispatch 'get', @id
