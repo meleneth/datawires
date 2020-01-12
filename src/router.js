@@ -2,10 +2,14 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Document from './views/Document.vue'
+import Documents from './views/Documents.vue'
 import Domain from './views/Domain.vue'
 import Domains from './views/Domains.vue'
 import Schema from './views/Schema.vue'
+import Schemas from './views/Schemas.vue'
 import SchemaEdit from './views/SchemaEdit.vue'
+import DocumentEdit from './views/DocumentEdit.vue'
+import CreateDocument from './views/CreateDocument.vue'
 
 import ObjectEdit from './components/SchemaEdit/ObjectEdit.vue'
 import StringEdit from './components/SchemaEdit/StringEdit.vue'
@@ -20,10 +24,14 @@ export default new Router({
   routes: [
     { path: '/', name: 'home', component: Home },
     { path: '/document/:id', name: 'Document', component: Document, props: true },
-    { path: '/domain/:id', name: 'Domain', component: Domain, props: true },
+    { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
+    { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
     { path: '/domains', name: 'Domains', component: Domains, props: true },
-    { path: '/schema/:id', name: 'Schema', component: Schema, props: true },
-    { path: '/schema/:id/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
+    { path: '/schemas/:domain', name: 'Schemas', component: Schemas, props: true },
+    { path: '/documents/:domain/:path', name: 'Documents', component: Documents, props: true },
+    { path: '/schema/:domain/:name', name: 'Schema', component: Schema, props: true },
+    { path: '/schema/:domain/:name/createDocument', name: 'CreateDocument', component: CreateDocument, props: true },
+    { path: '/schema/:domain/:name/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
     {
       path: '/about',
       name: 'about',

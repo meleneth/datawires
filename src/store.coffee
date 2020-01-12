@@ -40,6 +40,20 @@ export default new Vuex.Store
             .then (result) ->
               context.commit "SET_ENTRY", result
               context.commit "SET_SAVING", false
+    db_get_url: (context, url) ->
+      return axios.get "#{db_url}#{url}"
+    db_get_domains: ->
+      return @dispatch 'db_get_url', "/_design/schemas/_view/documents?group_level=1"
+        .then (d) ->
+          return d.data.rows
+    db_get_schemas: () ->
+      return @dispatch 'db_get_url', "/_design/schemas/_view/documents?group_level=2"
+        .then (d) ->
+          return d.data.rows
+    db_get_documents: (context, key) ->
+      return db.query "schemas/documents", {key: key, include_docs: true, reduce: false}
+        .then (d) ->
+          return _.map d.rows, (f) -> f.doc
     get: (context, id) ->
       @dispatch 'load_db'
         .then ->
