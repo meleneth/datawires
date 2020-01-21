@@ -59,7 +59,7 @@ export default
       @current = pointer.get @schema, @path
       @selectedComponent = tlookup[@current.type]
   mounted: ->
-    @load_schema()
+    @load_document()
   methods:
     add_property: (data) ->
       target = pointer.get @schema, data.path
@@ -82,7 +82,7 @@ export default
       target.description = data.description
       @update_rendered_json()
     update_rendered_json: ->
-      @renderedJson = JSON.stringify @schema, null, 2
+      @renderedJson = JSON.stringify @document, null, 2
       base = difflib.stringAsLines @sourceRenderedJson
       newtxt = difflib.stringAsLines @renderedJson
       sm = new difflib.SequenceMatcher base, newtxt
@@ -95,24 +95,24 @@ export default
         baseTextLines: base
         newTextLines: newtxt
         opcodes: opcodes
-        baseTextName: "base schema"
-        newTextName: "new schema"
+        baseTextName: "base document"
+        newTextName: "new document"
         contextSize: contextSize
         inline: true
-    save_schema: ->
+    save_document: ->
       console.log "Saving so easy? lets see you do it.."
-      @$store.dispatch "save_entry", @schema
+      @$store.dispatch "save_entry", @document
         .then (result) ->
           console.log "I've been away"
           console.log result
-    load_schema: ->
+    load_document: ->
       console.log "Fetching #{@id}"
       @$store.dispatch 'get', @id
         .then (document) =>
           @document = document
           @sourceRenderedJson = JSON.stringify @document, null, 2
           @update_rendered_json()
-          @$store.dispatch 'get', document.$ref
+          @$store.dispatch 'getSchemaByRef', document.$ref
             .then (schema) =>
               @schema = schema
 </script>

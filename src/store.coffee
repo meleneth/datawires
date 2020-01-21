@@ -7,6 +7,10 @@ _ = require 'lodash'
 
 Vue.use(Vuex)
 
+parse_ref = (ref) ->
+  matches = ref.match "http:\/\/([^/]*)\/([^#]*)#"
+  return [matches[1], matches[2]]
+
 export default new Vuex.Store
   state:
     entries: []
@@ -42,8 +46,10 @@ export default new Vuex.Store
               context.commit "SET_SAVING", false
     db_get_url: (context, url) ->
       return axios.get "#{db_url}#{url}"
+    get_doc: (context, id) ->
+      return db.get(id)
     db_get_domains: ->
-      return @dispatch 'db_get_url', "/_design/schemas/_view/documents?group_level=1"
+      return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?group_level=1"
         .then (d) ->
           return d.data.rows
     db_get_schemas: () ->
@@ -54,6 +60,11 @@ export default new Vuex.Store
       return db.query "schemas/documents", {key: key, include_docs: true, reduce: false}
         .then (d) ->
           return _.map d.rows, (f) -> f.doc
+    getSchemaByRef: (context, ref) ->
+      key = parse_ref ref
+      return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
+        .then (d) ->
+          return d.data.rows[0].doc
     get: (context, id) ->
       @dispatch 'load_db'
         .then ->

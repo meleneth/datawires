@@ -1,5 +1,6 @@
 <template lang="pug">
   div
+    add-schema
     md-icon done
     | Domains
     ul
@@ -9,8 +10,12 @@
 </template>
 <script lang="coffee">
 _ = require 'lodash'
+import AddSchema from  '@/components/AddSchema.vue'
+
 export default
   name: 'Domains'
+  components:
+    "add-schema": AddSchema
   data: ->
     return
       domains: []
