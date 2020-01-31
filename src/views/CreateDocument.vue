@@ -4,26 +4,27 @@
     .md-layout
       .md-layout-item.md-size-33
         div(id="diffdiv" style="text-align: left")
-      .md-layout-item.md-size-33
-        pre {{ document }}
-        hr
-        pre {{ schema }}
-      .md-layout-item.md-size-33
-        p(v-for="field in fields")
-          component(:is="field.is"
-                    :current="field.current"
-                    :path="field.path"
-                    :description="field.description"
-                    :title="field.title"
-                    v-on:updateString="update_string")
-        md-button.md-primary.md-raised(v-on:click="save_document") save
+      .md-layout-item.md-size-66
+        md-button.md-primary.md-raised(v-on:click="save_schema") save
+        md-card
+          schema-edit-link(:to="''" label="Top")
+          component(:is="selectedComponent"
+                    :current="current"
+                    :schema="schema"
+                    :path="path"
+                    v-on:addProperty="add_property"
+                    v-on:updateString="update_string"
+                    v-on:updateArray="update_array"
+                    v-on:updateNumber="update_number"
+                    v-on:updateObject="update_object"
+                    v-if="selectedComponent")
 </template>
 
 <script lang="coffee">
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
 import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
-import StringEdit from '@/components/DocumentEdit/StringEdit.vue'
+import StringEdit from '@/components/SchemaEdit/StringEdit.vue'
 import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
 import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
 
@@ -35,45 +36,48 @@ contextSize = null
 tlookup = {'object': ObjectEdit, 'array': ArrayEdit, 'string': StringEdit, 'number': NumberEdit}
 
 export default 
-  name: 'DocumentEdit'
+  name: 'CreateDocument'
   components:
     'schema-edit-link': SchemaEditLink
-    'string-edit': StringEdit
   props:
     id: String
   data: ->
     schema: {}
-    document: {}
     path: ''
     selectedComponent: false
     current: {}
     renderedJson: ''
     sourceRenderedJson: ''
-    fields: []
+  created: ->
+    EventBus.$on 'navigate', (data) =>
+      @path = data.path
+      @current = pointer.get @schema, @path
+      @selectedComponent = tlookup[@current.type]
   mounted: ->
-    @load_document()
+    @load_schema()
   methods:
     add_property: (data) ->
-      target = pointer.get @document, data.path
+      target = pointer.get @schema, data.path
       target[data.title] = data.prop
       @update_rendered_json()
     update_string: (data) ->
-      pointer.set @document, data.path, data.value
+      target = pointer.get @schema, data.path
+      target.description = data.description
       @update_rendered_json()
     update_number: (data) ->
-      target = pointer.get @document, data.path
+      target = pointer.get @schema, data.path
       target.description = data.description
       @update_rendered_json()
     update_array: (data) ->
-      target = pointer.get @document, data.path
+      target = pointer.get @schema, data.path
       target.description = data.description
       @update_rendered_json()
     update_object: (data) ->
-      target = pointer.get @document, data.path
+      target = pointer.get @schema, data.path
       target.description = data.description
       @update_rendered_json()
     update_rendered_json: ->
-      @renderedJson = JSON.stringify @document, null, 2
+      @renderedJson = JSON.stringify @schema, null, 2
       base = difflib.stringAsLines @sourceRenderedJson
       newtxt = difflib.stringAsLines @renderedJson
       sm = new difflib.SequenceMatcher base, newtxt
@@ -86,39 +90,25 @@ export default
         baseTextLines: base
         newTextLines: newtxt
         opcodes: opcodes
-        baseTextName: "base document"
-        newTextName: "new document"
+        baseTextName: "base schema"
+        newTextName: "new schema"
         contextSize: contextSize
         inline: true
-    save_document: ->
+    save_schema: ->
       console.log "Saving so easy? lets see you do it.."
-      @$store.dispatch "save_entry", @document
+      @$store.dispatch "save_entry", @schema
         .then (result) ->
           console.log "I've been away"
           console.log result
-    create_editor_fields: ->
-      @fields = []
-      for name, property of @schema.properties
-        path = "/#{name}"
-        if property.type == "string"
-          editor = StringEdit
-        @fields.push
-          current: pointer.get @document, path
-          path: path
-          is: editor
-          description: property.description
-          title: property.title
-    load_document: ->
+    load_schema: ->
       console.log "Fetching #{@id}"
       @$store.dispatch 'get', @id
-        .then (document) =>
-          @document = document
-          @sourceRenderedJson = JSON.stringify @document, null, 2
+        .then (schema) =>
+          @schema = schema
+          @current = pointer.get @schema, @path
+          @sourceRenderedJson = JSON.stringify @schema, null, 2
+          @selectedComponent = tlookup[@current.type]
           @update_rendered_json()
-          @$store.dispatch 'getSchemaByRef', document.$ref
-            .then (schema) =>
-              @schema = schema
-              @create_editor_fields()
 </script>
 <style>
 table.diff {
