@@ -25,14 +25,18 @@ import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
 import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
 import StringEdit from '@/components/DocumentEdit/StringEdit.vue'
 import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
-import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
+import NumberEdit from '@/components/DocumentEdit/NumberEdit.vue'
 
 pointer = require 'json-pointer'
 difflib = require 'jsdifflib'
 
 contextSize = null
 
-tlookup = {'object': ObjectEdit, 'array': ArrayEdit, 'string': StringEdit, 'number': NumberEdit}
+tlookup =
+  object: ObjectEdit
+  array: ArrayEdit
+  string: StringEdit
+  number: NumberEdit
 
 export default 
   name: 'DocumentEdit'

@@ -40,7 +40,8 @@ export default
   components:
     'schema-edit-link': SchemaEditLink
   props:
-    id: String
+    domain: String
+    name: String
   data: ->
     schema: {}
     path: ''
@@ -101,8 +102,8 @@ export default
           console.log "I've been away"
           console.log result
     load_schema: ->
-      console.log "Fetching #{@id}"
-      @$store.dispatch 'get', @id
+      console.log "Fetching schema for domain '#{@domain}' slash '#{@name}'"
+      @$store.dispatch 'getSchemaByKey', [@domain, @name]
         .then (schema) =>
           @schema = schema
           @current = pointer.get @schema, @path

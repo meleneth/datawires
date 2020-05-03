@@ -1,6 +1,8 @@
 <template lang="pug">
   div
-    h1 {{ domain }} / {{ path }}
+    h1
+      |{{ domain }} / {{ path }}
+      router-link(:to="{name: 'CreateDocument', params: {domain: this.domain, name: this.path}}") create
     ul
       li(v-for="doc in documents")
         router-link(:to="{name: 'Document', params: {id: doc._id}}") {{ doc.name || doc._id }}

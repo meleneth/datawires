@@ -53,13 +53,19 @@ export default new Vuex.Store
         .then (d) ->
           return d.data.rows
     db_get_schemas: () ->
-      return @dispatch 'db_get_url', "/_design/schemas/_view/documents?group_level=2"
+      return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?group_level=2"
         .then (d) ->
+          console.log "Got schemas"
+          console.log d.data.rows
           return d.data.rows
     db_get_documents: (context, key) ->
       return db.query "schemas/documents", {key: key, include_docs: true, reduce: false}
         .then (d) ->
           return _.map d.rows, (f) -> f.doc
+    getSchemaByKey: (context, key) ->
+      return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
+        .then (d) ->
+          return d.data.rows[0].doc
     getSchemaByRef: (context, ref) ->
       key = parse_ref ref
       return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
