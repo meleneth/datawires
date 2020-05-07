@@ -106,8 +106,11 @@ export default
         path = "/#{name}"
         if property.type == "string"
           editor = StringEdit
+        current = ''
+        if pointer.has @document, path
+          current = pointer.get @document, path
         @fields.push
-          current: pointer.get @document, path
+          current: current
           path: path
           is: editor
           description: property.description
