@@ -2,7 +2,23 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
 
-db = new PouchDB "http://clu:5984/vue_datawires"
+#PouchDB.plugin require 'pouchdb-authentication'
+
+db_url = "http://tyreen.sectorfour:5984/datawires"
+#db_url = "http://172.16.0.122:5984/noodatawires"
+#db_options =
+#  "auth.username": "datawires"
+#  "auth.password": "datawires"
+#db = new PouchDB db_url, {skip_setup: true}
+#db.logIn "datawires", "datawires"
+#  .then ->
+#    console.log "I'm batman"
+#db = new PouchDB db_url, {
+#  auth:
+#    username: "datawires"
+#    password: "datawires"
+#}
+db = new PouchDB db_url
 _ = require 'lodash'
 
 Vue.use(Vuex)
@@ -22,18 +38,18 @@ export default new Vuex.Store
     ADD_ENTRY: (state, entry) ->
       state.entries.push entry
     SET_ENTRIES: (state, entries) ->
-      state.entries = entries
+      Vue.set state, 'entries', entries
     SET_ENTRY: (state, entry) ->
       for value, index in state.entries
         if value._id == entry._id
-          state.entries[index] = entry
+          Vue.set state.entries, index, entry
           return
     SET_LOADING: (state, loading) ->
-      state.loading = loading
+      Vue.set state, 'loading', loading
     SET_DBLOADED: (state, db_loaded) ->
-      state.db_loaded = db_loaded
+      Vue.set state, 'db_loaded', db_loaded
     SET_SAVING: (state, saving) ->
-      state.saving = saving
+      Vue.set state, 'saving', saving
   ,
   actions:
     save_entry: (context, doc) ->

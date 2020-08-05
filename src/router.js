@@ -1,3 +1,4 @@
+import Admin from '@/views/Admin.vue'
 import CreateDocument from '@/views/CreateDocument.vue'
 import Document from '@/views/Document.vue'
 import DocumentEdit from '@/views/DocumentEdit.vue'
@@ -23,6 +24,7 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     { path: '/', name: 'home', component: Home },
+    { path: '/admin', name: 'Admin', component: Admin },
     { path: '/document/:id', name: 'Document', component: Document, props: true },
     { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
     { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
