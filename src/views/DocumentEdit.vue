@@ -15,7 +15,8 @@
                     :path="field.path"
                     :description="field.description"
                     :title="field.title"
-                    v-on:updateString="update_string")
+                    v-on:updateString="update_string"
+                    v-on:updateNumber="update_number")
         md-button.md-primary.md-raised(v-on:click="save_document") save
 </template>
 
@@ -65,8 +66,7 @@ export default
       pointer.set @document, data.path, data.value
       @update_rendered_json()
     update_number: (data) ->
-      target = pointer.get @document, data.path
-      target.description = data.description
+      pointer.set @document, data.path, Number(data.value)
       @update_rendered_json()
     update_array: (data) ->
       target = pointer.get @document, data.path
@@ -106,6 +106,8 @@ export default
         path = "/#{name}"
         if property.type == "string"
           editor = StringEdit
+        if property.type == "number"
+          editor = NumberEdit
         current = ''
         if pointer.has @document, path
           current = pointer.get @document, path
