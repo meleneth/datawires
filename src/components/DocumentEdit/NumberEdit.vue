@@ -3,7 +3,7 @@
     h3 {{ title }}
     md-field
       label {{ description }}
-      md-input(v-model="value")
+      md-input(v-model="value" type="number")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 
