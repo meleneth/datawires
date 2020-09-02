@@ -6,8 +6,17 @@
     md-field
       label description
       md-textarea(v-model="description")
+    h3 Allowed Values
+    .md-layout
+      .md-layout-item
+        ul(v-if="current.enum")
+          li(v-for="item in current.enum") {{ item }}
+      .md-layout-item
+        md-field
+          md-input(v-model="allowed_value_to_add")
+      .md-layout-item
+        md-button.md-primary.md-raised(v-on:click="add_enum_item") add
 </template>
-
 <script lang="coffee">
 pointer = require 'json-pointer'
 export default 
@@ -19,6 +28,7 @@ export default
   data: ->
     title: ''
     description: ''
+    allowed_value_to_add: ''
   mounted: ->
     @title = @current.title
     @description = @current.description
@@ -28,4 +38,10 @@ export default
   methods:
     save_changes: ->
       @$emit 'updateString', {path: @path, description: @description}
+    add_enum_item: ->
+      if not @current.enum
+        @current.enum = []
+      @current.enum.push @allowed_value_to_add
+      @allowed_value_to_add = ''
+      @save_changes()
 </script>

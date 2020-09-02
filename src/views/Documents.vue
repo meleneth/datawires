@@ -1,10 +1,15 @@
 <template lang="pug">
   div
     h1
-      |{{ domain }} / {{ path }}
+      | {{ domain }} / {{ path }} &nbsp;
       router-link(:to="{name: 'CreateDocument', params: {domain: this.domain, name: this.path}}") create
+      | &nbsp;
+      router-link(:to="{name: 'GridEditDocuments', params: {domain: this.domain, name: this.path}}") gridEdit
     ul
       li(v-for="doc in documents")
+        | [
+        router-link(:to="{name: 'DocumentEdit', params: {id: doc._id}}") edit
+        | ] &nbsp;
         router-link(:to="{name: 'Document', params: {id: doc._id}}") {{ doc.name || doc._id }}
 </template>
 

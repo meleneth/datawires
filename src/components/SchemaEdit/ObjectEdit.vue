@@ -59,7 +59,9 @@ export default
 
   methods:
     add_property: ->
-      new_prop = {title: @new_property_name, description: '', properties: {}, type: @new_property_type}
+      new_prop = {title: @new_property_name, description: '', type: @new_property_type}
+      if @new_property_type == 'object'
+        new_prop['properties'] = {}
       target = pointer.get @schema, "#{@path}/properties"
       @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
       EventBus.$emit('navigate', {path: "#{@path}/properties/#{@new_property_name}"})

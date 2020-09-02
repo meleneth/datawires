@@ -1,23 +1,25 @@
 <template lang="pug">
   div
-    h3 {{ field.title }}
     md-field
-      label {{ field.description }}
-      md-input(v-model="value" type="number")
+      md-input(v-model="value")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 
-  name: 'DocumentNumberEdit'
+  name: 'DocumentGridStringEdit'
   props:
-    field: Object
+    current: String
+    path: String
+    title: String
+    description: String
+    doc: Object
   data: ->
     value: undefined
   mounted: ->
-    @value = @field.current
+    @value = @current
   watch:
     value: ->
       @save_changes()
   methods:
     save_changes: ->
-      @$emit 'updateNumber', {path: @field.path, value: @value}
+      @$emit 'updateString', {path: @path, value: @value, doc: @doc}
 </script>

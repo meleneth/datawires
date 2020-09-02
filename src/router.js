@@ -5,17 +5,13 @@ import DocumentEdit from '@/views/DocumentEdit.vue'
 import Documents from '@/views/Documents.vue'
 import Domain from '@/views/Domain.vue'
 import Domains from '@/views/Domains.vue'
+import GridEditDocuments from '@/views/GridEditDocuments.vue'
 import Home from '@/views/Home.vue'
 import Router from 'vue-router'
 import Schema from '@/views/Schema.vue'
 import SchemaEdit from '@/views/SchemaEdit.vue'
 import Schemas from '@/views/Schemas.vue'
 import Vue from 'vue'
-
-import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
-import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
-import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
-import StringEdit from '@/components/SchemaEdit/StringEdit.vue'
 
 Vue.use(Router)
 
@@ -31,6 +27,7 @@ export default new Router({
     { path: '/domains', name: 'Domains', component: Domains, props: true },
     { path: '/schemas/:domain', name: 'Schemas', component: Schemas, props: true },
     { path: '/documents/:domain/:path', name: 'Documents', component: Documents, props: true },
+    { path: '/documents/:domain/:path/gridEdit', name: 'GridEditDocuments', component: GridEditDocuments, props: true },
     { path: '/schema/:domain/:name', name: 'Schema', component: Schema, props: true },
     { path: '/schema/:domain/:name/createDocument', name: 'CreateDocument', component: CreateDocument, props: true },
     { path: '/schema/:domain/:name/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
