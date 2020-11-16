@@ -16,7 +16,13 @@ describe 'DocumentEdit/StringEdit.vue', =>
       description: "Give me a value"
     title =  "a name with a value"
     path = "/name"
+    current = 'foo'
+    property =
+      "enum": ['foo', 'bar', 'baz']
     wrapper = shallowMount DocumentEditString,
-      propsData: { msg, object, title, path }
-      stubs: { "md-input": "<input />", "md-field": "<p />"}
+      propsData:
+        field: { current, title, path, property}
+      stubs:
+        "md-input": {template: "<input />"}
+        "md-field": {template: "<p />"}
     expect(wrapper.text()).to.include("a name with a value")

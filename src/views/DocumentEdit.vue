@@ -11,12 +11,7 @@
       .md-layout-item.md-size-33
         p(v-for="field in fields")
           component(:is="field.is"
-                    :current="field.current"
-                    :path="field.path"
-                    :description="field.description"
-                    :title="field.title"
-                    v-on:updateString="update_string"
-                    v-on:updateNumber="update_number")
+                    :field="field")
         md-button.md-primary.md-raised(v-on:click="save_document") save
 </template>
 
@@ -117,6 +112,7 @@ export default
           is: editor
           description: property.description
           title: property.title
+          property: property
     load_document: ->
       console.log "Fetching #{@id}"
       @$store.dispatch 'get', @id

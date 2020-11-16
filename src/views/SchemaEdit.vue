@@ -21,15 +21,15 @@
 </template>
 
 <script lang="coffee">
+pointer = require 'json-pointer'
+difflib = require 'jsdifflib'
+
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
 import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
 import StringEdit from '@/components/SchemaEdit/StringEdit.vue'
 import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
 import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
-
-pointer = require 'json-pointer'
-difflib = require 'jsdifflib'
 
 contextSize = null
 

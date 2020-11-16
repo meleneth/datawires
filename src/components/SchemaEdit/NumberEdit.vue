@@ -6,9 +6,23 @@
     md-field
       label description
       md-textarea(v-model="description")
+    .md-layout
+      .md-layout-item(v-if="!has_minimum")
+        md-button.md-primary.md-raised(v-on:click="add_minimum") add minimum
+      .md-layout-item(v-if="has_minimum")
+        md-field
+          md-input(v-model="current.minimum")
+        md-button.md-primary.md-raised(v-on:click="remove_minimum") remove minimum
+      .md-layout-item(v-if="!has_maximum")
+        md-button.md-primary.md-raised(v-on:click="add_maximum") add maximum
+      .md-layout-item(v-if="has_maximum")
+        md-field
+          md-input(v-model="current.maximum")
+        md-button.md-primary.md-raised(v-on:click="remove_maximum") remove maximum
 </template>
 
 <script lang="coffee">
+import Vue from 'vue'
 pointer = require 'json-pointer'
 export default 
   name: 'NumberEdit'
@@ -22,10 +36,27 @@ export default
   mounted: ->
     @title = @current.title
     @description = @current.description
+  computed:
+    has_minimum: ->
+      @current.hasOwnProperty 'minimum'
+    has_maximum: ->
+      @current.hasOwnProperty 'maximum'
   watch:
     description: ->
       @save_changes()
   methods:
+    add_minimum: ->
+      Vue.set @current, 'minimum', 0
+      @save_changes()
+    remove_minimum: ->
+      delete @current.minimum
+      @save_changes()
+    add_maximum: ->
+      Vue.set @current, 'maximum', 0
+      @save_changes()
+    remove_maximum: ->
+      delete @current.maximum
+      @save_changes()
     save_changes: ->
       @$emit 'updateNumber', {path: @path, description: @description}
 </script>

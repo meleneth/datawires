@@ -39,7 +39,7 @@ export default
     save_changes: ->
       @$emit 'updateString', {path: @path, description: @description}
     add_enum_item: ->
-      if not @current.enum
+      if not 'enum' in @current
         @current.enum = []
       @current.enum.push @allowed_value_to_add
       @allowed_value_to_add = ''
