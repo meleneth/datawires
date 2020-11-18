@@ -1,7 +1,5 @@
 <template lang="pug">
-  div
-    md-field
-      md-input(v-model="value" type="number")
+  v-text-field(v-model="value" type="number" :label="field.title")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 

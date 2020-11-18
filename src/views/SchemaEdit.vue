@@ -1,23 +1,25 @@
 <template lang="pug">
-  div
-    h3 {{ schema.$schema }}
-    .md-layout
-      .md-layout-item.md-size-33
+  v-container
+    v-row
+      v-col
+        h3 {{ schema.$schema }}
+    v-row
+      v-col
+        schema-edit-link(:to="''" label="Top")
+        component(:is="selectedComponent"
+                  :current="current"
+                  :schema="schema"
+                  :path="path"
+                  v-on:addProperty="add_property"
+                  v-on:updateString="update_string"
+                  v-on:updateArray="update_array"
+                  v-on:updateNumber="update_number"
+                  v-on:updateObject="update_object"
+                  v-if="selectedComponent")
+        v-btn(v-on:click="save_schema") save
+    v-row
+      v-col
         div(id="diffdiv" style="text-align: left")
-      .md-layout-item.md-size-66
-        md-button.md-primary.md-raised(v-on:click="save_schema") save
-        md-card
-          schema-edit-link(:to="''" label="Top")
-          component(:is="selectedComponent"
-                    :current="current"
-                    :schema="schema"
-                    :path="path"
-                    v-on:addProperty="add_property"
-                    v-on:updateString="update_string"
-                    v-on:updateArray="update_array"
-                    v-on:updateNumber="update_number"
-                    v-on:updateObject="update_object"
-                    v-if="selectedComponent")
 </template>
 
 <script lang="coffee">

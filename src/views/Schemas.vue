@@ -1,7 +1,6 @@
 <template lang="pug">
   div
     add-schema
-    md-icon done
     h1(v-if="schemas") Schemas - {{ domain }}
     ul
       li(v-for="schema in filtered_schemas")

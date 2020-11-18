@@ -3,28 +3,22 @@
     h1 ObjectEdit
     h5 Path: '{{ path }}'
     h3 {{ title }}
-    .md-layout
-      .md-layout-item
-        md-field
-          label(for="new_property_type") Type
-          md-select(v-model="new_property_type" name="new_property_type" id="new_property_type")
-            md-option(value="string") string
-            md-option(value="object") object
-            md-option(value="array") array
-            md-option(value="number") number
-      .md-layout-item
-        md-field
-          label New Property Name
-          md-input(v-model="new_property_name")
-      .md-layout-item
-        md-button.md-raised.md-primary(v-on:click="add_property") Create
-    .md-layout(v-for="property in myproperties")
-      .md-layout-item
-        | {{ property.type }}
-      .md-layout-item
-        schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
-      .md-layout-item
-        | {{ property.description }}
+    v-container
+      v-row
+        v-col
+          v-select(:items="item_types" v-model="new_property_type" label="Type")
+        v-col
+          v-text-field(v-model="new_property_name" label="New Property Name")
+        v-col
+          v-btn(v-on:click="add_property") Create
+    v-container(v-for="property in myproperties")
+      v-row
+        v-col
+          | {{ property.type }}
+        v-col
+          schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
+        v-col
+          | {{ property.description }}
 </template>
 
 <script lang="coffee">
@@ -44,6 +38,7 @@ export default
   data: ->
     new_property_type: ''
     new_property_name: ''
+    item_types: ['string', 'number', 'object', 'array']
     lookUp: {string: 'StringEdit', object: 'ObjectEdit', array: 'ArrayEdit', number: 'NumberEdit'}
     title: ''
     description: ''
@@ -56,7 +51,6 @@ export default
   computed:
     myproperties: ->
       return pointer.get @schema, "#{@path}/properties"
-
   methods:
     add_property: ->
       new_prop = {title: @new_property_name, description: '', type: @new_property_type}

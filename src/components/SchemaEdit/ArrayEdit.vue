@@ -3,9 +3,7 @@
     h1 ArrayEdit
     h5 Path: '{{ path }}'
     h3 {{ title }}
-    md-field
-      label description
-      md-textarea(v-model="description")
+    v-textarea(v-model="description" label="description")
 </template>
 
 <script lang="coffee">

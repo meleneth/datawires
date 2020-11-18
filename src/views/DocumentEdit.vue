@@ -1,18 +1,22 @@
 <template lang="pug">
-  div
-    h3 {{ schema.$schema }}
-    .md-layout
-      .md-layout-item.md-size-33
-        div(id="diffdiv" style="text-align: left")
-      .md-layout-item.md-size-33
-        pre {{ document }}
-        hr
-        pre {{ schema }}
-      .md-layout-item.md-size-33
+  v-container
+    v-row
+      v-col
+        h3 {{ schema.$schema }}
+    v-row
+      v-col
         p(v-for="field in fields")
           component(:is="field.is"
                     :field="field")
-        md-button.md-primary.md-raised(v-on:click="save_document") save
+        v-btn(v-on:click="save_document") save
+    v-row
+      v-col
+        div(id="diffdiv" style="text-align: left")
+    v-row
+      v-col
+        pre {{ document }}
+        hr
+        pre {{ schema }}
 </template>
 
 <script lang="coffee">

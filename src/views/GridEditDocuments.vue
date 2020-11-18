@@ -2,16 +2,18 @@
   div
     h1
       | {{ domain }} / {{ path }} - gridEditDocuments
-    .md-layout(v-for="row in rows")
-      .md-layout-item(v-for="field in row")
-        component(:is="field.is"
-                  :current="field.current"
-                  :path="field.path"
-                  :doc="field.doc"
-                  :description="field.description"
-                  :title="field.title"
-                  v-on:updateString="update_string"
-                  v-on:updateNumber="update_number")
+    v-container
+      v-row(v-for="row in rows")
+        v-col(v-for="field in row")
+          component(:is="field.is"
+                    :current="field.current"
+                    :path="field.path"
+                    :doc="field.doc"
+                    :description="field.description"
+                    :title="field.title"
+                    :property="field.property"
+                    v-on:updateString="update_string"
+                    v-on:updateNumber="update_number")
 </template>
 
 <script lang="coffee">
@@ -41,6 +43,7 @@ schema_to_fields = (schema, document) ->
       doc: document
       description: property.description
       title: property.title
+      property: property
   return fields
 
 export default

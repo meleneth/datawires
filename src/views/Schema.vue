@@ -2,7 +2,7 @@
   div
     p(v-if="schema.$schema") {{ schema.$schema }}
       router-link(:to="{name: 'SchemaEdit', params: {id: schema._id}}")
-        md-button.md-primary Edit
+        v-btn Edit
     ul
       li(v-for="doc in docs")
         router-link(:to="{name: 'Document', params: {id: doc._id}}") {{ doc.name || doc._id }}

@@ -1,10 +1,15 @@
-<template lang="pug">
-  div
-    | HomePage!
-    | Check out Domains and Documents and STUFF
+<template>
+  <hello-world />
 </template>
 
-<script lang="coffee">
-export default
-  name: 'home'
+<script>
+  import HelloWorld from '../components/HelloWorld'
+
+  export default {
+    name: 'Home',
+
+    components: {
+      HelloWorld,
+    },
+  }
 </script>

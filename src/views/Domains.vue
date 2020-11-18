@@ -1,10 +1,10 @@
 <template lang="pug">
-  div
+  v-container
     add-schema
-    md-icon done
-    | Domains
-    ul
-      li(v-for="domain in domains")
+    p
+    h2 Domains
+    v-row(v-for="domain in domains")
+      v-col
         router-link(:to="{name: 'Schemas', params: {domain: domain.key[0]}}") {{ domain.key[0] }}
         | {{ domain.value }}
 </template>

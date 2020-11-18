@@ -1,20 +1,23 @@
 <template lang="pug">
-  div
-    h3 Create Document with Schema {{ schema.$schema }}
-    .md-layout
-      .md-layout-item.md-size-33
-        div(id="diffdiv" style="text-align: left")
-      .md-layout-item.md-size-33
+  v-container
+    v-row
+      v-col
+        h3 Create Document with Schema {{ schema.$schema }}
+    v-row(v-for="field in fields")
+      v-col
+        component(:is="field.is"
+                  :field="field"
+                  v-on:updateString="update_string"
+                  v-on:updateNumber="update_number")
+    v-row
+      v-col
+        v-btn(v-on:click="save_document") save document
+      v-col
         pre {{ document }}
         hr
         pre {{ schema }}
-      .md-layout-item.md-size-33
-        p(v-for="field in fields")
-          component(:is="field.is"
-                    :field="field"
-                    v-on:updateString="update_string"
-                    v-on:updateNumber="update_number")
-        md-button.md-primary.md-raised(v-on:click="save_document") save
+      v-col
+        div(id="diffdiv" style="text-align: left")
 </template>
 
 <script lang="coffee">
