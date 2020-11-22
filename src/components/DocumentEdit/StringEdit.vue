@@ -1,13 +1,14 @@
 <template lang="pug">
   div
-    v-text-field(v-if="!has_enum" v-model="field_value" :label="field.title")
-    v-select(v-if="has_enum" :items="field.property.enum" v-model="field_value" :label="field.description")
+    v-text-field(v-if="!has_enum" v-model="field_value" :label="title")
+    v-select(v-if="has_enum" :items="field.property.enum" v-model="field_value" :label="title")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 
   name: 'DocumentStringEdit'
   props:
     field: Object
+    title: String
   data: ->
     field_value: 0
   mounted: ->

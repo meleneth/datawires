@@ -1,7 +1,6 @@
 <template lang="pug">
   div
-    h3 {{ field.title }}
-    v-text-input(v-model="value" type="number" :label="field.description")
+    v-text-field(v-model="value" type="number" :label="field.title")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 

@@ -1,5 +1,6 @@
 import Admin from '@/views/Admin.vue'
 import CreateDocument from '@/views/CreateDocument.vue'
+import DataViewDemo from '@/views/DataViewDemo.vue'
 import Document from '@/views/Document.vue'
 import DocumentEdit from '@/views/DocumentEdit.vue'
 import Documents from '@/views/Documents.vue'
@@ -21,6 +22,7 @@ export default new Router({
   routes: [
     { path: '/', name: 'home', component: Home },
     { path: '/admin', name: 'Admin', component: Admin },
+    { path: '/dataviewdemo', name: 'DataViewDemo', component: DataViewDemo },
     { path: '/document/:id', name: 'Document', component: Document, props: true },
     { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
     { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
