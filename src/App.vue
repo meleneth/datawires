@@ -11,6 +11,8 @@
           v-col
             router-link(to="/domains") Domains
           v-col
+            router-link(to="/dataviewdemo") DataViewDemo
+          v-col
             router-link(to="/admin") Admin
           v-col
             router-link(to="/about") About

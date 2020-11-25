@@ -13,6 +13,8 @@ tlookup =
   col: false
   card: false
   sheet: false
+  p: false
+  button: false
 
 DataView =
   name: 'DataView'
@@ -27,11 +29,15 @@ DataView =
     @$options.components['data-col'] = require('./DataCol.vue').default
     @$options.components['data-card'] = require('./DataCard.vue').default
     @$options.components['data-sheet'] = require('./DataSheet.vue').default
+    @$options.components['data-p'] = require('./DataP.vue').default
+    @$options.components['data-button'] = require('./DataButton.vue').default
     tlookup['container'] = @$options.components['data-container']
     tlookup['row'] = @$options.components['data-row']
     tlookup['col'] = @$options.components['data-col']
     tlookup['card'] = @$options.components['data-card']
     tlookup['sheet'] = @$options.components['data-sheet']
+    tlookup['p'] = @$options.components['data-p']
+    tlookup['button'] = @$options.components['data-button']
   computed:
     field_type: ->
       tlookup[@field.type]
