@@ -34,7 +34,7 @@ export default
         properties: {}
         title: "The #{ @new_schema_name } Schema"
         description: @new_schema_description
-      @$store.dispatch 'post_entry', new_schema
+      @$store.dispatch 'add_entry', new_schema
         .then (d) ->
           console.log "I have returned from my journey, and I now have the accent of a cabin man."
           console.log d
