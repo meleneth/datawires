@@ -10,6 +10,7 @@ mutations =
       if value._id == entry._id
         Vue.set state.entries, index, entry
         return
+    state.entries.push entry
   SET_LOADING: (state, loading) ->
     Vue.set state, 'loading', loading
   SET_DBLOADED: (state, db_loaded) ->
