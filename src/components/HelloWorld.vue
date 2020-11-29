@@ -3,12 +3,14 @@
     v-container
       v-row.text-center
         v-col(cols="12")
-          v-img(
-            class="my-3"
+          v-img(class="my-3"
             :src="require('../assets/logo.svg')"
             contain
             height="200"
           )
+      v-row
+        v-col(cols="12")
+          | {{ msg }}
 
         v-col(class="mb-4")
           h1(class="display-2 font-weight-bold mb-3")
@@ -30,7 +32,7 @@
 
         v-col(class="mb-5" cols="12")
           h2(class="headline font-weight-bold mb-3")
-            Important Links
+            | Important Links
 
           v-row(justify="center")
             a(
@@ -57,6 +59,9 @@
 <script>
   export default {
     name: 'HelloWorld',
+    props: {
+      msg: String
+    },
 
     data: () => ({
       ecosystem: [
