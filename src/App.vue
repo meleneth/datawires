@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-app
+  v-app(dark)
     v-app-bar(app color="primary" dark)
       .d-flex.align-center
         h1 |)atawires
-    v-main
+    v-main(dark)
       v-container
         v-row
           v-col
@@ -12,6 +12,8 @@
             router-link(to="/domains") Domains
           v-col
             router-link(to="/dataviewdemo") DataViewDemo
+          v-col
+            router-link(to="/import") Import
           v-col
             router-link(to="/admin") Admin
           v-col

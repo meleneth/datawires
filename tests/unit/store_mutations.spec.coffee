@@ -12,3 +12,8 @@ describe 'store_mutations', =>
       mutations['SET_ENTRY'](state, {"_id": 'some_id'})
       expect(state).to.deep.equal
         entries: [{"_id": "some_id"}]
+    it 'overwrites an entry with same _id', =>
+      state = {'entries': [{"_id": "some_id", "num": 1}]}
+      mutations['SET_ENTRY'](state, {"_id": 'some_id', "num": 2})
+      expect(state).to.deep.equal
+        entries: [{"_id": "some_id", "num": 2}]

@@ -6,7 +6,7 @@
       li(v-for="schema in filtered_schemas")
         | [
         router-link(:to="{name: 'SchemaEdit', params: {domain: schema.key[0], name: schema.key[1]}}") edit
-        | ]
+        | ] &nbsp;
         router-link(:to="{name: 'Documents', params: {domain: schema.key[0], path: schema.key[1]}}") {{ schema.key[1] }}
         | {{ schema.value }}
 </template>

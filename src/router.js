@@ -12,6 +12,8 @@ import Router from 'vue-router'
 import Schema from '@/views/Schema.vue'
 import SchemaEdit from '@/views/SchemaEdit.vue'
 import Schemas from '@/views/Schemas.vue'
+import Import from '@/views/Import.vue'
+import Export from '@/views/Export.vue'
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -27,6 +29,8 @@ export default new Router({
     { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
     { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
     { path: '/domains', name: 'Domains', component: Domains, props: true },
+    { path: '/import', name: 'Import', component: Import, props: true },
+    { path: '/export/:domain', name: 'Export', component: Export, props: true },
     { path: '/schemas/:domain', name: 'Schemas', component: Schemas, props: true },
     { path: '/documents/:domain/:path', name: 'Documents', component: Documents, props: true },
     { path: '/documents/:domain/:path/gridEdit', name: 'GridEditDocuments', component: GridEditDocuments, props: true },

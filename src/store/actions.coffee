@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
+_ = require 'lodash'
 
 #PouchDB.plugin require 'pouchdb-authentication'
 
@@ -19,7 +20,6 @@ db_url = "http://tyreen.sectorfour:5984/datawires"
 #    password: "datawires"
 #}
 db = new PouchDB db_url
-_ = require 'lodash'
 
 parse_ref = (ref) ->
   matches = ref.match "http:\/\/([^/]*)\/([^#]*)#"
@@ -45,8 +45,6 @@ actions =
   db_get_schemas: () ->
     return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?group_level=2"
       .then (d) ->
-        console.log "Got schemas"
-        console.log d.data.rows
         return d.data.rows
   db_get_documents: (context, key) ->
     return db.query "schemas/documents", {key: key, include_docs: true, reduce: false}
@@ -56,6 +54,15 @@ actions =
     return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
       .then (d) ->
         return d.data.rows[0].doc
+  getSchemasByDomain: (context, domain) ->
+    return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?include_docs=true&start_key=%5B%22#{ domain }%22%2C%20%22aaaaa%22%5D&end_key=%5B%22#{domain}%22%2C%20%22zzzzz%22%5D&skip=0&limit=21&reduce=false"
+      .then (d) ->
+        return _.map d.data.rows, (d) -> d.doc
+  getDocumentsByRef: (context, ref) ->
+    key = parse_ref ref
+    return @dispatch 'db_get_url', "/_design/schemas/_view/documents?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
+      .then (d) ->
+        return _.map d.data.rows, (d) -> d.doc
   getSchemaByRef: (context, ref) ->
     key = parse_ref ref
     return @dispatch 'db_get_url', "/_design/schemas/_view/schemas?keys=%5B%5B%22#{key[0]}%22%2C%20%22#{key[1]}%22%5D%5D&include_docs=true&reduce=false"
