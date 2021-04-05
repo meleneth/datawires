@@ -2,6 +2,16 @@
   v-container
     v-row
       v-col
+        hr
+        hr
+    v-row
+      v-col This page allows you to define the fields that will be allowed in your documents, also known as the Schema
+    v-row
+      v-col
+        hr
+        hr
+    v-row
+      v-col
         h3 {{ schema.$schema }}
     v-row
       v-col
@@ -19,12 +29,27 @@
         v-btn(v-on:click="save_schema") save
     v-row
       v-col
+        hr
+        hr
+    v-row
+      v-col
+        data-view(:field="dataview")
+    v-row
+      v-col
+        hr
+        hr
+    v-row
+      v-col
         div(id="diffdiv" style="text-align: left")
 </template>
 
 <script lang="coffee">
 pointer = require 'json-pointer'
 difflib = require 'jsdifflib'
+import Vue from 'vue'
+
+import Builder from '@/components/DataView/builder.coffee'
+import DataView from '@/components/DataView/DataView.vue'
 
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
@@ -41,6 +66,7 @@ export default
   name: 'SchemaEdit'
   components:
     'schema-edit-link': SchemaEditLink
+    'data-view': DataView
   props:
     domain: String
     name: String
@@ -51,6 +77,7 @@ export default
     current: {}
     renderedJson: ''
     sourceRenderedJson: ''
+    dataview: {}
   created: ->
     EventBus.$on 'navigate', (data) =>
       @path = data.path
@@ -58,6 +85,13 @@ export default
       @selectedComponent = tlookup[@current.type]
   mounted: ->
     @load_schema()
+    builder = new Builder('container')
+    row = builder.add_row()
+    row.add_col()
+    row.add_col().add_card().add_p().add_text 'Some Story about Some Thing'
+    row.add_col()
+    Vue.set @, 'dataview', builder.data
+    console.log builder.data
   methods:
     add_property: (data) ->
       target = pointer.get @schema, data.path
