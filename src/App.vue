@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-app(dark)
-    v-app-bar(app color="primary" dark)
+  div(dark)
+    div(app color="primary" dark)
       .d-flex.align-center
         h1 |)atawires
-    v-main(dark)
-      v-container
-        v-row
-          v-col
+    div(dark)
+      div
+        div
+          div
             router-link(to="/") Home
-          v-col
+          div
             router-link(to="/domains") Domains
-          v-col
+          div
             router-link(to="/dataviewdemo") DataViewDemo
-          v-col
+          div
             router-link(to="/import") Import
-          v-col
+          div
             router-link(to="/admin") Admin
-          v-col
+          div
             router-link(to="/about") About
       router-view
 </template>
