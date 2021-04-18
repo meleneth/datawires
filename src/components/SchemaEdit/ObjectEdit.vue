@@ -1,24 +1,24 @@
 <template lang="pug">
-  div
-    h1 ObjectEdit
-    h5 Path: '{{ path }}'
-    h3 {{ title }}
-    v-container
-      v-row
-        v-col
-          v-select(:items="item_types" v-model="new_property_type" label="Type")
-        v-col
-          v-text-field(v-model="new_property_name" label="New Property Name")
-        v-col
-          v-btn(v-on:click="add_property") Create
-    v-container(v-for="property in myproperties")
-      v-row
-        v-col
-          | {{ property.type }}
-        v-col
-          schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
-        v-col
-          | {{ property.description }}
+div
+  h1 ObjectEdit
+  h5 Path: '{{ path }}'
+  h3 {{ title }}
+  v-container
+    v-row
+      v-col
+        v-select(:items="item_types" v-model="new_property_type" label="Type")
+      v-col
+        v-text-field(v-model="new_property_name" label="New Property Name")
+      v-col
+        v-btn(v-on:click="add_property") Create
+  v-container(v-for="property in myproperties")
+    v-row
+      v-col
+        | {{ property.type }}
+      v-col
+        schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
+      v-col
+        | {{ property.description }}
 </template>
 
 <script lang="coffee">
@@ -57,9 +57,9 @@ export default
       if @new_property_type == 'object'
         new_prop['properties'] = {}
       target = pointer.get @schema, "#{@path}/properties"
-      @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
-      EventBus.$emit('navigate', {path: "#{@path}/properties/#{@new_property_name}"})
+      @emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
+      EventBus.emit('navigate', {path: "#{@path}/properties/#{@new_property_name}"})
       @new_property_name = ''
     save_changes: ->
-      @$emit 'updateObject', {path: @path, description: @description}
+      @emit 'updateObject', {path: @path, description: @description}
 </script>

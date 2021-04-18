@@ -1,18 +1,18 @@
 <template lang="pug">
-  v-container
-    v-row
-      v-col
-        h2 {{ fullschemaname }}
-    v-row
-      v-col
-        v-text-field(v-model="new_schema_domain" label="New Schema Domain")
-      v-col
-        v-text-field(v-model="new_schema_name" label="New Schema Name")
-      v-col
-        v-btn(v-on:click="createNewSchema") create
-    v-row
-      v-col
-        v-text-field(v-model="new_schema_description" label="Description")
+v-container
+  v-row
+    v-col
+      h2 {{ fullschemaname }}
+  v-row
+    v-col
+      v-text-field(v-model="new_schema_domain" label="New Schema Domain")
+    v-col
+      v-text-field(v-model="new_schema_name" label="New Schema Name")
+    v-col
+      v-btn(v-on:click="createNewSchema") create
+  v-row
+    v-col
+      v-text-field(v-model="new_schema_description" label="Description")
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'

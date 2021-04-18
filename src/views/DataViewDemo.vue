@@ -1,10 +1,10 @@
 <template lang="pug">
-  div
-    p Builder and DataView Demo
-    div(v-for="view in views")
-      data-view(:field="view")
-      hr
-      hr
+div
+  p Builder and DataView Demo
+  div(v-for="view in views")
+    data-view(:field="view")
+    hr
+    hr
 </template><script lang="coffee">
 import Vue from 'vue'
 import Builder from '@/components/DataView/builder.coffee'

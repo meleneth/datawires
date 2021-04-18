@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-btn {{ field.label }}
+v-btn {{ field.label }}
 </template><script lang="coffee">
 import Vue from 'vue'
 

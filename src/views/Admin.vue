@@ -1,8 +1,8 @@
 <template lang="pug">
-  div
-    h1 Admin
-    md-button.md-primary.md-raised(v-on:click="create_views") create views
-    div(v-if="views_created") created
+div
+  h1 Admin
+  md-button.md-primary.md-raised(v-on:click="create_views") create views
+  div(v-if="views_created") created
 </template>
 
 <script lang="coffee">

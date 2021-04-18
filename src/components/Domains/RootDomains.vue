@@ -1,25 +1,25 @@
 <template lang="pug">
-  div
-    .md-layout
-      .md-layout-item
-        md-field
-          md-input(v-model="new_schema_domain")
-          label New Schema Domain
-        md-field
-          md-input(v-model="new_schema_name")
-          label New Schema Name
-      .md-layout-item
-        md-field
-          label Description
-          md-textarea(v-model="new_schema_description")
-      .md-layout-item
-        h2 {{ fullschemaname }}
-        md-button.md-raised.md-primary(v-on:click="createNewSchema") create
-    hr
-    h2 Root Domains
-    ul
-      li(v-for="domain in rootDomains")
-        a(@click="navigate($event, domain)") {{ domain }}
+div
+  .md-layout
+    .md-layout-item
+      md-field
+        md-input(v-model="new_schema_domain")
+        label New Schema Domain
+      md-field
+        md-input(v-model="new_schema_name")
+        label New Schema Name
+    .md-layout-item
+      md-field
+        label Description
+        md-textarea(v-model="new_schema_description")
+    .md-layout-item
+      h2 {{ fullschemaname }}
+      md-button.md-raised.md-primary(v-on:click="createNewSchema") create
+  hr
+  h2 Root Domains
+  ul
+    li(v-for="domain in rootDomains")
+      a(@click="navigate($event, domain)") {{ domain }}
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
@@ -36,7 +36,7 @@ export default
   methods:
     navigate: (evt, domain) ->
       evt.preventDefault()
-      EventBus.$emit('selectRootDomain', {domain: domain})
+      EventBus.emit('selectRootDomain', {domain: domain})
     createNewSchema: ->
       console.log "ok I guess createNewSchema is a thing now"
       new_schema =

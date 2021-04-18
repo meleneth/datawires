@@ -1,19 +1,19 @@
 <template lang="pug">
-  div
-    h1
-      | {{ domain }} / {{ path }} - gridEditDocuments
-    v-container
-      v-row(v-for="row in rows")
-        v-col(v-for="field in row")
-          component(:is="field.is"
-                    :current="field.current"
-                    :path="field.path"
-                    :doc="field.doc"
-                    :description="field.description"
-                    :title="field.title"
-                    :property="field.property"
-                    v-on:updateString="update_string"
-                    v-on:updateNumber="update_number")
+div
+  h1
+    | {{ domain }} / {{ path }} - gridEditDocuments
+  v-container
+    v-row(v-for="row in rows")
+      v-col(v-for="field in row")
+        component(:is="field.is"
+                  :current="field.current"
+                  :path="field.path"
+                  :doc="field.doc"
+                  :description="field.description"
+                  :title="field.title"
+                  :property="field.property"
+                  v-on:updateString="update_string"
+                  v-on:updateNumber="update_number")
 </template>
 
 <script lang="coffee">

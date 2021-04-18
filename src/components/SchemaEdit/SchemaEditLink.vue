@@ -1,6 +1,6 @@
 <template lang="pug">
-  div
-    a(@click="navigate($event)") {{ label }}
+div
+  a(@click="navigate($event)") {{ label }}
 </template>
 
 <script lang="coffee">
@@ -15,5 +15,5 @@ export default
   methods:
     navigate: (evt) ->
       evt.preventDefault()
-      EventBus.$emit('navigate', {path: @to})
+      EventBus.emit('navigate', {path: @to})
 </script>

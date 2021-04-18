@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
+import 'axios'
+
 _ = require 'lodash'
 
 #PouchDB.plugin require 'pouchdb-authentication'

@@ -1,5 +1,5 @@
-import Vue from 'vue'
+import mitt from 'mitt'
 
-bus = new Vue()
+bus = mitt()
 
 export default bus

@@ -1,9 +1,9 @@
 <template lang="pug">
-  div
-    h1 ArrayEdit
-    h5 Path: '{{ path }}'
-    h3 {{ title }}
-    v-textarea(v-model="description" label="description")
+div
+  h1 ArrayEdit
+  h5 Path: '{{ path }}'
+  h3 {{ title }}
+  v-textarea(v-model="description" label="description")
 </template>
 
 <script lang="coffee">

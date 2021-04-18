@@ -1,10 +1,10 @@
 <template lang="pug">
-  div
-    | Document FINALLY WHAT ITS ALL ABOUT
-    br
-    router-link(:to="'/document/' + id + '/edit'") edit
-    br
-    pre {{ doc }}
+div
+  | Document FINALLY WHAT ITS ALL ABOUT
+  br
+  router-link(:to="'/document/' + id + '/edit'") edit
+  br
+  pre {{ doc }}
 </template>
 
 <script lang="coffee">

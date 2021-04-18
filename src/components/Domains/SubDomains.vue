@@ -1,9 +1,9 @@
 <template lang="pug">
-  div
-    h2 SubDomains - {{ selected_domain }}
-    ul
-      li(v-for="domain in subDomains")
-        a(@click="navigate($event, domain)") {{ domain }}
+div
+  h2 SubDomains - {{ selected_domain }}
+  ul
+    li(v-for="domain in subDomains")
+      a(@click="navigate($event, domain)") {{ domain }}
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
@@ -16,7 +16,7 @@ export default
   methods:
     navigate: (evt, domain) ->
       evt.preventDefault()
-      EventBus.$emit('selectSubDomain', {domain: domain})
+      EventBus.emit('selectSubDomain', {domain: domain})
   computed:
     subDomains: ->
       selected_domain = @selected_domain

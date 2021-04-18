@@ -1,5 +1,5 @@
 <template lang="pug">
-  div Domain
+div Domain
 </template>
 
 <script lang="coffee">

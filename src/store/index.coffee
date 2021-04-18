@@ -1,21 +1,14 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
+import { createStore } from 'vuex'
 
 import getters from './getters'
 import mutations from './mutations'
 import actions from './actions'
 
-_ = require 'lodash'
 
-Vue.use(Vuex)
+export default createStore
+  entries: []
+  loading: false
+  saving: false
+  db_loaded: false
 
-export default new Vuex.Store
-  state:
-    entries: []
-    loading: false
-    saving: false
-    db_loaded: false
-  mutations: mutations
-  actions: actions
-  getters: getters

@@ -1,7 +1,7 @@
 <template lang="pug">
-  div
-    v-text-field(v-if="!has_enum" v-model="value" :label="title")
-    v-select(v-if="has_enum" :items="property.enum" v-model="value" :label="description")
+div
+  v-text-field(v-if="!has_enum" v-model="value" :label="title")
+  v-select(v-if="has_enum" :items="property.enum" v-model="value" :label="description")
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 

@@ -15,37 +15,38 @@ import Router from 'vue-router'
 import Schema from '@/views/Schema.vue'
 import SchemaEdit from '@/views/SchemaEdit.vue'
 import Schemas from '@/views/Schemas.vue'
-import Vue from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
-Vue.use(Router)
+const routes = [
+{ path: '/', name: 'home', component: Home },
+{ path: '/admin', name: 'Admin', component: Admin },
+{ path: '/dataviewdemo', name: 'DataViewDemo', component: DataViewDemo },
+{ path: '/document/:id', name: 'Document', component: Document, props: true },
+{ path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
+{ path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
+{ path: '/hightail', name: 'HighTail', component: HighTail, props: true },
+{ path: '/domains', name: 'Domains', component: Domains, props: true },
+{ path: '/import', name: 'Import', component: Import, props: true },
+{ path: '/export/:domain', name: 'Export', component: Export, props: true },
+{ path: '/schemas/:domain', name: 'Schemas', component: Schemas, props: true },
+{ path: '/documents/:domain/:path', name: 'Documents', component: Documents, props: true },
+{ path: '/documents/:domain/:path/gridEdit', name: 'GridEditDocuments', component: GridEditDocuments, props: true },
+{ path: '/schema/:domain/:name', name: 'Schema', component: Schema, props: true },
+{ path: '/schema/:domain/:name/createDocument', name: 'CreateDocument', component: CreateDocument, props: true },
+{ path: '/schema/:domain/:name/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
+{
+  path: '/about',
+  name: 'about',
+  // route level code-splitting
+  // this generates a separate chunk (about.[hash].js) for this route
+  // which is lazy-loaded when the route is visited.
+  component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+}
+]
 
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes: [
-    { path: '/', name: 'home', component: Home },
-    { path: '/admin', name: 'Admin', component: Admin },
-    { path: '/dataviewdemo', name: 'DataViewDemo', component: DataViewDemo },
-    { path: '/document/:id', name: 'Document', component: Document, props: true },
-    { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
-    { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
-    { path: '/hightail', name: 'HighTail', component: HighTail, props: true },
-    { path: '/domains', name: 'Domains', component: Domains, props: true },
-    { path: '/import', name: 'Import', component: Import, props: true },
-    { path: '/export/:domain', name: 'Export', component: Export, props: true },
-    { path: '/schemas/:domain', name: 'Schemas', component: Schemas, props: true },
-    { path: '/documents/:domain/:path', name: 'Documents', component: Documents, props: true },
-    { path: '/documents/:domain/:path/gridEdit', name: 'GridEditDocuments', component: GridEditDocuments, props: true },
-    { path: '/schema/:domain/:name', name: 'Schema', component: Schema, props: true },
-    { path: '/schema/:domain/:name/createDocument', name: 'CreateDocument', component: CreateDocument, props: true },
-    { path: '/schema/:domain/:name/edit', name: 'SchemaEdit', component: SchemaEdit, props: true },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
-    }
-  ]
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes
 })
+
+export default router

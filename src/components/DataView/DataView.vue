@@ -1,6 +1,6 @@
 <template lang="pug">
-  component(:is="field_type" :field="field")
-    data-view(:field="f.field" v-for="f in fields")
+component(:is="field_type" :field="field")
+  data-view(:field="f.field" v-for="f in fields")
 </template><script lang="coffee">
 import Vue from 'vue'
 

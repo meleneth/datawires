@@ -1,11 +1,11 @@
 <template lang="pug">
-  div
-    p(v-if="schema.$schema") {{ schema.$schema }}
-      router-link(:to="{name: 'SchemaEdit', params: {id: schema._id}}")
-        v-btn Edit
-    ul
-      li(v-for="doc in docs")
-        router-link(:to="{name: 'Document', params: {id: doc._id}}") {{ doc.name || doc._id }}
+div
+  p(v-if="schema.$schema") {{ schema.$schema }}
+    router-link(:to="{name: 'SchemaEdit', params: {id: schema._id}}")
+      v-btn Edit
+  ul
+    li(v-for="doc in docs")
+      router-link(:to="{name: 'Document', params: {id: doc._id}}") {{ doc.name || doc._id }}
 </template>
 
 <script lang="coffee">

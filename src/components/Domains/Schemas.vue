@@ -1,9 +1,9 @@
 <template lang="pug">
-  div
-    h2 Schemas - {{ selected_domain }}
-    ul
-      li(v-for="schema in schemas")
-        router-link(:to="{name: 'Schema', params: {id: schema.id}}") {{ schema.name }}
+div
+  h2 Schemas - {{ selected_domain }}
+  ul
+    li(v-for="schema in schemas")
+      router-link(:to="{name: 'Schema', params: {id: schema.id}}") {{ schema.name }}
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
@@ -15,7 +15,7 @@ export default
   methods:
     navigate: (evt, domain) ->
       evt.preventDefault()
-      EventBus.$emit('selectSubDomain', {domain: domain})
+      EventBus.emit('selectSubDomain', {domain: domain})
   computed:
     schemas: ->
       selected_domain = @selected_domain

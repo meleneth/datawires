@@ -1,21 +1,21 @@
 <template lang="pug">
-  div
-    h1 NumberEdit
-    h5 Path: '{{ path }}'
-    h3 {{ title }}
-    v-textarea(v-model="description" label="description")
-    v-container
-      v-row
-        v-col(v-if="!has_minimum")
-          v-btn(v-on:click="add_minimum") add minimum
-        v-col(v-if="has_minimum")
-          v-text-field(v-model="current.minimum" label="minimum")
-          v-btn(v-on:click="remove_minimum") remove minimum
-        v-col(v-if="!has_maximum")
-          v-btn(v-on:click="add_maximum") add maximum
-        v-col(v-if="has_maximum")
-          v-text-field(v-model="current.maximum")
-          v-btn(v-on:click="remove_maximum") remove maximum
+div
+  h1 NumberEdit
+  h5 Path: '{{ path }}'
+  h3 {{ title }}
+  v-textarea(v-model="description" label="description")
+  v-container
+    v-row
+      v-col(v-if="!has_minimum")
+        v-btn(v-on:click="add_minimum") add minimum
+      v-col(v-if="has_minimum")
+        v-text-field(v-model="current.minimum" label="minimum")
+        v-btn(v-on:click="remove_minimum") remove minimum
+      v-col(v-if="!has_maximum")
+        v-btn(v-on:click="add_maximum") add maximum
+      v-col(v-if="has_maximum")
+        v-text-field(v-model="current.maximum")
+        v-btn(v-on:click="remove_maximum") remove maximum
 </template>
 
 <script lang="coffee">

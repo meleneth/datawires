@@ -1,10 +1,10 @@
 <template lang="pug">
-  div
-    h1 Import
-    br
-    router-link(:to="'/document/' + id + '/edit'") edit
-    br
-    pre {{ doc }}
+div
+  h1 Import
+  br
+  router-link(:to="'/document/' + id + '/edit'") edit
+  br
+  pre {{ doc }}
 </template>
 
 <script lang="coffee">

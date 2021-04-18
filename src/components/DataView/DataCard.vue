@@ -1,6 +1,6 @@
 <template lang="pug">
-  v-card
-    data-view(:field="f" v-for="f in field.children")
+v-card
+  data-view(:field="f" v-for="f in field.children")
 </template><script lang="coffee">
 import Vue from 'vue'
 

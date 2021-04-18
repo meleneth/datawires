@@ -1,23 +1,23 @@
 <template lang="pug">
-  v-container
-    v-row
-      v-col
-        h3 Create Document with Schema {{ schema.$schema }}
-    v-row(v-for="field in fields")
-      v-col
-        component(:is="field.is"
-                  :field="field"
-                  v-on:updateString="update_string"
-                  v-on:updateNumber="update_number")
-    v-row
-      v-col
-        v-btn(v-on:click="save_document") save document
-      v-col
-        pre {{ document }}
-        hr
-        pre {{ schema }}
-      v-col
-        div(id="diffdiv" style="text-align: left")
+v-container
+  v-row
+    v-col
+      h3 Create Document with Schema {{ schema.$schema }}
+  v-row(v-for="field in fields")
+    v-col
+      component(:is="field.is"
+                :field="field"
+                v-on:updateString="update_string"
+                v-on:updateNumber="update_number")
+  v-row
+    v-col
+      v-btn(v-on:click="save_document") save document
+    v-col
+      pre {{ document }}
+      hr
+      pre {{ schema }}
+    v-col
+      div(id="diffdiv" style="text-align: left")
 </template>
 
 <script lang="coffee">
@@ -52,7 +52,7 @@ export default
     sourceRenderedJson: ''
     fields: []
   created: ->
-    EventBus.$on 'navigate', (data) =>
+    EventBus.on 'navigate', (data) =>
       @path = data.path
       @current = pointer.get @schema, @path
       @selectedComponent = tlookup[@current.type]

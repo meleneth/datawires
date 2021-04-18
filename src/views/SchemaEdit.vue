@@ -1,46 +1,46 @@
 <template lang="pug">
-  v-container
-    v-row
-      v-col
-        hr
-        hr
-    v-row
-      v-col This page allows you to define the fields that will be allowed in your documents, also known as the Schema
-    v-row
-      v-col
-        hr
-        hr
-    v-row
-      v-col
-        h3 {{ schema.$schema }}
-    v-row
-      v-col
-        schema-edit-link(:to="''" label="Top")
-        component(:is="selectedComponent"
-                  :current="current"
-                  :schema="schema"
-                  :path="path"
-                  v-on:addProperty="add_property"
-                  v-on:updateString="update_string"
-                  v-on:updateArray="update_array"
-                  v-on:updateNumber="update_number"
-                  v-on:updateObject="update_object"
-                  v-if="selectedComponent")
-        v-btn(v-on:click="save_schema") save
-    v-row
-      v-col
-        hr
-        hr
-    v-row
-      v-col
-        data-view(:field="dataview")
-    v-row
-      v-col
-        hr
-        hr
-    v-row
-      v-col
-        div(id="diffdiv" style="text-align: left")
+v-container
+  v-row
+    v-col
+      hr
+      hr
+  v-row
+    v-col This page allows you to define the fields that will be allowed in your documents, also known as the Schema
+  v-row
+    v-col
+      hr
+      hr
+  v-row
+    v-col
+      h3 {{ schema.$schema }}
+  v-row
+    v-col
+      schema-edit-link(:to="''" label="Top")
+      component(:is="selectedComponent"
+                :current="current"
+                :schema="schema"
+                :path="path"
+                v-on:addProperty="add_property"
+                v-on:updateString="update_string"
+                v-on:updateArray="update_array"
+                v-on:updateNumber="update_number"
+                v-on:updateObject="update_object"
+                v-if="selectedComponent")
+      v-btn(v-on:click="save_schema") save
+  v-row
+    v-col
+      hr
+      hr
+  v-row
+    v-col
+      data-view(:field="dataview")
+  v-row
+    v-col
+      hr
+      hr
+  v-row
+    v-col
+      div(id="diffdiv" style="text-align: left")
 </template>
 
 <script lang="coffee">
@@ -79,7 +79,7 @@ export default
     sourceRenderedJson: ''
     dataview: {}
   created: ->
-    EventBus.$on 'navigate', (data) =>
+    EventBus.on 'navigate', (data) =>
       @path = data.path
       @current = pointer.get @schema, @path
       @selectedComponent = tlookup[@current.type]
