@@ -27,7 +27,6 @@
     "pouchdb-node": "^7.2.2",
     "pug": "^3.0.0",
     "vue": "^3.0.0",
-    "vue-heroicons": "^0.9.4",
     "vue-moment": "^4.0.0",
     "vue-router": "^4.0.6",
     "vuex": "^4.0.0-0"
