@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <Popover as="header" class="pb-24 bg-indigo-600" v-slot="{ open }">
+  <div class="min-h-screen bg-grey-darkest">
+    <Popover as="header" class="pb-24 bg-indigo-light" v-slot="{ open }">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         <div class="relative py-5 flex items-center justify-center lg:justify-between">
           <!-- Logo -->
@@ -13,7 +13,7 @@
 
           <!-- Right section on desktop -->
           <div class="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
-            <button type="button" class="flex-shrink-0 p-1 text-indigo-200 rounded-full hover:text-white hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white">
+            <button type="button" class="flex-shrink-0 p-1 text-indigo rounded-full hover:text-white hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white">
               <span class="sr-only">View notifications</span>
               <BellIcon class="h-6 w-6" aria-hidden="true" />
             </button>
@@ -29,13 +29,13 @@
               <transition leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
                 <MenuItems class="origin-top-right z-40 absolute -right-2 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <MenuItem v-slot="{ active }">
-                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Your Profile</a>
+                    <a href="#" :class="[active ? 'bg-grey-darker' : '', 'block px-4 py-2 text-sm text-grey-lighter']">Your Profile</a>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
-                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Settings</a>
+                    <a href="#" :class="[active ? 'bg-grey-100' : '', 'block px-4 py-2 text-sm text-grey-700']">Settings</a>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
-                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Sign out</a>
+                    <a href="#" :class="[active ? 'bg-grey-100' : '', 'block px-4 py-2 text-sm text-grey-700']">Sign out</a>
                   </MenuItem>
                 </MenuItems>
               </transition>
@@ -46,11 +46,11 @@
           <div class="flex-1 min-w-0 px-12 lg:hidden">
             <div class="max-w-xs w-full mx-auto">
               <label for="search" class="sr-only">Search</label>
-              <div class="relative text-white focus-within:text-gray-600">
+              <div class="relative text-white focus-within:text-grey-600">
                 <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
                   <SearchIcon class="h-5 w-5" aria-hidden="true" />
                 </div>
-                <input id="search" class="block w-full bg-white bg-opacity-20 py-2 pl-10 pr-3 border border-transparent rounded-md leading-5 text-gray-900 placeholder-white focus:outline-none focus:bg-opacity-100 focus:border-transparent focus:placeholder-gray-500 focus:ring-0 sm:text-sm" placeholder="Search" type="search" name="search" />
+                <input id="search" class="block w-full bg-white bg-opacity-20 py-2 pl-10 pr-3 border border-transparent rounded-md leading-5 text-grey-900 placeholder-white focus:outline-none focus:bg-opacity-100 focus:border-transparent focus:placeholder-grey-500 focus:ring-0 sm:text-sm" placeholder="Search" type="search" name="search" />
               </div>
             </div>
           </div>
@@ -77,11 +77,11 @@
             <div>
               <div class="max-w-md w-full mx-auto">
                 <label for="search" class="sr-only">Search</label>
-                <div class="relative text-white focus-within:text-gray-600">
+                <div class="relative text-white focus-within:text-grey-600">
                   <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
                     <SearchIcon class="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <input id="search" class="block w-full bg-white bg-opacity-20 py-2 pl-10 pr-3 border border-transparent rounded-md leading-5 text-gray-900 placeholder-white focus:outline-none focus:bg-opacity-100 focus:border-transparent focus:placeholder-gray-500 focus:ring-0 sm:text-sm" placeholder="Search" type="search" name="search" />
+                  <input id="search" class="block w-full bg-white bg-opacity-20 py-2 pl-10 pr-3 border border-transparent rounded-md leading-5 text-grey-900 placeholder-white focus:outline-none focus:bg-opacity-100 focus:border-transparent focus:placeholder-grey-500 focus:ring-0 sm:text-sm" placeholder="Search" type="search" name="search" />
                 </div>
               </div>
             </div>
@@ -97,25 +97,25 @@
 
           <TransitionChild as="template" enter="duration-150 ease-out" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100" leave="duration-150 ease-in" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95">
             <PopoverPanel focus static class="z-30 absolute top-0 inset-x-0 max-w-3xl mx-auto w-full p-2 transition transform origin-top">
-              <div class="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-white divide-y divide-gray-200">
+              <div class="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-white divide-y divide-grey-200">
                 <div class="pt-3 pb-2">
                   <div class="flex items-center justify-between px-4">
                     <div>
                       <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg" alt="Workflow" />
                     </div>
                     <div class="-mr-2">
-                      <PopoverButton class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                      <PopoverButton class="bg-white rounded-md p-2 inline-flex items-center justify-center text-grey-400 hover:text-grey-500 hover:bg-grey-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
                         <span class="sr-only">Close menu</span>
                         <XIcon class="h-6 w-6" aria-hidden="true" />
                       </PopoverButton>
                     </div>
                   </div>
                   <div class="mt-3 px-2 space-y-1">
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Home</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Profile</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Resources</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Company Directory</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Openings</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Home</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Profile</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Resources</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Company Directory</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Openings</a>
                   </div>
                 </div>
                 <div class="pt-4 pb-2">
@@ -124,18 +124,18 @@
                       <img class="h-10 w-10 rounded-full" :src="user.imageUrl" alt="" />
                     </div>
                     <div class="ml-3 min-w-0 flex-1">
-                      <div class="text-base font-medium text-gray-800 truncate">Rebecca Nicholas</div>
-                      <div class="text-sm font-medium text-gray-500 truncate">rebecca.nicholas@example.com</div>
+                      <div class="text-base font-medium text-grey-800 truncate">Rebecca Nicholas</div>
+                      <div class="text-sm font-medium text-grey-500 truncate">rebecca.nicholas@example.com</div>
                     </div>
-                    <button class="ml-auto flex-shrink-0 bg-white p-1 text-gray-400 rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button class="ml-auto flex-shrink-0 bg-white p-1 text-grey-400 rounded-full hover:text-grey-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                       <span class="sr-only">View notifications</span>
                       <BellIcon class="h-6 w-6" aria-hidden="true" />
                     </button>
                   </div>
                   <div class="mt-3 px-2 space-y-1">
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Your Profile</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Settings</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base text-gray-900 font-medium hover:bg-gray-100 hover:text-gray-800">Sign out</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Your Profile</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Settings</a>
+                    <a href="#" class="block rounded-md px-3 py-2 text-base text-grey-900 font-medium hover:bg-grey-100 hover:text-grey-800">Sign out</a>
                   </div>
                 </div>
               </div>
@@ -177,7 +177,7 @@
     </main>
     <footer>
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 lg:max-w-7xl">
-        <div class="border-t border-gray-200 py-8 text-sm text-gray-500 text-center sm:text-left"><span class="block sm:inline">&copy; 2021 Tailwind Labs Inc.</span> <span class="block sm:inline">All rights reserved.</span></div>
+        <div class="border-t border-grey-darker py-8 text-sm text-grey text-center sm:text-left"><span class="block sm:inline">&copy; 2021 Tailwind Labs Inc.</span> <span class="block sm:inline">All rights reserved.</span></div>
       </div>
     </footer>
   </div>

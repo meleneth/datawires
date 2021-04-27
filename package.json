@@ -39,7 +39,7 @@
     "@vue/compiler-sfc": "^3.0.0",
     "axios": "^0.18.0",
     "coffee-loader": "^1.0.0",
-    "coffeescript": ">= 2.0.0",
+    "coffeescript": ">= 2.5.1",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
     "tailwindcss": "^0.6.1",

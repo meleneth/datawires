@@ -19,18 +19,18 @@ export default
   mounted: ->
     builder = new Builder('container')
     builder.add_text 'Some Story about Some Thing'
-    Vue.set @views, 0, builder.data
+    @views[0] = builder.data
     builder = new Builder('container')
     row = builder.add_row()
     row.add_col()
     row.add_col().add_card().add_p().add_text 'Some Story about Some Thing'
     row.add_col()
-    Vue.set @views, 1, builder.data
+    @views[1] = builder.data
     builder = new Builder('container')
     row = builder.add_row()
     row.add_col().add_p().add_text 'Some Story about Some Thing'
     row.add_col().add_p().add_text 'Some Story about Some Thing'
-    Vue.set @views, 2, builder.data
+    @views[2] = builder.data
     builder = new Builder('container')
     row = builder.add_row()
     row.add_col().add_sheet().add_p().add_text 'Some Story about Some Thing'
@@ -38,5 +38,5 @@ export default
     row.add_col().add_button 'Some Text', 'nothing'
     row.add_col()
     row.add_col().add_card().add_p().add_text 'Some Story about Some Thing'
-    Vue.set @views, 3, builder.data
+    @views[3] = builder.data
 </script>

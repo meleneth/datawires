@@ -2734,7 +2734,7 @@ coffee-loader@^1.0.0:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
 
-"coffeescript@>= 2.0.0":
+"coffeescript@>= 2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/coffeescript/-/coffeescript-2.5.1.tgz#b2442a1f2c806139669534a54adc35010559d16a"
   integrity sha512-J2jRPX0eeFh5VKyVnoLrfVFgLZtnnmp96WQSLAS8OrLm2wtQLcnikYKe1gViJKDH7vucjuhHvBKKBP3rKcD1tQ==
@@ -9917,13 +9917,6 @@ vue-cli-plugin-tailwindcss@~0.1.1:
   resolved "https://registry.yarnpkg.com/vue-cli-plugin-tailwindcss/-/vue-cli-plugin-tailwindcss-0.1.1.tgz#e961e6f70a621fdbbf7b86b72cf065e7631d4c93"
   integrity sha512-7c1xtywUI80wSkLeiJEdCBIpiNbqlUm053hoysOWOMYOa4bFfZgj6OmZk+1X6NSDP34C+i0mklIebzQf5apEvQ==
 
-vue-heroicons@^0.9.4:
-  version "0.9.4"
-  resolved "https://registry.yarnpkg.com/vue-heroicons/-/vue-heroicons-0.9.4.tgz#bc233ee35fbc8c41855a9848cde386c151a87c50"
-  integrity sha512-iylylWRrO2O5F9LC1yYF2h5TNo9+ijanJwBWaJIpuA8cVgisxrr5LJP9pzmEOqxikjgrTR+ZIrSmg+id1vWfDw==
-  dependencies:
-    vue "^2.6.10"
-
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
@@ -9973,11 +9966,6 @@ vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
-
-vue@^2.6.10:
-  version "2.6.12"
-  resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.12.tgz#f5ebd4fa6bd2869403e29a896aed4904456c9123"
-  integrity sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg==
 
 vue@^3.0.0:
   version "3.0.11"
