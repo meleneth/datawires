@@ -11,4 +11,7 @@ export default createStore
   loading: false
   saving: false
   db_loaded: false
+  mutations: mutations
+  getters: getters
+  actions: actions
 

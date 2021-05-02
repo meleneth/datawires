@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
-import 'axios'
+import axios from 'axios'
 
 _ = require 'lodash'
 
