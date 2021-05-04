@@ -1,6 +1,5 @@
 import { mount, createLocalVue } from '@vue/test-utils'
 import { expect } from 'chai'
-import Vuetify from 'vuetify'
 
 import { shallowMount } from '@vue/test-utils'
 import DocumentEditString from '@/components/DocumentEdit/StringEdit.vue'
