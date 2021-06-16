@@ -4,7 +4,7 @@ mutations =
   ADD_ENTRY: (state, entry) ->
     state.entries.push entry
   SET_ENTRIES: (state, entries) ->
-    statei.entries = entries
+    state.entries = entries
   SET_ENTRY: (state, entry) ->
     for value, index in state.entries
       if value._id == entry._id

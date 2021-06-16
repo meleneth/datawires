@@ -1,4 +1,6 @@
 <template lang="pug">
+component(is="style")
+  | {{ color_css }}
 div
   Disclosure(as="nav" class="bg-gray-800" v-slot="{ open }")
     div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
@@ -96,9 +98,47 @@ export default
     XIcon,
   },
   mounted: ->
+    person = {
+      first_name: ""
+      last_name: ""
+      middle_names: ["", "", ""]
+      hex: 0xffffffff
+      pronoun: ""
+    }
+    colors_to_make = {
+      gray: {
+        100: "rgb(243, 244, 246)"
+        200: "rgb(229, 231, 235)"
+        300: "rgb(209, 213, 219)"
+        400: "rgb(156, 163, 175)"
+        500: "rgb(107, 114, 128)"
+        600: "rgb(75, 85, 99)"
+        700: "rgb(55, 65, 81)"
+        800: "rgb(31, 41, 55)"
+        900: "rgb(17, 24, 39)"
+      }
+    }
+    color_prefix_templates = [
+      { name: "text", selector: "", style: "color: " }
+      { name: "bg", selector: "", style: "background-color: " }
+      { name: "border", selector: "", style: "border-color: " }
+    ]
+    colors = []
+    for template in color_prefix_templates
+      for color, shades of colors_to_make
+        for level, code of shades
+          colors.push (["." + template.name, color, level].join "-") + " {"
+          colors.push "  " + template.style + code
+          colors.push "}"
+
+    @color_css = colors.join "\n"
+    console.log "color_css is"
+    console.log @color_css
     @$store.dispatch 'load_db'
   data: ->
     return {
-      navLinks
+      navLinks: []
+      color_css: ""
     }
 </script>
+

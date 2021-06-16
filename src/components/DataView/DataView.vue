@@ -28,6 +28,7 @@ DataView =
     @$options.components['data-row'] = require('./DataRow.vue').default
     @$options.components['data-col'] = require('./DataCol.vue').default
     @$options.components['data-card'] = require('./DataCard.vue').default
+    @$options.components['data-grid'] = require('./DataGrid.vue').default
     @$options.components['data-sheet'] = require('./DataSheet.vue').default
     @$options.components['data-p'] = require('./DataP.vue').default
     @$options.components['data-button'] = require('./DataButton.vue').default

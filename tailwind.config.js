@@ -46,6 +46,10 @@ View the full documentation at https://tailwindcss.com.
 let colors = {
   'transparent': 'transparent',
 
+  'gray': {
+    '500': 'rbga(255, 0, 0, var(--tw-text-opacity))',
+    '700': 'rbga(55, 65, 81, var(--tw-text-opacity))'
+  },
   'black': '#22292f',
   'grey-darkest': '#3d4852',
   'grey-darker': '#606f7b',
