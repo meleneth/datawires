@@ -16,6 +16,7 @@ v-container
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
+import make_schema from "@/lib/datawires"
 
 export default 
   name: 'AddSchema'
@@ -27,13 +28,7 @@ export default
   methods:
     createNewSchema: ->
       console.log "ok I guess createNewSchema is a thing now"
-      new_schema =
-        "$schema": "http://#{@new_schema_domain}/#{@new_schema_name}#"
-        definitions: {}
-        type: "object"
-        properties: {}
-        title: "The #{ @new_schema_name } Schema"
-        description: @new_schema_description
+      new_schema = make_schema @new_schema_domain, @new_schema_name, @new_schema_description
       @$store.dispatch 'add_entry', new_schema
         .then (d) ->
           console.log "I have returned from my journey, and I now have the accent of a cabin man."

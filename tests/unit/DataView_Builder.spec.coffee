@@ -7,40 +7,8 @@ describe 'DataViewBuilder', =>
     builder = new Builder 'container'
     expect(builder.data).to.eql
       type: 'container'
+      style: {}
       children: []
-  
-  describe "#add_container", =>
-    it 'works for simple case', =>
-      builder = new Builder 'container'
-      builder.add_container()
-      expect(builder.data).to.eql
-        type: 'container'
-        children: [{
-          type: 'container'
-          children: []
-        }]
-
-  describe "#add_row", =>
-    it 'works for simple case', =>
-      builder = new Builder 'container'
-      builder.add_row()
-      expect(builder.data).to.eql
-        type: 'container'
-        children: [{
-          type: 'row'
-          children: []
-        }]
-
-  describe "#add_col", =>
-    it 'works for simple case', =>
-      builder = new Builder 'container'
-      builder.add_col()
-      expect(builder.data).to.eql
-        type: 'container'
-        children: [{
-          type: 'col'
-          children: []
-        }]
 
   describe "#add_button", =>
     it 'works for simple case', =>
@@ -49,8 +17,10 @@ describe 'DataViewBuilder', =>
       builder.add_button 'add', action
       expect(builder.data).to.eql
         type: 'container'
+        style: {}
         children: [{
           type: 'button'
+          style: {}
           label: 'add'
           target: action
         }]
@@ -61,19 +31,10 @@ describe 'DataViewBuilder', =>
       builder.add_card()
       expect(builder.data).to.eql
         type: 'container'
+        style: {}
         children: [{
           type: 'card'
-          children: []
-        }]
-
-  describe "#add_sheet", =>
-    it 'works for simple case', =>
-      builder = new Builder 'container'
-      builder.add_sheet()
-      expect(builder.data).to.eql
-        type: 'container'
-        children: [{
-          type: 'sheet'
+          style: {}
           children: []
         }]
 
@@ -83,8 +44,10 @@ describe 'DataViewBuilder', =>
       builder.add_p()
       expect(builder.data).to.eql
         type: 'container'
+        style: {}
         children: [{
           type: 'p'
+          style: {}
           children: []
         }]
 
@@ -94,22 +57,26 @@ describe 'DataViewBuilder', =>
       builder.add_text('some_text')
       expect(builder.data).to.eql
         type: 'container'
+        style: {}
         children: [{
           type: 'text'
+          style: {}
           text: 'some_text'
         }]
-        type: 'container'
 
   describe "chainability", =>
     it 'works in a simple case', =>
       builder = new Builder 'container'
-      builder.add_row().add_col()
+      builder.add_p().add_p()
       expect(builder.data).to.eql
         type: 'container'
+        style: {}
         children: [ {
-          type: 'row'
+          type: 'p'
+          style: {}
           children: [ {
-            type: 'col'
+            type: 'p'
+            style: {}
             children: [ ]
           } ]
         } ]
