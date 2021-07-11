@@ -1,12 +1,12 @@
 <template lang="pug">
-div
-  p Builder and DataView Demo
-  div(v-for="view in views")
-    data-view(:field="view")
-    hr
-    hr
-    hr
-    hr
+p Builder and DataView Demo
+div.mt-8(v-for="view in views")
+  data-view(:field="view")
+p.mt-6
+p And that's all she wrote!
+p
+p
+p.mt-6
 form.space-y-8.divide-y.divide-gray-200
   .space-y-8.divide-y.divide-gray-200
     div
@@ -172,23 +172,23 @@ export default
     builder = new Builder('container')
     builder.add_card().add_text lorem_paragraph
     @views[0] = builder.data
-    builder = new Builder('container')
-    row = builder.add_row()
-    row.add_col()
-    row.add_col().add_card().add_p().add_text lorem_paragraph
-    row.add_col()
-    #@views[1] = builder.data
-    builder = new Builder('container')
-    row = builder.add_row()
-    row.add_col().add_p().add_text lorem_paragraph
-    row.add_col().add_p().add_text lorem_paragraph
-    #@views[2] = builder.data
-    builder = new Builder('container')
-    row = builder.add_row()
-    row.add_col().add_sheet().add_p().add_text lorem_paragraph
-    row.add_col()
-    row.add_col().add_button 'Some Text', 'nothing'
-    row.add_col()
-    row.add_col().add_card().add_p().add_text lorem_paragraph
-    #@views[3] = builder.data
+    #builder = new Builder('container')
+    #row = builder.add_row()
+    #row.add_col()
+    #row.add_col().add_card().add_p().add_text lorem_paragraph
+    #row.add_col()
+    ##@views[1] = builder.data
+    #builder = new Builder('container')
+    #row = builder.add_row()
+    #row.add_col().add_p().add_text lorem_paragraph
+    #row.add_col().add_p().add_text lorem_paragraph
+    ##@views[2] = builder.data
+    #builder = new Builder('container')
+    #row = builder.add_row()
+    #row.add_col().add_sheet().add_p().add_text lorem_paragraph
+    #row.add_col()
+    #row.add_col().add_button 'Some Text', 'nothing'
+    #row.add_col()
+    #row.add_col().add_card().add_p().add_text lorem_paragraph
+    ##@views[3] = builder.data
 </script>

@@ -43,7 +43,36 @@ class Builder extends RootBuilder
     button = new ButtonBuilder label, target
     @add_a_child button.data
     return button
+  add_form: () ->
+    form = new FormBuilder
+    @add_a_child form.data
+    return form
 
+class FormBuilder extends Builder
+  get_default_data: (type) ->
+    return
+      type: 'form'
+      style: {}
+      children: []
+  add_input: (label, target, field) ->
+    input = new InputField label, target, field
+    @add_a_child input.data
+    return input
+
+class InputField extends RootBuilder
+  constructor: (@label, @target, @field) ->
+    super 'input'
+    @data.label = @label
+    @data.target = @target
+    @data.field = @field
+  get_default_data: (type) ->
+    return
+      type: 'input'
+      style: {}
+      children: []
+      label: false
+      target: false
+      field: false
 
 class GridBuilder extends Builder
   get_default_data: (type) ->
