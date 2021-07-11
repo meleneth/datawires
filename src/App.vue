@@ -137,7 +137,7 @@ export default
     @$store.dispatch 'load_db'
   data: ->
     return {
-      navLinks: []
+      navLinks: navLinks
       color_css: ""
     }
 </script>

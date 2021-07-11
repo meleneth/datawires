@@ -54,7 +54,7 @@ describe 'DataViewBuilder', =>
   describe "#add_text", =>
     it 'works for simple case', =>
       builder = new Builder 'container'
-      builder.add_text('some_text')
+      builder.add_text 'some_text'
       expect(builder.data).to.eql
         type: 'container'
         style: {}

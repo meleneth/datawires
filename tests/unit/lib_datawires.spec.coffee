@@ -7,4 +7,5 @@ describe 'lib/datawires', =>
     it 'returns a schema wrapper', =>
       wrapper = make_schema 'demo.sec7or.com', 'test', 'test the schema generator'
       expect(wrapper.schema.$id).to.eql 'http://demo.sec7or.com/test.json'
+      expect(wrapper.schema.$schema).to.eql 'https://json-schema.org/draft/2020-12/schema'
 

@@ -4,6 +4,7 @@ class SchemaWrapper
 make_schema = (domain, name, description) ->
   new_schema =
     "$id": "http://#{domain}/#{name}.json"
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
     "$defs": {}
     type: "object"
     properties: {}
