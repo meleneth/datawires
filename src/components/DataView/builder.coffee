@@ -74,12 +74,46 @@ class InputField extends RootBuilder
       target: false
       field: false
 
+class GridCell
+  constructor: (@name, @grid, @update_func) ->
+    @_cell = new Builder 'div'
+    @data = @_cell.data
+
+  cell: ->
+    @_cell
+  set_grid: (x, y) ->
+    @grid[y][x] = @name
+    @
+
 class GridBuilder extends Builder
+  constructor: (@width, @height) ->
+    super 'grid'
+    @data.style['display'] = 'grid'
+    @gridcells = new Array @height
+    @column_templates = new Array @width
+    @row_templates = new Array @height
+
+    for y in [0...@height]
+      @row_templates[y] = '1fr'
+      line = new Array @width
+      for x in [0...@width]
+        line[x] = 'unset'
+      @gridcells[y] = line
+    for x in [0...@width]
+      @column_templates[x] = '1fr'
+    @_update_style()
   get_default_data: (type) ->
     return
       type: 'grid'
       style: {"display": "grid"}
       children: []
+  add_cell: (cell_name) ->
+    cell = new GridCell cell_name, @gridcells, ((e) -> e._update_style).bind(@)
+    @data.children.push cell.data
+    return cell
+  _update_style: () ->
+    grid_lines = (_.join " ", cells for cells in @gridcells)
+    @
 
 class InlineGridBuilder extends GridBuilder
   get_default_data: (type) ->
@@ -121,3 +155,7 @@ class TextBuilder extends RootBuilder
 
 
 export default Builder
+export {
+  GridBuilder,
+  Builder
+ }
