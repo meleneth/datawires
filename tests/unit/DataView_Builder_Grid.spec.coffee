@@ -51,7 +51,7 @@ describe 'GridBuilder', =>
         "grid-template-rows": "1fr 1fr 1fr"
       children: [
         type: 'div'
-        style: {}
+        style: {'grid-area': 'one'}
         children: [
           type: 'text'
           style: {}
@@ -59,7 +59,7 @@ describe 'GridBuilder', =>
         ]
       ,
         type: 'div'
-        style: {}
+        style: {'grid-area': 'two'}
         children: [
           type: 'text'
           style: {}
