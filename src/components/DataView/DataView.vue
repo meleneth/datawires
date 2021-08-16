@@ -24,6 +24,7 @@ DataView =
   props:
     field: Object
   beforeCreate: ->
+    @$options.components['data-div'] = require('./DataDiv.vue').default
     @$options.components['data-container'] = require('./DataContainer.vue').default
     @$options.components['data-row'] = require('./DataRow.vue').default
     @$options.components['data-col'] = require('./DataCol.vue').default
@@ -32,6 +33,7 @@ DataView =
     @$options.components['data-sheet'] = require('./DataSheet.vue').default
     @$options.components['data-p'] = require('./DataP.vue').default
     @$options.components['data-button'] = require('./DataButton.vue').default
+    tlookup['div'] = @$options.components['data-div']
     tlookup['container'] = @$options.components['data-container']
     tlookup['row'] = @$options.components['data-row']
     tlookup['col'] = @$options.components['data-col']

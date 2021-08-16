@@ -1,5 +1,5 @@
 <template lang="pug">
-div
+div(:style="field.style")
   data-view(:field="f" v-for="f in field.children")
 </template><script lang="coffee">
 import Vue from 'vue'

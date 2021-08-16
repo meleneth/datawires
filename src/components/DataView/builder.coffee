@@ -78,16 +78,18 @@ class GridCell
   constructor: (@name, @grid, @update_func) ->
     @_cell = new Builder 'div'
     @data = @_cell.data
-
+    @data.style['grid-area'] = @name
   cell: ->
     @_cell
   set_grid: (x, y) ->
     @grid[y][x] = @name
+    update_func = @update_func
+    update_func()
     @
 
 class GridBuilder extends Builder
   constructor: (@width, @height) ->
-    super 'grid'
+    super 'div'
     @data.style['display'] = 'grid'
     @gridcells = new Array @height
     @column_templates = new Array @width
@@ -104,15 +106,19 @@ class GridBuilder extends Builder
     @_update_style()
   get_default_data: (type) ->
     return
-      type: 'grid'
+      type: 'div'
       style: {"display": "grid"}
       children: []
   add_cell: (cell_name) ->
-    cell = new GridCell cell_name, @gridcells, ((e) -> e._update_style).bind(@)
+    cell = new GridCell cell_name, @gridcells, @_update_style.bind(@)
     @data.children.push cell.data
     return cell
-  _update_style: () ->
-    grid_lines = (_.join " ", cells for cells in @gridcells)
+  _update_style: ->
+    grid_lines = (_.join cells, " " for cells in @gridcells)
+    grid_lines = _.map grid_lines, (g) -> _.join ['', g, ''], '"'
+    @data.style['grid-template-areas'] = _.join grid_lines, " "
+    @data.style['grid-template-columns'] = _.join @column_templates, " "
+    @data.style['grid-template-rows'] = _.join @row_templates, " "
     @
 
 class InlineGridBuilder extends GridBuilder
