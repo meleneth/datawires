@@ -47,6 +47,7 @@ table
 pointer = require 'json-pointer'
 difflib = require 'jsdifflib'
 import Vue from 'vue'
+import { shallowRef } from 'vue'
 
 import Builder from '@/components/DataView/builder.coffee'
 import DataView from '@/components/DataView/DataView.vue'
@@ -60,7 +61,11 @@ import NumberEdit from '@/components/SchemaEdit/NumberEdit.vue'
 
 contextSize = null
 
-tlookup = {'object': ObjectEdit, 'array': ArrayEdit, 'string': StringEdit, 'number': NumberEdit}
+tlookup =
+  'object': shallowRef ObjectEdit
+  'array':  shallowRef ArrayEdit
+  'string': shallowRef StringEdit
+  'number': shallowRef NumberEdit
 
 export default 
   name: 'SchemaEdit'

@@ -21,6 +21,7 @@ table
 </template>
 
 <script lang="coffee">
+import { shallowRef } from 'vue'
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
 import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
@@ -33,7 +34,11 @@ difflib = require 'jsdifflib'
 
 contextSize = null
 
-tlookup = {'object': ObjectEdit, 'array': ArrayEdit, 'string': StringEdit, 'number': NumberEdit}
+tlookup =
+  object: shallowRef ObjectEdit
+  array:  shallowRef ArrayEdit
+  string: shallowRef StringEdit
+  number: shallowRef NumberEdit
 
 export default 
   name: 'CreateDocument'

@@ -58,9 +58,9 @@ export default
       if @new_property_type == 'object'
         new_prop['properties'] = {}
       target = pointer.get @schema, "#{@path}/properties"
-      @emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
+      @$emit 'addProperty', {path: "#{@path}/properties", prop: new_prop, title: @new_property_name}
       EventBus.emit('navigate', {path: "#{@path}/properties/#{@new_property_name}"})
       @new_property_name = ''
     save_changes: ->
-      @emit 'updateObject', {path: @path, description: @description}
+      @$emit 'updateObject', {path: @path, description: @description}
 </script>

@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  label {{ field.title }}
+  .label {{ field.title }}
   input(v-model="value" type="number" :label="field.title")
 </template><script lang="coffee">
 pointer = require 'json-pointer'

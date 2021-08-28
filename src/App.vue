@@ -143,4 +143,28 @@ export default
       navLinks: navLinks
       color_css: ""
 </script>
+<style>
+input, select, textarea {
+  padding: 15px 32px;
+  background-color: powderblue;
+  margin: 5px;
+}
+button {
+  background-color: darkseagreen;
+  margin: 5px;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
 
+}
+.label {
+  padding: 15px 32px;
+  margin: 5px;
+  background-color: tan;
+  display: inline;
+}
+</style>

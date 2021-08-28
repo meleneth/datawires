@@ -15,10 +15,14 @@ table
       h3 {{ schema.$schema }}
   tr
     td
-      p(v-for="field in fields")
-        component(:is="field.is"
-                  :field="field")
+      hr
+      hr
+  tr
+    td
       button(v-on:click="save_document") save
+  tr(v-for="field in fields")
+    td
+      component(:is="field.is" :field="field")
   tr
     td
       div(id="diffdiv" style="text-align: left")
@@ -45,6 +49,7 @@ table
 </template>
 
 <script lang="coffee">
+import { shallowRef } from 'vue'
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'
 import ObjectEdit from '@/components/SchemaEdit/ObjectEdit.vue'
@@ -58,16 +63,16 @@ difflib = require 'jsdifflib'
 contextSize = null
 
 tlookup =
-  object: ObjectEdit
-  array: ArrayEdit
-  string: StringEdit
-  number: NumberEdit
+  object: shallowRef ObjectEdit
+  array:  shallowRef ArrayEdit
+  string: shallowRef StringEdit
+  number: shallowRef NumberEdit
 
 export default 
   name: 'DocumentEdit'
   components:
-    'schema-edit-link': SchemaEditLink
-    'string-edit': StringEdit
+    'schema-edit-link': shallowRef SchemaEditLink
+    'string-edit': shallowRef StringEdit
   props:
     id: String
   data: ->
@@ -129,9 +134,9 @@ export default
       for name, property of @schema.properties
         path = "/#{name}"
         if property.type == "string"
-          editor = StringEdit
+          editor = shallowRef StringEdit
         if property.type == "number"
-          editor = NumberEdit
+          editor = shallowRef NumberEdit
         current = ''
         if pointer.has @document, path
           current = pointer.get @document, path

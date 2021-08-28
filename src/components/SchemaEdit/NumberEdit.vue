@@ -3,7 +3,7 @@ div
   h1 NumberEdit
   h5 Path: '{{ path }}'
   h3 {{ title }}
-  v-textarea(v-model="description" label="description")
+  textarea(v-model="description" label="description")
   table
     tr
       td(v-if="!has_minimum")

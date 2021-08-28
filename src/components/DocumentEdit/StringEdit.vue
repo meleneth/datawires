@@ -1,9 +1,9 @@
 <template lang="pug">
 div
-  label {{ field.property.title }}
+  .label {{ field.property.title }}
   input(type="text" v-if="!has_enum" v-model="field_value" :label="title")
   select(v-if="has_enum" :items="field.property.enum" v-model="field_value" :label="title")
-    option(v-for="item in field.property.enum") {{ property.title }}
+    option(v-for="item in field.property.enum" :value="item") {{ item }}
 </template><script lang="coffee">
 pointer = require 'json-pointer'
 export default 
