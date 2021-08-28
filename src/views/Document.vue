@@ -15,6 +15,7 @@ export default
   props:
     id: String
   mounted: ->
+    @$store.dispatch 'set_page_title', "Document"
     @$store.dispatch 'get_doc', @id
       .then (d) =>
         @doc = d

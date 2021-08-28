@@ -89,6 +89,7 @@ export default
       @current = pointer.get @schema, @path
       @selectedComponent = tlookup[@current.type]
   mounted: ->
+    @$store.dispatch 'set_page_title', "SchemaEdit"
     @load_schema()
     #builder = new Builder('container')
     #row = builder.add_row()

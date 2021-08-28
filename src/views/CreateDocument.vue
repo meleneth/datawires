@@ -62,6 +62,7 @@ export default
       @current = pointer.get @schema, @path
       @selectedComponent = tlookup[@current.type]
   mounted: ->
+    @$store.dispatch 'set_page_title', "Create Document"
     @load_schema()
   methods:
     load_schema: ->

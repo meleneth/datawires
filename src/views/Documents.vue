@@ -24,6 +24,7 @@ export default
   data: ->
     documents: false
   mounted: ->
+    @$store.dispatch 'set_page_title', "Documents"
     schema = "http://#{ @domain }/#{ @path }#"
 #    http://172.16.0.122:5984/noodatawires/_design/schemas/_view/documents?keys=%5B%5B%22rpg.sec7or.com%22%2C%20%22item%22%5D%5D&skip=0&limit=21&reduce=false
     console.log schema

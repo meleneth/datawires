@@ -23,6 +23,8 @@ export default
   data: ->
     return
       schemas: []
+  mounted: ->
+    @$store.dispatch 'set_page_title', "Schemas"
   computed:
     filtered_schemas: ->
       filtered =  _.filter @schemas, (d) => d.key[0] == @domain

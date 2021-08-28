@@ -5,4 +5,6 @@ div Domain
 <script lang="coffee">
 export default
   name: 'Domain'
+  mounted: ->
+    @$store.dispatch 'set_page_title', "Domain"
 </script>

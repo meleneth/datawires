@@ -24,6 +24,8 @@ export default
   data: ->
     return
       domains: []
+  mounted: ->
+    @$store.dispatch 'set_page_title', "Domains"
   created: ->
     @$store.dispatch "db_get_domains"
       .then (d) =>

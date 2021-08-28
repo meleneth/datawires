@@ -85,6 +85,7 @@ export default
     sourceRenderedJson: ''
     fields: []
   mounted: ->
+    @$store.dispatch 'set_page_title', "DocumentEdit"
     @load_document()
   methods:
     add_property: (data) ->

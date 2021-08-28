@@ -5,6 +5,8 @@ mutations =
     state.entries.push entry
   SET_ENTRIES: (state, entries) ->
     state.entries = entries
+  SET_SCREEN_TITLE: (state, title) ->
+    state.screen_title = title
   SET_ENTRY: (state, entry) ->
     for value, index in state.entries
       if value._id == entry._id

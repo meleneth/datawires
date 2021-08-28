@@ -16,14 +16,12 @@
 </div>
 </template>
 
-<script>
-  import HelloWorld from '../components/HelloWorld'
-
-  export default {
-    name: 'Home',
-
-    components: {
-      HelloWorld,
-    },
-  }
+<script lang="coffee">
+import HelloWorld from '../components/HelloWorld'
+export default
+  name: 'Home',
+  mounted: ->
+    @$store.dispatch 'set_page_title', "GridEditDocuments"
+  components:
+    "hello-world": HelloWorld
 </script>

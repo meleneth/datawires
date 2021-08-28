@@ -28,6 +28,8 @@ parse_ref = (ref) ->
   return [matches[1], matches[2]]
 
 actions =
+  set_page_title: (context, title) ->
+    context.commit "SET_SCREEN_TITLE", title
   save_entry: (context, doc) ->
     context.commit "SET_SAVING", true
     db.put doc

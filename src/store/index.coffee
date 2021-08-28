@@ -14,4 +14,8 @@ export default createStore
   mutations: mutations
   getters: getters
   actions: actions
+  state: ->
+    return
+      entries: []
+      screen_title: "Unset"
 

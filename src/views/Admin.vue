@@ -8,6 +8,8 @@ div
 <script lang="coffee">
 export default 
   name: 'Admin'
+  mounted: ->
+    @$store.dispatch 'set_page_title', "Admin"
   data: ->
     return
       views_created: false

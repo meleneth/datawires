@@ -18,6 +18,7 @@ export default
   data: ->
     schema: false
   mounted: ->
+    @$store.dispatch 'set_page_title', "Schema"
     @load_schema()
   methods:
     load_schema: ->
@@ -32,5 +33,4 @@ export default
           if s.$ref && s.$ref == @schema.$schema
             results.push s
       results
-
 </script>

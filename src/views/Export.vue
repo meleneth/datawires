@@ -28,6 +28,7 @@ export default
       return data
     }
   mounted: ->
+    @$store.dispatch 'set_page_title', "Export"
     @$store.dispatch 'getSchemasByDomain', @domain
       .then (schemas) =>
         @schemas = schemas
