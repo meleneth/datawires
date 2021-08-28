@@ -2,9 +2,9 @@
 div
   h1
     | {{ domain }} / {{ path }} - gridEditDocuments
-  v-container
-    v-row(v-for="row in rows")
-      v-col(v-for="field in row")
+  table
+    tr(v-for="row in rows")
+      td(v-for="field in row")
         component(:is="field.is"
                   :current="field.current"
                   :path="field.path"

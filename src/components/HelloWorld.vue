@@ -1,18 +1,18 @@
 <template lang="pug">
 div
-  v-container
-    v-row.text-center
-      v-col(cols="12")
-        v-img(class="my-3"
+  table
+    tr.text-center
+      td(cols="12")
+        img(class="my-3"
           :src="require('../assets/logo.svg')"
           contain
           height="200"
         )
-    v-row
-      v-col(cols="12")
+    tr
+      td(cols="12")
         | {{ msg }}
 
-      v-col(class="mb-4")
+      td(class="mb-4")
         h1(class="display-2 font-weight-bold mb-3")
           | Welcome to |)atawires
         p(class="subheading font-weight-regular")

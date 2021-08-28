@@ -3,21 +3,22 @@ div
   h1 ObjectEdit
   h5 Path: '{{ path }}'
   h3 {{ title }}
-  v-container
-    v-row
-      v-col
-        v-select(:items="item_types" v-model="new_property_type" label="Type")
-      v-col
-        v-text-field(v-model="new_property_name" label="New Property Name")
-      v-col
-        v-btn(v-on:click="add_property") Create
-  v-container(v-for="property in myproperties")
-    v-row
-      v-col
+  table
+    tr
+      td
+        select(:items="item_types" v-model="new_property_type" label="Type")
+          option(v-for="item in item_types") {{ item }}
+      td
+        input(type="text" :value="new_property_name" label="New Property Name")
+      td
+        button(v-on:click="add_property") Create
+  table(v-for="property in myproperties")
+    tr
+      td
         | {{ property.type }}
-      v-col
+      td
         schema-edit-link(:to="path + '/properties/' + property.title" :label="property.title")
-      v-col
+      td
         | {{ property.description }}
 </template>
 

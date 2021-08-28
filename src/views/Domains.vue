@@ -1,15 +1,17 @@
 <template lang="pug">
-v-container
-  add-schema
-  p
-  h2 Domains
-  v-row(v-for="domain in domains" :key="domain.key[0]")
-    v-col
+add-schema
+p
+h2 Domains
+table
+  tr(v-for="domain in domains" :key="domain.key[0]")
+    td
       | [
       router-link(:to="{name: 'Export', params: {domain: domain.key[0]}}") Export
       | ] &nbsp;
-      router-link(:to="{name: 'Schemas', params: {domain: domain.key[0]}}") {{ domain.key[0] }}
+    td
       | {{ domain.value }}
+    td
+      router-link(:to="{name: 'Schemas', params: {domain: domain.key[0]}}") {{ domain.key[0] }}
 </template>
 <script lang="coffee">
 _ = require 'lodash'

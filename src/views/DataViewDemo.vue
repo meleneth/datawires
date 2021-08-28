@@ -1,9 +1,17 @@
 <template lang="pug">
+pre
+  | 112
+  | 402
+  | 433
+
+p And that's all she wrote!
+p
+p
 p Builder and DataView Demo
 div.mt-8(v-for="view in views")
   data-view(:field="view")
 p.mt-6
-p And that's all she wrote!
+p And that's all she wrote! ... again
 p
 p
 p.mt-6
@@ -159,6 +167,7 @@ form.space-y-8.divide-y.divide-gray-200
 </template><script lang="coffee">
 import Vue from 'vue'
 import Builder from '@/components/DataView/builder.coffee'
+import { GridBuilder } from '@/components/DataView/builder'
 import DataView from '@/components/DataView/DataView.vue'
 
 export default 
@@ -169,6 +178,45 @@ export default
     'data-view': DataView
   mounted: ->
     lorem_paragraph = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quam neque, consequat eu metus eget, sodales maximus diam. Sed efficitur ipsum sit amet nisl aliquam tincidunt. Nunc nec ultrices magna. Ut dapibus augue sed nunc bibendum, eu interdum velit euismod. Donec fermentum, dui ac rhoncus cursus, nunc nibh lacinia arcu, id molestie risus quam quis odio. Proin hendrerit, turpis non aliquam elementum, eros ipsum varius felis, consequat pretium magna ligula ac metus. Maecenas pellentesque in leo vitae ultricies. Etiam justo ex, porttitor nec lorem eget, consectetur elementum diam."
+    pinwheel = new Builder('div')
+    pinwheel_grid = new GridBuilder 3, 3
+    pinwheel_grid.add_cell "center"
+      .set_grid 1, 1
+      .cell()
+      .add_text lorem_paragraph
+
+    pinwheel_grid.add_cell "wheel1"
+      .set_grid 0, 0
+      .set_grid 1, 0
+      .cell()
+      .set_style "background-color", "red"
+      .add_text lorem_paragraph
+
+    pinwheel_grid.add_cell "wheel2"
+      .set_grid 2, 0
+      .set_grid 2, 1
+      .cell()
+      .set_style "background-color", "green"
+      .add_text lorem_paragraph
+
+    pinwheel_grid.add_cell "wheel3"
+      .set_grid 2, 2
+      .set_grid 1, 2
+      .cell()
+      .set_style "background-color", "blue"
+      .add_text lorem_paragraph
+
+    pinwheel_grid.add_cell "wheel4"
+      .set_grid 0, 2
+      .set_grid 0, 1
+      .cell()
+      .set_style "background-color", "yellow"
+      .add_text lorem_paragraph
+
+    @views[1] = pinwheel_grid.data
+    @views[2] = pinwheel_grid.data
+    @views[3] = pinwheel_grid.data
+
     builder = new Builder('container')
     builder.add_card().add_text lorem_paragraph
     @views[0] = builder.data

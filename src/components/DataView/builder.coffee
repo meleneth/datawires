@@ -9,26 +9,26 @@ class RootBuilder
     @data.style[name] = value
     return @
   add_a_child: (child) ->
-    @data.children.push child
+    @data.children.push child.data
     return self
 
 class Builder extends RootBuilder
   add_div: ->
     div = new Builder 'div'
-    @add_a_child div.data
+    @add_a_child div
     return div
   add_grid: ->
     grid = new Builder 'div'
     grid.set_style 'display', 'grid'
-    @add_a_child grid.data
+    @add_a_child grid
     return grid
   add_card: () ->
     card = new Builder 'card'
-    @add_a_child card.data
+    @add_a_child card
     return card
   add_p: () ->
     p = new Builder 'p'
-    @add_a_child p.data
+    @add_a_child p
     return p
   add_text: (text) ->
     text_builder = new TextBuilder text
@@ -37,15 +37,15 @@ class Builder extends RootBuilder
   add_inline_grid: ->
     grid = new InlineGridBuilder
     grid.set_style 'display', 'inline-grid'
-    @add_a_child grid.data
+    @add_a_child grid
     return grid
   add_button: (label, target) ->
     button = new ButtonBuilder label, target
-    @add_a_child button.data
+    @add_a_child button
     return button
   add_form: () ->
     form = new FormBuilder
-    @add_a_child form.data
+    @add_a_child form
     return form
 
 class FormBuilder extends Builder
@@ -56,7 +56,7 @@ class FormBuilder extends Builder
       children: []
   add_input: (label, target, field) ->
     input = new InputField label, target, field
-    @add_a_child input.data
+    @add_a_child input
     return input
 
 class InputField extends RootBuilder
@@ -74,11 +74,12 @@ class InputField extends RootBuilder
       target: false
       field: false
 
-class GridCell
+class GridCell extends RootBuilder
   constructor: (@name, @grid, @update_func) ->
+    super('div')
     @_cell = new Builder 'div'
+    @_cell.set_style 'grid-area', @name
     @data = @_cell.data
-    @data.style['grid-area'] = @name
   cell: ->
     @_cell
   set_grid: (x, y) ->
@@ -90,7 +91,7 @@ class GridCell
 class GridBuilder extends Builder
   constructor: (@width, @height) ->
     super 'div'
-    @data.style['display'] = 'grid'
+    @set_style 'display', 'grid'
     @gridcells = new Array @height
     @column_templates = new Array @width
     @row_templates = new Array @height
@@ -107,18 +108,22 @@ class GridBuilder extends Builder
   get_default_data: (type) ->
     return
       type: 'div'
-      style: {"display": "grid"}
+      style:
+        display: "grid"
+        "grid-template-areas": ""
+        "grid-template-columns": ""
+        "grid-template-rows": ""
       children: []
   add_cell: (cell_name) ->
     cell = new GridCell cell_name, @gridcells, @_update_style.bind(@)
-    @data.children.push cell.data
+    @add_a_child cell
     return cell
   _update_style: ->
     grid_lines = (_.join cells, " " for cells in @gridcells)
     grid_lines = _.map grid_lines, (g) -> _.join ['', g, ''], '"'
-    @data.style['grid-template-areas'] = _.join grid_lines, " "
-    @data.style['grid-template-columns'] = _.join @column_templates, " "
-    @data.style['grid-template-rows'] = _.join @row_templates, " "
+    @set_style 'grid-template-areas', _.join grid_lines, " "
+    @set_style 'grid-template-columns',  _.join @column_templates, " "
+    @set_style 'grid-template-rows', _.join @row_templates, " "
     @
 
 class InlineGridBuilder extends GridBuilder

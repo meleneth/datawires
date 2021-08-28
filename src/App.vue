@@ -52,7 +52,7 @@ div
   header(class="bg-white shadow")
     div(class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8")
       h1(class="text-3xl font-bold text-gray-900")
-        |Dashboard
+        | {{ pageTitle }}
   main
     div(class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8")
       div(class="px-4 py-6 sm:px-0")
@@ -95,7 +95,11 @@ export default
     BellIcon,
     MenuIcon,
     XIcon,
-  },
+  }
+  computed:
+    pageTitle: ->
+      @$route.meta
+      "PageTitle - #{@$route.meta.name}"
   mounted: ->
     person = {
       first_name: ""
@@ -135,9 +139,8 @@ export default
     console.log @color_css
     @$store.dispatch 'load_db'
   data: ->
-    return {
+    return
       navLinks: navLinks
       color_css: ""
-    }
 </script>
 

@@ -1,20 +1,20 @@
 <template lang="pug">
-v-container
-  v-row
-    v-col
+table
+  tr
+    td
       hr
       hr
-  v-row
-    v-col This page allows you to define the fields that will be allowed in your documents, also known as the Schema
-  v-row
-    v-col
+  tr
+    td This page allows you to define the fields that will be allowed in your documents, also known as the Schema
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       h3 {{ schema.$schema }}
-  v-row
-    v-col
+  tr
+    td
       schema-edit-link(:to="''" label="Top")
       component(:is="selectedComponent"
                 :current="current"
@@ -26,20 +26,20 @@ v-container
                 v-on:updateNumber="update_number"
                 v-on:updateObject="update_object"
                 v-if="selectedComponent")
-      v-btn(v-on:click="save_schema") save
-  v-row
-    v-col
+      button(v-on:click="save_schema") save
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       data-view(:field="dataview")
-  v-row
-    v-col
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       div(id="diffdiv" style="text-align: left")
 </template>
 
@@ -85,13 +85,13 @@ export default
       @selectedComponent = tlookup[@current.type]
   mounted: ->
     @load_schema()
-    builder = new Builder('container')
-    row = builder.add_row()
-    row.add_col()
-    row.add_col().add_card().add_p().add_text 'Some Story about Some Thing'
-    row.add_col()
-    Vue.set @, 'dataview', builder.data
-    console.log builder.data
+    #builder = new Builder('container')
+    #row = builder.add_row()
+    #row.add_col()
+    #row.add_col().add_card().add_p().add_text 'Some Story about Some Thing'
+    #row.add_col()
+    #Vue.set @, 'dataview', builder.data
+    #console.log builder.data
   methods:
     add_property: (data) ->
       target = pointer.get @schema, data.path

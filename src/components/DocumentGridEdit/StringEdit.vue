@@ -1,8 +1,10 @@
 <template lang="pug">
 div
-  v-text-field(v-if="!has_enum" v-model="value" :label="title")
-  v-select(v-if="has_enum" :items="property.enum" v-model="value" :label="description")
-</template><script lang="coffee">
+  input(type="text" v-if="!has_enum" v-model="value" :label="title")
+  select(v-if="has_enum" :items="property.enum" v-model="value" :label="description")
+    option(v-for="item in property.enum" :value="item") {{item}}
+</template>
+<script lang="coffee">
 pointer = require 'json-pointer'
 export default 
   name: 'DocumentGridStringEdit'

@@ -1,12 +1,12 @@
 <template lang="pug">
 div
   h1 Export - {{ domain }}
-  v-container
-    v-row
-      v-col
-      v-col
+  table
+    tr
+      td
+      td
         pre {{ string_export }}
-      v-col
+      td
 </template>
 <script lang="coffee">
 import map_task from '@/lib/map_task'

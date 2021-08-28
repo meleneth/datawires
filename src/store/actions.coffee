@@ -24,7 +24,7 @@ db_url = "http://tyreen.sectorfour:5984/datawires"
 db = new PouchDB db_url
 
 parse_ref = (ref) ->
-  matches = ref.match "http:\/\/([^/]*)\/([^#]*)#"
+  matches = ref.match "http:\/\/([^/]*)\/(.*)"
   return [matches[1], matches[2]]
 
 actions =

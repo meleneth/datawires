@@ -1,44 +1,44 @@
 <template lang="pug">
-v-container
-  v-row
-    v-col
+table
+  tr
+    td
       hr
       hr
-  v-row
-    v-col This page lets you edit a document.  Fields are presented that map to the schema definition, and you are allowed to change values and save the changes
-  v-row
-    v-col
+  tr
+    td This page lets you edit a document.  Fields are presented that map to the schema definition, and you are allowed to change values and save the changes
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       h3 {{ schema.$schema }}
-  v-row
-    v-col
+  tr
+    td
       p(v-for="field in fields")
         component(:is="field.is"
                   :field="field")
-      v-btn(v-on:click="save_document") save
-  v-row
-    v-col
+      button(v-on:click="save_document") save
+  tr
+    td
       div(id="diffdiv" style="text-align: left")
-  v-row
-    v-col
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       hr
       hr
-    v-col
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       hr
       hr
-  v-row
-    v-col
+  tr
+    td
       pre {{ document }}
       hr
       pre {{ schema }}

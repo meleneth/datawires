@@ -5,15 +5,15 @@ div
   h3 {{ title }}
   v-textarea(v-model="description" label="description")
   h3 Allowed Values
-  v-container
-    v-row
-      v-col
+  table
+    tr
+      td
         ul(v-if="current.enum")
           li(v-for="item in current.enum") {{ item }}
-      v-col
-        v-text-field(v-model="allowed_value_to_add")
-      v-col
-        v-btn(v-on:click="add_enum_item") add
+      td
+        input(type="text" v-model="allowed_value_to_add")
+      td
+        button(v-on:click="add_enum_item") add
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
