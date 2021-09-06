@@ -33,7 +33,7 @@ export default
       .then (schemas) =>
         @schemas = schemas
         make_request = (item) =>
-          @$store.dispatch 'getDocumentsByRef', item.$schema
+          @$store.dispatch 'getDocumentsByRef', item.$id
             .then (documents) =>
               for doc in documents
                 @documents.push doc
