@@ -168,4 +168,7 @@ button {
   background-color: tan;
   display: inline;
 }
+a {
+  background-color: thistle;
+}
 </style>

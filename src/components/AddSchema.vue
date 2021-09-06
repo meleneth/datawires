@@ -1,17 +1,21 @@
 <template lang="pug">
 table
   tr
-    td
+    td(colspan="2")
+      button(v-on:click="createNewSchema") create
+  tr
+    td(colspan="2")
       h2 {{ fullschemaname }}
   tr
     td
+      .label domain
       input(type="text" v-model="new_schema_domain" label="New Schema Domain")
     td
+      .label schema
       input(type="text" v-model="new_schema_name" label="New Schema Name")
-    td
-      button(v-on:click="createNewSchema") create
   tr
-    td
+    td(colspan="2")
+      .label Description
       input(type="text" v-model="new_schema_description" label="Description")
 </template>
 <script lang="coffee">

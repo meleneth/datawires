@@ -2,7 +2,8 @@
 div
   .label {{ field.title }}
   input(v-model="value" type="number" :label="field.title")
-</template><script lang="coffee">
+</template>
+<script lang="coffee">
 pointer = require 'json-pointer'
 export default 
   name: 'DocumentNumberEdit'

@@ -145,12 +145,15 @@ export default
           console.log result
     load_schema: ->
       console.log "Fetching schema for domain '#{@domain}' slash '#{@name}'"
+      @$store.dispatch 'set_page_title', "SchemaEdit - #{@domain}/#{@name}"
       @$store.dispatch 'getSchemaByKey', [@domain, @name]
         .then (schema) =>
           @schema = schema
           @current = pointer.get @schema, @path
           @sourceRenderedJson = JSON.stringify @schema, null, 2
           @selectedComponent = tlookup[@current.type]
+          console.log "and the choices are"
+          console.log @selectedComponent
           @update_rendered_json()
 </script>
 <style>

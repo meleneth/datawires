@@ -1,46 +1,22 @@
 <template lang="pug">
 table
   tr
-    td
-      hr
-      hr
+    td(colspan="2") This page lets you edit a document.  Fields are presented that map to the schema definition, and you are allowed to change values and save the changes
   tr
-    td This page lets you edit a document.  Fields are presented that map to the schema definition, and you are allowed to change values and save the changes
+    td(colspan="2")
+      h3 {{ schema.$id }}
   tr
-    td
-      hr
-      hr
-  tr
-    td
-      h3 {{ schema.$schema }}
-  tr
-    td
-      hr
-      hr
-  tr
-    td
+    td(colspan="2")
       button(v-on:click="save_document") save
   tr(v-for="field in fields")
     td
-      component(:is="field.is" :field="field")
+      component(:is="field.is" 
+                :field="field"
+                v-on:updateString="update_string"
+                v-on:updateNumber="update_number")
   tr
     td
       div(id="diffdiv" style="text-align: left")
-  tr
-    td
-      hr
-      hr
-  tr
-    td
-      hr
-      hr
-    td
-      hr
-      hr
-  tr
-    td
-      hr
-      hr
   tr
     td
       pre {{ document }}

@@ -9,7 +9,7 @@ div
         select(:items="item_types" v-model="new_property_type" label="Type")
           option(v-for="item in item_types") {{ item }}
       td
-        input(type="text" :value="new_property_name" label="New Property Name")
+        input(type="text" v-model="new_property_name" label="New Property Name")
       td
         button(v-on:click="add_property") Create
   table(v-for="property in myproperties")
