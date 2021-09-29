@@ -7,7 +7,8 @@ _ = require 'lodash'
 
 #PouchDB.plugin require 'pouchdb-authentication'
 
-db_url = "http://tyreen.sectorfour:5984/datawires"
+#db_url = "http://tyreen.sectorfour:5984/datawires"
+db_url = document.location.origin + "/database"
 #db_url = "http://172.16.0.122:5984/noodatawires"
 #db_options =
 #  "auth.username": "datawires"
