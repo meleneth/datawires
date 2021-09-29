@@ -33,7 +33,7 @@ export default
     createNewSchema: ->
       console.log "ok I guess createNewSchema is a thing now"
       new_schema = make_schema @new_schema_domain, @new_schema_name, @new_schema_description
-      @$store.dispatch 'add_entry', new_schema
+      @$store.dispatch 'add_entry', new_schema.schema
         .then (d) ->
           console.log "I have returned from my journey, and I now have the accent of a cabin man."
           console.log d
