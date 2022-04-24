@@ -15,6 +15,7 @@ test-job1:
   script:
     - sed -i 's/pouchdb-browser/pouchdb-node/g' package.json
     - sed -i 's/pouchdb-browser/pouchdb-node/g' ./src/store/index.coffee
+    - sed -i 's/pouchdb-browser/pouchdb-node/g' ./src/store/actions.coffee
     - yarn
     - yarn test:unit
 
