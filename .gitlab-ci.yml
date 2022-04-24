@@ -1,5 +1,5 @@
 build-job:
-  image: node:14-bullseye
+  image: node:16-bullseye
   stage: build
   script:
     - yarn
