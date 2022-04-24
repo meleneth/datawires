@@ -13,6 +13,7 @@ test-job1:
   image: node:14-bullseye
   stage: test
   script:
+    - sed -i 's/pouchdb-browser/pouchdb-node/g' package.json
     - yarn
     - yarn test:unit
 
