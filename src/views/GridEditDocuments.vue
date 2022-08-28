@@ -17,7 +17,6 @@ div
 </template>
 
 <script lang="coffee">
-import Vue from 'vue'
 _ = require 'lodash'
 pointer = require 'json-pointer'
 
@@ -62,7 +61,7 @@ export default
       .then (schema) =>
         console.log "Loaded schema from DB"
         console.log schema
-        Vue.set @, 'schema', schema
+        @schema = schema
         @$store.dispatch "db_get_documents", [@domain, @path]
           .then (d) =>
             @documents = d
