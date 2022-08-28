@@ -165,15 +165,18 @@ form.space-y-8.divide-y.divide-gray-200
         | Save
 
 </template><script lang="coffee">
-import Vue from 'vue'
 import Builder from '@/components/DataView/builder.coffee'
+import DecoratedFormBuilder from '@/lib/decorated/form.coffee'
 import { GridBuilder } from '@/components/DataView/builder'
 import DataView from '@/components/DataView/DataView.vue'
 
-export default 
+export default
   name: 'DataViewDemo'
   data: ->
     views: []
+    some_object: {
+      some_field: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quam neque, consequat eu metus eget, sodales maximus diam. Sed efficitur ipsum sit amet nisl aliquam tincidunt. Nunc nec ultrices magna. Ut dapibus augue sed nunc bibendum, eu interdum velit euismod. Donec fermentum, dui ac rhoncus cursus, nunc nibh lacinia arcu, id molestie risus quam quis odio. Proin hendrerit, turpis non aliquam elementum, eros ipsum varius felis, consequat pretium magna ligula ac metus. Maecenas pellentesque in leo vitae ultricies. Etiam justo ex, porttitor nec lorem eget, consectetur elementum diam."
+    }
   components:
     'data-view': DataView
   mounted: ->
@@ -214,9 +217,14 @@ export default
       .set_style "background-color", "yellow"
       .add_text lorem_paragraph
 
+    my_display_grid = new DecoratedFormBuilder
+    my_display_grid.add_header_text "Profile", "This information will be displayed publicly so be careful what you share."
+    my_display_grid.add_textarea "About", "Write a few sentances about yourself", @some_object, 'some_field'
+
     @views[1] = pinwheel_grid.data
-    @views[2] = pinwheel_grid.data
-    @views[3] = pinwheel_grid.data
+    @views[2] = my_display_grid.data
+    #@views[3] = pinwheel_grid.data
+    #@views[4] = pinwheel_grid.data
 
     builder = new Builder('container')
     builder.add_card().add_text lorem_paragraph

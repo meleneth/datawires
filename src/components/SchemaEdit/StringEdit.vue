@@ -17,7 +17,7 @@ div
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
-export default 
+export default
   name: 'StringEdit'
   props:
     schema: Object

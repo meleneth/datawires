@@ -4,13 +4,17 @@ class RootBuilder
   get_default_data: (type) ->
       type: type
       style: {}
+      classes: {}
       children: []
   set_style: (name, value) ->
     @data.style[name] = value
     return @
   add_a_child: (child) ->
     @data.children.push child.data
-    return self
+    return @
+  set_classes: (classes) ->
+    @data.classes = classes
+    return @
 
 class Builder extends RootBuilder
   add_div: ->
@@ -26,9 +30,15 @@ class Builder extends RootBuilder
     card = new Builder 'card'
     @add_a_child card
     return card
-  add_p: () ->
+  add_h3: (text=false) ->
+    h3 = new Builder 'h3'
+    @add_a_child h3
+    h3.add_text text if text
+    return h3
+  add_p: (text=false) ->
     p = new Builder 'p'
     @add_a_child p
+    p.add_text text if text
     return p
   add_text: (text) ->
     text_builder = new TextBuilder text
@@ -44,7 +54,7 @@ class Builder extends RootBuilder
     @add_a_child button
     return button
   add_form: () ->
-    form = new FormBuilder
+    form = new FormBuilder 'form'
     @add_a_child form
     return form
 
@@ -53,6 +63,7 @@ class FormBuilder extends Builder
     return
       type: 'form'
       style: {}
+      classes: {}
       children: []
   add_input: (label, target, field) ->
     input = new InputField label, target, field
@@ -69,6 +80,7 @@ class InputField extends RootBuilder
     return
       type: 'input'
       style: {}
+      classes: {}
       children: []
       label: false
       target: false
@@ -132,6 +144,7 @@ class InlineGridBuilder extends GridBuilder
       type: 'grid'
       style:
         display: "inline-grid"
+      classes: {}
       children: []
 
 class ButtonBuilder extends RootBuilder
@@ -160,6 +173,7 @@ class TextBuilder extends RootBuilder
     return
       text: false
       style: {}
+      classes: {}
       type: 'text'
   text: (text) ->
     @data['text'] = text
@@ -168,5 +182,6 @@ class TextBuilder extends RootBuilder
 export default Builder
 export {
   GridBuilder,
-  Builder
+  Builder,
+  FormBuilder
  }

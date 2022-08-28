@@ -22,7 +22,7 @@ table
 pointer = require 'json-pointer'
 import { make_schema } from "@/lib/datawires"
 
-export default 
+export default
   name: 'AddSchema'
   data: ->
     return

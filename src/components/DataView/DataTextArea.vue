@@ -1,13 +1,12 @@
 <template lang="pug">
-p(:style="field.style", :class="field.classes")
-  data-view(:field="f" v-for="f in field.children")
+textarea(:style="field.style", :class="field.classes" :id="field.id") spome text to edit
 </template><script lang="coffee">
 import Vue from 'vue'
 
 import DataView from '@/components/DataView/DataView.vue'
 
 export default
-  name: 'DataP'
+  name: 'DataTextArea'
   props:
     field: Object
   components:

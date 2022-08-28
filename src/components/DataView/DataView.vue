@@ -25,6 +25,8 @@ DataView =
     field: Object
   beforeCreate: ->
     @$options.components['data-div'] = require('./DataDiv.vue').default
+    @$options.components['data-form'] = require('./DataForm.vue').default
+    @$options.components['data-h3'] = require('./DataH3.vue').default
     @$options.components['data-container'] = require('./DataContainer.vue').default
     @$options.components['data-row'] = require('./DataRow.vue').default
     @$options.components['data-col'] = require('./DataCol.vue').default
@@ -34,11 +36,13 @@ DataView =
     @$options.components['data-p'] = require('./DataP.vue').default
     @$options.components['data-button'] = require('./DataButton.vue').default
     tlookup['div'] = @$options.components['data-div']
+    tlookup['form'] = @$options.components['data-form']
     tlookup['container'] = @$options.components['data-container']
     tlookup['row'] = @$options.components['data-row']
     tlookup['col'] = @$options.components['data-col']
     tlookup['card'] = @$options.components['data-card']
     tlookup['sheet'] = @$options.components['data-sheet']
+    tlookup['h3'] = @$options.components['data-h3']
     tlookup['p'] = @$options.components['data-p']
     tlookup['button'] = @$options.components['data-button']
   computed:

@@ -20,7 +20,7 @@ div
 
 <script lang="coffee">
 pointer = require 'json-pointer'
-export default 
+export default
   name: 'NumberEdit'
   props:
     schema: Object

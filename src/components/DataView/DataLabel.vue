@@ -1,13 +1,11 @@
 <template lang="pug">
-p(:style="field.style", :class="field.classes")
-  data-view(:field="f" v-for="f in field.children")
+label(:style="field.style", :class="field.classes" :for="field.for") spome text to edit
 </template><script lang="coffee">
-import Vue from 'vue'
 
 import DataView from '@/components/DataView/DataView.vue'
 
 export default
-  name: 'DataP'
+  name: 'DataLabel'
   props:
     field: Object
   components:

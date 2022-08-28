@@ -1,7 +1,7 @@
 <template lang="pug">
-span {{ field.text }}
+| {{ field.text }}
 </template><script lang="coffee">
-export default 
+export default
   name: 'DataText'
   props:
     field: Object
