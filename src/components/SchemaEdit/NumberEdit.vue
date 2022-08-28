@@ -19,7 +19,6 @@ div
 </template>
 
 <script lang="coffee">
-import Vue from 'vue'
 pointer = require 'json-pointer'
 export default 
   name: 'NumberEdit'
@@ -43,13 +42,13 @@ export default
       @save_changes()
   methods:
     add_minimum: ->
-      Vue.set @current, 'minimum', 0
+      @current['minimum'] = 0
       @save_changes()
     remove_minimum: ->
       delete @current.minimum
       @save_changes()
     add_maximum: ->
-      Vue.set @current, 'maximum', 0
+      @current['maximum'] = 0
       @save_changes()
     remove_maximum: ->
       delete @current.maximum

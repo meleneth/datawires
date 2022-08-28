@@ -20,7 +20,7 @@ table
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
-import make_schema from "@/lib/datawires"
+import { make_schema } from "@/lib/datawires"
 
 export default 
   name: 'AddSchema'
