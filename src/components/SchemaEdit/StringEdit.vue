@@ -17,7 +17,6 @@ div
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
-import Vue from 'vue'
 export default 
   name: 'StringEdit'
   props:
@@ -39,7 +38,7 @@ export default
       @$emit 'updateString', {path: @path, description: @description}
     add_enum_item: ->
       if not @current.hasOwnProperty('enum')
-        Vue.set @current, 'enum', []
+        @current['enum'] = []
       @current.enum.push @allowed_value_to_add
       @allowed_value_to_add = ''
       @save_changes()
