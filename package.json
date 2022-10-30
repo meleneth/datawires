@@ -7,10 +7,8 @@
     "test:unit": "vue-cli-service test:unit tests/unit/*.coffee"
   },
   "dependencies": {
-    "@headlessui/vue": "^1.0.0",
-    "@heroicons/vue": "^1.0.1",
-    "@vue-hero-icons/outline": "^1.7.2",
-    "@vue-hero-icons/solid": "^1.7.2",
+    "@headlessui/vue": "^1.7.3",
+    "@heroicons/vue": "2.0.12",
     "core-js": "^3.8.3",
     "d3": "^6.2.0",
     "jsdifflib": "^1.1.0",

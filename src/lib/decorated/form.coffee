@@ -33,9 +33,23 @@ class DecoratedFormBuilder extends FormBuilder
       .set_classes {'sm:col-span-6': true}
     div.add_label 'About'
       .set_id uid
-    div.add_label
+    mt_1 = div.add_div()
+      .set_classes {'mt-1': true}
+    mt_1.add_textarea()
+      .set_classes {
+        'shadow-sm': true,
+        'block': true,
+        'w-full': true,
+        'border-gray-300': true,
+        'rounded-md': true
+      }
+      .set_name uid
     div.add_p()
-      .set_classes {}
+      .set_classes {
+        'mt-2': true,
+        'text-sm': true,
+        'text-gray-500':true,
+      }
   # div(class='sm:col-span-6')
   #   label.block.text-sm.font-medium.text-gray-700(for='about')
   #     | About

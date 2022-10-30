@@ -8,7 +8,6 @@ import Domain from '@/views/Domain.vue'
 import Domains from '@/views/Domains.vue'
 import Export from '@/views/Export.vue'
 import GridEditDocuments from '@/views/GridEditDocuments.vue'
-import HighTail from '@/views/HighTail.vue'
 import Home from '@/views/Home.vue'
 import Import from '@/views/Import.vue'
 import Router from 'vue-router'
@@ -24,7 +23,6 @@ const routes = [
 { path: '/document/:id', name: 'Document', component: Document, props: true },
 { path: '/document/:id/edit', name: 'DocumentEdit', component: DocumentEdit, props: true },
 { path: '/domain/:domain', name: 'Domain', component: Domain, props: true },
-{ path: '/hightail', name: 'HighTail', component: HighTail, props: true },
 { path: '/domains', name: 'Domains', component: Domains, props: true },
 { path: '/import', name: 'Import', component: Import, props: true },
 { path: '/export/:domain', name: 'Export', component: Export, props: true },

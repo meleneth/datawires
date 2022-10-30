@@ -2,16 +2,22 @@ class RootBuilder
   constructor: (type) ->
     @data = @get_default_data type
   get_default_data: (type) ->
-      type: type
-      style: {}
-      classes: {}
-      children: []
+    type: type
+    style: {}
+    classes: {}
+    children: []
   set_style: (name, value) ->
     @data.style[name] = value
     return @
+  set_name: (name) ->
+    @data.name = name
+    return @
+  set_id: (id) ->
+    @data.id = id
+    return @
   add_a_child: (child) ->
     @data.children.push child.data
-    return @
+    return child
   set_classes: (classes) ->
     @data.classes = classes
     return @
@@ -19,44 +25,42 @@ class RootBuilder
 class Builder extends RootBuilder
   add_div: ->
     div = new Builder 'div'
-    @add_a_child div
-    return div
+    return @add_a_child div
   add_grid: ->
     grid = new Builder 'div'
     grid.set_style 'display', 'grid'
-    @add_a_child grid
-    return grid
+    return @add_a_child grid
   add_card: () ->
     card = new Builder 'card'
-    @add_a_child card
-    return card
+    return @add_a_child card
   add_h3: (text=false) ->
     h3 = new Builder 'h3'
-    @add_a_child h3
     h3.add_text text if text
-    return h3
+    return @add_a_child h3
   add_p: (text=false) ->
     p = new Builder 'p'
-    @add_a_child p
     p.add_text text if text
-    return p
+    return @add_a_child p
+  add_label: (text=false) ->
+    label = new Builder 'label'
+    label.add_text text if text
+    return @add_a_child label
   add_text: (text) ->
     text_builder = new TextBuilder text
-    @data.children.push text_builder.data
-    return @
+    return @add_a_child(text_builder)
+  add_textarea: (text) ->
+    textarea_builder = new Builder 'textarea'
+    return @add_a_child textarea_builder
   add_inline_grid: ->
     grid = new InlineGridBuilder
     grid.set_style 'display', 'inline-grid'
-    @add_a_child grid
-    return grid
+    return @add_a_child grid
   add_button: (label, target) ->
     button = new ButtonBuilder label, target
-    @add_a_child button
-    return button
+    return @add_a_child button
   add_form: () ->
     form = new FormBuilder 'form'
-    @add_a_child form
-    return form
+    return @add_a_child form
 
 class FormBuilder extends Builder
   get_default_data: (type) ->

@@ -1,90 +1,75 @@
 <template lang="pug">
-component(is="style")
-  | {{ color_css }}
-div
-  Disclosure(as="nav" class="bg-gray-800" v-slot="{ open }")
-    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
-      div(class="flex items-center justify-between h-16")
-        div(class="flex items-center")
-          div(class="flex-shrink-0")
-            img(class="h-8 w-8" src="public_datawires_logo_3.svg" alt="Datawires")
-          div(class="hidden md:block")
-            div(class="ml-10 flex items-baseline space-x-4")
-              router-link(v-for="link in navLinks" :key="link.title" :to="link.to" :class="[link.active ? 'text-white' : 'text-indigo', 'text-sm font-medium rounded-md bg-white bg-opacity-0 px-3 py-2 hover:bg-opacity-10']" :aria-current="link.active ? 'page' : 'false'") {{ link.title }}
-        div(class="hidden md:block")
-          div(class="ml-4 flex items-center md:ml-6")
-            button(class="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white")
-              span(class="sr-only") View notifications
-              BellIcon(class="h-6 w-6" aria-hidden="true")
-            Menu(as="div" class="ml-3 relative")
+.min-h-full
+  Disclosure.bg-gray-800(as='nav' v-slot='{ open }')
+    .mx-auto.max-w-7xl.px-4(class='sm:px-6 lg:px-8')
+      .flex.h-16.items-center.justify-between
+        .flex.items-center
+          .flex-shrink-0
+            img.h-8.w-8(src='public_datawires_logo_3.svg' alt='datawires')
+          .hidden(class='md:block')
+            .ml-10.flex.items-baseline.space-x-4
+              router-link(v-for="link in navigation" :key="link.name" :to="link.href" :class="[link.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'px-3 py-2 rounded-md text-sm font-medium']" :aria-current="link.current ? 'page' : 'false'") {{ link.name }}
+        .hidden(class='md:block')
+          .ml-4.flex.items-center(class='md:ml-6')
+            button.rounded-full.bg-gray-800.p-1.text-gray-400(type='button' class='hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800')
+              span.sr-only View notifications
+              BellIcon.h-6.w-6(aria-hidden='true')
+            // Profile dropdown
+            Menu.relative.ml-3(as='div')
               div
-                MenuButton(class="max-w-xs bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white")
-                  span(class="sr-only") Open user menu
-                  img(class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="")
-                transition(enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95")
-                  MenuItems(class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none")
-                    MenuItem(v-for="item in profile" :key="item" v-slot="{ active }")
-                      a(href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']") {{ item }} 
-        div(class="-mr-2 flex md:hidden")
-          DisclosureButton(class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white")
-            span(class="sr-only") Open main menu
-            MenuIcon(v-if="!open" class="block h-6 w-6" aria-hidden="true")
-            XIcon(v-else class="block h-6 w-6" aria-hidden="true")
-    DisclosurePanel(class="md:hidden")
-      div(class="px-2 pt-2 pb-3 space-y-1 sm:px-3")
-        template(v-for="(item, itemIdx) in navigation" :key="item")
-          template(v-if="(itemIdx === 0)")
-            a(href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium") {{ item }}
-          a(v-else href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium") {{ item }}
-      div(class="pt-4 pb-3 border-t border-gray-700")
-        div(class="flex items-center px-5")
-          div(class="flex-shrink-0")
-            img(class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="")
-          div(class="ml-3")
-            div(class="text-base font-medium leading-none text-white") Tom Cook
-            div(class="text-sm font-medium leading-none text-gray-400") tom@example.com
-          button(class="ml-auto bg-gray-800 flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white")
-            span(class="sr-only") View notifications
-            BellIcon(class="h-6 w-6" aria-hidden="true")
-        div(class="mt-3 px-2 space-y-1")
-          a(v-for="item in profile" :key="item" href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700") {{ item }}
-
-  header(class="bg-white shadow")
-    div(class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8")
-      h1(class="text-3xl font-bold text-gray-900")
-        | {{ $store.state.screen_title }}
+                MenuButton.flex.max-w-xs.items-center.rounded-full.bg-gray-800.text-sm(class='focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800')
+                  span.sr-only Open user menu
+                  img.h-8.w-8.rounded-full(:src='user.imageUrl' alt='')
+              transition(enter-active-class='transition ease-out duration-100' enter-from-class='transform opacity-0 scale-95' enter-to-class='transform opacity-100 scale-100' leave-active-class='transition ease-in duration-75' leave-from-class='transform opacity-100 scale-100' leave-to-class='transform opacity-0 scale-95')
+                MenuItems.absolute.right-0.z-10.mt-2.w-48.origin-top-right.rounded-md.bg-white.py-1.shadow-lg.ring-1.ring-black.ring-opacity-5(class='focus:outline-none')
+                  MenuItem(v-for='item in userNavigation' :key='item.name' v-slot='{ active }')
+                    a(:href='item.href' :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']") {{ item.name }}
+        .-mr-2.flex(class='md:hidden')
+          // Mobile menu button
+          DisclosureButton.inline-flex.items-center.justify-center.rounded-md.bg-gray-800.p-2.text-gray-400(class='hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800')
+            span.sr-only Open main menu
+            Bars3Icon.block.h-6.w-6(v-if='!open' aria-hidden='true')
+            XMarkIcon.block.h-6.w-6(v-else='' aria-hidden='true')
+    DisclosurePanel(class='md:hidden')
+      .space-y-1.px-2.pt-2.pb-3(class='sm:px-3')
+        router-link(v-for="link in navigation" :key="link.name" :to="link.href" :class="[link.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'px-3 py-2 rounded-md text-sm font-medium']" :aria-current="link.current ? 'page' : 'false'") {{ link.name }}
+      .border-t.border-gray-700.pt-4.pb-3
+        .flex.items-center.px-5
+          .flex-shrink-0
+            img.h-10.w-10.rounded-full(:src='user.imageUrl' alt='')
+          .ml-3
+            .text-base.font-medium.leading-none.text-white {{ user.name }}
+            .text-sm.font-medium.leading-none.text-gray-400 {{ user.email }}
+          button.ml-auto.flex-shrink-0.rounded-full.bg-gray-800.p-1.text-gray-400(type='button' class='hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800')
+            span.sr-only View notifications
+            BellIcon.h-6.w-6(aria-hidden='true')
+        .mt-3.space-y-1.px-2
+          DisclosureButton.block.rounded-md.px-3.py-2.text-base.font-medium.text-gray-400(v-for='item in userNavigation' :key='item.name' as='a' :href='item.href' class='hover:bg-gray-700 hover:text-white') {{ item.name }}
+  header.bg-white.shadow
+    .mx-auto.max-w-7xl.py-6.px-4(class='sm:px-6 lg:px-8')
+      h1.text-3xl.font-bold.tracking-tight.text-gray-900 Dashboard
   main
-    div(class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8")
-      div(class="px-4 py-6 sm:px-0")
-        router-view
+    .mx-auto.max-w-7xl.py-6(class='sm:px-6 lg:px-8')
+      // Replace with your content
+      router-view
+      .px-4.py-6(class='sm:px-0')
+        .h-96.rounded-lg.border-4.border-dashed.border-gray-200
 
-div(class="min-h-screen bg-grey-darkest")
-  header(class="pb-24 bg-indigo-light")
-    div(class="max-w-3xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8")
-      div(class="relative py-5 flex items-center justify-center lg:justify-between")
-        p(class="sr-only") |)atawires
-    div
-      nav
-        router-link(v-for="link in navLinks" :key="link.title" :to="link.to" :class="[link.active ? 'text-white' : 'text-indigo', 'text-sm font-medium rounded-md bg-white bg-opacity-0 px-3 py-2 hover:bg-opacity-10']" :aria-current="link.active ? 'page' : 'false'")
+        // /End replace
+
 </template>
 
 <script lang="coffee">
 import { ref } from 'vue'
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-import { BellIcon, MenuIcon, XIcon } from '@heroicons/vue/outline'
+import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
-navLinks = [
-  { title: 'Home', to: "/", active: true },
-  { title: 'Domains', to: "/domains", active: false },
-  { title: 'DataViewDemo', to: "/dataviewdemo", active: false },
-  { title: 'Import', to: "/import", active: false },
-  { title: 'Admin', to: "/admin", active: false },
-  { title: 'About', to: "/about", active: false },
-]
 
 export default
   name: 'App',
   components: {
+    Bars3Icon,
+    BellIcon,
     Disclosure,
     DisclosureButton,
     DisclosurePanel,
@@ -92,9 +77,7 @@ export default
     MenuButton,
     MenuItem,
     MenuItems,
-    BellIcon,
-    MenuIcon,
-    XIcon,
+    XMarkIcon,
   }
   computed:
     pageTitle: ->
@@ -135,14 +118,24 @@ export default
           colors.push "}"
 
     @color_css = colors.join "\n"
-    console.log "color_css is"
-    console.log @color_css
+    #console.log "color_css is"
+    #console.log @color_css
     @$store.dispatch 'load_db'
     @$store.dispatch 'set_page_title', "App"
   data: ->
     return
-      navLinks: navLinks
       color_css: ""
+      user:
+        name: 'Tom Cook',
+        email: 'tom@example.com',
+        imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+      navigation: [
+        { name: 'Home', href: '#', current: true },
+        { name: 'Domains', href: '/domains', current: false },
+        { name: 'DataViewDemo', href: '/dataviewdemo', current: false },
+        { name: 'Admin', href: '/admin', current: false },
+        { name: 'About', href: '/about', current: false },
+      ]
 </script>
 <style>
 input, select, textarea {
@@ -168,7 +161,9 @@ button {
   background-color: tan;
   display: inline;
 }
+/*
 a {
   background-color: thistle;
 }
+*/
 </style>

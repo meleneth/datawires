@@ -1,12 +1,13 @@
 <template lang="pug">
 div
   h1 Admin
-  md-button.md-primary.md-raised(v-on:click="create_views") create views
+  button.ml-3.inline-flex.justify-center.py-2.px-4.border.border-transparent.shadow-sm.text-sm.font-medium.rounded-md.text-white.bg-indigo-600(v-on:click="create_views", class='hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500')
+    | create views
   div(v-if="views_created") created
 </template>
 
 <script lang="coffee">
-export default 
+export default
   name: 'Admin'
   mounted: ->
     @$store.dispatch 'set_page_title', "Admin"
