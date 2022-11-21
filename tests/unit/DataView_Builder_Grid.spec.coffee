@@ -52,17 +52,21 @@ describe 'GridBuilder', =>
       children: [
         type: 'div'
         style: {'grid-area': 'one'}
+        classes: {}
         children: [
           type: 'text'
           style: {}
+          classes: {}
           text: 'some_text'
         ]
       ,
         type: 'div'
         style: {'grid-area': 'two'}
+        classes: {}
         children: [
           type: 'text'
           style: {}
+          classes: {}
           text: 'some_other_text'
         ]
       ]

@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 
+import Builder from '@/components/DataView/builder.coffee'
 import DecoratedFormBuilder from '@/lib/decorated/form.coffee'
 
 # garbage, can't test until the test suite is runnable
@@ -10,6 +11,7 @@ describe 'DataViewBuilder', =>
     expect(builder.data).to.eql
       type: 'container'
       style: {}
+      classes: {}
       children: []
 
   describe "#add_button", =>
@@ -20,6 +22,7 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'button'
           style: {}
@@ -34,9 +37,11 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'card'
           style: {}
+          classes: {}
           children: []
         }]
 
@@ -47,9 +52,11 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'form'
           style: {}
+          classes: {}
           children: []
         }]
 
@@ -61,9 +68,11 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'form'
           style: {}
+          classes: {}
           children: [{
             type: 'input'
             label: 'First Name'
@@ -71,6 +80,7 @@ describe 'DataViewBuilder', =>
               first_name: 'Jason'
             field: 'first_name'
             style: {}
+            classes: {}
             children: []
           }]
         }]
@@ -82,9 +92,11 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'p'
           style: {}
+          classes: {}
           children: []
         }]
 
@@ -95,9 +107,11 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [{
           type: 'text'
           style: {}
+          classes: {}
           text: 'some_text'
         }]
 
@@ -108,12 +122,15 @@ describe 'DataViewBuilder', =>
       expect(builder.data).to.eql
         type: 'container'
         style: {}
+        classes: {}
         children: [ {
           type: 'p'
           style: {}
+          classes: {}
           children: [ {
             type: 'p'
             style: {}
+            classes: {}
             children: [ ]
           } ]
         } ]
