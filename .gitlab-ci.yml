@@ -10,7 +10,7 @@ build-job:
     expire_in: 1 week
 
 test-job1:
-  image: node:16-bullseye
+  image: node:18-bullseye
   stage: test
   script:
     - echo sed -i 's/pouchdb-browser/pouchdb-node/g' package.json
