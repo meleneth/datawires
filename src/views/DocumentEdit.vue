@@ -34,7 +34,7 @@ import ArrayEdit from '@/components/SchemaEdit/ArrayEdit.vue'
 import NumberEdit from '@/components/DocumentEdit/NumberEdit.vue'
 
 pointer = require 'json-pointer'
-difflib = require 'jsdifflib'
+difflib = require '@/lib/jsdifflib'
 
 contextSize = null
 

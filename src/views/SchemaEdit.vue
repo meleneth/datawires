@@ -45,7 +45,7 @@ table
 
 <script lang="coffee">
 pointer = require 'json-pointer'
-difflib = require 'jsdifflib'
+difflib = require '@/lib/jsdifflib'
 import Vue from 'vue'
 import { shallowRef } from 'vue'
 

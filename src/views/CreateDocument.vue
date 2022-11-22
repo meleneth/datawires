@@ -30,7 +30,7 @@ import StringEdit from '@/components/DocumentEdit/StringEdit.vue'
 import NumberEdit from '@/components/DocumentEdit/NumberEdit.vue'
 
 pointer = require 'json-pointer'
-difflib = require 'jsdifflib'
+difflib = require '@/lib/jsdifflib'
 
 contextSize = null
 

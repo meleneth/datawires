@@ -4758,11 +4758,6 @@ jsbn@~0.1.0:
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha512-UVU9dibq2JcFWxQPA6KCqj5O42VOmAY3zQUfEKxU0KpTGXwNoCjkX1e13eHNvw/xPynt6pU0rZ1htjWTNTSXsg==
 
-jsdifflib@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/jsdifflib/-/jsdifflib-1.1.0.tgz#2d8d54b2a43ecfd68074abde22582d8b12bdabf3"
-  integrity sha512-wsb7MeyPgKr7yNkyJa4VsM8uiqzchaZ4km5kcDzuYkGy8HNNEmeQGbPCnMy/yHWnPinORwIQSB+dnrdt8TFZPQ==
-
 jsdom-global@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/jsdom-global/-/jsdom-global-3.0.2.tgz#6bd299c13b0c4626b2da2c0393cd4385d606acb9"
