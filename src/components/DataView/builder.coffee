@@ -6,61 +6,76 @@ class RootBuilder
     style: {}
     classes: {}
     children: []
+  _set: (field, value) ->
+    @data[field] = value
+    @
   set_style: (name, value) ->
     @data.style[name] = value
-    return @
+    @
   set_name: (name) ->
-    @data.name = name
-    return @
+    @_set 'name', name
   set_id: (id) ->
-    @data.id = id
-    return @
+    @_set 'id', id
   add_a_child: (child) ->
     @data.children.push child.data
-    return child
+    child
   set_classes: (classes) ->
-    @data.classes = classes
-    return @
+    @_set 'classes', classes
 
 class Builder extends RootBuilder
   add_div: ->
     div = new Builder 'div'
-    return @add_a_child div
+    @add_a_child div
   add_grid: ->
     grid = new Builder 'div'
     grid.set_style 'display', 'grid'
-    return @add_a_child grid
+    @add_a_child grid
   add_card: () ->
     card = new Builder 'card'
-    return @add_a_child card
+    @add_a_child card
   add_h3: (text=false) ->
     h3 = new Builder 'h3'
     h3.add_text text if text
-    return @add_a_child h3
+    @add_a_child h3
   add_p: (text=false) ->
     p = new Builder 'p'
     p.add_text text if text
-    return @add_a_child p
+    @add_a_child p
   add_label: (text=false) ->
-    label = new Builder 'label'
+    label = new LabelBuilder 'label'
     label.add_text text if text
-    return @add_a_child label
+    @add_a_child label
   add_text: (text) ->
     text_builder = new TextBuilder text
-    return @add_a_child(text_builder)
-  add_textarea: (text) ->
-    textarea_builder = new Builder 'textarea'
-    return @add_a_child textarea_builder
+    @add_a_child(text_builder)
+  add_textarea: (target, field) ->
+    textarea_builder = new TextArea target, field
+    @add_a_child textarea_builder
   add_inline_grid: ->
     grid = new InlineGridBuilder
     grid.set_style 'display', 'inline-grid'
-    return @add_a_child grid
+    @add_a_child grid
   add_button: (label, target) ->
     button = new ButtonBuilder label, target
-    return @add_a_child button
+    @add_a_child button
   add_form: () ->
     form = new FormBuilder 'form'
-    return @add_a_child form
+    @add_a_child form
+
+class LabelBuilder extends Builder
+  get_default_data: (type) ->
+    return
+      type: 'form'
+      style: {}
+      classes: {}
+      children: []
+      for: false
+      text: ''
+  set_for: (what_for) ->
+    @data.for = what_for
+    @
+  set_text: (text) ->
+    @data.text = text
 
 class FormBuilder extends Builder
   get_default_data: (type) ->
@@ -73,6 +88,12 @@ class FormBuilder extends Builder
     input = new InputField label, target, field
     @add_a_child input
     return input
+
+class TextArea extends RootBuilder
+  constructor: (@target, @field) ->
+    super 'textarea'
+    @data.target = @target
+    @data.field = @field
 
 class InputField extends RootBuilder
   constructor: (@label, @target, @field) ->
@@ -133,7 +154,6 @@ class GridBuilder extends Builder
   add_cell: (cell_name) ->
     cell = new GridCell cell_name, @gridcells, @_update_style.bind(@)
     @add_a_child cell
-    return cell
   _update_style: ->
     grid_lines = (_.join cells, " " for cells in @gridcells)
     grid_lines = _.map grid_lines, (g) -> _.join ['', g, ''], '"'
@@ -167,7 +187,7 @@ class ButtonBuilder extends RootBuilder
     return @
   label: (label) ->
     @data.label = label
-    return @
+    @
 
 class TextBuilder extends RootBuilder
   constructor: (text) ->

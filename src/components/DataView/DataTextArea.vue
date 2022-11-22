@@ -1,5 +1,5 @@
 <template lang="pug">
-textarea(:style="field.style", :class="field.classes" :id="field.id") spome text to edit
+textarea(:style="field.style", :class="field.classes" :id="field.id" v-model="field.target[field.field]")
 </template><script lang="coffee">
 import Vue from 'vue'
 

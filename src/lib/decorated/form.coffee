@@ -27,15 +27,15 @@ class DecoratedFormBuilder extends FormBuilder
     div.add_p description
       .set_classes @p_classes()
 
-  add_textarea: ->
+  add_textarea: (label, details, target, field_name) ->
     uid = uuidv4()
     div = @frame.add_div()
       .set_classes {'sm:col-span-6': true}
-    div.add_label 'About'
-      .set_id uid
+    div.add_label label
+      .set_for uid
     mt_1 = div.add_div()
       .set_classes {'mt-1': true}
-    mt_1.add_textarea()
+    mt_1.add_textarea target, field_name
       .set_classes {
         'shadow-sm': true,
         'block': true,
@@ -44,18 +44,14 @@ class DecoratedFormBuilder extends FormBuilder
         'rounded-md': true
       }
       .set_name uid
+      .set_id uid
     div.add_p()
       .set_classes {
         'mt-2': true,
         'text-sm': true,
         'text-gray-500':true,
       }
-  # div(class='sm:col-span-6')
-  #   label.block.text-sm.font-medium.text-gray-700(for='about')
-  #     | About
-  #   .mt-1
-  #     textarea#about.shadow-sm.block.w-full.border-gray-300.rounded-md(name='about', rows='3', class='focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm')
-  #   p.mt-2.text-sm.text-gray-500 Write a few sentences about yourself.
+      .add_text details
 
   add_row: ->
   add_input: ->

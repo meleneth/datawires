@@ -1,5 +1,5 @@
 # build environment
-FROM node:14.17.6-bullseye as build
+FROM node:18-bullseye as build
 WORKDIR /app
 RUN apt-get install python3
 COPY package.json package.json
