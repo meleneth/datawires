@@ -4,10 +4,12 @@ component(:is="field_type" :field="field")
 </template><script lang="coffee">
 import Vue from 'vue'
 
+import DataInput from '@/components/DataView/DataInput.vue'
 import DataText from '@/components/DataView/DataText.vue'
 
 tlookup =
   text: DataText
+  input: DataInput
   container: false
   row: false
   col: false

@@ -4,12 +4,12 @@ pre
   | 402
   | 433
 
+div.mt-8(v-for="view in views")
+  data-view(:field="view")
 p And that's all she wrote!
 p
 p
 p Builder and DataView Demo
-div.mt-8(v-for="view in views")
-  data-view(:field="view")
 p.mt-6
 p And that's all she wrote! ... again
 p
@@ -174,6 +174,9 @@ export default
   name: 'DataViewDemo'
   data: ->
     views: []
+    info:
+      first_name: "Some First Name"
+      last_name: "Some Last Name"
     some_object: {
       some_field: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quam neque, consequat eu metus eget, sodales maximus diam. Sed efficitur ipsum sit amet nisl aliquam tincidunt. Nunc nec ultrices magna. Ut dapibus augue sed nunc bibendum, eu interdum velit euismod. Donec fermentum, dui ac rhoncus cursus, nunc nibh lacinia arcu, id molestie risus quam quis odio. Proin hendrerit, turpis non aliquam elementum, eros ipsum varius felis, consequat pretium magna ligula ac metus. Maecenas pellentesque in leo vitae ultricies. Etiam justo ex, porttitor nec lorem eget, consectetur elementum diam."
     }
@@ -220,9 +223,16 @@ export default
     my_display_grid = new DecoratedFormBuilder
     my_display_grid.add_header_text "Profile", "This information will be displayed publicly so be careful what you share."
     my_display_grid.add_textarea "About", "Write a few sentances about yourself", @some_object, 'some_field'
+    my_display_grid.add_header_text "Personal Information", "Use a permanent address where you can receive mail."
+    target = my_display_grid.add_div()
+    my_display_grid.add_input target, "again First name", @info, 'first_name'
+    
+    line = my_display_grid.add_line_2()
+    my_display_grid.add_input line[0], "First name", @info, 'first_name'
+    my_display_grid.add_input line[1], "Last name", @info, 'last_name'
 
-    @views[1] = pinwheel_grid.data
-    @views[2] = my_display_grid.data
+    @views[2] = pinwheel_grid.data
+    @views[1] = my_display_grid.data
     #@views[3] = pinwheel_grid.data
     #@views[4] = pinwheel_grid.data
 

@@ -61,7 +61,8 @@ describe 'DataViewBuilder', =>
       builder = new Builder 'container'
       some_object = {first_name: "Jason"}
       form = builder.add_form()
-      form.add_input 'First Name', some_object, 'first_name' #might be a ref?
+      input = form.add_input some_object, 'first_name' #might be a ref?
+      input.set_id "an ID of great importance"
       expect(builder.data).to.eql
         type: 'container'
         style: {}
@@ -72,9 +73,10 @@ describe 'DataViewBuilder', =>
           classes: {}
           children: [{
             type: 'input'
-            label: 'First Name'
+            input_type: 'text'
             target:
               first_name: 'Jason'
+            id: "an ID of great importance"
             field: 'first_name'
             style: {}
             classes: {}

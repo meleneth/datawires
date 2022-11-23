@@ -45,6 +45,9 @@ class Builder extends RootBuilder
     label = new LabelBuilder 'label'
     label.add_text text if text
     @add_a_child label
+  add_input: (target, field) ->
+    input = new InputField target, field
+    @add_a_child input
   add_text: (text) ->
     text_builder = new TextBuilder text
     @add_a_child(text_builder)
@@ -84,10 +87,6 @@ class FormBuilder extends Builder
       style: {}
       classes: {}
       children: []
-  add_input: (label, target, field) ->
-    input = new InputField label, target, field
-    @add_a_child input
-    return input
 
 class TextArea extends RootBuilder
   constructor: (@target, @field) ->
@@ -96,20 +95,23 @@ class TextArea extends RootBuilder
     @data.field = @field
 
 class InputField extends RootBuilder
-  constructor: (@label, @target, @field) ->
+  constructor: (@target, @field) ->
     super 'input'
-    @data.label = @label
     @data.target = @target
     @data.field = @field
+  set_id: (id) ->
+    @data.id = id
+    @
   get_default_data: (type) ->
     return
       type: 'input'
+      input_type: 'text'
       style: {}
       classes: {}
       children: []
-      label: false
       target: false
       field: false
+      id: false
 
 class GridCell extends RootBuilder
   constructor: (@name, @grid, @update_func) ->
