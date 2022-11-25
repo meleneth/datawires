@@ -1,5 +1,5 @@
 <template lang="pug">
-v-btn {{ field.label }}
+button(:class="field.classes" @click="field.target") {{ field.label }}
 </template><script lang="coffee">
 import Vue from 'vue'
 

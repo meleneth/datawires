@@ -1,26 +1,14 @@
 <template lang="pug">
-table
-  tr
-    td(colspan="2")
-      button(v-on:click="createNewSchema") create
-  tr
-    td(colspan="2")
-      h2 {{ fullschemaname }}
-  tr
-    td
-      .label domain
-      input(type="text" v-model="new_schema_domain" label="New Schema Domain")
-    td
-      .label schema
-      input(type="text" v-model="new_schema_name" label="New Schema Name")
-  tr
-    td(colspan="2")
-      .label Description
-      input(type="text" v-model="new_schema_description" label="Description")
+.px-4.py-6(class='sm:px-0')
+  .h-96.rounded-lg.border-4.border-dashed.border-gray-200
+    h2 {{ fullschemaname }}
+    data-view(:field="view")
 </template>
 <script lang="coffee">
 pointer = require 'json-pointer'
 import { make_schema } from "@/lib/datawires"
+import DecoratedFormBuilder from '@/lib/decorated/form.coffee'
+import DataView from '@/components/DataView/DataView.vue'
 
 export default
   name: 'AddSchema'
@@ -29,6 +17,16 @@ export default
       new_schema_domain: ''
       new_schema_name: ''
       new_schema_description: ''
+      view: {}
+  mounted: ->
+    my_display_grid = new DecoratedFormBuilder
+    my_display_grid.add_header_text "Add Schema", "Fill in information and hit create to make a new schema"
+    line = my_display_grid.add_line_2()
+    my_display_grid.add_input line[0], "Domain", @, 'new_schema_domain'
+    my_display_grid.add_input line[1], "Name", @, 'new_schema_name'
+    my_display_grid.add_input my_display_grid, "Description", @, 'new_schema_description'
+    my_display_grid.add_action_button "create", @createNewSchema.bind @
+    @view = my_display_grid.data
   methods:
     createNewSchema: ->
       console.log "ok I guess createNewSchema is a thing now"
@@ -41,6 +39,8 @@ export default
           console.log d.id
           console.log "And now I should go, but I'm too stupid to route push"
           # go {name: 'Schema', params: {id: d.id}}
+  components:
+    'data-view': DataView
   computed:
     fullschemaname: ->
       return "http://#{@new_schema_domain}/#{@new_schema_name}#"

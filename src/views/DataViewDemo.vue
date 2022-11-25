@@ -231,6 +231,11 @@ export default
     my_display_grid.add_input line[0], "First name", @info, 'first_name'
     my_display_grid.add_input line[1], "Last name", @info, 'last_name'
 
+    line = my_display_grid.add_line_3()
+    my_display_grid.add_input line[0], "First name", @info, 'first_name'
+    my_display_grid.add_input line[1], "Last name", @info, 'last_name'
+    my_display_grid.add_input line[2], "Last name", @info, 'last_name'
+
     @views[2] = pinwheel_grid.data
     @views[1] = my_display_grid.data
     #@views[3] = pinwheel_grid.data

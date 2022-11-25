@@ -18,6 +18,48 @@ class DecoratedFormBuilder extends FormBuilder
   p_classes: -> {
     "mt-1": true, "text-sm": true, "text-gray-500": true
   }
+  add_safe_button: (label, target) ->
+    button_classes =
+      "bg-white": true
+      "py-2": true
+      "px-4": true
+      "border": true
+      "border-gray-300": true
+      "rounded-md": true
+      "shadow-sm": true
+      "text-sm": true
+      "font-medium": true
+      "text-gray-700": true
+      "hover:bg-gray-50": true
+      "focus:outline-none": true
+      "focus:ring-2": true
+      "focus:ring-offset-2": true
+      "focus:ring-indigo-500": true
+    button = @add_button(label, target)
+    button.set_classes button_classes
+
+  add_action_button: (label, target) ->
+    button_classes =
+      "ml-3": true
+      "inline-flex": true
+      "justify-center": true
+      "py-2": true
+      "px-4": true
+      "border": true
+      "border-transparent": true
+      "shadow-sm": true
+      "text-sm": true
+      "font-medium": true
+      "rounded-md": true
+      "text-white": true
+      "bg-indigo-600": true
+      "hover:bg-indigo-700": true
+      "focus:outline-none": true
+      "focus:ring-2": true
+      "focus:ring-offset-2": true
+      "focus:ring-indigo-500": true
+    button = @add_button(label, target)
+    button.set_classes button_classes
 
   add_header_text: (title, description) ->
     div = @frame.add_div().add_div()
@@ -71,6 +113,24 @@ class DecoratedFormBuilder extends FormBuilder
       "sm:col-span-3" : true
     div = @add_div().set_classes wrapper_classes
     return [
+      div.add_div().set_classes inner_classes
+      div.add_div().set_classes inner_classes
+    ]
+
+  add_line_3: () ->
+    uid = uuidv4()
+    wrapper_classes =
+      "mt-6": true
+      "grid": true
+      "grid-cols-1": true
+      "gap-y-6": true
+      "gap-x-4": true
+      "sm:grid-cols-6": true
+    inner_classes =
+      "sm:col-span-2" : true
+    div = @add_div().set_classes wrapper_classes
+    return [
+      div.add_div().set_classes inner_classes
       div.add_div().set_classes inner_classes
       div.add_div().set_classes inner_classes
     ]
