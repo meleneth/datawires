@@ -5123,6 +5123,15 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==
 
+mel-dataview@^0.1.1:
+  version "0.1.1"
+  resolved "http://172.16.0.23/repository/npmhosted/mel-dataview/-/mel-dataview-0.1.1.tgz#fea77c98adf06a2a343cae7ed8087d636170d2eb"
+  integrity sha512-p9Ai5JvIW032If8UQvBiEm4YcSg5plpbLSuBLLpNZ7P64M9kE0T2rz63rK+IdUMpjXIiJ+QdSpwkwB1ifGUYfQ==
+  dependencies:
+    core-js "^3.8.3"
+    lodash "^4.17.15"
+    vue "^3.2.13"
+
 memfs@^3.4.3:
   version "3.4.12"
   resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.4.12.tgz#d00f8ad8dab132dc277c659dc85bfd14b07d03bd"

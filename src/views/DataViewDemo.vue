@@ -165,10 +165,7 @@ form.space-y-8.divide-y.divide-gray-200
         | Save
 
 </template><script lang="coffee">
-import Builder from '@/components/DataView/builder.coffee'
-import DecoratedFormBuilder from '@/lib/decorated/form.coffee'
-import { GridBuilder } from '@/components/DataView/builder'
-import DataView from '@/components/DataView/DataView.vue'
+import { GridBuilder, DataView, DecoratedFormBuilder, Builder, BuilderTag } from 'mel-dataview'
 
 export default
   name: 'DataViewDemo'
@@ -241,7 +238,7 @@ export default
     #@views[3] = pinwheel_grid.data
     #@views[4] = pinwheel_grid.data
 
-    builder = new Builder('container')
+    builder = new BuilderTag('container')
     builder.add_card().add_text lorem_paragraph
     @views[0] = builder.data
     #builder = new Builder('container')

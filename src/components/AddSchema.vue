@@ -7,8 +7,7 @@
 <script lang="coffee">
 pointer = require 'json-pointer'
 import { make_schema } from "@/lib/datawires"
-import DecoratedFormBuilder from '@/lib/decorated/form.coffee'
-import DataView from '@/components/DataView/DataView.vue'
+import { DataView, DecoratedFormBuilder } from 'mel-dataview'
 
 export default
   name: 'AddSchema'

@@ -49,8 +49,7 @@ difflib = require '@/lib/jsdifflib'
 import Vue from 'vue'
 import { shallowRef } from 'vue'
 
-import Builder from '@/components/DataView/builder.coffee'
-import DataView from '@/components/DataView/DataView.vue'
+import { Builder, DataView } from 'mel-dataview'
 
 import EventBus from '@/components/SchemaEdit/EventBus'
 import SchemaEditLink from '@/components/SchemaEdit/SchemaEditLink.vue'

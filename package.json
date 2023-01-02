@@ -17,6 +17,7 @@
     "json-pointer": "^0.6.1",
     "lodash": "^4.17.20",
     "machina": "^4.0.2",
+    "mel-dataview": "^0.1.1",
     "mitt": "^2.1.0",
     "moment": "^2.29.1",
     "pinia": "^2.0.23",
