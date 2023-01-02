@@ -13,7 +13,7 @@
     "@vue-hero-icons/solid": "^1.7.2",
     "autoprefixer": "^10",
     "core-js": "^3.8.3",
-    "d3": "^6.2.0",
+    "d3": "^7.8.0",
     "json-pointer": "^0.6.1",
     "lodash": "^4.17.20",
     "machina": "^4.0.2",
@@ -22,7 +22,7 @@
     "pinia": "^2.0.23",
     "postcss": "^8",
     "pouchdb": "^7.2.2",
-    "pouchdb-authentication": "^1.1.3",
+    "pouchdb-authentication": "^0.5.5",
     "pouchdb-browser": "^7.2.2",
     "pouchdb-node": "^7.2.2",
     "tailwindcss": "^3",
@@ -33,11 +33,11 @@
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
-     "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-unit-mocha": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vue/cli-service": "^5.0.8",
     "@vue/test-utils": "^2.0.0-0",
     "axios": "^0.21.1",
     "chai": "^4.2.0",
@@ -46,9 +46,9 @@
     "stylus": "^0.55.0",
     "stylus-loader": "^6.1.0",
     "vue-cli-plugin-axios": "~0.0.4",
-    "vue-cli-plugin-coffee": "~1.0.2",
+    "vue-cli-plugin-coffee": "^1.0.2",
     "vue-cli-plugin-pinia": "~0.2.1",
-    "vue-cli-plugin-pug": "~2.0.0",
+    "vue-cli-plugin-pug": "^2.0.0",
     "vue-cli-plugin-tailwind": "~3.0.0"
   },
   "name": "datawires"
