@@ -68,3 +68,5 @@ gem "shoulda-matchers", "~> 7.0", group: :test
 gem "database_cleaner-active_record", "~> 2.2", group: :test
 
 gem "haml-rails", "~> 3.0"
+
+gem "html2haml", "~> 2.3", group: :development
