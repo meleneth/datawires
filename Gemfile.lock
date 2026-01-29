@@ -444,6 +444,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.1.2)
   rspec-rails (~> 8.0)
+  rubocop-rails (~> 2.34)
   rubocop-rails-omakase
   shoulda-matchers (~> 7.0)
   solid_cable
