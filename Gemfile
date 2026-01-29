@@ -56,3 +56,5 @@ group :development do
 end
 
 gem "hotwire-rails", "~> 0.1.3"
+
+gem "rspec-rails", "~> 8.0", groups: [:development, :test]
