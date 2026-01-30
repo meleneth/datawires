@@ -1,0 +1,10 @@
+- content_for :title, "New room"
+
+%h1 New room
+
+= render "form", room: @room
+
+%br
+
+%div
+  = link_to "Back to rooms", rooms_path
