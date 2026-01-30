@@ -1,10 +1,17 @@
-%p{style: "color: green"}= notice
+- if notice.present?
+  %p{ style: "color: green" }= notice
 
-= render @room
+%p
+  %strong Name:
+  = @room.name
 
 %div
-  = link_to "Edit this room", edit_room_path(@room)
-  |
-  = link_to "Back to rooms", rooms_path
+  = link_to "Edit", edit_room_path(@room)
+  %span= " | "
+  = link_to "Back", rooms_path
 
-  = button_to "Destroy this room", @room, method: :delete
+#messages
+  = render @room.messages
+
+= button_to "Destroy this room", @room, method: :delete
+= link_to "New message", new_room_message_path(@room)

@@ -1,0 +1,8 @@
+%h1 New Message
+
+= form_with model: [@message.room, @message] do |f|
+  .field
+    = f.text_field :content
+    = f.submit "Send"
+
+= link_to "Back", @message.room
