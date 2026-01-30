@@ -40,6 +40,7 @@ module Datawires
     config.generators.system_tests = nil
 
     config.generators do |g|
+      g.orm :active_record, primary_key_type: :uuid
       g.template_engine :haml
       g.test_framework :rspec,
         fixtures: true,
