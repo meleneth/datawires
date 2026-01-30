@@ -76,3 +76,5 @@ gem "pry-rails", "~> 0.3.11", groups: [:development, :test]
 gem "rubocop-rails", "~> 2.34", group: :development
 
 gem "rubocop-rspec", "~> 3.9", group: :development
+
+gem "importmap-rails", "~> 2.2"
