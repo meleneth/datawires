@@ -1,14 +1,15 @@
 - if notice.present?
   %p{ style: "color: green" }= notice
 
-%p
-  %strong Name:
-  = @room.name
+= turbo_frame_tag "room" do
+  %p
+    %strong Name:
+    = @room.name
 
-%div
-  = link_to "Edit", edit_room_path(@room)
-  %span= " | "
-  = link_to "Back", rooms_path
+  %div
+    = link_to "Edit", edit_room_path(@room)
+    %span= " | "
+    = link_to "Back", rooms_path
 
 #messages
   = render @room.messages

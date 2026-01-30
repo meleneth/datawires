@@ -17,6 +17,7 @@ class RoomsController < ApplicationController
 
   # GET /rooms/1/edit
   def edit
+    render layout: false if turbo_frame_request?
   end
 
   # POST /rooms or /rooms.json
