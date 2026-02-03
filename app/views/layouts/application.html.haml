@@ -20,5 +20,14 @@
   %body.bg-ls5-yellow-6
     .bg-ls5-red-7.p-6.text-2xl.font-bold.rounded-xl.ls5-violet-2
       RED CHECK
+    = render ButtonComponent.new(tone: :warning) do
+      warning
+    = render ButtonComponent.new(tone: :primary) do
+      primary
+    = render ButtonComponent.new(tone: :danger) do
+      danger
+    = render ButtonComponent.new(tone: :subtle) do
+      subtle
+
     %main.bg-ls5-green-3.rounded-xl.shadow.p-6.ls5-blue-6
       = yield
