@@ -18,6 +18,16 @@
 
 
   %body.bg-ls5-yellow-6
+    = render SplitOneFourOneComponent.new do |c|
+      - c.with_one do
+        Left slot content
+
+      - c.with_two do
+        Middle slot content
+
+      - c.with_six do
+        Right slot content
+
     .bg-ls5-red-7.p-6.text-2xl.font-bold.rounded-xl.ls5-violet-2
       RED CHECK
     = render ButtonComponent.new(tone: :warning) do
