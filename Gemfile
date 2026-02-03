@@ -78,3 +78,5 @@ gem "rubocop-rails", "~> 2.34", group: :development
 gem "rubocop-rspec", "~> 3.9", group: :development
 
 gem "importmap-rails", "~> 2.2"
+
+gem "view_component", "~> 4.2"
