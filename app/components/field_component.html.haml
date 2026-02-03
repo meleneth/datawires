@@ -1,0 +1,25 @@
+%section{ class: frame_classes, **@html_options.except(:class) }
+  - if @label.present? || actions
+    %header{ class: header_classes }
+      %div.flex-1.min-w-0
+        - if @label.present?
+          %div{ class: label_classes }
+            = @label
+            - if required_mark
+              %span.text-ls5-red-6= required_mark
+        - if @hint.present?
+          %div{ id: hint_id, class: meta_classes }
+            = @hint
+
+      - if actions
+        %div.shrink-0
+          = actions
+
+  %div{ class: control_wrap_classes }
+    -# The control itself lives in the block content
+    = content
+
+  - if @errors.any?
+    %ul{ id: errors_id, class: error_classes }
+      - @errors.each do |e|
+        %li= e
