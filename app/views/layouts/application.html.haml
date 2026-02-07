@@ -15,37 +15,32 @@
     %link{:href => "/icon.png", :rel => "apple-touch-icon"}/
     = stylesheet_link_tag :app
     = javascript_importmap_tags
-
-
   %body.bg-ls5-yellow-6
-    This is where schemas, fields, and questionable decisions live.
-    = render SplitOneFourOneComponent.new do |c|
-      - c.with_one do
-        Left slot content
-
-      - c.with_two do
-        = render ThingCardComponent.new do |c|
-          - c.with_label do
-            Rooms
-          Middle slot content
-
-          .bg-ls5-red-7.p-6.text-2xl.font-bold.rounded-xl.ls5-violet-2
-            RED CHECK
-          = render ButtonComponent.new(tone: :warning) do
-            warning
-          = render ButtonComponent.new(tone: :primary) do
-            primary
-          = render ButtonComponent.new(tone: :danger) do
-            danger
-          = render ButtonComponent.new(tone: :subtle) do
-            subtle
-
-          = render FieldComponent.new(name: "room_name", label: "Name", hint: "Shown to other systems", state: :normal, errors: @room.errors[:name]) do
-            = text_field_tag :name, @room.name, class: "w-full rounded border border-ls5-blue-3 p-2 bg-ink-inverse text-ink", aria: { invalid: "false" }
-
-      - c.with_six do
-        Right slot content
-
-
     %main.bg-ls5-green-3.rounded-xl.shadow.p-6.ls5-blue-6
-      = yield
+      = render SplitOneFourOneComponent.new do |c|
+        - c.with_one do
+          Left slot content
+
+        - c.with_two do
+          = yield
+          = render ThingCardComponent.new do |c|
+            - c.with_label do
+              Rooms
+            Middle slot content
+
+            .bg-ls5-red-7.p-6.text-2xl.font-bold.rounded-xl.text-ls5-violet-1
+              RED CHECK
+            = render ButtonComponent.new(tone: :primary) do
+              primary
+            = render ButtonComponent.new(tone: :subtle) do
+              subtle
+            = render ButtonComponent.new(tone: :warning) do
+              warning
+            = render ButtonComponent.new(tone: :danger) do
+              danger
+        - c.with_six do
+          Right slot content
+-#            = render FieldComponent.new(name: "room_name", label: "Name", hint: "Shown to other systems", state: :normal, errors: @room.errors[:name]) do
+-#              = text_field_tag :name, @room.name, class: "w-full rounded border border-ls5-blue-3 p-2 bg-ink-inverse text-ink", aria: { invalid: "false" }
+
+
