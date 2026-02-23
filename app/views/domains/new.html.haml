@@ -1,0 +1,10 @@
+- content_for :title, "New domain"
+
+%h1 New domain
+
+= render "form", domain: @domain
+
+%br
+
+%div
+  = link_to "Back to domains", domains_path

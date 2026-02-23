@@ -1,0 +1,13 @@
+%p{style: "color: green"}= notice
+
+- content_for :title, "Domains"
+
+%h1 Domains
+
+%div{id: "domains"}
+  - @domains.each do |domain|
+    = render domain
+    %p
+      = link_to "Show this domain", domain
+
+= link_to "New domain", new_domain_path

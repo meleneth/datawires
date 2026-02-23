@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :domains
   resources :users
   resources :rooms do
     resources :messages
