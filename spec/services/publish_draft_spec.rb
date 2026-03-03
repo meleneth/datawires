@@ -46,8 +46,7 @@ RSpec.describe PublishDraft do
 
       stale_draft = create(:draft, document: doc, based_on_revision: rev1, body: { "v" => 999 })
 
-      expect { described_class.call(draft: stale_draft) }
-        .to raise_error(PublishDraft::StaleDraftError)
+      expect { described_class.call(draft: stale_draft) }.to raise_error(PublishDraft::StaleDraftError)
 
       doc.reload
       expect(doc.head_revision).to eq(rev2)

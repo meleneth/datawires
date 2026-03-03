@@ -20,7 +20,6 @@ RSpec.describe Revision, type: :model do
 
   it "is immutable after creation" do
     rev = create(:revision, body: { "a" => 1 })
-    expect { rev.update!(body: { "a" => 2 }) }
-      .to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect { rev.update!(body: { "a" => 2 }) }.to raise_error(ActiveRecord::ReadOnlyRecord)
   end
 end

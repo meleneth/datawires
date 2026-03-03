@@ -35,7 +35,7 @@ class PublishDraft
         parent_revision: parent,
         body: deep_dup_hash(@draft.body),
         message: @message,
-        created_by: @actor
+        created_by: @actor,
       )
 
       @document.update!(head_revision: revision)
@@ -44,7 +44,7 @@ class PublishDraft
       # it now represents "working copy based on the new head".
       @draft.update!(
         based_on_revision: revision,
-        body: deep_dup_hash(revision.body)
+        body: deep_dup_hash(revision.body),
       )
 
       revision

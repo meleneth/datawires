@@ -5,4 +5,3 @@ class ApplicationComponent < ViewComponent::Base
     parts.flatten.compact.join(" ")
   end
 end
-

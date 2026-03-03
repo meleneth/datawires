@@ -2,11 +2,11 @@ class FieldComponent < ApplicationComponent
   renders_one :actions
 
   STATES = {
-    normal:  { frame: "border-ls5-blue-3 bg-ls5-blue-1",   label: "text-ink",       hint: "text-ls5-blue-8",   error: "text-ls5-red-7" },
-    focus:   { frame: "border-ls5-blue-4 bg-ls5-blue-1",   label: "text-ink",       hint: "text-ls5-blue-8",   error: "text-ls5-red-7" },
-    dirty:   { frame: "border-ls5-yellow-4 bg-ls5-yellow-1", label: "text-ink",     hint: "text-ls5-yellow-8", error: "text-ls5-red-7" },
-    error:   { frame: "border-ls5-red-6 bg-ls5-red-1",     label: "text-ink",       hint: "text-ls5-red-7",    error: "text-ls5-red-7" },
-    disabled:{ frame: "border-ls5-violet-3 bg-ls5-violet-1",label: "text-ls5-violet-7", hint: "text-ls5-violet-7", error: "text-ls5-red-7" }
+    normal: { frame: "border-ls5-blue-3 bg-ls5-blue-1", label: "text-ink", hint: "text-ls5-blue-8", error: "text-ls5-red-7" },
+    focus: { frame: "border-ls5-blue-4 bg-ls5-blue-1", label: "text-ink", hint: "text-ls5-blue-8", error: "text-ls5-red-7" },
+    dirty: { frame: "border-ls5-yellow-4 bg-ls5-yellow-1", label: "text-ink", hint: "text-ls5-yellow-8", error: "text-ls5-red-7" },
+    error: { frame: "border-ls5-red-6 bg-ls5-red-1", label: "text-ink", hint: "text-ls5-red-7", error: "text-ls5-red-7" },
+    disabled: { frame: "border-ls5-violet-3 bg-ls5-violet-1", label: "text-ls5-violet-7", hint: "text-ls5-violet-7", error: "text-ls5-red-7" },
   }.freeze
 
   def initialize(
