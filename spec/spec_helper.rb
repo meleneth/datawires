@@ -91,4 +91,16 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
+  require "simplecov"
+  require "simplecov-html"
+
+  SimpleCov.start "rails" do
+    enable_coverage :branch
+    add_filter %r{\A/spec/}
+    add_filter %r{\A/config/}
+    add_filter %r{\A/vendor/}
+    add_filter %r{\A/db/}
+  end
+
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end

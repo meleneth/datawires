@@ -57,11 +57,11 @@ end
 
 gem "hotwire-rails", "~> 0.1.3"
 
-gem "rspec-rails", "~> 8.0", groups: [:development, :test]
+gem "rspec-rails", "~> 8.0", groups: [ :development, :test ]
 
-gem "factory_bot_rails", "~> 6.5", groups: [:development, :test]
+gem "factory_bot_rails", "~> 6.5", groups: [ :development, :test ]
 
-gem "faker", "~> 3.6", groups: [:development, :test]
+gem "faker", "~> 3.6", groups: [ :development, :test ]
 
 gem "shoulda-matchers", "~> 7.0", group: :test
 
@@ -71,7 +71,7 @@ gem "haml-rails", "~> 3.0"
 
 gem "html2haml", "~> 2.3", group: :development
 
-gem "pry-rails", "~> 0.3.11", groups: [:development, :test]
+gem "pry-rails", "~> 0.3.11", groups: [ :development, :test ]
 
 gem "rubocop-rails", "~> 2.34", group: :development
 
@@ -80,3 +80,10 @@ gem "rubocop-rspec", "~> 3.9", group: :development
 gem "importmap-rails", "~> 2.2"
 
 gem "view_component", "~> 4.2"
+
+gem "rufo", "~> 0.18.2", group: :development, require: false
+
+group :test do
+  gem "simplecov", require: false
+  gem "simplecov-html", require: false
+end
