@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :draft do
-    document { nil }
+    document
     based_on_revision { nil }
-    body { "" }
+    body { {} }
     created_by { nil }
   end
 end

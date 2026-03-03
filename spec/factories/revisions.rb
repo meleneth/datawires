@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :revision do
-    document { nil }
+    document
     parent_revision { nil }
-    body { "" }
-    message { "MyText" }
+    body { {} }
+    message { nil }
     created_by { nil }
   end
 end
