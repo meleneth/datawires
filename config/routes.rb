@@ -1,5 +1,17 @@
 Rails.application.routes.draw do
-  resources :domains
+  resources :domains, param: :slug do
+    resources :schemas, only: %i[index new create]
+
+    resources :documents, param: :key, only: [] do
+      resources :drafts, only: %i[show] do
+        member do
+          patch :patch_ptr
+        end
+      end
+    end
+  end
+
+
   resources :users
   resources :rooms do
     resources :messages

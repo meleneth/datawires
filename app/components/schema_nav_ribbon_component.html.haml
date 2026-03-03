@@ -1,0 +1,26 @@
+%nav.schema-nav{ data: { controller: "dropdown", turbo_prefetch: "false" } }
+  - crumbs.each_with_index do |c, idx|
+    - options = choices_for(c[:ptr])
+
+    %span.schema-nav__group
+      = link_to c[:label],
+        nav_url(c[:ptr]),
+        data: { turbo_frame: turbo_frame, turbo_action: "advance" },
+        class: "schema-nav__crumb"
+
+      - if options.any?
+        %button.schema-nav__chev{
+          type: "button",
+          data: { action: "click->dropdown#toggle", dropdown_level_param: idx }
+        } >
+
+        %div.schema-nav__menu.hidden{ data: { dropdown_target: "menu", level: idx } }
+          - options.each do |key|
+            - target = child_ptr(c[:ptr], key)
+            = link_to key,
+              nav_url(target),
+              data: { turbo_frame: turbo_frame, turbo_action: "advance", action: "click->dropdown#close" },
+              class: "schema-nav__item"
+
+      - elsif idx < (crumbs.length - 1)
+        %span.schema-nav__sep.schema-nav__sep--disabled >

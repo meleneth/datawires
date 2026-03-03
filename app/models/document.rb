@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Document < ApplicationRecord
+  JSON_SCHEMA_2020_12 = "https://json-schema.org/draft/2020-12/schema"
+
   belongs_to :domain
 
   belongs_to :head_revision,
@@ -18,6 +20,17 @@ class Document < ApplicationRecord
            inverse_of: :document
 
   validates :key, presence: true, uniqueness: { scope: :domain_id }
+
+  scope :with_head, -> { joins(:head_revision) }
+
+  scope :schemas, -> {
+    joins(:head_revision)
+      .where("revisions.body @> ?", { "$schema" => JSON_SCHEMA_2020_12 }.to_json)
+  }
+
+  def to_param
+    key
+  end
 
   def draft_for(actor: nil)
     drafts.find_or_create_by!(created_by: actor) do |d|

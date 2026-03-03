@@ -8,6 +8,7 @@ class DomainsController < ApplicationController
 
   # GET /domains/1 or /domains/1.json
   def show
+    @schema = @domain.documents.schemas.order(:key)
   end
 
   # GET /domains/new
@@ -66,6 +67,6 @@ class DomainsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def domain_params
-    params.expect(domain: [:name, :slug])
+    params.expect(domain: [ :name, :slug ])
   end
 end

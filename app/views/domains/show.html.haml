@@ -8,3 +8,6 @@
   = link_to "Back to domains", domains_path
 
   = button_to "Destroy this domain", @domain, method: :delete
+
+  - @schemas.each do |doc|
+    = link_to doc.key, domain_document_draft_path(@domain, doc, doc.drafts.first)
