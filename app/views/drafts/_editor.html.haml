@@ -1,0 +1,16 @@
+- value = JsonPtr.get(draft.body, ptr)
+
+%h3= "Edit: #{ptr.presence || '(root)'}"
+
+- if value.is_a?(Hash) || value.is_a?(Array)
+  %pre= JSON.pretty_generate(value)
+  %p Composite values are read-only in v1.
+- else
+  = form_with url: patch_ptr_domain_document_draft_path(domain, document, draft),
+              method: :patch,
+              data: { turbo_frame: "editor" },
+              format: :turbo_stream do
+    = hidden_field_tag :mode, mode
+    = hidden_field_tag :ptr, ptr
+    = text_field_tag :value, value, class: "w-full"
+    = submit_tag "Save"

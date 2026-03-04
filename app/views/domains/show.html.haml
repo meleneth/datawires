@@ -11,3 +11,10 @@
 
   - @schemas.each do |doc|
     = link_to doc.key, domain_document_draft_path(@domain, doc, doc.drafts.first)
+
+%h2 Add schema
+
+= form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|
+  = f.label :key, "New schema name"
+  = f.text_field :key, autofocus: true
+  = f.submit "Create"

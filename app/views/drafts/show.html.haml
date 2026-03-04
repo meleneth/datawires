@@ -1,0 +1,9 @@
+%h1= "#{@domain.slug} / #{@document.key}"
+%p= "mode: #{@mode}"
+
+.grid{ style: "display:grid; grid-template-columns: 320px 1fr; gap: 16px;" }
+  = turbo_frame_tag "ribbon" do
+    = render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+
+  = turbo_frame_tag "editor" do
+    = render "editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode

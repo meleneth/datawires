@@ -1,11 +1,7 @@
 -# app/views/schemas/new.html.haml
 %h1 New schema
 
-= form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|
-  = f.label :key
-  = f.text_field :key
-
-  = f.label :title
-  = f.text_field :title
-
+= form_with model: [@domain, @document] do |f|
+  = f.label :key, "New schema name"
+  = f.text_field :key, autofocus: true
   = f.submit "Create"

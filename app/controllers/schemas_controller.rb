@@ -3,17 +3,17 @@
 
 class SchemasController < ApplicationController
   def index
-    @domain = Domain.find_by!(slug: params[:domain_slug] || params[:domain_id])
+    @domain = Domain.find(params[:domain_id])
     @schemas = @domain.documents.schemas.order(:key)
   end
 
   def new
-    @domain = Domain.find_by!(slug: params[:domain_slug] || params[:domain_id])
+    @domain = Domain.find(params[:domain_id])
     @document = @domain.documents.build
   end
 
   def create
-    @domain = Domain.find_by!(slug: params[:domain_slug] || params[:domain_id])
+    @domain = Domain.find(params[:domain_id])
 
     result = CreateSchemaDocument.call(
       domain: @domain,

@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :domains, param: :slug do
+  resources :domains  do
     resources :schemas, only: %i[index new create]
 
     resources :documents, param: :key, only: [] do

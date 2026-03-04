@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= User.find_or_create_by!(id: DEV_USER_ID) do |user|
       user.name = "devUser"
-      user.avatar_url = "https://api.dicebear.com/7.x/pixel-art/png?seed=devUser"
+      user.avatar = "https://api.dicebear.com/7.x/pixel-art/png?seed=devUser"
     end
   end
 

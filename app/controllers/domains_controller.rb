@@ -8,7 +8,8 @@ class DomainsController < ApplicationController
 
   # GET /domains/1 or /domains/1.json
   def show
-    @schema = @domain.documents.schemas.order(:key)
+    @schemas = @domain.documents.schemas.order(:key)
+    @document = @domain.documents.build
   end
 
   # GET /domains/new
