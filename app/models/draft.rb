@@ -16,6 +16,12 @@ class Draft < ApplicationRecord
   validate :body_must_be_json_object
   validate :base_must_be_same_document
 
+  def is_json_schema?
+    return false unless body.has_key? :$schema
+    return false unless body.has_key? :$id
+    true if body[:$schema] == "https://json-schema.org/draft/2020-12/schema"
+  end
+
   private
 
   def body_must_be_json_object

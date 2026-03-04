@@ -1,3 +1,10 @@
+.flex.items-center.gap-2
+  = render (NavMenuComponent.new(title: "Menu")) do |m|
+    - m.with_entry() do
+      = render(NavMenu::ItemComponent.new(title: "Dashboard", href: 'some_url'))
+    - m.with_entry() do
+      = render(NavMenu::ItemComponent.new(title: "OtherThing", href: 'other_url'))
+
 %p{style: "color: green"}= notice
 
 = render @domain
