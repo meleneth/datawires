@@ -10,6 +10,7 @@ class DomainsController < ApplicationController
   def show
     @schemas = @domain.documents.schemas.order(:key)
     @document = @domain.documents.build
+    @drafts = @domain.open_drafts
   end
 
   # GET /domains/new
