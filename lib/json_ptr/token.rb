@@ -22,6 +22,7 @@ module JsonPtr
     def ==(other)
       other.is_a?(Token) && unescaped == other.unescaped
     end
+
     alias eql? ==
 
     def hash
@@ -31,6 +32,7 @@ module JsonPtr
 
   class UnescapedToken < Token
     def unescaped = @str
+
     def escaped
       @str.gsub("~", "~0").gsub("/", "~1")
     end
@@ -40,6 +42,7 @@ module JsonPtr
 
   class EscapedToken < Token
     def escaped = @str
+
     def unescaped
       # Order matters: ~1 first, then ~0.
       @str.gsub("~1", "/").gsub("~0", "~")

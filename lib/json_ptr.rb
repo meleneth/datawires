@@ -29,17 +29,14 @@ module JsonPtr
           return default unless cur.key?(token) || (sym && cur.key?(sym))
         end
         cur = val
-
       when Array
         idx = Integer(token, 10) rescue nil
         return default if idx.nil? || idx < 0 || idx >= cur.length
         cur = cur[idx]
-
       else
         return default
       end
     end
-
 
     cur
   end
@@ -80,5 +77,6 @@ module JsonPtr
     return nil unless token.match?(/\A[a-zA-Z_][a-zA-Z0-9_]*[!?=]?\z/)
     token.to_sym
   end
+
   private_class_method :safe_to_sym_for_exist_check
 end

@@ -138,7 +138,7 @@ RSpec.describe JsonPtr do
         "type" => "object",
         "title" => "Hello",
         "properties" => { "b" => 2, "a" => 1 },
-        "a" => 0
+        "a" => 0,
       }
 
       # Collect only first-level child pointers
@@ -153,7 +153,7 @@ RSpec.describe JsonPtr do
         "/type",
         "/properties",
         "/a",
-        "/z"
+        "/z",
       ])
     end
 

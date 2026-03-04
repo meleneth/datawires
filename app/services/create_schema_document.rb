@@ -22,7 +22,7 @@ class CreateSchemaDocument
       draft = document.drafts.create!(
         created_by: @actor,
         based_on_revision: document.head_revision, # nil on brand new doc is fine
-        body: starter_body
+        body: starter_body,
       )
 
       Result.new(document, draft)
@@ -36,7 +36,7 @@ class CreateSchemaDocument
       "$schema" => Document::JSON_SCHEMA_2020_12,
       "$id" => schema_id,
       "type" => "object",
-      "properties" => {}
+      "properties" => {},
     }
   end
 

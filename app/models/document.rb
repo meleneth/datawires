@@ -24,9 +24,9 @@ class Document < ApplicationRecord
   scope :with_head, -> { joins(:head_revision) }
 
   scope :schemas, -> {
-    joins(:head_revision)
-      .where("revisions.body @> ?", { "$schema" => JSON_SCHEMA_2020_12 }.to_json)
-  }
+          joins(:head_revision)
+            .where("revisions.body @> ?", { "$schema" => JSON_SCHEMA_2020_12 }.to_json)
+        }
 
   def to_param
     key

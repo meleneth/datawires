@@ -42,7 +42,7 @@ class SchemaNavRibbonComponent < ViewComponent::Base
       domain,
       document,
       draft,
-      ptr: target_ptr
+      ptr: target_ptr,
     )
   end
 

@@ -19,7 +19,7 @@ class SchemasController < ApplicationController
       domain: @domain,
       key: schema_params.fetch(:key),
       title: schema_params[:title],
-      actor: current_user
+      actor: current_user,
     )
 
     redirect_to domain_document_draft_path(

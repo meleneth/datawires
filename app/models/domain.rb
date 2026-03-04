@@ -3,7 +3,7 @@ class Domain < ApplicationRecord
 
   def open_drafts
     Draft.joins(:document)
-        .where(documents: { domain_id: id })
-        .includes(:document)
+      .where(documents: { domain_id: id })
+      .includes(:document)
   end
 end

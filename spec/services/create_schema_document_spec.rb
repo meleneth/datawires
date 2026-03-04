@@ -21,7 +21,7 @@ RSpec.describe CreateSchemaDocument do
     expect(result.draft.body).to include(
       "$schema" => Document::JSON_SCHEMA_2020_12,
       "type" => "object",
-      "properties" => {}
+      "properties" => {},
     )
   end
 end

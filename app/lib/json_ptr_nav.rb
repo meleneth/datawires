@@ -2,7 +2,7 @@
 
 class JsonPtrNav
   DEFAULT_KEY_ORDER = JsonPtr::KeyOrder.new(
-    priority: %w[$schema $id title description type properties $defs required]
+    priority: %w[$schema $id title description type properties $defs required],
   )
 
   def initialize(json, key_order: DEFAULT_KEY_ORDER)
