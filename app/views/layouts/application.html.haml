@@ -23,24 +23,7 @@
 
         - c.with_two do
           = yield
-          = render ThingCardComponent.new do |c|
-            - c.with_label do
-              Rooms
-            Middle slot content
 
-            .bg-ls5-red-7.p-6.text-2xl.font-bold.rounded-xl.text-ls5-violet-1
-              RED CHECK
-            = render ButtonComponent.new(tone: :primary) do
-              primary
-            = render ButtonComponent.new(tone: :subtle) do
-              subtle
-            = render ButtonComponent.new(tone: :warning) do
-              warning
-            = render ButtonComponent.new(tone: :danger) do
-              danger
         - c.with_six do
           Right slot content
--#            = render FieldComponent.new(name: "room_name", label: "Name", hint: "Shown to other systems", state: :normal, errors: @room.errors[:name]) do
--#              = text_field_tag :name, @room.name, class: "w-full rounded border border-ls5-blue-3 p-2 bg-ink-inverse text-ink", aria: { invalid: "false" }
-
 

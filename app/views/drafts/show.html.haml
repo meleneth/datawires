@@ -1,12 +1,26 @@
-%h1= "#{@domain.slug} / #{@document.key}"
-%p= "mode: #{@mode}"
+= render ThingCardComponent.new do |c|
+  - c.with_label do
+    = "#{@domain.name} / #{@document.key}"
 
-is_schema: 
-= @draft.is_json_schema?
+  .flex.items-center.gap-2
+    = render (NavMenuComponent.new(title: "Menu")) do |m|
+      - m.with_entry() do
+        = render(NavMenu::ItemComponent.new(title: "Dashboard", href: 'some_url'))
+      - m.with_entry() do
+        = render(NavMenu::ItemComponent.new(title: "OtherThing", href: 'other_url'))
+    = render ButtonComponent.new(tone: :primary) do
+      Commit
+    = render ButtonComponent.new(tone: :subtle) do
+      Save
 
-.grid{ style: "display:grid; grid-template-columns: 320px 1fr; gap: 16px;" }
-  = turbo_frame_tag "ribbon" do
-    = render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+  %p= "mode: #{@mode}"
 
-  = turbo_frame_tag "editor" do
-    = render "editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+  is_schema: 
+  = @draft.is_json_schema?
+
+  .grid{ style: "display:grid; grid-template-columns: 320px 1fr; gap: 16px;" }
+    = turbo_frame_tag "ribbon" do
+      = render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+
+    = turbo_frame_tag "editor" do
+      = render "editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode

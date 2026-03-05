@@ -1,47 +1,25 @@
-.flex.items-center.gap-2
-  = render (NavMenuComponent.new(title: "Menu")) do |m|
-    - m.with_entry() do
-      = render(NavMenu::ItemComponent.new(title: "Dashboard", href: 'some_url'))
-    - m.with_entry() do
-      = render(NavMenu::ItemComponent.new(title: "OtherThing", href: 'other_url'))
+= render ThingCardComponent.new do |c|
+  - c.with_label do
+    = "#{@domain.name} Domain"
+  %p{style: "color: green"}= notice
 
-%p{style: "color: green"}= notice
+  = render @domain
 
-= render @domain
+  %div
+    = link_to "Edit this domain", edit_domain_path(@domain)
+    |
+    = link_to "Back to domains", domains_path
 
-%div
-  = link_to "Edit this domain", edit_domain_path(@domain)
-  |
-  = link_to "Back to domains", domains_path
+    = button_to "Destroy this domain", @domain, method: :delete
 
-  = button_to "Destroy this domain", @domain, method: :delete
+    - @schemas.each do |doc|
+      = link_to doc.key, domain_document_draft_path(@domain, doc, doc.drafts.first)
 
-  - @schemas.each do |doc|
-    = link_to doc.key, domain_document_draft_path(@domain, doc, doc.drafts.first)
+  %h2 Add schema
 
-%h2 Add schema
+  = form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|
+    = f.label :key, "New schema name"
+    = f.text_field :key, autofocus: true
+    = f.submit "Create"
 
-= form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|
-  = f.label :key, "New schema name"
-  = f.text_field :key, autofocus: true
-  = f.submit "Create"
-
-%section.mt-6
-  %h2.text-lg.font-semibold.text-slate-200
-
-    Open Drafts
-
-  - if @drafts.any?
-    %ul.mt-2.space-y-1
-      - @drafts.each do |draft|
-        %li{class: "flex justify-between items-center bg-slate-800/60 rounded px-3 py-2"}
-          = link_to draft.document.key,
-            domain_document_draft_path(@domain, document_key: draft.document.key, id: draft.id),
-            class: "text-sky-400 hover:text-sky-300 hover:underline font-medium"
-
-          %span.text-slate-400.text-xs
-            updated #{time_ago_in_words(draft.updated_at)} ago
-  - else
-    %p.text-slate-500.mt-2
-      No drafts yet
-
+= render "domains/open_drafts"
