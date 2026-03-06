@@ -2,25 +2,25 @@
   - c.with_label do
     = "#{@domain.name} / #{@document.key}"
 
-  .flex.items-center.gap-2
-    = render (NavMenuComponent.new(title: "Menu")) do |m|
-      - m.with_entry() do
-        = render(NavMenu::ItemComponent.new(title: "Dashboard", href: 'some_url'))
-      - m.with_entry() do
-        = render(NavMenu::ItemComponent.new(title: "OtherThing", href: 'other_url'))
-    = render ButtonComponent.new(tone: :primary) do
-      Commit
-    = render ButtonComponent.new(tone: :subtle) do
-      Save
+  = render ButtonComponent.new( tone: :primary, type: :submit, form: "draft-form", formaction: publish_domain_document_draft_path(@domain, @document, @draft), data: { turbo_frame: "_top" }) do
+    Commit
 
-  %p= "mode: #{@mode}"
-
-  is_schema: 
+  is_schema:
   = @draft.is_json_schema?
 
   .grid{ style: "display:grid; grid-template-columns: 320px 1fr; gap: 16px;" }
     = turbo_frame_tag "ribbon" do
-      = render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+      = render "ribbon",
+        domain: @domain,
+        document: @document,
+        draft: @draft,
+        ptr: @ptr,
+        mode: @mode
 
     = turbo_frame_tag "editor" do
-      = render "editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr, mode: @mode
+      = render "editor",
+        domain: @domain,
+        document: @document,
+        draft: @draft,
+        ptr: @ptr,
+        mode: @mode

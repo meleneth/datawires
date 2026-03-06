@@ -22,6 +22,7 @@
           Left slot content
 
         - c.with_two do
+          = render "shared/flash"
           = yield
 
         - c.with_six do
