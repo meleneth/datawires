@@ -2,8 +2,9 @@
   - c.with_label do
     = "#{@domain.name} / #{@document.key}"
 
-  = render ButtonComponent.new( tone: :primary, type: :submit, form: "draft-form", formaction: publish_domain_document_draft_path(@domain, @document, @draft), data: { turbo_frame: "_top" }) do
-    Commit
+  = link_to new_domain_document_draft_commit_path(@domain, @document, @draft),
+    class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5" do
+    Commit…
 
   is_schema:
   = @draft.is_json_schema?

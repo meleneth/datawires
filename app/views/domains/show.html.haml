@@ -12,8 +12,8 @@
 
     = button_to "Destroy this domain", @domain, method: :delete
 
-    - @schemas.each do |doc|
-      = link_to doc.key, domain_document_draft_path(@domain, doc, doc.drafts.first)
+    - @schemas.each do |schema|
+      = link_to schema.key, domain_schema_path(@domain, schema)
 
   %h2 Add schema
 

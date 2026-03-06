@@ -1,0 +1,35 @@
+%section.space-y-6
+  %header.space-y-2
+    %h1.text-2xl.font-semibold Commit draft
+    %p.text-sm.text-slate-400
+      Enter a log message for this revision.
+
+  .rounded-xl.border.border-slate-700.bg-slate-900.p-4
+    %dl.grid.gap-3.text-sm
+      %div
+        %dt.text-slate-400 Domain
+        %dd.text-slate-100= @domain.name
+      %div
+        %dt.text-slate-400 Document
+        %dd.text-slate-100= @document.key
+      %div
+        %dt.text-slate-400 Draft
+        %dd.text-slate-100= @draft.id
+
+  = form_with url: domain_document_draft_commit_path(@domain, @document, @draft),
+              method: :post,
+              scope: :commit,
+              class: "space-y-4" do |f|
+    %div
+      = f.label :message, "Log message", class: "mb-2 block text-sm font-medium text-slate-200"
+      = f.text_area :message,
+        rows: 4,
+        class: "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+
+    .flex.items-center.gap-3
+      = f.submit "Commit draft",
+        name: nil,
+        class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+      = link_to "Back to editor",
+        domain_document_draft_path(@domain, @document, @draft),
+        class: "text-sm text-slate-400 hover:text-slate-200"

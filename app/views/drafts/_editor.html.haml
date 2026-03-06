@@ -1,19 +1,24 @@
 - value = JsonPtr.get(draft.body, ptr)
 
-%h3= "Edit: #{ptr.presence || '(root)'}"
+.space-y-4
+  .flex.items-center.justify-between
+    %h3= "Edit: #{ptr.presence || '(root)'}"
 
-= form_with url: patch_ptr_domain_document_draft_path(domain, document, draft),
-            method: :patch,
-            data: { turbo_frame: "editor" },
-            html: { id: "draft-form" },
-            format: :turbo_stream do
-  = hidden_field_tag :mode, mode
-  = hidden_field_tag :ptr, ptr
+    = link_to "Commit…",
+      new_domain_document_draft_commit_path(domain, document, draft),
+      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
-  - if value.is_a?(Hash) || value.is_a?(Array)
-    %pre= JSON.pretty_generate(value)
-    %p Composite values are read-only in v1.
-    -# No editable field, but the form still exists so Commit can target it.
-  - else
-    = text_field_tag :value, value, class: "w-full"
-    = submit_tag "Save"
+  = form_with url: patch_ptr_domain_document_draft_path(domain, document, draft),
+              method: :patch,
+              data: { turbo_frame: "editor" },
+              html: { id: "draft-form" },
+              format: :turbo_stream do
+    = hidden_field_tag :mode, mode
+    = hidden_field_tag :ptr, ptr
+
+    - if value.is_a?(Hash) || value.is_a?(Array)
+      %pre= JSON.pretty_generate(value)
+      %p Composite values are read-only in v1.
+    - else
+      = text_field_tag :value, value, class: "w-full"
+      = submit_tag "Save"

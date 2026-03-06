@@ -16,6 +16,10 @@
     = stylesheet_link_tag :app
     = javascript_importmap_tags
   %body.bg-ls5-yellow-6
+    - if Rails.env.development?
+      .w-full.bg-yellow-500.text-black.text-center.text-sm.font-semibold.py-1
+        🚧 DATAWIRES UNDER CONSTRUCTION 🚧
+    = link_to "Domains", "/domains"
     %main.bg-ls5-green-3.rounded-xl.shadow.p-6.ls5-blue-6
       = render SplitOneFourOneComponent.new do |c|
         - c.with_one do
