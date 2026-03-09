@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 class DraftsController < ApplicationController
-  before_action :load_domain
-  before_action :load_document
-  before_action :load_draft
+  before_action :load
 
   def show
     @mode = params[:mode].presence || "document"
@@ -20,7 +18,7 @@ class DraftsController < ApplicationController
     respond_to do |format|
       format.turbo_stream
       format.html do
-        redirect_to domain_document_draft_path(@domain, @document, @draft, mode: @mode, ptr: @ptr)
+        redirect_to draft_path(@draft, mode: @mode, ptr: @ptr)
       end
     end
   rescue KeyError => e
@@ -37,7 +35,7 @@ class DraftsController < ApplicationController
     respond_to do |format|
       format.html do
         # pick where you want to land after publish
-        redirect_to domain_document_draft_path(@domain, @document, @draft, mode: params[:mode], ptr: params[:ptr]),
+        redirect_to draft_path(@draft, mode: params[:mode], ptr: params[:ptr]),
                     notice: "Published revision #{revision.id}."
       end
 
@@ -51,7 +49,7 @@ class DraftsController < ApplicationController
   rescue PublishDraft::StaleDraftError => e
     respond_to do |format|
       format.html do
-        redirect_to domain_document_draft_path(@domain, @document, @draft, mode: params[:mode], ptr: params[:ptr]),
+        redirect_to draft_path(@draft, mode: params[:mode], ptr: params[:ptr]),
                     alert: e.message
       end
       format.turbo_stream do
@@ -63,17 +61,12 @@ class DraftsController < ApplicationController
 
   private
 
-  def load_domain
-    @domain = Domain.find(params[:domain_id])
+  def load
+    @draft = Draft.find params[:id]
+    @document = @draft.document
+    @domain = @document.domain
   end
 
-  def load_document
-    @document = @domain.documents.find_by!(key: params[:document_key])
-  end
-
-  def load_draft
-    @draft = @document.drafts.find(params[:id])
-  end
 
   def normalize_ptr(raw)
     JsonPtr::Pointer.parse(raw.to_s).to_s

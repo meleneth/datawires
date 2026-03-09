@@ -5,10 +5,10 @@
     %h3= "Edit: #{ptr.presence || '(root)'}"
 
     = link_to "Commit…",
-      new_domain_document_draft_commit_path(domain, document, draft),
+      new_draft_commit_path(draft),
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
-  = form_with url: patch_ptr_domain_document_draft_path(domain, document, draft),
+  = form_with url: patch_ptr_draft_path(draft),
               method: :patch,
               data: { turbo_frame: "editor" },
               html: { id: "draft-form" },

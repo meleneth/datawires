@@ -12,9 +12,6 @@
 
     = button_to "Destroy this domain", @domain, method: :delete
 
-    - @schemas.each do |schema|
-      = link_to schema.key, domain_schema_path(@domain, schema)
-
   %h2 Add schema
 
   = form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|

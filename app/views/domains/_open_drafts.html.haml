@@ -7,7 +7,7 @@
       - @drafts.each do |draft|
         %li{class: "flex justify-between items-center bg-slate-800/60 rounded px-3 py-2"}
           = link_to draft.document.key,
-            domain_document_draft_path(@domain, document_key: draft.document.key, id: draft.id),
+            draft_path(draft),
             class: "text-sky-400 hover:text-sky-300 hover:underline font-medium"
 
           %span.text-slate-400.text-xs

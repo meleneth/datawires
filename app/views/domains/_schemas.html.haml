@@ -7,7 +7,7 @@
       - @schemas.each do |schema|
         %li{class: "flex justify-between items-center bg-slate-800/60 rounded px-3 py-2"}
           = link_to schema.key,
-            domain_document_path(@domain, schema, id: schema.id),
+            schema_path(schema),
             class: "text-sky-400 hover:text-sky-300 hover:underline font-medium"
 
           %span.text-slate-400.text-xs

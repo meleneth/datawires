@@ -29,7 +29,7 @@ class Document < ApplicationRecord
         }
 
   def to_param
-    key
+    id
   end
 
   def draft_for(actor: nil)

@@ -16,7 +16,7 @@
         %dt.text-slate-400 Draft
         %dd.text-slate-100= @draft.id
 
-  = form_with url: domain_document_draft_commit_path(@domain, @document, @draft),
+  = form_with url: draft_commit_path(@draft),
               method: :post,
               scope: :commit,
               class: "space-y-4" do |f|
@@ -31,5 +31,5 @@
         name: nil,
         class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
       = link_to "Back to editor",
-        domain_document_draft_path(@domain, @document, @draft),
+        draft_path(@draft),
         class: "text-sm text-slate-400 hover:text-slate-200"

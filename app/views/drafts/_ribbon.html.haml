@@ -5,5 +5,5 @@
   - next if p.to_s == "" # skip root
   %div
     = link_to p.to_s,
-      domain_document_draft_path(domain, document, draft, mode: mode, ptr: p.to_s),
+      draft_path(draft, mode: mode, ptr: p.to_s),
       data: { turbo_frame: "editor" }

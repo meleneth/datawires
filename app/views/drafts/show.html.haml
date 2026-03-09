@@ -2,7 +2,7 @@
   - c.with_label do
     = "#{@domain.name} / #{@document.key}"
 
-  = link_to new_domain_document_draft_commit_path(@domain, @document, @draft),
+  = link_to new_draft_commit_path(@draft),
     class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5" do
     Commit…
 

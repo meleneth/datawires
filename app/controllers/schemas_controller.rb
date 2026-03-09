@@ -1,4 +1,3 @@
-# app/controllers/schemas_controller.rb
 # frozen_string_literal: true
 
 class SchemasController < ApplicationController
@@ -22,11 +21,12 @@ class SchemasController < ApplicationController
       actor: current_user,
     )
 
-    redirect_to domain_document_draft_path(
-      @domain,
-      result.document,
-      result.draft
-    )
+    redirect_to draft_path(result.draft)
+  end
+
+  def show
+    @document = Document.find(params[:id])
+    @domain = @document.domain
   end
 
   private

@@ -5,22 +5,28 @@ SESSION="rails-dev"
 
 tmux has-session -t "$SESSION" 2>/dev/null && tmux kill-session -t "$SESSION"
 
-# Create session with current terminal dimensions (helps pane sizing behave)
 COLS="$(tput cols)"
 LINES="$(tput lines)"
 
 tmux new-session -d -s "$SESSION" -x "$COLS" -y "$LINES"
 
-# Split into top/bottom, then resize TOP to 4 lines
+# Create bottom pane (logs) first so it becomes pane 0
 tmux split-window -v -t "$SESSION:0"
+
+# Resize top control strip
 tmux resize-pane -t "$SESSION:0.0" -y 4
 
-# Split the TOP pane left/right: left = bin/dev, right = coverage server
+# Split control strip left/right
 tmux split-window -h -t "$SESSION:0.0"
 
-# Run processes
+# Start services
 tmux send-keys -t "$SESSION:0.0" "bin/dev" C-m
 tmux send-keys -t "$SESSION:0.1" "ruby -run -e httpd coverage -p 4000 -b 0.0.0.0" C-m
-tmux send-keys -t "$SESSION:0.2" "tail -f log/development.log" C-m
+
+# Log pane
+tmux send-keys -t "$SESSION:0.2" "lnav log/development.log" C-m
+
+# Focus logs for scrollback
+tmux select-pane -t "$SESSION:0.2"
 
 tmux attach -t "$SESSION"

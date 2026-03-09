@@ -16,7 +16,7 @@ class Drafts::CommitsController < ApplicationController
     redirect_to domain_path(@domain),
       notice: "Draft committed."
   rescue PublishDraft::StaleDraftError => e
-    redirect_to domain_document_draft_path(@domain, @document, @draft),
+    redirect_to draft_path(@draft),
       alert: e.message
   rescue ActiveRecord::RecordInvalid
     flash.now[:alert] = "Could not commit draft."
@@ -26,9 +26,9 @@ class Drafts::CommitsController < ApplicationController
   private
 
   def set_context
-    @domain = Domain.find(params[:domain_id])
-    @document = @domain.documents.find_by!(key: params[:document_key])
-    @draft = @document.drafts.find(params[:draft_id])
+    @draft = Draft.find(params[:draft_id])
+    @document = @draft.document
+    @domain = @document.domain
   end
 
   def commit_params

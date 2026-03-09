@@ -17,7 +17,7 @@ class SchemaNavRibbonComponent < ViewComponent::Base
 
   def crumbs
     tokens = JsonPtr::Pointer.parse(ptr).tokens
-    out = [{ label: "/", ptr: "" }]
+    out = [ { label: "/", ptr: "" } ]
 
     tokens.each_with_index do |tok, idx|
       out << { label: tok.unescaped, ptr: pointer_for(tokens.take(idx + 1)) }
@@ -35,12 +35,7 @@ class SchemaNavRibbonComponent < ViewComponent::Base
   end
 
   def nav_url(target_ptr)
-    # Adjust this helper to match your draft editor route.
-    # Expected shape (recommended):
-    # domain_document_draft_path(domain, document, draft, ptr: target_ptr)
-    Rails.application.routes.url_helpers.domain_document_draft_path(
-      domain,
-      document,
+    Rails.application.routes.url_helpers.draft_path(
       draft,
       ptr: target_ptr,
     )
