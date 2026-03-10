@@ -15,6 +15,14 @@ Rails.application.routes.draw do
       patch :patch_ptr
     end
 
+    resource :schema_properties, only: [], module: :drafts do
+      patch :add
+      patch :remove
+      patch :rename
+      patch :change_type
+      patch :set_required
+    end
+
     resource :commit, only: %i[new create], module: :drafts
   end
 

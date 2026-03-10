@@ -2,23 +2,74 @@
 
 .space-y-4
   .flex.items-center.justify-between
-    %h3= "Edit: #{ptr.presence || '(root)'}"
+    %h3= "Edit: #{ptr.presence || '/'}"
 
     = link_to "Commit…",
       new_draft_commit_path(draft),
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
-  = form_with url: patch_ptr_draft_path(draft),
-              method: :patch,
-              data: { turbo_frame: "editor" },
-              html: { id: "draft-form" },
-              format: :turbo_stream do
-    = hidden_field_tag :mode, mode
-    = hidden_field_tag :ptr, ptr
+  - if mode == "schema" && value.is_a?(Hash)
+    - properties = value["properties"] || {}
+    - required = Array(value["required"])
 
-    - if value.is_a?(Hash) || value.is_a?(Array)
-      %pre= JSON.pretty_generate(value)
-      %p Composite values are read-only in v1.
-    - else
-      = text_field_tag :value, value, class: "w-full"
-      = submit_tag "Save"
+    .space-y-3
+      - properties.each do |name, prop_schema|
+        .rounded-lg.border.border-slate-700.p-3
+          .flex.items-center.justify-between
+            .font-medium= name
+            .text-sm.text-slate-400= prop_schema["type"] || "(no type)"
+
+          - if required.include?(name)
+            .text-xs.text-slate-400 required
+
+          - if prop_schema.is_a?(Hash) && prop_schema["type"] == "object"
+            .mt-2
+              - child_ptr = [ptr == "/" ? nil : ptr, "properties", name].compact.join("/")
+              = link_to "Edit nested",
+                draft_path(draft, mode: mode, ptr: child_ptr),
+                class: "text-sm text-ls5-blue-4 hover:underline"
+
+    .rounded-lg.border.border-slate-700.p-4
+      %h4.mb-3.font-medium Add property
+
+      = form_with url: add_draft_schema_properties_path(draft),
+                  method: :patch,
+                  format: :turbo_stream,
+                  data: { turbo_frame: "editor" } do
+        = hidden_field_tag :mode, mode
+        = hidden_field_tag :ptr, ptr
+
+        .grid.gap-3.md:grid-cols-3
+          %div
+            = label_tag :name, "Name", class: "block text-sm font-medium"
+            = text_field_tag :name, nil, class: "mt-1 w-full"
+
+          %div
+            = label_tag :property_type, "Type", class: "block text-sm font-medium"
+            = select_tag :property_type,
+              options_for_select(%w[string integer number boolean object array]),
+              class: "mt-1 w-full"
+
+          %div.flex.items-end.gap-3
+            %label.flex.items-center.gap-2
+              = check_box_tag :required, "1", false
+              %span Required
+
+            = submit_tag "Add",
+              class: "rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+
+  - else
+    = form_with url: patch_ptr_draft_path(draft),
+                method: :patch,
+                data: { turbo_frame: "editor" },
+                html: { id: "draft-form" },
+                format: :turbo_stream do
+      = hidden_field_tag :mode, mode
+      = hidden_field_tag :ptr, ptr
+
+      - if value.is_a?(Hash) || value.is_a?(Array)
+        %pre= JSON.pretty_generate(value)
+        %p Composite values are read-only in v1.
+      - else
+        = text_field_tag :value, value, class: "w-full"
+        = submit_tag "Save"

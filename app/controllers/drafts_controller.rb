@@ -4,12 +4,12 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
-    @mode = params[:mode].presence || "document"
+    @mode = params[:mode].presence || default_mode
     @ptr = normalize_ptr(params[:ptr])
   end
 
   def patch_ptr
-    @mode = params[:mode].presence || "document"
+    @mode = params[:mode].presence || default_mode
     @ptr = normalize_ptr(params[:ptr])
     value = params[:value]
 
@@ -67,10 +67,13 @@ class DraftsController < ApplicationController
     @domain = @document.domain
   end
 
+  def default_mode
+    @document.schema_document? ? "schema" : "document"
+  end
 
   def normalize_ptr(raw)
     JsonPtr::Pointer.parse(raw.to_s).to_s
   rescue ArgumentError
-    ""
+    "/"
   end
 end
