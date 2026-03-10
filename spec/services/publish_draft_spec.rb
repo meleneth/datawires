@@ -7,8 +7,9 @@ RSpec.describe PublishDraft do
     it "publishes a draft into a revision and advances the document head" do
       doc = create(:document)
       draft = create(:draft, document: doc, body: { "title" => "Hello" })
+      message = "Some Commit Message"
 
-      revision = described_class.call(draft:)
+      revision = described_class.call(draft:, message:)
 
       expect(revision).to be_persisted
       expect(revision.document).to eq(doc)
@@ -18,9 +19,7 @@ RSpec.describe PublishDraft do
       doc.reload
       expect(doc.head_revision).to eq(revision)
 
-      draft.reload
-      expect(draft.based_on_revision).to eq(revision)
-      expect(draft.body).to eq(revision.body)
+      expect(Draft.exists?(draft.id)).to be(false)
     end
 
     it "uses the current head as parent when draft is based on head" do
@@ -46,7 +45,7 @@ RSpec.describe PublishDraft do
 
       stale_draft = create(:draft, document: doc, based_on_revision: rev1, body: { "v" => 999 })
 
-      expect { described_class.call(draft: stale_draft) }.to raise_error(PublishDraft::StaleDraftError)
+      expect { described_class.call(draft: stale_draft, message: "no good - stale") }.to raise_error(PublishDraft::StaleDraftError)
 
       doc.reload
       expect(doc.head_revision).to eq(rev2)
@@ -57,7 +56,7 @@ RSpec.describe PublishDraft do
       doc = create(:document)
       draft = create(:draft, document: doc, body: { "x" => 1 })
 
-      revision = described_class.call(draft:, actor:)
+      revision = described_class.call(draft:, actor:, message: "some message")
 
       expect(revision.created_by).to eq(actor)
     end
