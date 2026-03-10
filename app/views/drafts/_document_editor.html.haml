@@ -1,0 +1,23 @@
+- value = JsonPtr.get(draft.body, ptr)
+
+.space-y-4
+  .flex.items-center.justify-between
+    %h3= "Edit: #{ptr}"
+
+    = link_to "Commit…",
+      new_draft_commit_path(draft),
+      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+
+  = form_with url: patch_ptr_draft_path(draft),
+              method: :patch,
+              data: { turbo_frame: "editor" },
+              html: { id: "draft-form" },
+              format: :turbo_stream do
+    = hidden_field_tag :ptr, ptr
+
+    - if value.is_a?(Hash) || value.is_a?(Array)
+      %pre= JSON.pretty_generate(value)
+      %p Composite values are read-only in v1.
+    - else
+      = text_field_tag :value, value, class: "w-full"
+      = submit_tag "Save"

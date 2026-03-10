@@ -1,65 +1,53 @@
 # frozen_string_literal: true
 
-class SchemaNavRibbonComponent < ViewComponent::Base
-  def initialize(domain:, document:, draft:, ptr:, turbo_frame: "schema_workspace")
+class SchemaNavRibbonComponent < ApplicationComponent
+  def initialize(domain:, document:, draft:, path:, turbo_frame: "schema_workspace")
     @domain = domain
     @document = document
     @draft = draft
-    @ptr = normalize_ptr(ptr)
-
-    # Use draft body so navigation reflects uncommitted edits.
-    @nav = JsonPtrNav.new(source_json)
-
+    @path = SchemaPath.normalize(path)
+    @nav = SchemaNav.new(source_json)
     @turbo_frame = turbo_frame
   end
 
-  attr_reader :domain, :document, :draft, :ptr, :turbo_frame
+  attr_reader :domain, :document, :draft, :path, :turbo_frame
 
   def crumbs
-    tokens = JsonPtr::Pointer.parse(ptr).tokens
-    out = [ { label: "/", ptr: "" } ]
+    current = SchemaPath.new(path)
 
-    tokens.each_with_index do |tok, idx|
-      out << { label: tok.unescaped, ptr: pointer_for(tokens.take(idx + 1)) }
+    out = [{ label: "/", path: SchemaPath::ROOT }]
+
+    running = SchemaPath.new(SchemaPath::ROOT)
+    current.tokens.each do |token|
+      running = running.child(token)
+      out << { label: token, path: running.to_s }
     end
 
     out
   end
 
-  def choices_for(ptr_at_level)
-    @nav.object_keys_at(ptr_at_level)
+  def choices_for(path_at_level)
+    @nav.object_keys_at(path_at_level)
   end
 
-  def child_ptr(parent_ptr, child_key)
-    @nav.child_ptr(parent_ptr, child_key)
+  def child_path(parent_path, child_key)
+    @nav.child_path(parent_path, child_key)
   end
 
-  def nav_url(target_ptr)
+  def nav_url(target_path)
     Rails.application.routes.url_helpers.draft_path(
       draft,
-      ptr: target_ptr,
+      path: SchemaPath.normalize(target_path)
     )
   end
 
-  def ptr_resolves?
-    @nav.value_at(ptr).present?
+  def path_resolves?
+    @nav.subschema_at(path).present?
   end
 
   private
 
   def source_json
     draft&.body || {}
-  end
-
-  def normalize_ptr(raw)
-    JsonPtr::Pointer.parse(raw.to_s).to_s
-  rescue ArgumentError
-    ""
-  end
-
-  def pointer_for(tokens)
-    p = JsonPtr::Pointer.parse("")
-    tokens.each { |t| p = p.child(t.unescaped) }
-    p.to_s
   end
 end

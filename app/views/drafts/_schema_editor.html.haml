@@ -1,0 +1,59 @@
+- schema_path = SchemaPath.new(path)
+- raw_ptr = schema_path.json_ptr
+- subschema = JsonPtr.get(draft.body, raw_ptr) || {}
+- properties = subschema.fetch("properties", {})
+- required = Array(subschema["required"])
+
+.space-y-4
+  .flex.items-center.justify-between
+    %h3= "Schema: #{path}"
+
+    = link_to "Commit…",
+      new_draft_commit_path(draft),
+      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+
+  .space-y-3
+    - properties.each do |name, prop_schema|
+      .rounded-lg.border.border-slate-700.p-3
+        .flex.items-center.justify-between.gap-4
+          .min-w-0
+            .font-medium= name
+            .text-sm.text-slate-400= prop_schema["type"] || "(no type)"
+
+            - if required.include?(name)
+              .mt-1.text-xs.text-slate-400 required
+
+          .flex.items-center.gap-2
+            - if prop_schema.is_a?(Hash) && SchemaNav.new(draft.body).object_schema?(prop_schema)
+              = link_to "Open",
+                draft_path(draft, path: SchemaPath.new(path).child(name).to_s),
+                data: { turbo_frame: "editor", turbo_action: "advance" },
+                class: "rounded-lg px-3 py-2 text-sm font-medium text-ls5-blue-4 hover:bg-slate-800/60"
+
+  .rounded-lg.border.border-slate-700.p-4
+    %h4.mb-3.font-medium Add property
+
+    = form_with url: add_draft_schema_properties_path(draft),
+                method: :patch,
+                format: :turbo_stream,
+                data: { turbo_frame: "editor" } do
+      = hidden_field_tag :path, path
+
+      .grid.gap-3.md:grid-cols-3
+        %div
+          = label_tag :name, "Name", class: "block text-sm font-medium"
+          = text_field_tag :name, nil, class: "mt-1 w-full"
+
+        %div
+          = label_tag :property_type, "Type", class: "block text-sm font-medium"
+          = select_tag :property_type,
+            options_for_select(%w[string integer number boolean object array]),
+            class: "mt-1 w-full"
+
+        %div.flex.items-end.gap-3
+          %label.flex.items-center.gap-2
+            = check_box_tag :required, "1", false
+            %span Required
+
+          = submit_tag "Add",
+            class: "rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"

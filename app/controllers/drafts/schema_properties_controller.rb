@@ -6,7 +6,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
   def add
     SchemaMutations.add_property!(
       @draft.body,
-      at: @ptr,
+      at: raw_ptr,
       name: params[:name],
       type: params[:property_type],
       required: boolean_param(:required),
@@ -18,7 +18,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
   def remove
     SchemaMutations.remove_property!(
       @draft.body,
-      at: @ptr,
+      at: raw_ptr,
       name: params[:name],
     )
 
@@ -28,7 +28,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
   def rename
     SchemaMutations.rename_property!(
       @draft.body,
-      at: @ptr,
+      at: raw_ptr,
       old_name: params[:old_name],
       new_name: params[:new_name],
     )
@@ -39,7 +39,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
   def change_type
     SchemaMutations.change_property_type!(
       @draft.body,
-      at: @ptr,
+      at: raw_ptr,
       name: params[:name],
       type: params[:property_type],
     )
@@ -50,7 +50,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
   def set_required
     SchemaMutations.set_required!(
       @draft.body,
-      at: @ptr,
+      at: raw_ptr,
       name: params[:name],
       required: boolean_param(:required),
     )
@@ -64,13 +64,11 @@ class Drafts::SchemaPropertiesController < ApplicationController
     @draft = Draft.find(params[:draft_id])
     @document = @draft.document
     @domain = @document.domain
-    @ptr = normalize_ptr(params[:ptr])
+    @path = SchemaPath.normalize(params[:path])
   end
 
-  def normalize_ptr(raw)
-    JsonPtr::Pointer.parse(raw.presence || "/").to_s
-  rescue ArgumentError
-    "/"
+  def raw_ptr
+    SchemaPath.new(@path).json_ptr
   end
 
   def boolean_param(name)
@@ -82,7 +80,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render "drafts/patch_ptr" }
-      format.html { redirect_to draft_path(@draft, ptr: @ptr) }
+      format.html { redirect_to draft_path(@draft, path: @path) }
     end
   rescue KeyError, ArgumentError => e
     render plain: e.message, status: :unprocessable_entity
