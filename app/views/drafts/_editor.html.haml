@@ -8,7 +8,7 @@
       new_draft_commit_path(draft),
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
-  - if mode == "schema" && value.is_a?(Hash)
+  - if draft.schema_document? && value.is_a?(Hash)
     - properties = value["properties"] || {}
     - required = Array(value["required"])
 
@@ -26,7 +26,7 @@
             .mt-2
               - child_ptr = [ptr == "/" ? nil : ptr, "properties", name].compact.join("/")
               = link_to "Edit nested",
-                draft_path(draft, mode: mode, ptr: child_ptr),
+                draft_path(draft, ptr: child_ptr),
                 class: "text-sm text-ls5-blue-4 hover:underline"
 
     .rounded-lg.border.border-slate-700.p-4
@@ -36,7 +36,6 @@
                   method: :patch,
                   format: :turbo_stream,
                   data: { turbo_frame: "editor" } do
-        = hidden_field_tag :mode, mode
         = hidden_field_tag :ptr, ptr
 
         .grid.gap-3.md:grid-cols-3
@@ -64,7 +63,6 @@
                 data: { turbo_frame: "editor" },
                 html: { id: "draft-form" },
                 format: :turbo_stream do
-      = hidden_field_tag :mode, mode
       = hidden_field_tag :ptr, ptr
 
       - if value.is_a?(Hash) || value.is_a?(Array)

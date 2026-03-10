@@ -22,6 +22,10 @@ class Draft < ApplicationRecord
     true if body["$schema"] == "https://json-schema.org/draft/2020-12/schema"
   end
 
+  def schema_document?
+    is_json_schema?
+  end
+
   private
 
   def body_must_be_json_object

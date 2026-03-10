@@ -1,17 +1,7 @@
 <%= turbo_stream.replace "ribbon" do %>
-  <%= render "ribbon",
-             domain: @domain,
-             document: @document,
-             draft: @draft,
-             ptr: @ptr,
-             mode: @mode %>
+  <%= render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr %>
 <% end %>
 
 <%= turbo_stream.replace "editor" do %>
-  <%= render "editor",
-             domain: @domain,
-             document: @document,
-             draft: @draft,
-             ptr: @ptr,
-             mode: @mode %>
+  <%= render "editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr %>
 <% end %>

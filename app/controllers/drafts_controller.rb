@@ -4,12 +4,10 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
-    @mode = params[:mode].presence || default_mode
     @ptr = normalize_ptr(params[:ptr])
   end
 
   def patch_ptr
-    @mode = params[:mode].presence || default_mode
     @ptr = normalize_ptr(params[:ptr])
     value = params[:value]
 

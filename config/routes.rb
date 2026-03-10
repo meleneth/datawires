@@ -1,13 +1,14 @@
 Rails.application.routes.draw do
   resources :domains do
     resources :schemas, only: %i[index new create]
-    resources :documents, param: :key, only: %i[index show]
+    resources :documents, only: %i[index show]
   end
 
   resources :schemas, only: %i[show]
 
+
   resources :documents, only: [] do
-    resource :draft, only: %i[create]
+    resource :draft, only: %i[create], module: :documents
   end
 
   resources :drafts, only: %i[show update destroy] do

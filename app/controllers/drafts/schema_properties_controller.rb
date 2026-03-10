@@ -64,12 +64,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
     @draft = Draft.find(params[:draft_id])
     @document = @draft.document
     @domain = @document.domain
-    @mode = params[:mode].presence || default_mode
     @ptr = normalize_ptr(params[:ptr])
-  end
-
-  def default_mode
-    @document.schema? ? "schema" : "document"
   end
 
   def normalize_ptr(raw)
@@ -87,7 +82,7 @@ class Drafts::SchemaPropertiesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render "drafts/patch_ptr" }
-      format.html { redirect_to draft_path(@draft, mode: @mode, ptr: @ptr) }
+      format.html { redirect_to draft_path(@draft, ptr: @ptr) }
     end
   rescue KeyError, ArgumentError => e
     render plain: e.message, status: :unprocessable_entity
