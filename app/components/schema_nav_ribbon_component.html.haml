@@ -1,20 +1,25 @@
 %nav.flex.items-center.gap-1.text-sm{ data: { turbo_prefetch: "false" } }
   - segments.each_with_index do |segment, idx|
     %div.relative.inline-block.group
-      = link_to segment.label,
-        segment.url,
-        data: { turbo_frame: turbo_frame, turbo_action: "advance" },
-        class: "inline-flex items-center rounded-lg px-3 py-2 font-medium text-slate-200 hover:bg-slate-800/70 hover:text-white"
+      = link_to segment.label, segment.url, data: { turbo_frame: turbo_frame, turbo_action: "advance" }, class: "inline-flex items-center rounded-lg px-3 py-2 font-medium text-slate-200 hover:bg-slate-800/70 hover:text-white"
 
       - if segment.menu_items.any?
         .absolute.left-0.top-full.h-2.w-full
         %div.absolute.left-0.top-full.z-50.mt-2.hidden.min-w-48.rounded-xl.border.border-slate-700.bg-slate-900.p-1.shadow-xl.group-hover:block
           - segment.menu_items.each do |item|
-            = link_to item.label,
-              item.url,
-              data: { turbo_frame: turbo_frame, turbo_action: "advance" },
-              class: "block rounded-lg px-3 py-2 text-slate-200 hover:bg-slate-800 hover:text-white"
+            = link_to item.label, item.url, data: { turbo_frame: turbo_frame, turbo_action: "advance" }, class: "block rounded-lg px-3 py-2 text-slate-200 hover:bg-slate-800 hover:text-white"
 
     - if idx < segments.length - 1
       %span.mx-1.text-slate-500
         >
+
+  - if tail_menu_items.any?
+    %span.mx-1.text-slate-500
+      >
+    %div.relative.inline-block.group
+      %span.inline-flex.cursor-default.items-center.rounded-lg.px-2.py-2.font-medium.text-slate-400
+        ▾
+      .absolute.left-0.top-full.h-2.w-full
+      %div.absolute.left-0.top-full.z-50.mt-2.hidden.min-w-48.rounded-xl.border.border-slate-700.bg-slate-900.p-1.shadow-xl.group-hover:block
+        - tail_menu_items.each do |item|
+          = link_to item.label, item.url, data: { turbo_frame: turbo_frame, turbo_action: "advance" }, class: "block rounded-lg px-3 py-2 text-slate-200 hover:bg-slate-800 hover:text-white"

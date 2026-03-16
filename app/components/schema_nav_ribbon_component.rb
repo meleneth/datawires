@@ -76,6 +76,18 @@ class SchemaNavRibbonComponent < ApplicationComponent
       path: SchemaPath.normalize(target_path)
     )
   end
+  def tail_menu_items
+    @nav.object_keys_at(path).map do |key|
+      item_path = SchemaPath.new(path).child(key).to_s
+
+      SchemaRibbonMenuItem.new(
+        label: key,
+        path: item_path,
+        url: nav_url(item_path),
+        current: false
+      )
+    end
+  end
 
   def source_json
     draft&.body || {}
