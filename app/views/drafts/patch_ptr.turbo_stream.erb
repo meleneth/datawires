@@ -1,33 +1,33 @@
 <%= turbo_stream.replace "ribbon" do %>
-  <% if @document.schema_document? %>
+  <% if @draft.schema_document? %>
     <%= render SchemaNavRibbonComponent.new(
       domain: @domain,
       document: @document,
       draft: @draft,
       path: @path,
-      turbo_frame: "editor"
+      turbo_frame: "editor",
     ) %>
   <% else %>
     <%= render "drafts/ribbon",
-               domain: @domain,
-               document: @document,
-               draft: @draft,
-               ptr: @ptr %>
+    domain: @domain,
+    document: @document,
+    draft: @draft,
+    ptr: @ptr %>
   <% end %>
 <% end %>
 
 <%= turbo_stream.replace "editor" do %>
-  <% if @document.schema_document? %>
+  <% if @draft.schema_document? %>
     <%= render "drafts/schema_editor",
-               domain: @domain,
-               document: @document,
-               draft: @draft,
-               path: @path %>
+    domain: @domain,
+    document: @document,
+    draft: @draft,
+    path: @path %>
   <% else %>
     <%= render "drafts/document_editor",
-               domain: @domain,
-               document: @document,
-               draft: @draft,
-               ptr: @ptr %>
+    domain: @domain,
+    document: @document,
+    draft: @draft,
+    ptr: @ptr %>
   <% end %>
 <% end %>
