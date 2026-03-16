@@ -1,21 +1,20 @@
-%nav.schema-nav{ data: { turbo_prefetch: "false" } }
-  - crumbs.each_with_index do |crumb, idx|
-    - options = choices_for(crumb[:path])
-    %span.schema-nav__group
-      = link_to crumb[:label],
-        nav_url(crumb[:path]),
+%nav.flex.items-center.gap-1.text-sm{ data: { turbo_prefetch: "false" } }
+  - segments.each_with_index do |segment, idx|
+    %div.relative.inline-block.group
+      = link_to segment.label,
+        segment.url,
         data: { turbo_frame: turbo_frame, turbo_action: "advance" },
-        class: "schema-nav__crumb"
-      - if options.any?
-        %button.schema-nav__chev{
-          type: "button",
-          data: { action: "click->dropdown#toggle", dropdown_level_param: idx }
-        }
-          >
-        %div.schema-nav__menu.hidden{ data: { dropdown_target: "menu", level: idx } }
-          - options.each do |key|
-            - target_path = child_path(crumb[:path], key)
-            = link_to key, nav_url(target_path), data: { turbo_frame: turbo_frame, turbo_action: "advance", action: "click->dropdown#close" }, class: "schema-nav__item"
-      - elsif idx < crumbs.length - 1
-        %span.schema-nav__sep.schema-nav__sep--disabled
-          >
+        class: "inline-flex items-center rounded-lg px-3 py-2 font-medium text-slate-200 hover:bg-slate-800/70 hover:text-white"
+
+      - if segment.menu_items.any?
+        .absolute.left-0.top-full.h-2.w-full
+        %div.absolute.left-0.top-full.z-50.mt-2.hidden.min-w-48.rounded-xl.border.border-slate-700.bg-slate-900.p-1.shadow-xl.group-hover:block
+          - segment.menu_items.each do |item|
+            = link_to item.label,
+              item.url,
+              data: { turbo_frame: turbo_frame, turbo_action: "advance" },
+              class: "block rounded-lg px-3 py-2 text-slate-200 hover:bg-slate-800 hover:text-white"
+
+    - if idx < segments.length - 1
+      %span.mx-1.text-slate-500
+        >

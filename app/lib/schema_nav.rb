@@ -1,4 +1,3 @@
-# app/services/schema_nav.rb
 # frozen_string_literal: true
 
 class SchemaNav

@@ -4,7 +4,7 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
-    if @document.schema_document?
+    if @draft.schema_document?
       @path = SchemaPath.normalize(params[:path])
     else
       @ptr = normalize_ptr(params[:ptr])

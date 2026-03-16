@@ -1,6 +1,4 @@
 - if @draft.schema_document?
-  = turbo_frame_tag "ribbon" do
-    = render SchemaNavRibbonComponent.new( domain: @domain, document: @document, draft: @draft, path: @path, turbo_frame: "editor")
   = turbo_frame_tag "editor" do
     = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
 - else
