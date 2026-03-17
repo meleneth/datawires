@@ -4,7 +4,9 @@ Rails.application.routes.draw do
     resources :documents, only: %i[index show]
   end
 
-  resources :schemas, only: %i[show]
+resources :schemas, only: %i[show] do
+  resources :documents, only: %i[create], module: :schemas
+end
 
 
   resources :documents, only: [] do

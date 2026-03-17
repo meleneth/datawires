@@ -1,6 +1,16 @@
 = turbo_frame_tag "main_content" do
   %h1 Schema
+  .flex.gap-2
+  = button_to "New document",
+    schema_documents_path(@document),
+    method: :post,
+    class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
 
+  = button_to "Edit schema",
+    document_draft_path(@document),
+    method: :post,
+    class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+  
   %p
     Domain:
     = @domain.name
