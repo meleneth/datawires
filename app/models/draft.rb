@@ -11,6 +11,8 @@ class Draft < ApplicationRecord
              class_name: "User",
              optional: true
 
+  delegate :domain, :schema_document, :schema_document?, to: :document
+
   scope :for_actor, ->(actor) { where(created_by: actor) }
 
   validate :body_must_be_json_object

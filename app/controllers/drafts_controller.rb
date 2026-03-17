@@ -5,9 +5,13 @@ class DraftsController < ApplicationController
 
   def show
     if @draft.schema_document?
-      @path = SchemaPath.normalize(params[:path])
+      @path = SchemaPath.new(params[:path])
     else
-      @ptr = normalize_ptr(params[:ptr])
+      @path = DocumentPath.new(params[:path] || params[:ptr])
+      @projection = DocumentProjection.new(source: @draft, path: @path)
+      @value = @projection.document_node
+      @schema_node = @projection.schema_node || {}
+      @properties = @schema_node.fetch("properties", {})
     end
   end
 

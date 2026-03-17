@@ -1,24 +1,64 @@
-- value = JsonPtr.get(draft.body, ptr)
+= render DocumentNavRibbonComponent.new(document: document, draft: draft, path: @path, turbo_frame: "editor")
 
 .space-y-4
   .flex.items-center.justify-between
-    %h3= "Edit: #{ptr}"
+    %h3.text-lg.font-semibold.text-ink= "Document: #{@path}"
 
-    = link_to "Commit…",
-      new_draft_commit_path(draft),
-      data: { turbo_frame: "main_content" },
-      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+    = link_to "Commit…", new_draft_commit_path(draft), class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5", data: { turbo_frame: "main_content" }
 
-  = form_with url: patch_ptr_draft_path(draft),
-              method: :patch,
-              data: { turbo_frame: "editor" },
-              html: { id: "draft-form" },
-              format: :turbo_stream do
-    = hidden_field_tag :ptr, ptr
+  - if @value.is_a?(Hash)
+    .space-y-3
+      - @properties.each do |name, prop_schema|
+        - child_path = @path.child(name)
+        - child_value = @value[name]
+        - openable = child_value.is_a?(Hash) || child_value.is_a?(Array) || prop_schema["type"] == "object" || prop_schema["type"] == "array"
 
-    - if value.is_a?(Hash) || value.is_a?(Array)
-      %pre= JSON.pretty_generate(value)
-      %p Composite values are read-only in v1.
-    - else
-      = text_field_tag :value, value, class: "w-full"
-      = submit_tag "Save"
+        - if openable
+          = link_to draft_path(draft, path: child_path.to_s), data: { turbo_frame: "editor", turbo_action: "advance" }, class: "block rounded-lg border border-ls5-violet-3 bg-white p-3 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+            .flex.items-center.justify-between.gap-4
+              .min-w-0
+                .font-medium.text-ink= name
+                .text-sm.text-ls5-violet-6= prop_schema["type"] || "(no type)"
+
+                - if child_value.nil?
+                  .mt-1.text-xs.text-ls5-violet-5 missing
+                - elsif child_value.is_a?(Hash) || child_value.is_a?(Array)
+                  .mt-1.text-xs.text-ls5-violet-5 present
+                - else
+                  .mt-1.text-xs.text-ls5-violet-5= child_value.inspect
+
+              .text-sm.font-medium.text-ls5-blue-4 Open
+        - else
+          .rounded-lg.border.border-ls5-violet-3.bg-white.p-3
+            .flex.items-center.justify-between.gap-4
+              .min-w-0
+                .font-medium.text-ink= name
+                .text-sm.text-ls5-violet-6= prop_schema["type"] || "(no type)"
+
+                - if child_value.nil?
+                  .mt-1.text-xs.text-ls5-violet-5 missing
+                - else
+                  .mt-1.text-xs.text-ls5-violet-5= child_value.inspect
+
+      - if @properties.empty?
+        .rounded-lg.border.border-ls5-violet-3.bg-white.p-4.text-sm.text-ls5-violet-6
+          No properties at this level.
+
+  - elsif @value.is_a?(Array)
+    .rounded-lg.border.border-ls5-violet-3.bg-white.p-4
+      %h4.mb-3.font-medium.text-ink Array value
+      %pre= JSON.pretty_generate(@value)
+      %p.text-sm.text-ls5-violet-6 Arrays are read-only in v1.
+
+  - else
+    .rounded-lg.border.border-ls5-violet-3.bg-white.p-4
+      %h4.mb-3.font-medium.text-ink Edit value
+
+      = form_with url: patch_ptr_draft_path(draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor" }, class: "space-y-4" do
+        = hidden_field_tag :ptr, @path.document_ptr
+
+        .space-y-1
+          = label_tag :value, "Value", class: "block text-sm font-medium text-ink"
+          = text_field_tag :value, @value, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink placeholder:text-ls5-violet-5 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4"
+
+        = submit_tag "Save", class: "rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"

@@ -14,6 +14,16 @@ class DocumentProjection
     JsonPtr.get(source.schema_document.body, path.schema_ptr)
   end
 
+  def schema_child_keys
+    node = schema_node
+    return [] unless node.is_a?(Hash)
+
+    properties = node["properties"]
+    return [] unless properties.is_a?(Hash)
+
+    properties.keys.sort
+  end
+
   def root?
     path.root?
   end

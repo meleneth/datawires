@@ -76,6 +76,7 @@ class SchemaNavRibbonComponent < ApplicationComponent
       path: SchemaPath.normalize(target_path)
     )
   end
+
   def tail_menu_items
     @nav.object_keys_at(path).map do |key|
       item_path = SchemaPath.new(path).child(key).to_s

@@ -1,7 +1,8 @@
+# app/lib/document_path.rb
 # frozen_string_literal: true
 
 class DocumentPath
-  ROOT = "/".freeze
+  ROOT = "".freeze
 
   def self.normalize(raw)
     JsonPtr::Pointer.parse(raw.presence || ROOT).to_s
@@ -14,6 +15,10 @@ class DocumentPath
   end
 
   def to_s
+    @path
+  end
+
+  def document_ptr
     @path
   end
 
@@ -31,28 +36,26 @@ class DocumentPath
   end
 
   def parent
-    return self.class.new(ROOT) if root?
-
-    toks = tokens[0...-1]
-    return self.class.new(ROOT) if toks.empty?
-
-    ptr = JsonPtr::Pointer.parse(ROOT)
-    toks.each { |tok| ptr = ptr.child(tok) }
-    self.class.new(ptr.to_s)
+    self.class.new(JsonPtr::Pointer.parse(@path).parent.to_s)
   end
 
-  def document_ptr
-    @path
-  end
-
+  # Maps document path → schema path
+  # e.g.
+  # ""                -> ""
+  # "/foo"            -> "/properties/foo"
+  # "/foo/bar"        -> "/properties/foo/properties/bar"
   def schema_ptr
     ptr = JsonPtr::Pointer.parse(ROOT)
+
     tokens.each do |tok|
       ptr = ptr.child("properties").child(tok)
     end
+
     ptr.to_s
   end
 
+  # Convenience for "what children exist here?"
+  # e.g. "/foo" -> "/properties/foo/properties"
   def schema_properties_ptr
     JsonPtr::Pointer.parse(schema_ptr).child("properties").to_s
   end
