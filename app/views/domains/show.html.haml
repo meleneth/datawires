@@ -1,23 +1,23 @@
 = render ThingCardComponent.new do |c|
-  - c.with_label do
-    = "#{@domain.name} Domain"
-  %p{style: "color: green"}= notice
+  - c.with_label { "#{@domain.name} Domain" }
+
+  - if notice.present?
+    %p.text-ls5-green-7= notice
 
   = render @domain
 
-  %div
-    = link_to "Edit this domain", edit_domain_path(@domain)
-    |
-    = link_to "Back to domains", domains_path
+  .mt-4.flex.flex-wrap.items-center.gap-3
+    = link_to "Edit this domain", edit_domain_path(@domain), class: "text-ls5-blue-4 hover:text-ls5-blue-5"
+    = link_to "Back to domains", domains_path, class: "text-ls5-violet-6 hover:text-ls5-violet-7"
+    = button_to "Destroy this domain", @domain, method: :delete, class: "inline-block"
 
-    = button_to "Destroy this domain", @domain, method: :delete
+  .mt-6.space-y-3
+    %h2.text-lg.font-semibold.text-ink Add schema
 
-  %h2 Add schema
-
-  = form_with model: [@domain, @document], url: domain_schemas_path(@domain) do |f|
-    = f.label :key, "New schema name"
-    = f.text_field :key, autofocus: true
-    = f.submit "Create"
+    = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
+      = render TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
+      = render ButtonComponent.new(type: :submit, tone: :primary) do
+        Create
 
 = render "domains/open_drafts"
 

@@ -1,19 +1,17 @@
-= form_with(model: domain) do |form|
+= form_with(model: domain, class: "space-y-6") do |form|
   - if domain.errors.any?
-    %div{style: "color: red"}
-      %h2= "#{pluralize(domain.errors.count, "error")} prohibited this domain from being saved:"
-
-      %ul
+    .rounded-lg.border.border-ls5-red-6.bg-ls5-red-1.p-4.text-ls5-red-8
+      %h2.font-semibold
+        = "#{pluralize(domain.errors.count, "error")} prohibited this domain from being saved:"
+      %ul.mt-2.list-disc.pl-5
         - domain.errors.each do |error|
           %li= error.full_message
 
-  %div
-    = form.label :name, style: "display: block"
-    = form.text_field :name
+  .space-y-4
+    = render TextFieldComponent.new(form: form, name: :name)
+    = render TextFieldComponent.new(form: form, name: :slug)
+    
 
-  %div
-    = form.label :slug, style: "display: block"
-    = form.text_field :slug
-
-  %div
-    = form.submit
+  .pt-2
+    = render ButtonComponent.new(type: :submit, tone: :primary) do
+      Save domain
