@@ -9,6 +9,10 @@ class DocumentProjection
     @path = path.is_a?(DocumentPath) ? path : DocumentPath.new(path)
   end
 
+  def root?
+    path.root?
+  end
+
   def document_node
     JsonPtr.get(@source.body, path.document_ptr)
   end
