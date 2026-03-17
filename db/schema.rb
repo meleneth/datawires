@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_03_033732) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_205451) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -20,11 +20,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_033732) do
     t.uuid "domain_id", null: false
     t.uuid "head_revision_id"
     t.string "key", null: false
+    t.uuid "schema_document_id"
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["domain_id", "key"], name: "index_documents_on_domain_id_and_key", unique: true
     t.index ["domain_id"], name: "index_documents_on_domain_id"
     t.index ["head_revision_id"], name: "index_documents_on_head_revision_id"
+    t.index ["schema_document_id"], name: "index_documents_on_schema_document_id"
   end
 
   create_table "domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -83,6 +85,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_033732) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "documents", "documents", column: "schema_document_id"
   add_foreign_key "documents", "domains"
   add_foreign_key "documents", "revisions", column: "head_revision_id"
   add_foreign_key "drafts", "documents"

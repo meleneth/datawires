@@ -10,6 +10,8 @@ class Document < ApplicationRecord
              optional: true,
              inverse_of: :head_for_documents
 
+  belongs_to :schema_document, class_name: "Document", optional: true
+
   has_many :revisions,
            -> { order(created_at: :asc) },
            dependent: :restrict_with_exception,
@@ -20,6 +22,7 @@ class Document < ApplicationRecord
            inverse_of: :document
 
   validates :key, presence: true, uniqueness: { scope: :domain_id }
+  validate :schema_document_must_be_a_schema, if: -> { schema_document_id.present? }
 
   scope :with_head, -> { joins(:head_revision) }
 
@@ -44,6 +47,12 @@ class Document < ApplicationRecord
   end
 
   def schema_document?
-    body.is_a?(Hash) && body["$schema"].present?
+    body.is_a?(Hash) && body["$schema"] == JSON_SCHEMA_2020_12
+  end
+
+  def schema_document_must_be_a_schema
+    return if schema_document&.schema_document?
+
+    errors.add(:schema_document, "must reference a schema document")
   end
 end
