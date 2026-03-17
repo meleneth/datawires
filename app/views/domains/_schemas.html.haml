@@ -1,12 +1,15 @@
-= render PageHeaderComponent.new(text: "Schemas")
+= turbo_frame_tag "main_content" do
+  = render PageHeaderComponent.new(text: "Schemas")
 
-= render CardComponent.new do
-  - if @schemas.any?
-    %ul.mt-2.space-y-2
-      - @schemas.each do |schema|
-        %li
-          = link_to schema_path(schema), class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
-            .font-medium.text-ls5-blue-4= schema.key
-            .text-xs.text-ls5-violet-6= "updated #{time_ago_in_words(schema.updated_at)} ago"
-  - else
-    %p.mt-2.text-ls5-violet-6 No schemas yet
+  = render CardComponent.new do
+    - if @schemas.any?
+      %ul.mt-2.space-y-2
+        - @schemas.each do |schema|
+          %li
+            = link_to schema_path(schema),
+              data: { turbo_frame: "main_content" },
+              class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+              .font-medium.text-ls5-blue-4= schema.key
+              .text-xs.text-ls5-violet-6= "updated #{time_ago_in_words(schema.updated_at)} ago"
+    - else
+      %p.mt-2.text-ls5-violet-6 No schemas yet
