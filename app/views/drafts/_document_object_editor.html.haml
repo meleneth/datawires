@@ -1,0 +1,30 @@
+.space-y-3
+  - @property_rows.each do |row|
+    - if row.openable?
+      = link_to draft_path(draft, path: row.path.to_s), data: { turbo_frame: "editor", turbo_action: "advance" }, class: "block rounded-lg border border-ls5-violet-3 bg-white p-3 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+        .flex.items-center.justify-between.gap-4
+          .min-w-0
+            .font-medium.text-ink= row.name
+            .text-sm.text-ls5-violet-6= row.type
+
+            - if row.required?
+              .mt-1.text-xs.text-ls5-violet-5 required
+
+            .mt-1.text-xs.text-ls5-violet-5= row.value_label
+
+          .text-sm.font-medium.text-ls5-blue-4 Open
+    - else
+      .rounded-lg.border.border-ls5-violet-3.bg-white.p-3
+        .flex.items-center.justify-between.gap-4
+          .min-w-0
+            .font-medium.text-ink= row.name
+            .text-sm.text-ls5-violet-6= row.type
+
+            - if row.required?
+              .mt-1.text-xs.text-ls5-violet-5 required
+
+            .mt-1.text-xs.text-ls5-violet-5= row.value_label
+
+  - if @property_rows.empty?
+    .rounded-lg.border.border-ls5-violet-3.bg-white.p-4.text-sm.text-ls5-violet-6
+      No properties at this level.

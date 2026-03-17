@@ -1,7 +1,6 @@
 = turbo_frame_tag "main_content" do
-  - if @draft.schema_document?
-    = turbo_frame_tag "editor" do
+  = turbo_frame_tag "editor" do
+    - if @draft.schema_document?
       = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
-  - else
-    = turbo_frame_tag "editor" do
-      = render "document_editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr
+    - else
+      = render "document_editor", domain: @domain, document: @document, draft: @draft, path: @path

@@ -12,6 +12,7 @@ class DraftsController < ApplicationController
       @value = @projection.document_node
       @schema_node = @projection.schema_node || {}
       @properties = @schema_node.fetch("properties", {})
+      @property_rows = @projection.child_rows
     end
   end
 
