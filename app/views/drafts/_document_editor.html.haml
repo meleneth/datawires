@@ -6,6 +6,7 @@
 
     = link_to "Commit…",
       new_draft_commit_path(draft),
+      data: { turbo_frame: "main_content" },
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
   = form_with url: patch_ptr_draft_path(draft),

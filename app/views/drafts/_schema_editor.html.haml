@@ -10,7 +10,7 @@
   .flex.items-center.justify-between
     %h3.text-lg.font-semibold.text-ink= "Schema: #{path}"
 
-    = link_to "Commit…", new_draft_commit_path(draft), class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+    = link_to "Commit…", new_draft_commit_path(draft), class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5", data: { turbo_frame: "main_content" }
 
   .space-y-3
     - properties.each do |name, prop_schema|

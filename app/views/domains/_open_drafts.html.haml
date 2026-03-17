@@ -1,18 +1,14 @@
-= render ThingCardComponent.new do |c|
-  - c.with_label do
-    Open Drafts
+= render PageHeaderComponent.new(text: "Open Drafts")
 
+= render CardComponent.new do
   - if @drafts.any?
-    %ul.mt-2.space-y-1
+    %ul.mt-2.space-y-2
       - @drafts.each do |draft|
-        %li{class: "flex justify-between items-center bg-slate-800/60 rounded px-3 py-2"}
-          = link_to draft.document.key,
-            draft_path(draft),
-            class: "text-sky-400 hover:text-sky-300 hover:underline font-medium"
-
-          %span.text-slate-400.text-xs
-            updated #{time_ago_in_words(draft.updated_at)} ago
+        %li
+          = link_to draft_path(draft), class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+            .min-w-0
+              .font-medium.text-ls5-blue-4= draft.document.key
+              .text-xs.text-ls5-violet-6
+                = "updated #{time_ago_in_words(draft.updated_at)} ago"
   - else
-    %p.text-slate-500.mt-2
-      No drafts yet
-
+    %p.mt-2.text-ls5-violet-6 No drafts yet

@@ -1,18 +1,12 @@
-= render ThingCardComponent.new do |c|
-  - c.with_label do
-    Schemas
+= render PageHeaderComponent.new(text: "Schemas")
 
+= render CardComponent.new do
   - if @schemas.any?
-    %ul.mt-2.space-y-1
+    %ul.mt-2.space-y-2
       - @schemas.each do |schema|
-        %li{class: "flex justify-between items-center bg-slate-800/60 rounded px-3 py-2"}
-          = link_to schema.key,
-            schema_path(schema),
-            class: "text-sky-400 hover:text-sky-300 hover:underline font-medium"
-
-          %span.text-slate-400.text-xs
-            updated #{time_ago_in_words(schema.updated_at)} ago
+        %li
+          = link_to schema_path(schema), class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+            .font-medium.text-ls5-blue-4= schema.key
+            .text-xs.text-ls5-violet-6= "updated #{time_ago_in_words(schema.updated_at)} ago"
   - else
-    %p.text-slate-500.mt-2
-      No schemas yet
-
+    %p.mt-2.text-ls5-violet-6 No schemas yet

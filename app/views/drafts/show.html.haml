@@ -1,8 +1,7 @@
-- if @draft.schema_document?
-  = turbo_frame_tag "editor" do
-    = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
-- else
-  = turbo_frame_tag "ribbon" do
-    = render "ribbon", domain: @domain, document: @document, draft: @draft, ptr: @ptr
-  = turbo_frame_tag "editor" do
-    = render "document_editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr
+= turbo_frame_tag "main_content" do
+  - if @draft.schema_document?
+    = turbo_frame_tag "editor" do
+      = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
+  - else
+    = turbo_frame_tag "editor" do
+      = render "document_editor", domain: @domain, document: @document, draft: @draft, ptr: @ptr

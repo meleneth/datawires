@@ -1,24 +1,30 @@
-= render ThingCardComponent.new do |c|
-  - c.with_label { "#{@domain.name} Domain" }
+= turbo_frame_tag "main_content" do
+  = render PageHeaderComponent.new(text: "#{@domain.name} Domain")
 
-  - if notice.present?
-    %p.text-ls5-green-7= notice
+  = render CardComponent.new do
+    - if notice.present?
+      %p.mb-4.text-ls5-green-7= notice
 
-  = render @domain
+    .space-y-2
+      .text-sm.text-ls5-violet-6 Name
+      .text-lg.font-medium.text-ink= @domain.name
 
-  .mt-4.flex.flex-wrap.items-center.gap-3
-    = link_to "Edit this domain", edit_domain_path(@domain), class: "text-ls5-blue-4 hover:text-ls5-blue-5"
-    = link_to "Back to domains", domains_path, class: "text-ls5-violet-6 hover:text-ls5-violet-7"
-    = button_to "Destroy this domain", @domain, method: :delete, class: "inline-block"
+    .space-y-2.mt-4
+      .text-sm.text-ls5-violet-6 Slug
+      .text-base.text-ink= @domain.slug
 
-  .mt-6.space-y-3
-    %h2.text-lg.font-semibold.text-ink Add schema
+    .mt-6.flex.flex-wrap.items-center.gap-3
+      = link_to "Edit this domain", edit_domain_path(@domain), class: "text-ls5-blue-4 hover:text-ls5-blue-5"
+      = link_to "Back to domains", domains_path, class: "text-ls5-violet-6 hover:text-ls5-violet-7"
+      = button_to "Destroy this domain", @domain, method: :delete, class: "rounded-lg border border-ls5-red-7 bg-ls5-red-6 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-red-7"
 
-    = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
-      = render TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
-      = render ButtonComponent.new(type: :submit, tone: :primary) do
-        Create
+    .mt-6.space-y-3
+      %h2.text-lg.font-semibold.text-ink Add schema
 
-= render "domains/open_drafts"
+      = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
+        = render TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
+        = render ButtonComponent.new(type: :submit, tone: :primary) do
+          Create
 
-= render "domains/schemas"
+  = render "domains/open_drafts"
+  = render "domains/schemas"
