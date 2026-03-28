@@ -16,20 +16,49 @@ class DraftsController < ApplicationController
     end
   end
 
-  def patch_ptr
-    @ptr = normalize_ptr(params[:ptr])
-    value = params[:value]
+def patch_ptr
+  @ptr = normalize_ptr(params[:ptr])
+  path = DocumentPath.new(@ptr)
+  projection = DocumentProjection.new(source: @draft, path: path)
+  schema_node = projection.schema_node || {}
 
-    @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
+  value = coerce_scalar_value(params[:value], schema_node)
 
-    respond_to do |format|
-      format.turbo_stream
-      format.html { redirect_to draft_path(@draft, ptr: @ptr) }
-    end
-  rescue KeyError => e
-    render plain: e.message, status: :unprocessable_entity
+  @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
+
+  respond_to do |format|
+    format.turbo_stream
+    format.html { redirect_to draft_path(@draft, ptr: @ptr) }
   end
+rescue KeyError => e
+  render plain: e.message, status: :unprocessable_entity
+end
 
+private
+
+  def coerce_scalar_value(raw, schema_node)
+    return raw if schema_node.blank?
+
+    if schema_node["enum"].present?
+      return nil if raw.blank?
+      return raw
+    end
+
+    case schema_node["type"]
+    when "boolean"
+      ActiveModel::Type::Boolean.new.cast(raw)
+    when "integer"
+      return nil if raw.blank?
+      Integer(raw, 10)
+    when "number"
+      return nil if raw.blank?
+      Float(raw)
+    else
+      raw
+    end
+  rescue ArgumentError, TypeError
+    raw
+  end
   def publish
     revision = PublishDraft.call(
       draft: @draft,
@@ -88,5 +117,29 @@ class DraftsController < ApplicationController
     else
       draft_path(@draft, ptr: normalize_ptr(params[:ptr]))
     end
+  end
+
+  def coerce_scalar_value(raw, schema_node)
+    return raw if schema_node.blank?
+
+    if schema_node["enum"].present?
+      return nil if raw.blank?
+      return raw
+    end
+
+    case schema_node["type"]
+    when "boolean"
+      ActiveModel::Type::Boolean.new.cast(raw)
+    when "integer"
+      return nil if raw.blank?
+      Integer(raw, 10)
+    when "number"
+      return nil if raw.blank?
+      Float(raw)
+    else
+      raw
+    end
+  rescue ArgumentError, TypeError
+    raw
   end
 end

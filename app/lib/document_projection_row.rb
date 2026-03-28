@@ -8,8 +8,20 @@ class DocumentProjectionRow
 
   attr_reader :name
 
+  def draft
+    @projection.source
+  end
+
+  def schema_node
+    @schema_node ||= @projection.child_schema(name) || {}
+  end
+
+  def enum_values
+    Array(schema_node["enum"]).presence
+  end
+
   def type
-    schema["type"] || "(no type)"
+    schema_node["type"] || "(no type)"
   end
 
   def required?
@@ -37,6 +49,8 @@ class DocumentProjectionRow
   end
 
   def input_kind
+    return :select if enum_values.present?
+
     case type
     when "boolean"
       :checkbox
@@ -58,6 +72,10 @@ class DocumentProjectionRow
     end
   end
 
+  def checkbox_value
+    ActiveModel::Type::Boolean.new.cast(field_value)
+  end
+
   def path
     @projection.path.child(name)
   end
@@ -71,11 +89,5 @@ class DocumentProjectionRow
     return "present" if composite?
 
     value.inspect
-  end
-
-  private
-
-  def schema
-    @schema ||= @projection.child_schema(name)
   end
 end

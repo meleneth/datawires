@@ -8,21 +8,9 @@
 
           - if row.required?
             .mt-1.text-xs.text-ls5-violet-5 required
-
           - if row.scalar?
-            = form_with url: patch_ptr_draft_path(draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor", controller: "autosave" }, class: "mt-3" do
-              = hidden_field_tag :ptr, row.ptr
-
-              - case row.input_kind
-              - when :checkbox
-                %label.flex.items-center.gap-2
-                  = check_box_tag :value, "true", row.field_value, data: { action: "change->autosave#submit blur->autosave#submit" }
-                  %span.text-sm.text-ink Set
-              - when :number
-                = number_field_tag :value, row.field_value, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink", data: { action: "input->autosave#queue blur->autosave#submit" }
-              - else
-                = text_field_tag :value, row.field_value, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink", data: { action: "input->autosave#queue blur->autosave#submit" }
-
+            .mt-3
+              = render DocumentScalarFieldComponent.new(row: row)
           - elsif row.composite?
             .mt-2.text-xs.text-ls5-violet-5= row.value_label
 

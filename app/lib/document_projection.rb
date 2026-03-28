@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 class DocumentProjection
-  attr_reader :path
+  attr_reader :source, :path
 
   def initialize(source:, path:)
     @source = source

@@ -38,5 +38,7 @@ Rails.application.routes.draw do
     resources :messages
   end
 
+  root to: "domains#index"
+
   get "up" => "rails/health#show", as: :rails_health_check
 end

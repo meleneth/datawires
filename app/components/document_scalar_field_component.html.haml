@@ -1,0 +1,23 @@
+= form_with url: patch_ptr_draft_path(row.draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor", controller: "autosave", autosave_delay_value: 400 }, class: "space-y-4" do
+  = hidden_field_tag :ptr, row.ptr
+
+  .space-y-1
+    = label_tag field_id, row.name, class: "block text-sm font-medium text-ink"
+
+    - case row.input_kind
+    - when :checkbox
+      = hidden_field_tag :value, "false", id: nil
+      %label.flex.items-center.gap-2
+        = check_box_tag :value, "true", row.checkbox_value, id: field_id, data: { action: "change->autosave#submit blur->autosave#submit" }
+        %span.text-sm.text-ink Set
+
+    - when :number
+      = number_field_tag :value, row.field_value, id: field_id, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink", data: { action: "input->autosave#queue blur->autosave#submit change->autosave#submit" }
+
+    - when :select
+      = select_tag :value, options_for_select(row.enum_values, row.field_value), include_blank: true, id: field_id, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4", data: { action: "change->autosave#submit blur->autosave#submit" }
+
+    - else
+      = text_field_tag :value, row.field_value, id: field_id, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink placeholder:text-ls5-violet-5 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4", data: { action: "input->autosave#queue blur->autosave#submit change->autosave#submit" }
+
+  = submit_tag "Save", class: "hidden"

@@ -1,11 +1,6 @@
 .rounded-lg.border.border-ls5-violet-3.bg-white.p-4
   %h4.mb-3.font-medium.text-ink Edit value
 
-  = form_with url: patch_ptr_draft_path(draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor" }, class: "space-y-4" do
-    = hidden_field_tag :ptr, @path.document_ptr
-
-    .space-y-1
-      = label_tag :value, "Value", class: "block text-sm font-medium text-ink"
-      = text_field_tag :value, @value, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink placeholder:text-ls5-violet-5 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4"
-
-    = submit_tag "Save", class: "rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+  - row = DocumentScalarFieldRow.new(draft: draft, ptr: @path.document_ptr, field_value: @value, schema_node: @schema_node, name: @path.to_s)
+  - component = DocumentScalarFieldComponent.new(row: row)
+  = render(component)
