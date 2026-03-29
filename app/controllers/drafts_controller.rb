@@ -4,10 +4,34 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
+    load_document_editor_state(params[:path] || params[:ptr])
+  end
+
+  def patch_ptr
+    @ptr = normalize_ptr(params[:ptr])
+    path = DocumentPath.new(@ptr)
+    projection = DocumentProjection.new(source: @draft, path: path)
+    schema_node = projection.schema_node || {}
+
+    value = coerce_scalar_value(params[:value], schema_node)
+
+    @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
+
+    respond_to do |format|
+      format.turbo_stream { head :no_content }
+      format.html { redirect_to draft_path(@draft, ptr: @ptr) }
+    end
+  rescue KeyError => e
+    render plain: e.message, status: :unprocessable_entity
+  end
+
+  private
+
+  def load_document_editor_state(path_param = nil)
     if @draft.schema_document?
-      @path = SchemaPath.new(params[:path])
+      @path = SchemaPath.new(path_param)
     else
-      @path = DocumentPath.new(params[:path] || params[:ptr])
+      @path = DocumentPath.new(path_param || params[:ptr])
       @projection = DocumentProjection.new(source: @draft, path: @path)
       @value = @projection.document_node
       @schema_node = @projection.schema_node || {}
@@ -15,26 +39,6 @@ class DraftsController < ApplicationController
       @property_rows = @projection.child_rows
     end
   end
-
-def patch_ptr
-  @ptr = normalize_ptr(params[:ptr])
-  path = DocumentPath.new(@ptr)
-  projection = DocumentProjection.new(source: @draft, path: path)
-  schema_node = projection.schema_node || {}
-
-  value = coerce_scalar_value(params[:value], schema_node)
-
-  @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
-
-  respond_to do |format|
-    format.turbo_stream
-    format.html { redirect_to draft_path(@draft, ptr: @ptr) }
-  end
-rescue KeyError => e
-  render plain: e.message, status: :unprocessable_entity
-end
-
-private
 
   def coerce_scalar_value(raw, schema_node)
     return raw if schema_node.blank?

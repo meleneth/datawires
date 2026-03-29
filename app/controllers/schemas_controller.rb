@@ -27,6 +27,7 @@ class SchemasController < ApplicationController
   def show
     @document = Document.find(params[:id])
     @domain = @document.domain
+    @instance_documents = @document.instance_documents.order(updated_at: :desc)
   end
 
   private

@@ -1,4 +1,3 @@
-// app/javascript/controllers/autosave_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -14,7 +13,8 @@ export default class extends Controller {
     this.clearTimer()
   }
 
-  queue() {
+  queue(event) {
+    event?.preventDefault()
     this.clearTimer()
     this.timeout = setTimeout(() => this.submit(), this.delayValue)
   }

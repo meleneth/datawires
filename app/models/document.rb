@@ -10,8 +10,6 @@ class Document < ApplicationRecord
              optional: true,
              inverse_of: :head_for_documents
 
-  belongs_to :schema_document, class_name: "Document", optional: true
-
   has_many :revisions,
            -> { order(created_at: :asc) },
            dependent: :restrict_with_exception,
@@ -26,10 +24,28 @@ class Document < ApplicationRecord
 
   scope :with_head, -> { joins(:head_revision) }
 
+  belongs_to :schema_document,
+            class_name: "Document",
+            optional: true,
+            inverse_of: :instance_documents
+
+  has_many :instance_documents,
+          class_name: "Document",
+          foreign_key: :schema_document_id,
+          inverse_of: :schema_document
+
+  JSON_SCHEMA_MARKER = { "$schema" => JSON_SCHEMA_2020_12 }.freeze
+
   scope :schemas, -> {
-          joins(:head_revision)
-            .where("revisions.body @> ?", { "$schema" => JSON_SCHEMA_2020_12 }.to_json)
-        }
+    joins(:head_revision)
+      .where("revisions.body @> ?", JSON_SCHEMA_MARKER.to_json)
+  }
+
+  scope :non_schemas, -> {
+    left_joins(:head_revision)
+      .where("revisions.id IS NULL OR NOT (revisions.body @> ?)", JSON_SCHEMA_MARKER.to_json)
+  }
+
 
   def to_param
     id
