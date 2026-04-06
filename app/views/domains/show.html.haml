@@ -9,10 +9,6 @@
       .text-sm.text-ls5-violet-6 Name
       .text-lg.font-medium.text-ink= @domain.name
 
-    .space-y-2.mt-4
-      .text-sm.text-ls5-violet-6 Slug
-      .text-base.text-ink= @domain.slug
-
     .mt-6.flex.flex-wrap.items-center.gap-3
       = link_to "Edit this domain", edit_domain_path(@domain), class: "text-ls5-blue-4 hover:text-ls5-blue-5"
       = link_to "Back to domains", domains_path, class: "text-ls5-violet-6 hover:text-ls5-violet-7"

@@ -9,9 +9,6 @@
 
   .space-y-4
     = render TextFieldComponent.new(form: form, name: :name)
-    = render TextFieldComponent.new(form: form, name: :slug)
-    
-
   .pt-2
     = render ButtonComponent.new(type: :submit, tone: :primary) do
       Save domain
