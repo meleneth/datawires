@@ -11,6 +11,8 @@ class Domain < ApplicationRecord
            class_name: "Document",
            inverse_of: :domain
 
+  validates :name, presence: true, uniqueness: true
+
   def open_drafts
     Draft.joins(:document)
       .where(documents: { domain_id: id })

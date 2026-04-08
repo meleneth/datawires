@@ -1,3 +1,12 @@
+# frozen_string_literal: true
+
+require_relative "seeds/support/document_seed_helper"
+require_relative "seeds/support/journey_event_schema"
+require_relative "seeds/support/journey_event_example_document"
+
+Seeds::JourneyEventSchema.seed!
+Seeds::JourneyEventExampleDocument.seed!
+
 require_relative "seeds/edit_form_schema"
 
 # This file should ensure the existence of records required to run the application in every environment (production,
