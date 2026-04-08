@@ -12,17 +12,25 @@ RSpec.describe RenderView, type: :model do
     subject(:render_view) { build(:render_view) }
 
     it { is_expected.to validate_presence_of(:name) }
-    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:for_schema_document_id) }
+
+    it "validates uniqueness of name scoped to for_schema_document_id" do
+      create(:render_view, name: "default")
+
+      expect(build(:render_view, name: "default"))
+        .not_to be_valid
+    end
   end
 
   describe "custom validations" do
     let(:schema_document) { create(:document, :with_schema_head_revision) }
     let(:ordinary_document) { create(:document, :with_plain_head_revision) }
+    let(:view_document) { create(:document, :with_plain_head_revision) }
 
     it "is valid when for_schema_document is a schema document" do
       render_view = build(
         :render_view,
-        for_schema_document: schema_document
+        for_schema_document: schema_document,
+        view_document: view_document
       )
 
       expect(render_view).to be_valid
@@ -31,7 +39,8 @@ RSpec.describe RenderView, type: :model do
     it "is invalid when for_schema_document is not a schema document" do
       render_view = build(
         :render_view,
-        for_schema_document: ordinary_document
+        for_schema_document: ordinary_document,
+        view_document: view_document
       )
 
       expect(render_view).not_to be_valid

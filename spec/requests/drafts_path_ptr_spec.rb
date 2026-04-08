@@ -53,7 +53,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/character_class", value: "Warlock" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("character_class" => "Warlock")
   end
 
@@ -61,7 +61,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/character_level", value: "28" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("character_level" => 28)
   end
 
@@ -69,7 +69,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/notable", value: "true" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("notable" => true)
   end
 
@@ -77,7 +77,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/notable", value: "false" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("notable" => false)
   end
 
@@ -85,7 +85,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/notes", value: "Found Sander's RipRap" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("notes" => "Found Sander's RipRap")
   end
 
@@ -93,7 +93,7 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/character_class", value: "" }
 
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("character_class" => nil)
   end
 end

@@ -1,9 +1,7 @@
 # db/seeds/edit_form_schema.rb
 # frozen_string_literal: true
 
-domain = Domain.find_or_create_by!(name: "Datawires") do |d|
-  d.slug = "datawires" if d.respond_to?(:slug=)
-end
+domain = Domain.find_or_create_by!(name: "Datawires")
 
 schema_body = {
   "$schema" => "https://json-schema.org/draft/2020-12/schema",

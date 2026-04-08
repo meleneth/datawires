@@ -1,4 +1,3 @@
-# app/services/create_schema_document.rb
 # frozen_string_literal: true
 
 class CreateSchemaDocument
@@ -21,8 +20,8 @@ class CreateSchemaDocument
 
       draft = document.drafts.create!(
         created_by: @actor,
-        based_on_revision: document.head_revision, # nil on brand new doc is fine
-        body: starter_body,
+        based_on_revision: document.head_revision,
+        body: starter_body
       )
 
       Result.new(document, draft)
@@ -36,13 +35,13 @@ class CreateSchemaDocument
       "$schema" => Document::JSON_SCHEMA_2020_12,
       "$id" => schema_id,
       "type" => "object",
-      "properties" => {},
+      "properties" => {}
     }
   end
 
   def schema_id
-    # Pick one canonical rule and keep it forever.
-    # If domain.slug is not actually your host, swap it for whatever is.
-    "http://#{@domain.slug}/schemas/#{@key}"
+    # JSON Schema $id is a stable identifier, not necessarily a resolvable URL.
+    # In datawires, we derive it from the internal domain namespace and document key.
+    "http://#{@domain.name}/schemas/#{@key}"
   end
 end

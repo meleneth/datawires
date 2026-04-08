@@ -3,9 +3,7 @@
 FactoryBot.define do
   factory :revision do
     document
-    parent_revision { nil }
     body { {} }
-    message { nil }
-    created_by { nil }
+    message { "Initial revision" }
   end
 end

@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 class EditAffordance < ApplicationRecord
-  belongs_to :for_schema_document,
-    class_name: "Document",
-    inverse_of: :edit_affordances_for_schema
+  extend Forwardable
 
-  belongs_to :affordance_document,
-    class_name: "Document",
-    inverse_of: :edit_affordance_definition,
-    optional: false
+  belongs_to :for_schema_document, class_name: "Document", inverse_of: :edit_affordances_for_schema
+  belongs_to :affordance_document, class_name: "Document", inverse_of: :edit_affordance_definition
+
+  def_delegators :affordance_document, :head_revision
+  def_delegators :head_revision, :body
+
+  scope :for_schema, ->(document) { where(for_schema_document: document) }
 
   validates :name, presence: true, uniqueness: { scope: :for_schema_document_id }
 
