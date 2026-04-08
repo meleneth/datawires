@@ -13,7 +13,7 @@ Rails.application.routes.draw do
     patch :remove
   end
 
-  resources :documents, only: [] do
+  resources :documents, only: %i[show] do
     resource :draft, only: %i[create], module: :documents
   end
 

@@ -1,29 +1,40 @@
 = turbo_frame_tag "main_content" do
   %h1 Schema
-  .flex.gap-2
-  = button_to "New document",
-    schema_documents_path(@document),
-    method: :post,
-    class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
 
-  = button_to "Edit schema",
-    document_draft_path(@document),
-    method: :post,
-    class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
-  
-  %p
-    Domain:
-    = @domain.name
+  .mb-4.flex.gap-2
+    = button_to "New document",
+      schema_documents_path(@document),
+      method: :post,
+      class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
+
+    = button_to "Edit schema",
+      document_draft_path(@document),
+      method: :post,
+      data: { turbo_frame: "main_content" },
+      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
   %p
-    Key:
+    %strong Domain:
+    = @document.domain.name
+
+  %p
+    %strong Key:
     = @document.key
 
-  = button_to "Edit schema",
-    document_draft_path(@document),
-    method: :post,
-    data: { turbo_frame: "main_content" },
-    class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+  .mt-6
+    %h2.text-lg.font-semibold Documents using this schema
 
-  %pre
-    = JSON.pretty_generate(@document.head_revision.body)
+    - if @schema_documents.any?
+      %ul.mt-2.space-y-2
+        - @schema_documents.each do |doc|
+          %li
+            = link_to document_path(doc),
+              class: "block rounded-md border border-ls5-violet-2 px-3 py-2 hover:bg-ls5-violet-1" do
+              .font-medium.text-ls5-blue-4= doc.title.presence || doc.key
+              .text-xs.text-ls5-violet-6= doc.key
+    - else
+      %p.mt-2.text-sm.text-ls5-violet-6 No documents use this schema yet.
+
+  .mt-6
+    %pre
+      = JSON.pretty_generate(@document.head_revision.body)

@@ -59,12 +59,12 @@ class Document < ApplicationRecord
 
   scope :with_head, -> { joins(:head_revision) }
 
-  scope :schemas, -> {
+  scope :schemas, lambda {
     joins(:head_revision)
       .where("revisions.body @> ?", JSON_SCHEMA_MARKER.to_json)
   }
 
-  scope :non_schemas, -> {
+  scope :non_schemas, lambda {
     left_joins(:head_revision)
       .where("revisions.id IS NULL OR NOT (revisions.body @> ?)", JSON_SCHEMA_MARKER.to_json)
   }

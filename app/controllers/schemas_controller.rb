@@ -25,9 +25,17 @@ class SchemasController < ApplicationController
   end
 
   def show
-    @document = Document.find(params[:id])
+    document = Document
+      .includes(
+        :domain,
+        :head_revision,
+        instance_documents: :head_revision
+      )
+      .find(params[:id])
+
+    @document = SchemaDocument.new(document)
     @domain = @document.domain
-    @instance_documents = @document.instance_documents.order(updated_at: :desc)
+    @schema_documents = @document.conforming_documents
   end
 
   private

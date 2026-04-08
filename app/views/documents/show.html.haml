@@ -1,0 +1,39 @@
+= turbo_frame_tag "main_content" do
+  %h1= @document.title.presence || @document.key
+
+  %p
+    %strong Domain:
+    = @domain.name
+
+  %p
+    %strong Key:
+    = @document.key
+
+  - if @schema_document
+    %p
+      %strong Schema:
+      = link_to @schema_document.key, schema_path(@schema_document)
+
+  - if @edit_affordances.any?
+    .mt-6
+      %h2.text-lg.font-semibold Edit affordances
+
+      %ul.mt-2.space-y-2
+        - @edit_affordances.each do |affordance|
+          %li.rounded-md.border.border-ls5-blue-1.px-3.py-2
+            .font-medium= affordance.name
+            .text-xs.text-ls5-violet-6= affordance.affordance_document.key
+
+  - if @render_views.any?
+    .mt-6
+      %h2.text-lg.font-semibold Render views
+
+      %ul.mt-2.space-y-2
+        - @render_views.each do |render_view|
+          %li.rounded-md.border.border-ls5-violet-2.px-3.py-2
+            .font-medium= render_view.name
+            .text-xs.text-ls5-violet-6= render_view.view_document.key
+
+  .mt-6
+    %pre
+      = JSON.pretty_generate(@document.body)
