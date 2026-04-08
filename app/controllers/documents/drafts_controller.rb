@@ -5,7 +5,20 @@ class Documents::DraftsController < ApplicationController
     document = Document.find(params[:document_id])
     draft = EnsureDraftForDocument.call(document:, actor: current_user)
 
-    return redirect_to draft_path(draft, path: "/") if document.schema_document?
-    redirect_to draft_path(draft, ptr: "/")
+    redirect_to draft_path(draft, redirect_params(document))
+  end
+
+  private
+
+  def redirect_params(document)
+    base_params = {
+      edit_affordance_id: params[:edit_affordance_id]
+    }
+
+    if document.schema_document?
+      base_params.merge(path: "/")
+    else
+      base_params.merge(ptr: "/")
+    end
   end
 end

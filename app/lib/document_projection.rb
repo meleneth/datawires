@@ -2,11 +2,12 @@
 # frozen_string_literal: true
 
 class DocumentProjection
-  attr_reader :source, :path
+  attr_reader :source, :path, :edit_affordance
 
-  def initialize(source:, path:)
+  def initialize(source:, path:, edit_affordance: nil)
     @source = source
     @path = path.is_a?(DocumentPath) ? path : DocumentPath.new(path)
+    @edit_affordance = edit_affordance
   end
 
   def root?
@@ -14,11 +15,11 @@ class DocumentProjection
   end
 
   def document_node
-    JsonPtr.get(@source.body, path.document_ptr)
+    JsonPtr.get(source.body, path.document_ptr)
   end
 
   def schema_node
-    JsonPtr.get(@source.schema_document.body, path.schema_ptr)
+    JsonPtr.get(source.schema_document.body, path.schema_ptr)
   end
 
   def schema_child_keys
@@ -33,7 +34,7 @@ class DocumentProjection
   end
 
   def child_schema(name)
-    JsonPtr.get(@source.schema_document.body, path.child(name).schema_ptr) || {}
+    JsonPtr.get(source.schema_document.body, path.child(name).schema_ptr) || {}
   end
 
   def child_value(name)
@@ -56,9 +57,80 @@ class DocumentProjection
     Array(node.is_a?(Hash) ? node["required"] : nil).include?(name)
   end
 
+  def editor_rows
+    return affordance_editor_rows if edit_affordance.present?
+
+    default_editor_rows
+  end
+
   def child_rows
+    default_child_rows
+  end
+
+  def default_child_rows
     child_property_names.map do |name|
-      DocumentProjectionRow.new(projection: self, name:)
+      DocumentProjectionRow.new(projection: self, name: name)
     end
+  end
+
+  private
+
+  def default_editor_rows
+    default_child_rows.map do |row|
+      DocumentEditorRow.new(
+        cells: [
+          DocumentEditorFieldCell.new(
+            projection_row: row,
+            span: nil,
+            widget: "auto",
+            label: true
+          )
+        ]
+      )
+    end
+  end
+
+  def affordance_editor_rows
+    Array(edit_affordance["rows"]).map do |row|
+      DocumentEditorRow.new(
+        cells: Array(row).map { |cell| build_affordance_cell(cell) }.compact
+      )
+    end.reject { |row| row.cells.empty? }
+  end
+
+  def build_affordance_cell(cell)
+    if cell["kind"] == "commit"
+      return DocumentEditorCommitCell.new(
+        span: cell["span"],
+        message_mode: cell["message_mode"] || "hidden"
+      )
+    end
+
+    ptr = cell["ptr"]
+    return nil if ptr.blank?
+
+    projection_row = projection_row_for_ptr(ptr)
+
+    return nil unless projection_row
+
+    DocumentEditorFieldCell.new(
+      projection_row: projection_row,
+      span: cell["span"],
+      widget: cell["widget"] || "auto",
+      label: cell.key?("label") ? cell["label"] : true
+    )
+  end
+
+  def projection_row_for_ptr(ptr)
+    pointer = JsonPtr::Pointer.parse(ptr)
+    tokens = pointer.tokens.map(&:unescaped)
+    return nil unless tokens.length == 1
+
+    name = tokens.first
+    return nil unless child_property_names.include?(name)
+
+    DocumentProjectionRow.new(projection: self, name: name)
+  rescue ArgumentError
+    nil
   end
 end

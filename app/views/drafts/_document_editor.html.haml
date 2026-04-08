@@ -4,7 +4,10 @@
   .flex.items-center.justify-between
     %h3.text-lg.font-semibold.text-ink= "Document: #{@path}"
 
-    = link_to "Commit…", new_draft_commit_path(draft), data: { turbo_frame: "main_content" }, class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+    = link_to "Commit…",
+      new_draft_commit_path(draft, edit_affordance_id: params[:edit_affordance_id]),
+      data: { turbo_frame: "main_content" },
+      class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
   - if @value.is_a?(Hash)
     = render "document_object_editor", draft: draft

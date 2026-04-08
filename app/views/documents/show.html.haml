@@ -20,9 +20,12 @@
 
       %ul.mt-2.space-y-2
         - @edit_affordances.each do |affordance|
-          %li.rounded-md.border.border-ls5-blue-1.px-3.py-2
-            .font-medium= affordance.name
-            .text-xs.text-ls5-violet-6= affordance.affordance_document.key
+          %li
+            = button_to document_draft_path(@document, edit_affordance_id: affordance.id),
+              method: :post,
+              class: "block w-full rounded-md border border-ls5-blue-1 px-3 py-2 text-left hover:bg-ls5-blue-1" do
+              .font-medium= affordance.name
+              .text-xs.text-ls5-violet-6= affordance.affordance_document.key
 
   - if @render_views.any?
     .mt-6
