@@ -9,11 +9,12 @@ class DraftsController < ApplicationController
 
   def patch_ptr
     @ptr = normalize_ptr(params[:ptr])
-    path = Documents::Path.new(@ptr)
+    render_path = params[:path].presence || "/"
+    field_path = Documents::Path.new(@ptr)
 
     projection = Documents::Projection.new(
       source: @draft,
-      path: path,
+      path: field_path,
       edit_affordance: selected_edit_affordance_body
     )
 
@@ -22,12 +23,14 @@ class DraftsController < ApplicationController
 
     @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
 
+    load_document_editor_state(render_path)
+
     respond_to do |format|
-      format.turbo_stream { head :no_content }
+      format.turbo_stream
       format.html do
         redirect_to draft_path(
           @draft,
-          ptr: @ptr,
+          path: render_path,
           edit_affordance_id: params[:edit_affordance_id]
         )
       end
@@ -39,12 +42,14 @@ class DraftsController < ApplicationController
   private
 
   def load_document_editor_state(path_param = nil)
+    effective_path = path_param.presence || params[:path].presence || params[:ptr].presence || "/"
+
     if @draft.schema_document?
-      @path = Schemas::Path.new(path_param)
+      @path = Schemas::Path.new(effective_path)
       return
     end
 
-    @path = Documents::Path.new(path_param || params[:ptr])
+    @path = Documents::Path.new(effective_path)
     @projection = Documents::Projection.new(
       source: @draft,
       path: @path,
@@ -54,24 +59,7 @@ class DraftsController < ApplicationController
     @schema_node = @projection.schema_node || {}
     @properties = @schema_node.fetch("properties", {})
     @editor_rows = @projection.editor_rows
-    @debug_line = {
-        domain: @domain&.attributes,
-        document: @document.respond_to?(:document) ? @document.document.attributes : @document&.attributes,
-        draft: @draft&.attributes,
-        path: @path&.to_s,
-        edit_affordance: selected_edit_affordance_body
-      }.pretty_inspect
-      @debug_editor_rows = {
-        value_class: @value.class.name,
-        editor_rows_class: @editor_rows.class.name,
-        editor_rows_count: @editor_rows.size,
-        first_row_class: @editor_rows.first&.class&.name,
-        first_row_cells_count: @editor_rows.first&.cells&.size,
-        first_cell_class: @editor_rows.first&.cells&.first&.class&.name,
-        first_field_name: @editor_rows.first&.cells&.first&.respond_to?(:projection_row) ? @editor_rows.first.cells.first.projection_row.name : nil
-      }.pretty_inspect
   end
-
 
   def load
     @draft = Draft.find(params[:id])

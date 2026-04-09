@@ -2,12 +2,13 @@
 
 module Editors
   class DocumentObjectEditorComponent < ApplicationComponent
-    attr_reader :draft, :editor_rows, :edit_affordance_id
+    attr_reader :draft, :editor_rows, :edit_affordance_id, :current_path
 
-    def initialize(draft:, editor_rows:, edit_affordance_id: nil)
+    def initialize(draft:, editor_rows:, edit_affordance_id: nil, current_path: nil)
       @draft = draft
       @editor_rows = editor_rows
       @edit_affordance_id = edit_affordance_id
+      @current_path = current_path
     end
   end
 end

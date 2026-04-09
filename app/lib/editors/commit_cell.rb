@@ -1,6 +1,6 @@
-module Editors
-  # frozen_string_literal: true
+# frozen_string_literal: true
 
+module Editors
   class CommitCell
     attr_reader :span, :message_mode
 
@@ -17,8 +17,8 @@ module Editors
       true
     end
 
-    def span_class
-      "col-span-#{span || 12}"
+    def span_class(column_count)
+      "col-span-#{span || column_count}"
     end
   end
 end

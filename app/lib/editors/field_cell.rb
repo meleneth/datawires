@@ -19,8 +19,8 @@ module Editors
       false
     end
 
-    def span_class
-      "col-span-#{span || 12}"
+    def span_class(column_count)
+      "col-span-#{span || column_count}"
     end
   end
 end

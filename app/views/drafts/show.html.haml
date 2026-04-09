@@ -1,8 +1,10 @@
 = turbo_frame_tag "main_content" do
   = turbo_frame_tag "editor" do
-    %pre.text-xs.text-ls5-violet-6= @debug_line
-    %pre.text-xs.text-ls5-violet-4= @debug_editor_rows
+    Path is:
+    = @path
     - if @draft.schema_document?
       = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
     - else
       = render "document_editor", domain: @domain, document: @document, draft: @draft, path: @path
+  = turbo_frame_tag "review" do
+    = render "drafts/review", draft: @draft

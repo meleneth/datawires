@@ -2,12 +2,13 @@
 
 module Editors
   class FieldCellComponent < ApplicationComponent
-    attr_reader :cell, :draft, :edit_affordance_id
+    attr_reader :cell, :draft, :edit_affordance_id, :current_path
 
-    def initialize(cell:, draft:, edit_affordance_id: nil)
+    def initialize(cell:, draft:, edit_affordance_id: nil, current_path: nil)
       @cell = cell
       @draft = draft
       @edit_affordance_id = edit_affordance_id
+      @current_path = current_path
     end
 
     def row

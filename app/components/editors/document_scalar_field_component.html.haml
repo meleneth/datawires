@@ -1,7 +1,8 @@
 = form_with url: patch_ptr_draft_path(row.draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor", controller: "autosave", autosave_delay_value: 400 }, class: "space-y-4" do
   = hidden_field_tag :ptr, row.ptr
   = hidden_field_tag :edit_affordance_id, params[:edit_affordance_id] if params[:edit_affordance_id].present?
-
+  = hidden_field_tag :path, current_path if current_path.present?
+  
   .space-y-1
     - if show_label
       = label_tag field_id, row.name, class: "block text-sm font-medium text-ink"

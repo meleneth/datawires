@@ -2,5 +2,4 @@
   %h4.mb-3.font-medium.text-ink Edit value
 
   - row = Documents::ScalarFieldRow.new(draft: draft, ptr: @path.document_ptr, field_value: @value, schema_node: @schema_node, name: @path.to_s)
-  - component = DocumentScalarUi::FieldComponent.new(row: row)
-  = render(component)
+  = render Editors::DocumentScalarFieldComponent.new(row: row, widget: "auto", show_label: false, edit_affordance_id: params[:edit_affordance_id], current_path: @path.to_s)

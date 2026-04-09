@@ -1,3 +1,7 @@
+<%= turbo_stream.replace "review" do %>
+  <%= render "drafts/review", draft: @draft %>
+<% end %>
+
 <%= turbo_stream.replace "ribbon" do %>
   <% if @draft.schema_document? %>
     <%= render Navigation::Schemas::NavRibbonComponent.new(
@@ -5,29 +9,29 @@
       document: @document,
       draft: @draft,
       path: @path,
-      turbo_frame: "editor",
+      turbo_frame: "editor"
     ) %>
   <% else %>
     <%= render "drafts/ribbon",
-    domain: @domain,
-    document: @document,
-    draft: @draft,
-    ptr: @ptr %>
+      domain: @domain,
+      document: @document,
+      draft: @draft,
+      ptr: @path.to_s %>
   <% end %>
 <% end %>
 
 <%= turbo_stream.replace "editor" do %>
   <% if @draft.schema_document? %>
     <%= render "drafts/schema_editor",
-    domain: @domain,
-    document: @document,
-    draft: @draft,
-    path: @path %>
+      domain: @domain,
+      document: @document,
+      draft: @draft,
+      path: @path %>
   <% else %>
     <%= render "drafts/document_editor",
-    domain: @domain,
-    document: @document,
-    draft: @draft,
-    ptr: @ptr %>
+      domain: @domain,
+      document: @document,
+      draft: @draft,
+      path: @path %>
   <% end %>
 <% end %>

@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 module Editors
   class DocumentScalarFieldComponent < ApplicationComponent
-    attr_reader :row, :widget, :show_label, :edit_affordance_id
+    attr_reader :row, :widget, :show_label, :edit_affordance_id, :current_path
 
-    def initialize(row:, widget: "auto", show_label: true, edit_affordance_id: nil)
+    def initialize(row:, widget: "auto", show_label: true, edit_affordance_id: nil, current_path: nil)
       @row = row
       @widget = widget
       @show_label = show_label
       @edit_affordance_id = edit_affordance_id
+      @current_path = current_path
     end
 
     def field_id

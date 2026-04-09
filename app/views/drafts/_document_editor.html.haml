@@ -8,12 +8,9 @@
       new_draft_commit_path(draft, edit_affordance_id: params[:edit_affordance_id]),
       data: { turbo_frame: "main_content" },
       class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
-
   - if @value.is_a?(Hash)
-    = render "document_object_editor", draft: draft
-
+    = render(Editors::DocumentObjectEditorComponent.new(draft: draft, editor_rows: @editor_rows, edit_affordance_id: params[:edit_affordance_id], current_path: @path.to_s))
   - elsif @value.is_a?(Array)
     = render "document_array_editor"
-
   - else
     = render "document_scalar_editor", draft: draft

@@ -1,0 +1,9 @@
+= render Ui::CardComponent.new do
+  .grid.grid-cols-2.gap-6
+    %div
+      %h3.text-lg.font-semibold.text-ink Before
+      %pre.text-sm= JSON.pretty_generate(@draft.based_on_revision.body)
+
+    %div
+      %h3.text-lg.font-semibold.text-ink Current
+      %pre.text-sm= JSON.pretty_generate(@draft.body)
