@@ -42,14 +42,12 @@ class DraftsController < ApplicationController
   private
 
   def load_document_editor_state(path_param = nil)
-    effective_path = path_param.presence || params[:path].presence || params[:ptr].presence || "/"
-
     if @draft.schema_document?
-      @path = Schemas::Path.new(effective_path)
+      @path = Schemas::Path.new(path_param)
       return
     end
 
-    @path = Documents::Path.new(effective_path)
+    @path = Documents::Path.new(path_param || params[:ptr])
     @projection = Documents::Projection.new(
       source: @draft,
       path: @path,
@@ -59,6 +57,11 @@ class DraftsController < ApplicationController
     @schema_node = @projection.schema_node || {}
     @properties = @schema_node.fetch("properties", {})
     @editor_rows = @projection.editor_rows
+
+    @diff_rows = Documents::Diff.rows(
+      before: @draft.based_on_revision&.body,
+      after: @draft.body
+    )
   end
 
   def load
