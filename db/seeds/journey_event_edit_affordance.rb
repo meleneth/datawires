@@ -43,38 +43,38 @@ module Seeds
         "version" => 1,
         "screen" => {
           "mode" => "page",
-          "columns" => 12,
-          "default_span" => 6,
+          "columns" => 6,
+          "default_span" => 3,
           "commit_mode" => "review_screen"
         },
         "rows" => [
           [
-            { "ptr" => "/title", "span" => 12 }
+            { "ptr" => "/title", "span" => 6 }
           ],
           [
-            { "ptr" => "/event_type", "span" => 6 },
-            { "ptr" => "/occurred_at", "span" => 6 }
+            { "ptr" => "/event_type", "span" => 3 },
+            { "ptr" => "/occurred_at", "span" => 3 }
           ],
           [
-            { "ptr" => "/character_name", "span" => 4 },
-            { "ptr" => "/character_class", "span" => 4 },
-            { "ptr" => "/character_level", "span" => 4 }
+            { "ptr" => "/character_name", "span" => 2 },
+            { "ptr" => "/character_class", "span" => 2 },
+            { "ptr" => "/character_level", "span" => 2 }
           ],
           [
-            { "ptr" => "/difficulty", "span" => 4 },
-            { "ptr" => "/act", "span" => 4 },
-            { "ptr" => "/area", "span" => 4 }
+            { "ptr" => "/difficulty", "span" => 2 },
+            { "ptr" => "/act", "span" => 2 },
+            { "ptr" => "/area", "span" => 2 }
           ],
           [
-            { "ptr" => "/item_name", "span" => 6 },
-            { "ptr" => "/item_quality", "span" => 6 }
+            { "ptr" => "/item_name", "span" => 3 },
+            { "ptr" => "/item_quality", "span" => 3 }
           ],
           [
-            { "ptr" => "/notable", "span" => 3 },
-            { "ptr" => "/notes", "span" => 9, "widget" => "textarea" }
+            { "ptr" => "/notable", "span" => 2 },
+            { "ptr" => "/notes", "span" => 4, "widget" => "textarea" }
           ],
           [
-            { "kind" => "commit", "span" => 12, "message_mode" => "inline_optional" }
+            { "kind" => "commit", "span" => 6, "message_mode" => "inline_optional" }
           ]
         ]
       }

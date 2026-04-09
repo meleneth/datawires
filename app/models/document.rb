@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class Document < ApplicationRecord
-  JSON_SCHEMA_2020_12 = "https://json-schema.org/draft/2020-12/schema"
-  JSON_SCHEMA_MARKER = { "$schema" => JSON_SCHEMA_2020_12 }.freeze
-
   belongs_to :domain
 
   belongs_to :head_revision,
@@ -54,19 +51,21 @@ class Document < ApplicationRecord
           inverse_of: :view_document,
           dependent: :restrict_with_exception
 
+  has_one :external_document, dependent: :destroy, inverse_of: :document
+
   validates :key, presence: true, uniqueness: { scope: :domain_id }
-  validate :schema_document_must_be_a_schema, if: -> { schema_document_id.present? }
+  validate :schema_document_must_be_schema_backed, if: -> { schema_document_id.present? }
 
   scope :with_head, -> { joins(:head_revision) }
 
   scope :schemas, lambda {
     joins(:head_revision)
-      .where("revisions.body @> ?", JSON_SCHEMA_MARKER.to_json)
+      .where("revisions.body ? '$schema'")
   }
 
   scope :non_schemas, lambda {
     left_joins(:head_revision)
-      .where("revisions.id IS NULL OR NOT (revisions.body @> ?)", JSON_SCHEMA_MARKER.to_json)
+      .where("revisions.id IS NULL OR NOT (revisions.body ? '$schema')")
   }
 
   def to_param
@@ -85,15 +84,17 @@ class Document < ApplicationRecord
   end
 
   def schema?
-    body.is_a?(Hash) && body["$schema"] == JSON_SCHEMA_2020_12
+    body.is_a?(Hash) && body["$schema"].is_a?(String) && body["$schema"].present?
   end
 
   alias schema_document? schema?
 
   private
 
-  def schema_document_must_be_a_schema
-    return if schema_document&.schema?
+  def schema_document_must_be_schema_backed
+    return if schema_document.blank?
+    return if schema_document == self && schema?
+    return if schema_document.schema?
 
     errors.add(:schema_document, "must reference a schema document")
   end

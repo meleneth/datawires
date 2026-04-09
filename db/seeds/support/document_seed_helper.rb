@@ -26,20 +26,29 @@ module Seeds
       message: "Seed document"
     )
       document = Document.find_or_initialize_by(domain:, key:)
+
       document.title = title if title.present?
-      document.schema_document = schema_document
+
+      # Do not assign schema_document yet. For schema-backed validations,
+      # the document may need its head_revision in place first.
       document.save! if document.new_record? || document.changed?
 
       current_body = document.head_revision&.body
-      return document if current_body == body
 
-      revision = document.revisions.create!(
-        body:,
-        parent_revision: document.head_revision,
-        message:
-      )
+      if current_body != body
+        revision = document.revisions.create!(
+          body:,
+          parent_revision: document.head_revision,
+          message:
+        )
 
-      document.update!(head_revision: revision)
+        document.update!(head_revision: revision)
+      end
+
+      if document.schema_document != schema_document
+        document.update!(schema_document:)
+      end
+
       document
     end
   end

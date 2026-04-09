@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_08_065947) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -57,6 +57,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_065947) do
     t.datetime "updated_at", null: false
     t.index ["affordance_document_id"], name: "index_edit_affordances_on_affordance_document_id", unique: true
     t.index ["for_schema_document_id", "name"], name: "index_edit_affordances_on_schema_and_name", unique: true
+  end
+
+  create_table "external_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "canonical_uri", null: false
+    t.datetime "created_at", null: false
+    t.uuid "document_id", null: false
+    t.datetime "imported_at"
+    t.datetime "last_checked_at"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "source_kind", null: false
+    t.string "source_uri"
+    t.datetime "updated_at", null: false
+    t.index ["canonical_uri"], name: "index_external_documents_on_canonical_uri", unique: true
+    t.index ["document_id"], name: "index_external_documents_on_document_id", unique: true
   end
 
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -112,6 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_065947) do
   add_foreign_key "drafts", "users", column: "created_by_id"
   add_foreign_key "edit_affordances", "documents", column: "affordance_document_id"
   add_foreign_key "edit_affordances", "documents", column: "for_schema_document_id"
+  add_foreign_key "external_documents", "documents"
   add_foreign_key "messages", "rooms"
   add_foreign_key "render_views", "documents", column: "for_schema_document_id"
   add_foreign_key "render_views", "documents", column: "view_document_id"

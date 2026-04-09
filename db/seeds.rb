@@ -4,12 +4,13 @@ require_relative "seeds/support/document_seed_helper"
 require_relative "seeds/support/journey_event_schema"
 require_relative "seeds/support/journey_event_example_document"
 require_relative "seeds/journey_event_edit_affordance"
+require_relative "seeds/edit_form_schema"
 
+Seeds::EditFormSchema.seed!
 Seeds::JourneyEventSchema.seed!
 Seeds::JourneyEventExampleDocument.seed!
 Seeds::JourneyEventEditAffordance.seed!
 
-require_relative "seeds/edit_form_schema"
 
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
