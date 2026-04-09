@@ -1,7 +1,7 @@
 = turbo_frame_tag "main_content" do
-  = render PageHeaderComponent.new(text: "#{@domain.name} Domain")
+  = render Ui::PageHeaderComponent.new(text: "#{@domain.name} Domain")
 
-  = render CardComponent.new do
+  = render Ui::CardComponent.new do
     - if notice.present?
       %p.mb-4.text-ls5-green-7= notice
 
@@ -18,8 +18,8 @@
       %h2.text-lg.font-semibold.text-ink Add schema
 
       = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
-        = render TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
-        = render ButtonComponent.new(type: :submit, tone: :primary) do
+        = render TextUi::FieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
+        = render Ui::ButtonComponent.new(type: :submit, tone: :primary) do
           Create
 
   = render "domains/open_drafts"

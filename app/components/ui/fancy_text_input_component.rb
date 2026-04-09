@@ -1,5 +1,5 @@
 module Ui
-  class FancyTextInputComponent < ViewComponent::Base
+  class Ui::FancyTextInputComponent < ViewComponent::Base
     def initialize(id:, label:, form:, name:, button_text: "»")
       @id = id
 

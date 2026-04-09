@@ -1,6 +1,6 @@
 <%= turbo_stream.replace "ribbon" do %>
   <% if @draft.schema_document? %>
-    <%= render SchemaNavRibbonComponent.new(
+    <%= render Navigation::Schemas::NavRibbonComponent.new(
       domain: @domain,
       document: @document,
       draft: @draft,

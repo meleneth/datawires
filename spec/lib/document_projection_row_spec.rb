@@ -2,15 +2,15 @@
 
 require "rails_helper"
 
-RSpec.describe DocumentProjectionRow do
+RSpec.describe Documents::ProjectionRow do
   subject(:row) { described_class.new(projection:, name:) }
 
   let(:name) { "title" }
-  let(:path) { DocumentPath.new("/metadata") }
+  let(:path) { Documents::Path.new("/metadata") }
 
   let(:projection) do
     instance_double(
-      DocumentProjection,
+      Documents::Projection,
       child_required?: required,
       child_present?: present,
       child_value: value,
@@ -210,7 +210,7 @@ RSpec.describe DocumentProjectionRow do
 
   describe "#path" do
     it "returns the child path under the projection path" do
-      expect(row.path).to be_a(DocumentPath)
+      expect(row.path).to be_a(Documents::Path)
       expect(row.path.to_s).to eq("/metadata/title")
     end
   end

@@ -1,7 +1,7 @@
 module Navigation
   # frozen_string_literal: true
 
-  class NavMenuComponent < ViewComponent::Base
+  class Navigation::NavMenuComponent < ViewComponent::Base
     renders_many :entries
     attr_reader :title, :align, :width_class
 

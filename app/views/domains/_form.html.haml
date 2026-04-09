@@ -8,7 +8,7 @@
           %li= error.full_message
 
   .space-y-4
-    = render TextFieldComponent.new(form: form, name: :name)
+    = render Ui::TextFieldComponent.new(form: form, name: :name)
   .pt-2
-    = render ButtonComponent.new(type: :submit, tone: :primary) do
+    = render Ui::ButtonComponent.new(type: :submit, tone: :primary) do
       Save domain

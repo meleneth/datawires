@@ -1,5 +1,5 @@
 module Ui
-  class SplitOneFourOneComponent < ApplicationComponent
+  class Ui::SplitOneFourOneComponent < ApplicationComponent
     renders_one :one
     renders_one :two
     renders_one :six

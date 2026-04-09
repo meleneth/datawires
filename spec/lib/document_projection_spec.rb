@@ -3,10 +3,10 @@
 
 require "rails_helper"
 
-RSpec.describe DocumentProjection do
+RSpec.describe Documents::Projection do
   subject(:projection) { described_class.new(source:, path:) }
 
-  let(:path) { DocumentPath.new(raw_path) }
+  let(:path) { Documents::Path.new(raw_path) }
 
   let(:schema_body) do
     {

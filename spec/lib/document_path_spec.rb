@@ -3,7 +3,7 @@
 
 require "rails_helper"
 
-RSpec.describe DocumentPath do
+RSpec.describe Documents::Path do
   describe "#document_ptr" do
     it "returns the normalized document pointer" do
       expect(described_class.new("/mobilis/name").document_ptr).to eq("/mobilis/name")

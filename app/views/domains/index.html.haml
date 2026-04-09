@@ -1,11 +1,11 @@
 - content_for :title, "Domains"
 
-= render PageHeaderComponent.new(text: "Domains")
+= render Ui::PageHeaderComponent.new(text: "Domains")
 
 - if notice.present?
   %p.mb-4.text-ls5-green-7= notice
 
-= render CardComponent.new do
+= render Ui::CardComponent.new do
   - if @domains.empty?
     .text-ls5-violet-6 No domains yet.
 

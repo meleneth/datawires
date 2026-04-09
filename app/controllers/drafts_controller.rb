@@ -9,9 +9,9 @@ class DraftsController < ApplicationController
 
   def patch_ptr
     @ptr = normalize_ptr(params[:ptr])
-    path = DocumentPath.new(@ptr)
+    path = Documents::Path.new(@ptr)
 
-    projection = DocumentProjection.new(
+    projection = Documents::Projection.new(
       source: @draft,
       path: path,
       edit_affordance: selected_edit_affordance_body
@@ -40,12 +40,12 @@ class DraftsController < ApplicationController
 
   def load_document_editor_state(path_param = nil)
     if @draft.schema_document?
-      @path = SchemaPath.new(path_param)
+      @path = Schemas::Path.new(path_param)
       return
     end
 
-    @path = DocumentPath.new(path_param || params[:ptr])
-    @projection = DocumentProjection.new(
+    @path = Documents::Path.new(path_param || params[:ptr])
+    @projection = Documents::Projection.new(
       source: @draft,
       path: @path,
       edit_affordance: selected_edit_affordance_body
@@ -109,7 +109,7 @@ class DraftsController < ApplicationController
     if @document.schema_document?
       draft_path(
         @draft,
-        path: SchemaPath.normalize(params[:path]),
+        path: Schemas::Path.normalize(params[:path]),
         edit_affordance_id: params[:edit_affordance_id]
       )
     else

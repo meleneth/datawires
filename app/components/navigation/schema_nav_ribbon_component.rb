@@ -1,20 +1,20 @@
 module Navigation
   # frozen_string_literal: true
 
-  class SchemaNavRibbonComponent < ApplicationComponent
+  class Navigation::Schemas::NavRibbonComponent < ApplicationComponent
     def initialize(domain:, document:, draft:, path:, turbo_frame: "editor")
       @domain = domain
       @document = document
       @draft = draft
-      @path = SchemaPath.normalize(path)
-      @nav = SchemaNav.new(source_json)
+      @path = Schemas::Path.normalize(path)
+      @nav = Schemas::Nav.new(source_json)
       @turbo_frame = turbo_frame
     end
 
     attr_reader :domain, :document, :draft, :path, :turbo_frame
 
     def segments
-      tokens = SchemaPath.new(path).tokens
+      tokens = Schemas::Path.new(path).tokens
       [ root_segment ] + token_segments(tokens)
     end
 
@@ -25,11 +25,11 @@ module Navigation
     private
 
     def root_segment
-      SchemaRibbonSegment.new(
+      Schemas::RibbonSegment.new(
         label: "/",
-        path: SchemaPath::ROOT,
-        url: nav_url(SchemaPath::ROOT),
-        current: path == SchemaPath::ROOT,
+        path: Schemas::Path::ROOT,
+        url: nav_url(Schemas::Path::ROOT),
+        current: path == Schemas::Path::ROOT,
         menu_items: []
       )
     end
@@ -45,7 +45,7 @@ module Navigation
         menu_items = sibling_keys.map do |key|
           item_path = path_for_tokens(parent_tokens + [ key ])
 
-          SchemaRibbonMenuItem.new(
+          Schemas::RibbonMenuItem.new(
             label: key,
             path: item_path,
             url: nav_url(item_path),
@@ -53,7 +53,7 @@ module Navigation
           )
         end
 
-        SchemaRibbonSegment.new(
+        Schemas::RibbonSegment.new(
           label: token,
           path: segment_path,
           url: nav_url(segment_path),
@@ -64,7 +64,7 @@ module Navigation
     end
 
     def path_for_tokens(tokens)
-      ptr = SchemaPath.new(SchemaPath::ROOT)
+      ptr = Schemas::Path.new(Schemas::Path::ROOT)
       tokens.each do |token|
         ptr = ptr.child(token)
       end
@@ -74,15 +74,15 @@ module Navigation
     def nav_url(target_path)
       Rails.application.routes.url_helpers.draft_path(
         draft,
-        path: SchemaPath.normalize(target_path)
+        path: Schemas::Path.normalize(target_path)
       )
     end
 
     def tail_menu_items
       @nav.object_keys_at(path).map do |key|
-        item_path = SchemaPath.new(path).child(key).to_s
+        item_path = Schemas::Path.new(path).child(key).to_s
 
-        SchemaRibbonMenuItem.new(
+        Schemas::RibbonMenuItem.new(
           label: key,
           path: item_path,
           url: nav_url(item_path),

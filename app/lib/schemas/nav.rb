@@ -7,7 +7,7 @@ module Schemas
     end
 
     def subschema_at(path)
-      JsonPtr.fetch(@schema, SchemaPath.new(path).json_ptr, default: {})
+      JsonPtr.fetch(@schema, Schemas::Path.new(path).json_ptr, default: {})
     end
 
     def properties_at(path)
@@ -32,7 +32,7 @@ module Schemas
     end
 
     def child_path(parent_path, child_key)
-      SchemaPath.new(parent_path).child(child_key).to_s
+      Schemas::Path.new(parent_path).child(child_key).to_s
     end
   end
 end

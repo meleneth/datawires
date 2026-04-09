@@ -7,7 +7,7 @@ module Documents
 
     def initialize(source:, path:, edit_affordance: nil)
       @source = source
-      @path = path.is_a?(DocumentPath) ? path : DocumentPath.new(path)
+      @path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
       @edit_affordance = edit_affordance
     end
 
@@ -70,7 +70,7 @@ module Documents
 
     def default_child_rows
       child_property_names.map do |name|
-        DocumentProjectionRow.new(projection: self, name: name)
+        Documents::ProjectionRow.new(projection: self, name: name)
       end
     end
 
@@ -78,9 +78,9 @@ module Documents
 
     def default_editor_rows
       default_child_rows.map do |row|
-        DocumentEditorRow.new(
+        Editors::Row.new(
           cells: [
-            DocumentEditorFieldCell.new(
+            Editors::FieldCell.new(
               projection_row: row,
               span: nil,
               widget: "auto",
@@ -93,7 +93,7 @@ module Documents
 
     def affordance_editor_rows
       Array(edit_affordance["rows"]).map do |row|
-        DocumentEditorRow.new(
+        Editors::Row.new(
           cells: Array(row).map { |cell| build_affordance_cell(cell) }.compact
         )
       end.reject { |row| row.cells.empty? }
@@ -101,7 +101,7 @@ module Documents
 
     def build_affordance_cell(cell)
       if cell["kind"] == "commit"
-        return DocumentEditorCommitCell.new(
+        return Editors::CommitCell.new(
           span: cell["span"],
           message_mode: cell["message_mode"] || "hidden"
         )
@@ -114,7 +114,7 @@ module Documents
 
       return nil unless projection_row
 
-      DocumentEditorFieldCell.new(
+      Editors::FieldCell.new(
         projection_row: projection_row,
         span: cell["span"],
         widget: cell["widget"] || "auto",
@@ -130,7 +130,7 @@ module Documents
       name = tokens.first
       return nil unless child_property_names.include?(name)
 
-      DocumentProjectionRow.new(projection: self, name: name)
+      Documents::ProjectionRow.new(projection: self, name: name)
     rescue ArgumentError
       nil
     end

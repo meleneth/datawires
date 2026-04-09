@@ -1,6 +1,6 @@
-= render PageHeaderComponent.new(text: "Open Drafts")
+= render Ui::PageHeaderComponent.new(text: "Open Drafts")
 
-= render CardComponent.new do
+= render Ui::CardComponent.new do
   - if @drafts.any?
     %ul.mt-2.space-y-2
       - @drafts.each do |draft|

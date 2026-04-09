@@ -1,7 +1,7 @@
 module Ui
   # frozen_string_literal: true
 
-  class ButtonComponent < ApplicationComponent
+  class Ui::ButtonComponent < ApplicationComponent
     TONES = {
       primary: "bg-ls5-blue-4 text-ink-inverse hover:bg-ls5-blue-5",
       warning: "bg-ls5-yellow-4 text-ls5-yellow-8 hover:bg-ls5-yellow-5",

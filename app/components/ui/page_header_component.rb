@@ -1,7 +1,7 @@
 module Ui
   # frozen_string_literal: true
 
-  class PageHeaderComponent < ApplicationComponent
+  class Ui::PageHeaderComponent < ApplicationComponent
     def initialize(text:)
       @text = text
     end

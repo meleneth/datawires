@@ -1,6 +1,6 @@
 .rounded-lg.border.border-ls5-violet-3.bg-white.p-4
   %h4.mb-3.font-medium.text-ink Edit value
 
-  - row = DocumentScalarFieldRow.new(draft: draft, ptr: @path.document_ptr, field_value: @value, schema_node: @schema_node, name: @path.to_s)
-  - component = DocumentScalarFieldComponent.new(row: row)
+  - row = Documents::ScalarFieldRow.new(draft: draft, ptr: @path.document_ptr, field_value: @value, schema_node: @schema_node, name: @path.to_s)
+  - component = DocumentScalarUi::FieldComponent.new(row: row)
   = render(component)

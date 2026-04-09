@@ -2,16 +2,16 @@
 
 require "rails_helper"
 
-RSpec.describe DocumentProjectionRow do
+RSpec.describe Documents::ProjectionRow do
   subject(:row) { described_class.new(projection:, name:) }
 
   let(:name) { "character_class" }
-  let(:child_path) { instance_double(DocumentPath, document_ptr: "/character_class") }
-  let(:path) { instance_double(DocumentPath, child: child_path) }
+  let(:child_path) { instance_double(Documents::Path, document_ptr: "/character_class") }
+  let(:path) { instance_double(Documents::Path, child: child_path) }
 
   let(:projection) do
     instance_double(
-      DocumentProjection,
+      Documents::Projection,
       source: draft,
       child_schema: schema_node,
       child_required?: false,

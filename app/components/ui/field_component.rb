@@ -1,5 +1,5 @@
 module Ui
-  class FieldComponent < ApplicationComponent
+  class Ui::FieldComponent < ApplicationComponent
     renders_one :actions
 
     STATES = {

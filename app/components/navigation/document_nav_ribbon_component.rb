@@ -1,12 +1,12 @@
 module Navigation
   # frozen_string_literal: true
 
-  class DocumentNavRibbonComponent < ApplicationComponent
+  class Navigation::DocumentNavRibbonComponent < ApplicationComponent
     def initialize(document:, draft:, path:, turbo_frame: "editor")
       @document = document
       @draft = draft
-      @path = path.is_a?(DocumentPath) ? path : DocumentPath.new(path)
-      @projection = DocumentProjection.new(source: draft, path: @path)
+      @path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
+      @projection = Documents::Projection.new(source: draft, path: @path)
       @turbo_frame = turbo_frame
     end
 
@@ -25,7 +25,7 @@ module Navigation
       schema_child_keys_at(path).map do |key|
         item_path = path.child(key)
 
-        SchemaRibbonMenuItem.new(
+        Schemas::RibbonMenuItem.new(
           label: key,
           path: item_path.to_s,
           url: nav_url(item_path),
@@ -37,10 +37,10 @@ module Navigation
     private
 
     def root_segment
-      SchemaRibbonSegment.new(
+      Schemas::RibbonSegment.new(
         label: "/",
-        path: DocumentPath::ROOT,
-        url: nav_url(DocumentPath::ROOT),
+        path: Documents::Path::ROOT,
+        url: nav_url(Documents::Path::ROOT),
         current: path.root?,
         menu_items: []
       )
@@ -57,7 +57,7 @@ module Navigation
         menu_items = sibling_keys.map do |key|
           item_path = path_for_tokens(parent_tokens + [ key ])
 
-          SchemaRibbonMenuItem.new(
+          Schemas::RibbonMenuItem.new(
             label: key,
             path: item_path.to_s,
             url: nav_url(item_path),
@@ -65,7 +65,7 @@ module Navigation
           )
         end
 
-        SchemaRibbonSegment.new(
+        Schemas::RibbonSegment.new(
           label: token,
           path: segment_path.to_s,
           url: nav_url(segment_path),
@@ -76,7 +76,7 @@ module Navigation
     end
 
     def path_for_tokens(tokens)
-      tokens.reduce(DocumentPath.new(DocumentPath::ROOT)) do |current_path, token|
+      tokens.reduce(Documents::Path.new(Documents::Path::ROOT)) do |current_path, token|
         current_path.child(token)
       end
     end
@@ -84,7 +84,7 @@ module Navigation
     def nav_url(target_path)
       Rails.application.routes.url_helpers.draft_path(
         draft,
-        path: DocumentPath.new(target_path).to_s
+        path: Documents::Path.new(target_path).to_s
       )
     end
 
@@ -93,7 +93,7 @@ module Navigation
     end
 
     def projection_at(target_path)
-      DocumentProjection.new(source: draft, path: target_path)
+      Documents::Projection.new(source: draft, path: target_path)
     end
   end
 end

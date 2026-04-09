@@ -1,11 +1,11 @@
-- schema_path = SchemaPath.new(path)
+- schema_path = Schemas::Path.new(path)
 - raw_ptr = schema_path.json_ptr
 - subschema = JsonPtr.get(draft.body, raw_ptr) || {}
 - properties = subschema.fetch("properties", {})
 - required = Array(subschema["required"])
-- nav = SchemaNav.new(draft.body)
+- nav = Schemas::Nav.new(draft.body)
 
-= render SchemaNavRibbonComponent.new(domain: @domain, document: @document, draft: @draft, path: @path, turbo_frame: "editor")
+= render Navigation::Schemas::NavRibbonComponent.new(domain: @domain, document: @document, draft: @draft, path: @path, turbo_frame: "editor")
 
 .space-y-4
   .flex.items-center.justify-between
@@ -15,7 +15,7 @@
 
   .space-y-3
     - properties.each do |name, prop_schema|
-      - child_path = SchemaPath.new(path).child(name).to_s
+      - child_path = Schemas::Path.new(path).child(name).to_s
       - openable = prop_schema.is_a?(Hash) && nav.object_schema?(prop_schema)
 
       - if openable

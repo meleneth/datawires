@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Document < ApplicationRecord
+  JSON_SCHEMA_2020_12 = "https://json-schema.org/draft/2020-12/schema"
+
   belongs_to :domain
 
   belongs_to :head_revision,

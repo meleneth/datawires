@@ -1,7 +1,6 @@
-module Ui
-  # app/components/text_field_component.rb
-  # frozen_string_literal: true
+# frozen_string_literal: true
 
+module Ui
   class TextFieldComponent < ViewComponent::Base
     def initialize(form:, name:, id: nil, label: nil, placeholder: nil, html_options: {})
       @form = form

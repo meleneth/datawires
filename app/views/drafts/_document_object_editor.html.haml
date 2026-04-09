@@ -19,7 +19,7 @@
 
                   - if row.scalar?
                     .mt-3
-                      = render DocumentScalarFieldComponent.new(row: row, widget: cell.widget,  show_label: cell.label)
+                      = render DocumentScalarUi::FieldComponent.new(row: row, widget: cell.widget,  show_label: cell.label)
 
                   - elsif row.composite?
                     .mt-2.text-xs.text-ls5-violet-5= row.value_label

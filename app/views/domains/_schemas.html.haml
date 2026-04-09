@@ -1,7 +1,7 @@
 = turbo_frame_tag "main_content" do
-  = render PageHeaderComponent.new(text: "Schemas")
+  = render Ui::PageHeaderComponent.new(text: "Schemas")
 
-  = render CardComponent.new do
+  = render Ui::CardComponent.new do
     - if @schemas.any?
       %ul.mt-2.space-y-2
         - @schemas.each do |schema|

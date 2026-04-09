@@ -1,7 +1,7 @@
 module Editors
   # frozen_string_literal: true
 
-  class DocumentScalarFieldComponent < ViewComponent::Base
+  class DocumentScalarUi::FieldComponent < ViewComponent::Base
     attr_reader :row, :widget, :show_label
 
     def initialize(row:, widget: "auto", show_label: true)

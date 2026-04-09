@@ -64,11 +64,11 @@ class Drafts::SchemaPropertiesController < ApplicationController
     @draft = Draft.find(params[:draft_id])
     @document = @draft.document
     @domain = @document.domain
-    @path = SchemaPath.normalize(params[:path])
+    @path = Schemas::Path.normalize(params[:path])
   end
 
   def raw_ptr
-    SchemaPath.new(@path).json_ptr
+    Schemas::Path.new(@path).json_ptr
   end
 
   def boolean_param(name)
