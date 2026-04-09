@@ -16,13 +16,19 @@ export default class extends Controller {
   queue(event) {
     event?.preventDefault()
     this.clearTimer()
-    this.timeout = setTimeout(() => this.submit(), this.delayValue)
+
+    const form = event?.target?.form || this.element
+    this.timeout = setTimeout(() => {
+      form.requestSubmit()
+    }, this.delayValue)
   }
 
   submit(event) {
     event?.preventDefault()
     this.clearTimer()
-    this.element.requestSubmit()
+
+    const form = event?.target?.form || this.element
+    form.requestSubmit()
   }
 
   clearTimer() {
