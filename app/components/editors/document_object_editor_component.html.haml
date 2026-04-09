@@ -1,0 +1,3 @@
+.space-y-4
+  - Array(editor_rows).each do |row|
+    = render(Editors::EditorRowComponent.new(row: row, draft: draft, edit_affordance_id: edit_affordance_id))

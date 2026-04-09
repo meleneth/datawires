@@ -1,0 +1,21 @@
+.rounded-lg.border.border-ls5-blue-3.bg-white.p-4
+  = form_with url: draft_commit_path(draft), method: :post, class: "space-y-3" do |form|
+    - if edit_affordance_id.present?
+      = hidden_field_tag :edit_affordance_id, edit_affordance_id
+
+    - if show_message?
+      .space-y-1
+        = form.label :message, "Commit message", class: "block text-sm font-medium text-ink"
+        = form.text_field :message, required: message_required?, class: "w-full rounded-md border border-ls5-violet-2 px-3 py-2"
+
+    = form.submit "Publish", class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5 rounded-lg.border.border-ls5-blue"
+  = form_with url: draft_commit_path(draft), method: :post, class: "space-y-3" do |form|
+    - if edit_affordance_id.present?
+      = hidden_field_tag :edit_affordance_id, edit_affordance_id
+
+    - if show_message?
+      .space-y-1
+        = form.label :message, "Commit message", class: "block text-sm font-medium text-ink"
+        = form.text_field :message, required: message_required?, class: "w-full rounded-md border border-ls5-violet-2 px-3 py-2"
+
+    = form.submit "Publish", class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"

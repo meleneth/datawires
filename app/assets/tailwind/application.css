@@ -1,6 +1,11 @@
 @config "../../../tailwind.config.js";
 @import "tailwindcss";
+
 @source "../../views/**/*.{erb,haml,html}";
 @source "../../components/**/*.{rb,erb,haml}";
 @source "../../helpers/**/*.rb";
 
+@source inline("col-span-{1..12}");
+@source inline("{bg,text,border,ring}-ls5-{yellow,red,violet,blue,green}-{1..8}");
+@source inline("ls5-{yellow,red,violet,blue,green}-{1..8}");
+@source inline("grid-cols-{1..12}");

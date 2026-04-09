@@ -1,13 +1,12 @@
 module Editors
-  # frozen_string_literal: true
+  class DocumentScalarFieldComponent < ApplicationComponent
+    attr_reader :row, :widget, :show_label, :edit_affordance_id
 
-  class DocumentScalarUi::FieldComponent < ViewComponent::Base
-    attr_reader :row, :widget, :show_label
-
-    def initialize(row:, widget: "auto", show_label: true)
+    def initialize(row:, widget: "auto", show_label: true, edit_affordance_id: nil)
       @row = row
       @widget = widget
       @show_label = show_label
+      @edit_affordance_id = edit_affordance_id
     end
 
     def field_id
@@ -18,12 +17,9 @@ module Editors
       return widget.to_sym unless widget.to_s == "auto"
 
       case row.input_kind
-      when :checkbox
-        :checkbox
-      when :number
-        :number
-      when :select
-        :select
+      when :checkbox then :checkbox
+      when :number then :number
+      when :select then :select
       else
         :text
       end

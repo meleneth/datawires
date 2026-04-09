@@ -1,7 +1,6 @@
-module Documents
-  # app/lib/document_projection.rb
-  # frozen_string_literal: true
+# frozen_string_literal: true
 
+module Documents
   class Projection
     attr_reader :source, :path, :edit_affordance
 
@@ -13,6 +12,11 @@ module Documents
 
     def root?
       path.root?
+    end
+
+    def editor_column_count
+      count = edit_affordance&.dig("screen", "columns")
+      count.present? ? count.to_i : 12
     end
 
     def document_node
@@ -86,7 +90,8 @@ module Documents
               widget: "auto",
               label: true
             )
-          ]
+          ],
+          column_count: editor_column_count
         )
       end
     end
@@ -94,7 +99,8 @@ module Documents
     def affordance_editor_rows
       Array(edit_affordance["rows"]).map do |row|
         Editors::Row.new(
-          cells: Array(row).map { |cell| build_affordance_cell(cell) }.compact
+          cells: Array(row).map { |cell| build_affordance_cell(cell) }.compact,
+          column_count: editor_column_count
         )
       end.reject { |row| row.cells.empty? }
     end

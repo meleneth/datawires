@@ -18,7 +18,7 @@
       %h2.text-lg.font-semibold.text-ink Add schema
 
       = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
-        = render TextUi::FieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
+        = render Ui::TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
         = render Ui::ButtonComponent.new(type: :submit, tone: :primary) do
           Create
 
