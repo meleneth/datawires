@@ -1,8 +1,8 @@
-<%= turbo_stream.replace "review" do %>
+<%= turbo_stream.update "review" do %>
   <%= render "drafts/review", draft: @draft %>
 <% end %>
 
-<%= turbo_stream.replace "ribbon" do %>
+<%= turbo_stream.update "ribbon" do %>
   <% if @draft.schema_document? %>
     <%= render Navigation::Schemas::NavRibbonComponent.new(
       domain: @domain,
@@ -20,7 +20,7 @@
   <% end %>
 <% end %>
 
-<%= turbo_stream.replace "editor" do %>
+<%= turbo_stream.update "editor" do %>
   <% if @draft.schema_document? %>
     <%= render "drafts/schema_editor",
       domain: @domain,

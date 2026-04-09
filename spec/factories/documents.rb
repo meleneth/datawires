@@ -5,6 +5,8 @@ FactoryBot.define do
     domain
     sequence(:key) { |n| "document-#{n}" }
     title { "Document" }
+    head_revision { nil }
+    schema_document { nil }
 
     transient do
       head_body { {} }
@@ -49,6 +51,37 @@ FactoryBot.define do
             "event_type" => "note"
           }
         end
+      end
+    end
+
+    trait :with_name_schema do
+      with_head_revision
+
+      transient do
+        head_body do
+          {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://#{domain.name}/schemas/#{key}",
+            "type" => "object",
+            "properties" => {
+              "name" => {
+                "type" => "string",
+                "title" => "Name"
+              }
+            },
+            "required" => [ "name" ]
+          }
+        end
+      end
+    end
+
+    trait :conforming_to_schema do
+      transient do
+        schema_document_record { nil }
+      end
+
+      after(:build) do |document, evaluator|
+        document.schema_document = evaluator.schema_document_record if evaluator.schema_document_record
       end
     end
   end
