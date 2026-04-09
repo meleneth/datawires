@@ -1,9 +1,11 @@
-# frozen_string_literal: true
+module Editors
+  # frozen_string_literal: true
 
-class DocumentEditorRow
-  attr_reader :cells
+  class Row
+    attr_reader :cells
 
-  def initialize(cells:)
-    @cells = cells
+    def initialize(cells:)
+      @cells = cells
+    end
   end
 end

@@ -1,22 +1,24 @@
-# frozen_string_literal: true
+module Editors
+  # frozen_string_literal: true
 
-class DocumentEditorCommitCell
-  attr_reader :span, :message_mode
+  class CommitCell
+    attr_reader :span, :message_mode
 
-  def initialize(span:, message_mode:)
-    @span = span
-    @message_mode = message_mode
-  end
+    def initialize(span:, message_mode:)
+      @span = span
+      @message_mode = message_mode
+    end
 
-  def field?
-    false
-  end
+    def field?
+      false
+    end
 
-  def commit?
-    true
-  end
+    def commit?
+      true
+    end
 
-  def span_class
-    "col-span-#{span || 12}"
+    def span_class
+      "col-span-#{span || 12}"
+    end
   end
 end
