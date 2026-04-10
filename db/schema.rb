@@ -50,13 +50,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
   end
 
   create_table "edit_affordances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "affordance_document_id", null: false
     t.datetime "created_at", null: false
+    t.uuid "edit_document_id", null: false
     t.uuid "for_schema_document_id", null: false
-    t.string "name", null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["affordance_document_id"], name: "index_edit_affordances_on_affordance_document_id", unique: true
-    t.index ["for_schema_document_id", "name"], name: "index_edit_affordances_on_schema_and_name", unique: true
+    t.index ["edit_document_id"], name: "index_edit_affordances_on_edit_document_id", unique: true
+    t.index ["for_schema_document_id", "title"], name: "index_edit_affordances_on_schema_and_title", unique: true
   end
 
   create_table "external_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -124,7 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
   add_foreign_key "drafts", "documents"
   add_foreign_key "drafts", "revisions", column: "based_on_revision_id"
   add_foreign_key "drafts", "users", column: "created_by_id"
-  add_foreign_key "edit_affordances", "documents", column: "affordance_document_id"
+  add_foreign_key "edit_affordances", "documents", column: "edit_document_id"
   add_foreign_key "edit_affordances", "documents", column: "for_schema_document_id"
   add_foreign_key "external_documents", "documents"
   add_foreign_key "messages", "rooms"

@@ -14,10 +14,41 @@ RSpec.describe ViewAffordance, type: :model do
     it { is_expected.to validate_presence_of(:title) }
 
     it "validates uniqueness of title scoped to for_schema_document_id" do
-      create(:view_affordance, title: "default")
+      schema_document = create(:document, :with_schema_head_revision)
 
-      expect(build(:view_affordance, title: "default"))
-        .not_to be_valid
+      create(
+        :view_affordance,
+        for_schema_document: schema_document,
+        title: "default"
+      )
+
+      duplicate = build(
+        :view_affordance,
+        for_schema_document: schema_document,
+        title: "default"
+      )
+
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:title]).to include("has already been taken")
+    end
+
+    it "allows the same title for a different schema document" do
+      first_schema_document = create(:document, :with_schema_head_revision)
+      second_schema_document = create(:document, :with_schema_head_revision)
+
+      create(
+        :view_affordance,
+        for_schema_document: first_schema_document,
+        title: "default"
+      )
+
+      other = build(
+        :view_affordance,
+        for_schema_document: second_schema_document,
+        title: "default"
+      )
+
+      expect(other).to be_valid
     end
   end
 

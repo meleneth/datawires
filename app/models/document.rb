@@ -35,12 +35,6 @@ class Document < ApplicationRecord
            inverse_of: :for_schema_document,
            dependent: :destroy
 
-  has_one :edit_affordance_definition,
-          class_name: "EditAffordance",
-          foreign_key: :affordance_document_id,
-          inverse_of: :affordance_document,
-          dependent: :restrict_with_exception
-
   has_many :view_affordances_for_schema,
          class_name: "ViewAffordance",
          foreign_key: :for_schema_document_id,
@@ -52,6 +46,12 @@ class Document < ApplicationRecord
         foreign_key: :view_document_id,
         inverse_of: :view_document,
         dependent: :restrict_with_exception
+
+  has_one :edit_affordance,
+          class_name: "EditAffordance",
+          foreign_key: :edit_document_id,
+          inverse_of: :edit_document,
+          dependent: :restrict_with_exception
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
 

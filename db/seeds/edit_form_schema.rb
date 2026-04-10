@@ -78,14 +78,35 @@ module Seeds
         },
 
         "$defs" => {
-          "field_cell" => {
+          "document_ptr_binding" => {
             "type" => "object",
-            "required" => [ "ptr" ],
+            "required" => %w[kind ptr],
             "additionalProperties" => false,
             "properties" => {
+              "kind" => {
+                "type" => "string",
+                "const" => "document_ptr"
+              },
               "ptr" => {
                 "type" => "string",
                 "minLength" => 1
+              }
+            }
+          },
+
+          "binding" => {
+            "oneOf" => [
+              { "$ref" => "#/$defs/document_ptr_binding" }
+            ]
+          },
+
+          "field_cell" => {
+            "type" => "object",
+            "required" => [ "binding" ],
+            "additionalProperties" => false,
+            "properties" => {
+              "binding" => {
+                "$ref" => "#/$defs/binding"
               },
               "span" => {
                 "type" => "integer",
