@@ -1,22 +1,22 @@
 # frozen_string_literal: true
 
-class RenderView < ApplicationRecord
+class ViewAffordance < ApplicationRecord
   extend Forwardable
 
   belongs_to :for_schema_document,
     class_name: "Document",
-    inverse_of: :render_views_for_schema
+    inverse_of: :view_affordances_for_schema
 
   belongs_to :view_document,
     class_name: "Document",
-    inverse_of: :render_view_definition
+    inverse_of: :view_affordance
 
   def_delegators :view_document, :head_revision
   def_delegators :head_revision, :body
 
   scope :for_schema, ->(document) { where(for_schema_document: document) }
 
-  validates :name, presence: true, uniqueness: { scope: :for_schema_document_id }
+  validates :title, presence: true, uniqueness: { scope: :for_schema_document_id }
 
   validate :for_schema_document_must_be_schema_document
   validate :view_document_must_not_equal_schema_document

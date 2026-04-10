@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class CreateRenderViews < ActiveRecord::Migration[8.1]
+class CreateViewAffordances < ActiveRecord::Migration[8.1]
   def change
-    create_table :render_views, id: :uuid do |t|
+    create_table :view_affordances, id: :uuid do |t|
       t.references :for_schema_document,
         null: false,
         type: :uuid,
@@ -15,17 +15,17 @@ class CreateRenderViews < ActiveRecord::Migration[8.1]
         foreign_key: { to_table: :documents },
         index: false
 
-      t.string :name, null: false
+      t.string :title, null: false
 
       t.timestamps
     end
 
-    add_index :render_views,
-      [ :for_schema_document_id, :name ],
+    add_index :view_affordances,
+      [ :for_schema_document_id, :title ],
       unique: true,
-      name: "index_render_views_on_schema_and_name"
+      name: "index_view_affordances_on_schema_and_title"
 
-    add_index :render_views,
+    add_index :view_affordances,
       :view_document_id,
       unique: true
   end

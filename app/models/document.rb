@@ -41,17 +41,17 @@ class Document < ApplicationRecord
           inverse_of: :affordance_document,
           dependent: :restrict_with_exception
 
-  has_many :render_views_for_schema,
-           class_name: "RenderView",
-           foreign_key: :for_schema_document_id,
-           inverse_of: :for_schema_document,
-           dependent: :destroy
+  has_many :view_affordances_for_schema,
+         class_name: "ViewAffordance",
+         foreign_key: :for_schema_document_id,
+         inverse_of: :for_schema_document,
+         dependent: :restrict_with_exception
 
-  has_one :render_view_definition,
-          class_name: "RenderView",
-          foreign_key: :view_document_id,
-          inverse_of: :view_document,
-          dependent: :restrict_with_exception
+  has_one :view_affordance,
+        class_name: "ViewAffordance",
+        foreign_key: :view_document_id,
+        inverse_of: :view_document,
+        dependent: :restrict_with_exception
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
 

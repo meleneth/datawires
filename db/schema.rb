@@ -81,16 +81,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
     t.index ["room_id"], name: "index_messages_on_room_id"
   end
 
-  create_table "render_views", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.uuid "for_schema_document_id", null: false
-    t.string "name", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "view_document_id", null: false
-    t.index ["for_schema_document_id", "name"], name: "index_render_views_on_schema_and_name", unique: true
-    t.index ["view_document_id"], name: "index_render_views_on_view_document_id", unique: true
-  end
-
   create_table "revisions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "body", null: false
     t.datetime "created_at", null: false
@@ -118,6 +108,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "view_affordances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "for_schema_document_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "view_document_id", null: false
+    t.index ["for_schema_document_id", "title"], name: "index_view_affordances_on_schema_and_title", unique: true
+    t.index ["view_document_id"], name: "index_view_affordances_on_view_document_id", unique: true
+  end
+
   add_foreign_key "documents", "documents", column: "schema_document_id"
   add_foreign_key "documents", "domains"
   add_foreign_key "documents", "revisions", column: "head_revision_id"
@@ -128,9 +128,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
   add_foreign_key "edit_affordances", "documents", column: "for_schema_document_id"
   add_foreign_key "external_documents", "documents"
   add_foreign_key "messages", "rooms"
-  add_foreign_key "render_views", "documents", column: "for_schema_document_id"
-  add_foreign_key "render_views", "documents", column: "view_document_id"
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"
+  add_foreign_key "view_affordances", "documents", column: "for_schema_document_id"
+  add_foreign_key "view_affordances", "documents", column: "view_document_id"
 end

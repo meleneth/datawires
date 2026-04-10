@@ -2,21 +2,21 @@
 
 require "rails_helper"
 
-RSpec.describe RenderView, type: :model do
+RSpec.describe ViewAffordance, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:for_schema_document).class_name("Document") }
     it { is_expected.to belong_to(:view_document).class_name("Document") }
   end
 
   describe "validations" do
-    subject(:render_view) { build(:render_view) }
+    subject(:view_affordance) { build(:view_affordance) }
 
-    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:title) }
 
-    it "validates uniqueness of name scoped to for_schema_document_id" do
-      create(:render_view, name: "default")
+    it "validates uniqueness of title scoped to for_schema_document_id" do
+      create(:view_affordance, title: "default")
 
-      expect(build(:render_view, name: "default"))
+      expect(build(:view_affordance, title: "default"))
         .not_to be_valid
     end
   end
@@ -27,35 +27,35 @@ RSpec.describe RenderView, type: :model do
     let(:view_document) { create(:document, :with_plain_head_revision) }
 
     it "is valid when for_schema_document is a schema document" do
-      render_view = build(
-        :render_view,
+      view_affordance = build(
+        :view_affordance,
         for_schema_document: schema_document,
         view_document: view_document
       )
 
-      expect(render_view).to be_valid
+      expect(view_affordance).to be_valid
     end
 
     it "is invalid when for_schema_document is not a schema document" do
-      render_view = build(
-        :render_view,
+      view_affordance = build(
+        :view_affordance,
         for_schema_document: ordinary_document,
         view_document: view_document
       )
 
-      expect(render_view).not_to be_valid
-      expect(render_view.errors[:for_schema_document]).to include("must be a schema document")
+      expect(view_affordance).not_to be_valid
+      expect(view_affordance.errors[:for_schema_document]).to include("must be a schema document")
     end
 
     it "is invalid when view_document equals for_schema_document" do
-      render_view = build(
-        :render_view,
+      view_affordance = build(
+        :view_affordance,
         for_schema_document: schema_document,
         view_document: schema_document
       )
 
-      expect(render_view).not_to be_valid
-      expect(render_view.errors[:view_document]).to include("must be a separate document")
+      expect(view_affordance).not_to be_valid
+      expect(view_affordance.errors[:view_document]).to include("must be a separate document")
     end
   end
 end
