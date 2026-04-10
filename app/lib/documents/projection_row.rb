@@ -1,24 +1,28 @@
-module Documents
-  # frozen_string_literal: true
+# frozen_string_literal: true
 
+module Documents
   class ProjectionRow
+    attr_reader :path
+
     def initialize(projection:, path:)
       @projection = projection
       @path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
     end
 
-    attr_reader :path
-
     def draft
       @projection.source
     end
 
+    def resolved_path
+      @resolved_path ||= @projection.resolved_path(path)
+    end
+
     def name
-      document_pointer.tokens.last&.unescaped.to_s
+      path.name
     end
 
     def schema_node
-      @schema_node ||= JsonPtr.get(draft.schema_document.body, path.schema_ptr) || {}
+      resolved_path.schema_node || {}
     end
 
     def enum_values
@@ -30,11 +34,29 @@ module Documents
     end
 
     def required?
-      parent_required_keys.include?(name)
+      return false if path.root?
+
+      parent_schema_node = resolved_path.parent&.schema_node || {}
+      Array(parent_schema_node["required"]).include?(name)
     end
 
     def present?
-      parent_node.is_a?(Hash) && (parent_node.key?(name) || parent_node.key?(name.to_sym))
+      return true if path.root?
+
+      parent_value = JsonPtr.get(draft.body, path.parent.document_ptr)
+
+      if array_element?
+        return false unless parent_value.is_a?(Array)
+
+        index = Integer(name, 10)
+        return index >= 0 && index < parent_value.length
+      end
+
+      return false unless parent_value.is_a?(Hash)
+
+      parent_value.key?(name) || parent_value.key?(name.to_sym)
+    rescue ArgumentError, TypeError
+      false
     end
 
     def value
@@ -51,6 +73,14 @@ module Documents
 
     def scalar?
       !composite?
+    end
+
+    def array_element?
+      resolved_path.array_element?
+    end
+
+    def object_property?
+      resolved_path.object_property?
     end
 
     def input_kind
@@ -90,30 +120,6 @@ module Documents
       return "present" if composite?
 
       value.inspect
-    end
-
-    private
-
-    def document_pointer
-      @document_pointer ||= JsonPtr::Pointer.parse(path.document_ptr)
-    end
-
-    def parent_path
-      @parent_path ||= document_pointer.tokens[0...-1]
-        .map(&:unescaped)
-        .reduce(Documents::Path.new("/")) { |current, token| current.child(token) }
-    end
-
-    def parent_node
-      JsonPtr.get(draft.body, parent_path.document_ptr)
-    end
-
-    def parent_schema_node
-      JsonPtr.get(draft.schema_document.body, parent_path.schema_ptr) || {}
-    end
-
-    def parent_required_keys
-      Array(parent_schema_node["required"])
     end
   end
 end

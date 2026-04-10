@@ -23,8 +23,15 @@ module Documents
       JsonPtr.get(source.body, path.document_ptr)
     end
 
+    def resolved_path(path = self.path)
+      Documents::ResolvedPath.new(
+        path: path,
+        schema_body: source.schema_document.body
+      )
+    end
+
     def schema_node
-      JsonPtr.get(source.schema_document.body, path.schema_ptr)
+      resolved_path.schema_node
     end
 
     def schema_child_keys
@@ -38,30 +45,6 @@ module Documents
       schema_child_keys
     end
 
-    def child_schema(name)
-      JsonPtr.get(source.schema_document.body, path.child(name).schema_ptr) || {}
-    end
-
-    def child_value(name)
-      node = document_node
-      return nil unless node.is_a?(Hash)
-
-      return node[name] if node.key?(name)
-      return node[name.to_sym] if node.key?(name.to_sym)
-
-      nil
-    end
-
-    def child_present?(name)
-      node = document_node
-      node.is_a?(Hash) && (node.key?(name) || node.key?(name.to_sym))
-    end
-
-    def child_required?(name)
-      node = schema_node
-      Array(node.is_a?(Hash) ? node["required"] : nil).include?(name)
-    end
-
     def editor_rows
       return affordance_editor_rows if edit_affordance.present?
 
@@ -73,6 +56,19 @@ module Documents
     end
 
     def default_child_rows
+      case resolved_path.schema_type
+      when "object"
+        object_child_rows
+      when "array"
+        array_child_rows
+      else
+        []
+      end
+    end
+
+    private
+
+    def object_child_rows
       child_property_names.map do |name|
         Documents::ProjectionRow.new(
           projection: self,
@@ -81,7 +77,14 @@ module Documents
       end
     end
 
-    private
+    def array_child_rows
+      Array(document_node).each_index.map do |index|
+        Documents::ProjectionRow.new(
+          projection: self,
+          path: path.child(index.to_s)
+        )
+      end
+    end
 
     def default_editor_rows
       default_child_rows.map do |row|
@@ -154,33 +157,29 @@ module Documents
     end
 
     def projection_row_for_ptr(ptr)
-      pointer = JsonPtr::Pointer.parse(ptr)
-      document_ptr = pointer.to_s
+      candidate_path = Documents::Path.new(ptr)
+      return nil unless within_projection_root?(candidate_path)
 
-      return nil unless within_projection_root?(document_ptr)
-
-      relative_tokens = relative_tokens_for(document_ptr)
-      return nil if relative_tokens.empty?
-
-      row_path = relative_tokens.reduce(path) { |current, token| current.child(token) }
-
-      Documents::ProjectionRow.new(projection: self, path: row_path)
-    rescue ArgumentError
+      Documents::ProjectionRow.new(
+        projection: self,
+        path: candidate_path
+      )
+    rescue Documents::Path::InvalidPathError,
+           Documents::ResolvedPath::InvalidTraversalError,
+           ArgumentError
       nil
     end
 
-    def within_projection_root?(document_ptr)
-      root_tokens = JsonPtr::Pointer.parse(path.document_ptr).tokens.map(&:unescaped)
-      target_tokens = JsonPtr::Pointer.parse(document_ptr).tokens.map(&:unescaped)
+    def within_projection_root?(candidate_path)
+      root_tokens = path.tokens
+      candidate_tokens = candidate_path.tokens
 
-      target_tokens.first(root_tokens.length) == root_tokens
-    end
+      return false unless candidate_tokens.first(root_tokens.length) == root_tokens
 
-    def relative_tokens_for(document_ptr)
-      root_tokens = JsonPtr::Pointer.parse(path.document_ptr).tokens.map(&:unescaped)
-      target_tokens = JsonPtr::Pointer.parse(document_ptr).tokens.map(&:unescaped)
-
-      target_tokens.drop(root_tokens.length)
+      resolved_path(candidate_path)
+      true
+    rescue Documents::ResolvedPath::InvalidTraversalError
+      false
     end
   end
 end

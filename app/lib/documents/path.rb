@@ -1,64 +1,62 @@
+# frozen_string_literal: true
+
 module Documents
-  # app/lib/document_path.rb
-  # frozen_string_literal: true
-
   class Path
-    ROOT = "".freeze
+    class InvalidPathError < ArgumentError; end
 
-    def self.normalize(raw)
-      JsonPtr::Pointer.parse(raw.presence || ROOT).to_s
-    rescue ArgumentError
-      ROOT
+    ROOT = "/"
+
+    attr_reader :document_ptr
+
+    def initialize(document_ptr = ROOT)
+      @document_ptr = normalize_ptr(document_ptr)
     end
 
-    def initialize(path = ROOT)
-      @path = self.class.normalize(path)
-    end
-
-    def to_s
-      @path
-    end
-
-    def document_ptr
-      @path
+    def self.root
+      new(ROOT)
     end
 
     def root?
-      tokens.empty?
+      document_ptr == ROOT
+    end
+
+    def pointer
+      @pointer ||= JsonPtr::Pointer.parse(document_ptr)
     end
 
     def tokens
-      JsonPtr::Pointer.parse(@path).tokens.map(&:unescaped)
+      pointer.tokens.map(&:unescaped)
     end
 
-    def child(token)
-      ptr = JsonPtr::Pointer.parse(@path)
-      self.class.new(ptr.child(token.to_s).to_s)
+    def child(segment)
+      self.class.new(pointer.child(segment.to_s).to_s)
     end
 
     def parent
-      self.class.new(JsonPtr::Pointer.parse(@path).parent.to_s)
-    end
+      return nil if root?
 
-    # Maps document path → schema path
-    # e.g.
-    # ""                -> ""
-    # "/foo"            -> "/properties/foo"
-    # "/foo/bar"        -> "/properties/foo/properties/bar"
-    def schema_ptr
-      ptr = JsonPtr::Pointer.parse(ROOT)
-
-      tokens.each do |tok|
-        ptr = ptr.child("properties").child(tok)
+      parent_tokens = tokens[0...-1]
+      ptr = parent_tokens.reduce(JsonPtr::Pointer.parse("/")) do |memo, token|
+        memo.child(token)
       end
 
-      ptr.to_s
+      self.class.new(ptr.to_s)
     end
 
-    # Convenience for "what children exist here?"
-    # e.g. "/foo" -> "/properties/foo/properties"
-    def schema_properties_ptr
-      JsonPtr::Pointer.parse(schema_ptr).child("properties").to_s
+    def name
+      tokens.last
+    end
+
+    def to_s
+      document_ptr
+    end
+
+    private
+
+    def normalize_ptr(raw)
+      JsonPtr::Pointer.parse(raw.presence || "/").to_s
+    rescue ArgumentError => e
+      raise InvalidPathError, e.message
     end
   end
 end

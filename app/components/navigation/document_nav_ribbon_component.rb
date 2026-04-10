@@ -37,10 +37,12 @@ module Navigation
     private
 
     def root_segment
+      root_path = Documents::Path.root
+
       Schemas::RibbonSegment.new(
         label: "/",
-        path: Documents::Path::ROOT,
-        url: nav_url(Documents::Path::ROOT),
+        path: root_path.to_s,
+        url: nav_url(root_path),
         current: path.root?,
         menu_items: []
       )
@@ -76,15 +78,17 @@ module Navigation
     end
 
     def path_for_tokens(tokens)
-      tokens.reduce(Documents::Path.new(Documents::Path::ROOT)) do |current_path, token|
+      tokens.reduce(Documents::Path.root) do |current_path, token|
         current_path.child(token)
       end
     end
 
     def nav_url(target_path)
+      path_value = target_path.is_a?(Documents::Path) ? target_path.to_s : Documents::Path.new(target_path).to_s
+
       Rails.application.routes.url_helpers.draft_path(
         draft,
-        path: Documents::Path.new(target_path).to_s
+        path: path_value
       )
     end
 
