@@ -76,9 +76,9 @@ class DraftsController < ApplicationController
 
     @document.schema_document
       .edit_affordances_for_schema
-      .includes(affordance_document: :head_revision)
+      .includes(edit_document: :head_revision)
       .find_by(id: params[:edit_affordance_id])
-      &.affordance_document
+      &.edit_document
       &.body
   end
 

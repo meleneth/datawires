@@ -2,19 +2,23 @@ module Documents
   # frozen_string_literal: true
 
   class ProjectionRow
-    def initialize(projection:, name:)
+    def initialize(projection:, path:)
       @projection = projection
-      @name = name
+      @path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
     end
 
-    attr_reader :name
+    attr_reader :path
 
     def draft
       @projection.source
     end
 
+    def name
+      document_pointer.tokens.last&.unescaped.to_s
+    end
+
     def schema_node
-      @schema_node ||= @projection.child_schema(name) || {}
+      @schema_node ||= JsonPtr.get(draft.schema_document.body, path.schema_ptr) || {}
     end
 
     def enum_values
@@ -26,15 +30,15 @@ module Documents
     end
 
     def required?
-      @projection.child_required?(name)
+      parent_required_keys.include?(name)
     end
 
     def present?
-      @projection.child_present?(name)
+      parent_node.is_a?(Hash) && (parent_node.key?(name) || parent_node.key?(name.to_sym))
     end
 
     def value
-      @projection.child_value(name)
+      JsonPtr.get(draft.body, path.document_ptr)
     end
 
     def composite?
@@ -77,10 +81,6 @@ module Documents
       ActiveModel::Type::Boolean.new.cast(field_value)
     end
 
-    def path
-      @projection.path.child(name)
-    end
-
     def ptr
       path.document_ptr
     end
@@ -90,6 +90,30 @@ module Documents
       return "present" if composite?
 
       value.inspect
+    end
+
+    private
+
+    def document_pointer
+      @document_pointer ||= JsonPtr::Pointer.parse(path.document_ptr)
+    end
+
+    def parent_path
+      @parent_path ||= document_pointer.tokens[0...-1]
+        .map(&:unescaped)
+        .reduce(Documents::Path.new("/")) { |current, token| current.child(token) }
+    end
+
+    def parent_node
+      JsonPtr.get(draft.body, parent_path.document_ptr)
+    end
+
+    def parent_schema_node
+      JsonPtr.get(draft.schema_document.body, parent_path.schema_ptr) || {}
+    end
+
+    def parent_required_keys
+      Array(parent_schema_node["required"])
     end
   end
 end

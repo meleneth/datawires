@@ -74,7 +74,10 @@ module Documents
 
     def default_child_rows
       child_property_names.map do |name|
-        Documents::ProjectionRow.new(projection: self, name: name)
+        Documents::ProjectionRow.new(
+          projection: self,
+          path: path.child(name)
+        )
       end
     end
 
@@ -106,18 +109,21 @@ module Documents
     end
 
     def build_affordance_cell(cell)
-      if cell["kind"] == "commit"
-        return Editors::CommitCell.new(
-          span: cell["span"],
-          message_mode: cell["message_mode"] || "hidden"
-        )
-      end
+      return build_commit_cell(cell) if commit_cell?(cell)
+      return build_field_cell(cell) if field_cell?(cell)
 
-      ptr = cell["ptr"]
-      return nil if ptr.blank?
+      raise ArgumentError, "unsupported edit affordance cell: #{cell.inspect}"
+    end
 
-      projection_row = projection_row_for_ptr(ptr)
+    def build_commit_cell(cell)
+      Editors::CommitCell.new(
+        span: cell["span"],
+        message_mode: cell["message_mode"] || "hidden"
+      )
+    end
 
+    def build_field_cell(cell)
+      projection_row = projection_row_for_binding(cell.fetch("binding"))
       return nil unless projection_row
 
       Editors::FieldCell.new(
@@ -128,17 +134,53 @@ module Documents
       )
     end
 
+    def commit_cell?(cell)
+      cell.is_a?(Hash) && cell["kind"] == "commit"
+    end
+
+    def field_cell?(cell)
+      cell.is_a?(Hash) && cell.key?("binding")
+    end
+
+    def projection_row_for_binding(binding_data)
+      binding = EditForms::Binding.new(binding_data)
+
+      case binding.kind
+      when "document_ptr"
+        projection_row_for_ptr(binding.document_ptr)
+      else
+        raise ArgumentError, "unsupported binding kind: #{binding.kind.inspect}"
+      end
+    end
+
     def projection_row_for_ptr(ptr)
       pointer = JsonPtr::Pointer.parse(ptr)
-      tokens = pointer.tokens.map(&:unescaped)
-      return nil unless tokens.length == 1
+      document_ptr = pointer.to_s
 
-      name = tokens.first
-      return nil unless child_property_names.include?(name)
+      return nil unless within_projection_root?(document_ptr)
 
-      Documents::ProjectionRow.new(projection: self, name: name)
+      relative_tokens = relative_tokens_for(document_ptr)
+      return nil if relative_tokens.empty?
+
+      row_path = relative_tokens.reduce(path) { |current, token| current.child(token) }
+
+      Documents::ProjectionRow.new(projection: self, path: row_path)
     rescue ArgumentError
       nil
+    end
+
+    def within_projection_root?(document_ptr)
+      root_tokens = JsonPtr::Pointer.parse(path.document_ptr).tokens.map(&:unescaped)
+      target_tokens = JsonPtr::Pointer.parse(document_ptr).tokens.map(&:unescaped)
+
+      target_tokens.first(root_tokens.length) == root_tokens
+    end
+
+    def relative_tokens_for(document_ptr)
+      root_tokens = JsonPtr::Pointer.parse(path.document_ptr).tokens.map(&:unescaped)
+      target_tokens = JsonPtr::Pointer.parse(document_ptr).tokens.map(&:unescaped)
+
+      target_tokens.drop(root_tokens.length)
     end
   end
 end

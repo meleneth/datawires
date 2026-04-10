@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "forwardable"
 
 class SchemaDocument
@@ -19,11 +21,11 @@ class SchemaDocument
   end
 
   def edit_affordances
-    document.edit_affordances_for_schema.order(:name)
+    document.edit_affordances_for_schema.order(:title)
   end
 
-  def render_views
-    document.render_views_for_schema.order(:name)
+  def view_affordances
+    document.view_affordances_for_schema.order(:title)
   end
 
   def to_model

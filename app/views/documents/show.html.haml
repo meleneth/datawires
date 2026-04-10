@@ -24,18 +24,18 @@
             = button_to document_draft_path(@document, edit_affordance_id: affordance.id),
               method: :post,
               class: "block w-full rounded-md border border-ls5-blue-1 px-3 py-2 text-left hover:bg-ls5-blue-1" do
-              .font-medium= affordance.name
-              .text-xs.text-ls5-violet-6= affordance.affordance_document.key
+              .font-medium= affordance.title
+              .text-xs.text-ls5-violet-6= affordance.edit_document.key
 
-  - if @render_views.any?
+  - if @view_affordances.any?
     .mt-6
-      %h2.text-lg.font-semibold Render views
+      %h2.text-lg.font-semibold View affordances
 
       %ul.mt-2.space-y-2
-        - @render_views.each do |render_view|
+        - @view_affordances.each do |view_affordance|
           %li.rounded-md.border.border-ls5-violet-2.px-3.py-2
-            .font-medium= render_view.name
-            .text-xs.text-ls5-violet-6= render_view.view_document.key
+            .font-medium= view_affordance.title
+            .text-xs.text-ls5-violet-6= view_affordance.view_document.key
 
   .mt-6
     %pre
