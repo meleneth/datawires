@@ -7,7 +7,7 @@
         - @schemas.each do |schema|
           %li
             = link_to schema_path(schema),
-              data: { turbo_frame: "main_content" },
+              data: { turbo_frame: "main_content",  turbo_action: "advance" },
               class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
               .font-medium.text-ls5-blue-4= schema.key
               .text-xs.text-ls5-violet-6= "updated #{time_ago_in_words(schema.updated_at)} ago"

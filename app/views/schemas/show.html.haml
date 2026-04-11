@@ -5,12 +5,13 @@
     = button_to "New document",
       schema_documents_path(@schema_document),
       method: :post,
+      form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
       class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
 
     = button_to "Edit schema",
       document_draft_path(@schema_document.document),
       method: :post,
-      data: { turbo_frame: "main_content" },
+      form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
   %p
@@ -32,9 +33,11 @@
               .font-medium.text-ls5-blue-4= affordance.title
               - if affordance.edit_document.present?
                 .text-xs.text-ls5-violet-6= affordance.edit_document.title.presence || affordance.edit_document.key
+
             = button_to "New with this affordance",
               schema_documents_path(@schema_document, edit_affordance_id: affordance.id),
               method: :post,
+              form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
               class: "inline-flex items-center rounded-lg bg-ls5-green-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-green-5"
     - else
       %p.mt-2.text-sm.text-ls5-violet-6 No edit affordances exist for this schema yet.
@@ -47,6 +50,7 @@
         - @documents.each do |document|
           %li
             = link_to document_path(document),
+              data: { turbo_frame: "main_content", turbo_action: "advance" },
               class: "block rounded-md border border-ls5-violet-2 px-3 py-2 hover:bg-ls5-violet-1" do
               .font-medium.text-ls5-blue-4= document.title.presence || document.key
               .text-xs.text-ls5-violet-6= document.key

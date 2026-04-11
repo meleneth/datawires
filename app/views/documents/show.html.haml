@@ -12,7 +12,9 @@
   - if @schema_document
     %p
       %strong Schema:
-      = link_to @schema_document.key, schema_path(@schema_document)
+      = link_to @schema_document.key,
+        schema_path(@schema_document),
+        data: { turbo_frame: "main_content", turbo_action: "advance" }
 
   - if @edit_affordances.any?
     .mt-6
@@ -23,6 +25,7 @@
           %li
             = button_to document_draft_path(@document, edit_affordance_id: affordance.id),
               method: :post,
+              form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
               class: "block w-full rounded-md border border-ls5-blue-1 px-3 py-2 text-left hover:bg-ls5-blue-1" do
               .font-medium= affordance.title
               .text-xs.text-ls5-violet-6= affordance.edit_document.key
