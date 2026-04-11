@@ -55,7 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
     t.uuid "for_schema_document_id", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["edit_document_id"], name: "index_edit_affordances_on_edit_document_id", unique: true
+    t.index ["edit_document_id"], name: "index_edit_affordances_on_edit_document_id"
     t.index ["for_schema_document_id", "title"], name: "index_edit_affordances_on_schema_and_title", unique: true
   end
 
@@ -101,6 +101,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "schema_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id"], name: "index_schema_documents_on_document_id", unique: true
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "avatar"
     t.datetime "created_at", null: false
@@ -115,7 +122,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
     t.datetime "updated_at", null: false
     t.uuid "view_document_id", null: false
     t.index ["for_schema_document_id", "title"], name: "index_view_affordances_on_schema_and_title", unique: true
-    t.index ["view_document_id"], name: "index_view_affordances_on_view_document_id", unique: true
+    t.index ["view_document_id"], name: "index_view_affordances_on_view_document_id"
   end
 
   add_foreign_key "documents", "documents", column: "schema_document_id"
@@ -125,12 +132,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_001201) do
   add_foreign_key "drafts", "revisions", column: "based_on_revision_id"
   add_foreign_key "drafts", "users", column: "created_by_id"
   add_foreign_key "edit_affordances", "documents", column: "edit_document_id"
-  add_foreign_key "edit_affordances", "documents", column: "for_schema_document_id"
+  add_foreign_key "edit_affordances", "schema_documents", column: "for_schema_document_id"
   add_foreign_key "external_documents", "documents"
   add_foreign_key "messages", "rooms"
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"
-  add_foreign_key "view_affordances", "documents", column: "for_schema_document_id"
+  add_foreign_key "schema_documents", "documents"
   add_foreign_key "view_affordances", "documents", column: "view_document_id"
+  add_foreign_key "view_affordances", "schema_documents", column: "for_schema_document_id"
 end

@@ -18,8 +18,14 @@ module Seeds
       journey_domain = DocumentSeedHelper.ensure_domain!(name: JOURNEY_DOMAIN_NAME)
       datawires_domain = DocumentSeedHelper.ensure_domain!(name: DATAWIRES_DOMAIN_NAME)
 
-      journey_schema = Document.find_by!(domain: journey_domain, key: JOURNEY_SCHEMA_KEY)
-      edit_form_schema = Document.find_by!(domain: datawires_domain, key: EDIT_FORM_SCHEMA_KEY)
+      journey_schema_document = SchemaDocument.joins(:document).find_by!(
+        documents: { domain_id: journey_domain.id, key: JOURNEY_SCHEMA_KEY }
+      )
+
+      edit_form_schema = Document.find_by!(
+        domain: datawires_domain,
+        key: EDIT_FORM_SCHEMA_KEY
+      )
 
       edit_document = DocumentSeedHelper.ensure_document_with_revision!(
         domain: journey_domain,
@@ -31,7 +37,7 @@ module Seeds
       )
 
       EditAffordance.find_or_create_by!(
-        for_schema_document: journey_schema,
+        for_schema_document: journey_schema_document,
         edit_document: edit_document
       ) do |edit_affordance|
         edit_affordance.title = EDIT_AFFORDANCE_TITLE

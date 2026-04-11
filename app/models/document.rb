@@ -55,6 +55,11 @@ class Document < ApplicationRecord
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
+  has_one :schema_document_record,
+        class_name: "SchemaDocument",
+        dependent: :destroy,
+        inverse_of: :document
+
   validates :key, presence: true, uniqueness: { scope: :domain_id }
   validate :schema_document_must_be_schema_backed, if: -> { schema_document_id.present? }
 
@@ -69,6 +74,22 @@ class Document < ApplicationRecord
     left_joins(:head_revision)
       .where("revisions.id IS NULL OR NOT (revisions.body ? '$schema')")
   }
+
+  has_one :schema_document_record,
+          class_name: "SchemaDocument",
+          inverse_of: :document
+
+  def edit_affordances
+    schema_record&.edit_affordances || EditAffordance.none
+  end
+
+  def schema_record
+    schema_document&.schema_document_record
+  end
+
+  def edit_affordances_for_schema
+    schema_record&.edit_affordances || EditAffordance.none
+  end
 
   def to_param
     id

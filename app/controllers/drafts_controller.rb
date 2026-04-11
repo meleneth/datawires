@@ -72,9 +72,8 @@ class DraftsController < ApplicationController
 
   def selected_edit_affordance_body
     return nil if params[:edit_affordance_id].blank?
-    return nil unless @document.schema_document
 
-    @document.schema_document
+    @document
       .edit_affordances_for_schema
       .includes(edit_document: :head_revision)
       .find_by(id: params[:edit_affordance_id])

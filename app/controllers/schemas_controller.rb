@@ -3,7 +3,11 @@
 class SchemasController < ApplicationController
   def index
     @domain = Domain.find(params[:domain_id])
-    @schemas = @domain.documents.schemas.order(:key)
+    @schemas = SchemaDocument
+      .includes(document: [ :domain, :head_revision ])
+      .joins(:document)
+      .where(documents: { domain_id: @domain.id })
+      .order("documents.key")
   end
 
   def new
@@ -18,24 +22,29 @@ class SchemasController < ApplicationController
       domain: @domain,
       key: schema_params.fetch(:key),
       title: schema_params[:title],
-      actor: current_user,
+      actor: current_user
     )
 
     redirect_to draft_path(result.draft)
   end
 
   def show
-    document = Document
+    @schema_document = SchemaDocument
       .includes(
-        :domain,
-        :head_revision,
-        instance_documents: :head_revision
+        document: [
+          :domain,
+          :head_revision,
+          { instance_documents: :head_revision }
+        ],
+        edit_affordances: { edit_document: :head_revision },
+        view_affordances: { view_document: :head_revision }
       )
       .find(params[:id])
 
-    @document = SchemaDocument.new(document)
-    @domain = @document.domain
-    @schema_documents = @document.conforming_documents
+    @domain = @schema_document.domain
+    @documents = @schema_document.conforming_documents
+    @edit_affordances = @schema_document.edit_affordances.order(:title)
+    @view_affordances = @schema_document.view_affordances.order(:title)
   end
 
   private

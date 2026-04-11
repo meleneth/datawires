@@ -1,34 +1,31 @@
 # frozen_string_literal: true
 
-require "forwardable"
+class SchemaDocument < ApplicationRecord
+  belongs_to :document, inverse_of: :schema_document_record
 
-class SchemaDocument
-  extend Forwardable
+  has_many :edit_affordances,
+           foreign_key: :for_schema_document_id,
+           inverse_of: :for_schema_document,
+           dependent: :destroy
 
-  class NotASchemaDocumentError < ArgumentError; end
+  has_many :view_affordances,
+           foreign_key: :for_schema_document_id,
+           inverse_of: :for_schema_document,
+           dependent: :destroy
 
-  attr_reader :document
+  delegate :key, :title, :domain, :head_revision, :body, to: :document
 
-  def_delegators :document, :id, :to_param, :key, :title, :domain, :head_revision, :body
-
-  def initialize(document)
-    @document = document
-    raise NotASchemaDocumentError, "document is not a schema" unless document.schema?
-  end
+  validate :document_must_be_schema
 
   def conforming_documents
     document.instance_documents.order(:title, :key)
   end
 
-  def edit_affordances
-    document.edit_affordances_for_schema.order(:title)
-  end
+  private
 
-  def view_affordances
-    document.view_affordances_for_schema.order(:title)
-  end
+  def document_must_be_schema
+    return if document&.schema?
 
-  def to_model
-    document
+    errors.add(:document, "must be a schema document")
   end
 end

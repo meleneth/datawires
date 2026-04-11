@@ -3,38 +3,56 @@
 
   .mb-4.flex.gap-2
     = button_to "New document",
-      schema_documents_path(@document),
+      schema_documents_path(@schema_document),
       method: :post,
       class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
 
     = button_to "Edit schema",
-      document_draft_path(@document),
+      document_draft_path(@schema_document.document),
       method: :post,
       data: { turbo_frame: "main_content" },
       class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
   %p
     %strong Domain:
-    = @document.domain.name
+    = @schema_document.domain.name
 
   %p
     %strong Key:
-    = @document.key
+    = @schema_document.key
+
+  .mt-6
+    %h2.text-lg.font-semibold Edit affordances
+
+    - if @edit_affordances.any?
+      %ul.mt-2.space-y-2
+        - @edit_affordances.each do |affordance|
+          %li.flex.items-center.justify-between.rounded-md.border.border-ls5-blue-2.px-3.py-2
+            .min-w-0
+              .font-medium.text-ls5-blue-4= affordance.title
+              - if affordance.edit_document.present?
+                .text-xs.text-ls5-violet-6= affordance.edit_document.title.presence || affordance.edit_document.key
+            = button_to "New with this affordance",
+              schema_documents_path(@schema_document, edit_affordance_id: affordance.id),
+              method: :post,
+              class: "inline-flex items-center rounded-lg bg-ls5-green-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-green-5"
+    - else
+      %p.mt-2.text-sm.text-ls5-violet-6 No edit affordances exist for this schema yet.
 
   .mt-6
     %h2.text-lg.font-semibold Documents using this schema
 
-    - if @schema_documents.any?
+    - if @documents.any?
       %ul.mt-2.space-y-2
-        - @schema_documents.each do |doc|
+        - @documents.each do |document|
           %li
-            = link_to document_path(doc),
+            = link_to document_path(document),
               class: "block rounded-md border border-ls5-violet-2 px-3 py-2 hover:bg-ls5-violet-1" do
-              .font-medium.text-ls5-blue-4= doc.title.presence || doc.key
-              .text-xs.text-ls5-violet-6= doc.key
+              .font-medium.text-ls5-blue-4= document.title.presence || document.key
+              .text-xs.text-ls5-violet-6= document.key
     - else
       %p.mt-2.text-sm.text-ls5-violet-6 No documents use this schema yet.
 
   .mt-6
     %pre
-      = JSON.pretty_generate(@document.head_revision.body)
+      = JSON.pretty_generate(@schema_document.body)

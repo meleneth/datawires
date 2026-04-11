@@ -5,11 +5,13 @@ require_relative "seeds/support/journey_event_schema"
 require_relative "seeds/support/journey_event_example_document"
 require_relative "seeds/journey_event_edit_affordance"
 require_relative "seeds/edit_form_schema"
+require_relative "seeds/journey_item_collection_schema"
 
 Seeds::EditFormSchema.seed!
 Seeds::JourneyEventSchema.seed!
 Seeds::JourneyEventExampleDocument.seed!
 Seeds::JourneyEventEditAffordance.seed!
+Seeds::JourneyItemCollectionSchema.seed!
 
 
 # This file should ensure the existence of records required to run the application in every environment (production,

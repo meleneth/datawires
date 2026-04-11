@@ -4,26 +4,29 @@ module Seeds
   module JourneyEventSchema
     module_function
 
-    DOMAIN_NAME = "Journey".freeze
-    DOCUMENT_KEY = "event".freeze
+    DOMAIN_NAME = "Journey"
+    DOCUMENT_KEY = "event"
+    DOCUMENT_TITLE = "Journey Event"
 
     def seed!
       domain = DocumentSeedHelper.ensure_domain!(name: DOMAIN_NAME)
 
-      DocumentSeedHelper.ensure_document_with_revision!(
+      document = DocumentSeedHelper.ensure_document_with_revision!(
         domain:,
         key: DOCUMENT_KEY,
-        title: "Journey Event",
+        title: DOCUMENT_TITLE,
         body: schema_body,
         message: "Seed Journey Event schema"
       )
+
+      SchemaDocument.find_or_create_by!(document:)
     end
 
     def schema_body
       {
         "$id" => "http://journey/event",
         "type" => "object",
-        "title" => "Journey Event",
+        "title" => DOCUMENT_TITLE,
         "$schema" => "https://json-schema.org/draft/2020-12/schema",
         "examples" => [
           {

@@ -2,14 +2,15 @@
 
 module Documents
   class CreateFromSchema
-    def self.call(schema:, actor: nil)
-      new(schema:, actor:).call
+    def self.call(schema_document:, actor: nil)
+      new(schema_document:, actor:).call
     end
 
-    def initialize(schema:, actor:)
-      raise ArgumentError, "schema must be a schema document" unless schema.schema_document?
+    def initialize(schema_document:, actor:)
+      raise ArgumentError, "schema_document must be a SchemaDocument" unless schema_document.is_a?(SchemaDocument)
 
-      @schema = schema
+      @schema_document = schema_document
+      @schema = schema_document.document
       @actor = actor
     end
 
@@ -38,7 +39,7 @@ module Documents
     def next_key
       loop do
         key = "document-#{SecureRandom.hex(4)}"
-        break key unless @schema.domain.documents.exists?(key:)
+        break key unless @schema.domain.documents.exists?(key: key)
       end
     end
 

@@ -8,11 +8,16 @@ class DomainsController < ApplicationController
 
   # GET /domains/1 or /domains/1.json
   def show
-    @schemas = @domain.documents.schemas.order(:key)
+    @schemas = SchemaDocument
+      .includes(:document)
+      .joins(:document)
+      .where(documents: { domain_id: @domain.id })
+      .merge(@domain.documents.schemas)
+      .order("documents.key")
+
     @document = @domain.documents.build
     @drafts = @domain.open_drafts
   end
-
   # GET /domains/new
   def new
     @domain = Domain.new

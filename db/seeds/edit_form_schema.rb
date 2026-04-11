@@ -4,10 +4,10 @@ module Seeds
   module EditFormSchema
     module_function
 
-    DOMAIN_NAME = "Datawires".freeze
-    DOCUMENT_KEY = "edit-form".freeze
-    DOCUMENT_TITLE = "Edit Form".freeze
-    JSON_SCHEMA_DOCUMENT_KEY = "meta/json-schema/2020-12".freeze
+    DOMAIN_NAME = "Datawires"
+    DOCUMENT_KEY = "edit-form"
+    DOCUMENT_TITLE = "Edit Form"
+    JSON_SCHEMA_DOCUMENT_KEY = "meta/json-schema/2020-12"
 
     def seed!
       domain = DocumentSeedHelper.find_domain!(name: DOMAIN_NAME)
@@ -16,7 +16,7 @@ module Seeds
         key: JSON_SCHEMA_DOCUMENT_KEY
       )
 
-      DocumentSeedHelper.ensure_document_with_revision!(
+      document = DocumentSeedHelper.ensure_document_with_revision!(
         domain:,
         key: DOCUMENT_KEY,
         title: DOCUMENT_TITLE,
@@ -24,13 +24,15 @@ module Seeds
         body: schema_body,
         message: "Seed edit form schema"
       )
+
+      SchemaDocument.find_or_create_by!(document:)
     end
 
     def schema_body
       {
         "$schema" => "https://json-schema.org/draft/2020-12/schema",
         "$id" => "http://datawires/schemas/edit-form",
-        "title" => "Edit Form",
+        "title" => DOCUMENT_TITLE,
         "type" => "object",
         "required" => %w[version screen rows],
         "additionalProperties" => false,
