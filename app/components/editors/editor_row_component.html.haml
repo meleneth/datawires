@@ -1,7 +1,0 @@
-.grid.gap-4{ class: row.grid_class }
-  - row.cells.each do |cell|
-    %div{ class: cell.span_class(row.column_count) }
-      - if cell.field?
-        = render(Editors::FieldCellComponent.new(cell: cell, draft: draft, edit_affordance_id: edit_affordance_id, current_path: current_path))
-      - elsif cell.commit?
-        = render(Editors::CommitCellComponent.new(cell: cell, draft: draft, edit_affordance_id: edit_affordance_id))

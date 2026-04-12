@@ -1,9 +1,0 @@
-%h3 Ribbon
-%p= ptr.presence || "(root)"
-
-- JsonPtr.each_pointer(draft.body).each do |p, _|
-  - next if p.to_s == "" # skip root
-  %div
-    = link_to p.to_s,
-      draft_path(draft, ptr: p.to_s),
-      data: { turbo_frame: "editor" }
