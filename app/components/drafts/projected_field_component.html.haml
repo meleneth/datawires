@@ -3,31 +3,9 @@
     %label.block.text-sm.font-medium.text-ink{ for: dom_id }
       = label_text
 
-  = form_with url: patch_path,
-    method: :patch,
-    data: { turbo_frame: "main_content" } do |form|
+  = form_with url: patch_path, method: :patch, data: form_data_attributes do |form|
     = form.hidden_field :ptr, value: ptr
     = form.hidden_field :path, value: path
+    = form.hidden_field :edit_affordance_id, value: edit_affordance_id if edit_affordance_id.present?
 
-    - case input_kind
-    - when :checkbox
-      = form.check_box input_name,
-        { id: dom_id, checked: checkbox_value },
-        "true",
-        "false"
-    - when :select
-      = form.select input_name,
-        select_options,
-        {},
-        id: dom_id,
-        class: input_html_class
-    - when :number
-      = form.number_field input_name,
-        value: field_value,
-        id: dom_id,
-        class: input_html_class
-    - else
-      = form.text_field input_name,
-        value: field_value,
-        id: dom_id,
-        class: input_html_class
+    = form.public_send(input_method, *input_leading_args)

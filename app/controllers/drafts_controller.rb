@@ -9,23 +9,18 @@ class DraftsController < ApplicationController
 
   def patch_ptr
     ptr = normalize_ptr(params[:ptr])
-    render_path = params[:path].presence || "/"
     field_cursor = Documents::Cursor.new(source: @draft, path: ptr)
-
     value = coerce_scalar_value(params[:value], field_cursor.schema_node)
-    @draft.update!(body: JsonPtr.set(@draft.body, ptr, value))
 
-    @page = build_show_page(path_param: render_path)
+    @draft.update!(body: JsonPtr.set(@draft.body, ptr, value))
+    @diff_rows = Documents::Diff.rows(
+      before: @draft.based_on_revision&.body,
+      after: @draft.body
+    )
 
     respond_to do |format|
       format.turbo_stream
-      format.html do
-        redirect_to draft_path(
-          @draft,
-          path: render_path,
-          edit_affordance_id: params[:edit_affordance_id]
-        )
-      end
+      format.html { head :no_content }
     end
   rescue KeyError => e
     render plain: e.message, status: :unprocessable_entity

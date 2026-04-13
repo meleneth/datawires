@@ -12,6 +12,7 @@ class Draft < ApplicationRecord
              optional: true
 
   delegate :domain, :schema_document, :schema_document?, to: :document
+  after_commit :broadcast_review_update, on: %i[create update]
 
   scope :for_actor, ->(actor) { where(created_by: actor) }
 
@@ -28,6 +29,18 @@ class Draft < ApplicationRecord
     is_json_schema?
   end
 
+  def review_stream_name
+    "draft:#{id}:review"
+  end
+
+  def review_dom_id
+    ActionView::RecordIdentifier.dom_id(self, :review)
+  end
+
+  def review_dom_id
+    "review"
+  end
+
   private
 
   def body_must_be_json_object
@@ -39,5 +52,20 @@ class Draft < ApplicationRecord
     return if based_on_revision.document_id == document_id
 
     errors.add(:based_on_revision, "must belong to the same document")
+  end
+
+  def broadcast_review_update
+    broadcast_update_to(
+      review_stream_name,
+      target: review_dom_id,
+      partial: "drafts/review",
+      locals: {
+        draft: self,
+        diff_rows: Documents::Diff.rows(
+          before: based_on_revision&.body,
+          after: body
+        )
+      }
+    )
   end
 end

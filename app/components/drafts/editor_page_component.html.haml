@@ -1,18 +1,19 @@
-.space-y-4
-  .space-y-1
-    .text-xs.text-ls5-violet-5 Path
-    .font-mono.text-sm= path_label
+= render Ui::CardComponent.new do
+  .space-y-4
+    .space-y-1
+      .text-xs.text-ls5-violet-5 Path
+      .font-mono.text-sm= path_label
 
-  .flex.items-center.justify-between
-    %h3.text-lg.font-semibold.text-ink= title
+    .flex.items-center.justify-between
+      %h3.text-lg.font-semibold.text-ink= title
 
-    = link_to "Commit…",
-      commit_path,
-      data: { turbo_frame: "main_content" },
-      class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+      = link_to "Commit…",
+        commit_path,
+        data: { turbo_frame: "main_content" },
+        class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
 
-  - if projected_rows?
-    = render projected_rows_component
-  - else
-    .rounded-lg.border.border-ls5-violet-2.p-4.text-sm.text-ls5-violet-6
-      No edit affordance projection available for this location.
+    - if projected_rows?
+      = render projected_rows_component
+    - else
+      .rounded-lg.border.border-ls5-violet-2.p-4.text-sm.text-ls5-violet-6
+        No edit affordance projection available for this location.

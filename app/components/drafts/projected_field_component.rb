@@ -2,13 +2,27 @@
 
 module Drafts
   class ProjectedFieldComponent < ApplicationComponent
-    attr_reader :draft, :projected_field
+    attr_reader :draft, :projected_field, :edit_affordance_id
 
     delegate :cursor, :label, :widget, to: :projected_field
 
-    def initialize(draft:, field:)
+    def initialize(draft:, field:, edit_affordance_id: nil)
       @draft = draft
       @projected_field = field
+      @edit_affordance_id = edit_affordance_id
+    end
+
+    def input_method
+      case input_kind
+      when :checkbox
+        :check_box
+      when :select
+        :select
+      when :number
+        :number_field
+      else
+        :text_field
+      end
     end
 
     def input_kind
@@ -37,6 +51,13 @@ module Drafts
       patch_ptr_draft_path(draft)
     end
 
+    def form_data_attributes
+      {
+        controller: "autosave",
+        autosave_delay_value: 400
+      }
+    end
+
     def ptr
       cursor.ptr
     end
@@ -59,6 +80,44 @@ module Drafts
 
     def input_html_class
       "w-full rounded-lg border border-ls5-violet-2"
+    end
+
+    def input_html_options
+      base = {
+        id: dom_id,
+        data: { action: input_action }
+      }
+
+      case input_method
+      when :select
+        base.merge(class: input_html_class)
+      when :number_field, :text_field
+        base.merge(class: input_html_class, value: field_value)
+      when :check_box
+        base.merge(checked: checkbox_value)
+      else
+        base
+      end
+    end
+
+    def input_leading_args
+      case input_method
+      when :select
+        [ input_name, select_options, {}, input_html_options ]
+      when :check_box
+        [ input_name, input_html_options, "true", "false" ]
+      else
+        [ input_name, input_html_options ]
+      end
+    end
+
+    def input_action
+      case input_kind
+      when :checkbox, :select
+        "change->autosave#submit"
+      else
+        "input->autosave#queue change->autosave#submit"
+      end
     end
 
     def select_options

@@ -1,6 +1,8 @@
 = turbo_frame_tag "main_content" do
+  = turbo_stream_from @page.draft.review_stream_name
+
   = turbo_frame_tag "editor" do
     = render Drafts::EditorPageComponent.new(page: @page)
 
-  = turbo_frame_tag "review" do
+  = turbo_frame_tag @page.draft.review_dom_id do
     = render "drafts/review", diff_rows: @page.diff_rows, draft: @page.draft
