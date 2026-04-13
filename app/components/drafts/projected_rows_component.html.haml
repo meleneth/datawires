@@ -1,0 +1,6 @@
+.space-y-4
+  - projected_rows.each do |row|
+    .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
+      - row.cells.each do |cell|
+        %div{ class: span_class_for(cell) }
+          = render rendered_component_for(cell)

@@ -1,0 +1,34 @@
+- field_cursor = cursor
+
+.space-y-1
+  - if field.label
+    %label.block.text-sm.font-medium.text-ink{ for: field_cursor.ptr.parameterize }
+      = field_cursor.name.to_s.humanize
+
+  - case field_cursor.input_kind
+  - when :checkbox
+    = form_with url: patch_ptr_draft_path(draft),
+      method: :patch,
+      data: { turbo_frame: "main_content" } do |form|
+      = form.hidden_field :ptr, value: field_cursor.ptr
+      = form.hidden_field :path, value: field_cursor.path.to_s
+      = form.check_box :value, { checked: field_cursor.checkbox_value }, "true", "false"
+  - when :select
+    = form_with url: patch_ptr_draft_path(draft),
+      method: :patch,
+      data: { turbo_frame: "main_content" } do |form|
+      = form.hidden_field :ptr, value: field_cursor.ptr
+      = form.hidden_field :path, value: field_cursor.path.to_s
+      = form.select :value,
+        options_for_select(field_cursor.enum_values, field_cursor.field_value),
+        {},
+        class: "w-full rounded-lg border border-ls5-violet-2"
+  - else
+    = form_with url: patch_ptr_draft_path(draft),
+      method: :patch,
+      data: { turbo_frame: "main_content" } do |form|
+      = form.hidden_field :ptr, value: field_cursor.ptr
+      = form.hidden_field :path, value: field_cursor.path.to_s
+      = form.text_field :value,
+        value: field_cursor.field_value,
+        class: "w-full rounded-lg border border-ls5-violet-2"

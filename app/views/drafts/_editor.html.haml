@@ -1,0 +1,51 @@
+.space-y-4
+  = render Navigation::DocumentNavRibbonComponent.new(
+    document: document,
+    draft: draft,
+    path: cursor.path,
+    turbo_frame: "editor"
+  )
+
+  .flex.items-center.justify-between
+    %h3.text-lg.font-semibold.text-ink
+      = document.title.presence || document.key
+
+    = link_to "Commit…",
+      new_draft_commit_path(draft, edit_affordance_id: edit_affordance&.id, path: cursor.path.to_s),
+      data: { turbo_frame: "main_content" },
+      class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+
+  - if projected_rows.present?
+    = render "drafts/projected_rows",
+      draft: draft,
+      cursor: cursor,
+      projected_rows: projected_rows,
+      edit_affordance: edit_affordance
+  - else
+    .rounded-lg.border.border-ls5-violet-2.p-4.text-sm.text-ls5-violet-6
+      No edit affordance projection available for this location..space-y-4
+  = render Navigation::DocumentNavRibbonComponent.new(
+    document: document,
+    draft: draft,
+    path: cursor.path,
+    turbo_frame: "editor"
+  )
+
+  .flex.items-center.justify-between
+    %h3.text-lg.font-semibold.text-ink
+      = document.title.presence || document.key
+
+    = link_to "Commit…",
+      new_draft_commit_path(draft, edit_affordance_id: edit_affordance&.id, path: cursor.path.to_s),
+      data: { turbo_frame: "main_content" },
+      class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+
+  - if projected_rows.present?
+    = render "drafts/projected_rows",
+      draft: draft,
+      cursor: cursor,
+      projected_rows: projected_rows,
+      edit_affordance: edit_affordance
+  - else
+    .rounded-lg.border.border-ls5-violet-2.p-4.text-sm.text-ls5-violet-6
+      No edit affordance projection available for this location.

@@ -2,9 +2,9 @@
   .space-y-4
     .flex.items-center.justify-between
       %h3.text-lg.font-semibold.text-ink Changes
-      .text-sm.text-slate-500= pluralize(@diff_rows.size, "change")
+      .text-sm.text-slate-500= pluralize(diff_rows.size, "change")
 
-    - if @diff_rows.empty?
+    - if diff_rows.empty?
       .rounded-lg.bg-slate-50.p-4.text-sm.text-slate-600
         No changes.
     - else
@@ -17,10 +17,10 @@
               %th.px-3.py-2.text-left.font-medium.text-slate-700 Before
               %th.px-3.py-2.text-left.font-medium.text-slate-700 After
           %tbody.divide-y.divide-slate-100
-            - @diff_rows.each do |row|
+            - diff_rows.each do |row|
               - badge_classes = "bg-amber-100 text-amber-800"
-              - badge_class = "bg-green-100 text-green-800" if row.kind == :added
-              - badge_class = "bg-red-100 text-red-800" if row.kind == :removed
+              - badge_classes = "bg-green-100 text-green-800" if row.kind == :added
+              - badge_classes = "bg-red-100 text-red-800" if row.kind == :removed
               %tr.align-top
                 %td.px-3.py-2.font-mono.text-xs.text-slate-700= row.path
                 %td.px-3.py-2

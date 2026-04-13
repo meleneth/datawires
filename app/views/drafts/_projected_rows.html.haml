@@ -1,0 +1,15 @@
+.space-y-4
+  - projected_rows.each do |row|
+    .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
+      - row.cells.each do |cell|
+        - if cell.is_a?(EditForms::ProjectedField)
+          %div{ class: cell.span.present? ? "col-span-#{cell.span}" : nil }
+            = render "drafts/projected_field",
+              draft: draft,
+              field: cell,
+              cursor: cell.cursor
+        - elsif cell.is_a?(EditForms::ProjectedCommit)
+          %div{ class: cell.span.present? ? "col-span-#{cell.span}" : nil }
+            = render "drafts/projected_commit",
+              draft: draft,
+              commit: cell

@@ -1,10 +1,6 @@
 = turbo_frame_tag "main_content" do
   = turbo_frame_tag "editor" do
-    Path is:
-    = @path
-    - if @draft.schema_document?
-      = render "schema_editor", domain: @domain, document: @document, draft: @draft, path: @path
-    - else
-      = render "document_editor", domain: @domain, document: @document, draft: @draft, path: @path
+    = render Drafts::EditorPageComponent.new(page: @page)
+
   = turbo_frame_tag "review" do
-    = render "drafts/review", draft: @draft
+    = render "drafts/review", diff_rows: @page.diff_rows, draft: @page.draft

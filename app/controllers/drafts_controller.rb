@@ -4,26 +4,18 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
-    load_document_editor_state(params[:path] || params[:ptr])
+    @page = build_show_page(path_param: params[:path].presence || params[:ptr].presence || "/")
   end
 
   def patch_ptr
-    @ptr = normalize_ptr(params[:ptr])
+    ptr = normalize_ptr(params[:ptr])
     render_path = params[:path].presence || "/"
-    field_path = Documents::Path.new(@ptr)
+    field_cursor = Documents::Cursor.new(source: @draft, path: ptr)
 
-    projection = Documents::Projection.new(
-      source: @draft,
-      path: field_path,
-      edit_affordance: selected_edit_affordance_body
-    )
+    value = coerce_scalar_value(params[:value], field_cursor.schema_node)
+    @draft.update!(body: JsonPtr.set(@draft.body, ptr, value))
 
-    schema_node = projection.schema_node || {}
-    value = coerce_scalar_value(params[:value], schema_node)
-
-    @draft.update!(body: JsonPtr.set(@draft.body, @ptr, value))
-
-    load_document_editor_state(render_path)
+    @page = build_show_page(path_param: render_path)
 
     respond_to do |format|
       format.turbo_stream
@@ -41,26 +33,18 @@ class DraftsController < ApplicationController
 
   private
 
-  def load_document_editor_state(path_param = nil)
-    if @draft.schema_document?
-      @path = Schemas::Path.new(path_param)
-      return
-    end
-
-    @path = Documents::Path.new(path_param || params[:ptr])
-    @projection = Documents::Projection.new(
+  def build_show_page(path_param:)
+    cursor = Documents::Cursor.new(
       source: @draft,
-      path: @path,
-      edit_affordance: selected_edit_affordance_body
+      path: path_param
     )
-    @value = @projection.document_node
-    @schema_node = @projection.schema_node || {}
-    @properties = @schema_node.fetch("properties", {})
-    @editor_rows = @projection.editor_rows
 
-    @diff_rows = Documents::Diff.rows(
-      before: @draft.based_on_revision&.body,
-      after: @draft.body
+    Drafts::ShowPage.new(
+      domain: @domain,
+      document: @document,
+      draft: @draft,
+      cursor: cursor,
+      edit_affordance: selected_edit_affordance
     )
   end
 
@@ -70,45 +54,19 @@ class DraftsController < ApplicationController
     @domain = @document.domain
   end
 
-  def selected_edit_affordance_body
+  def selected_edit_affordance
     return nil if params[:edit_affordance_id].blank?
 
     @document
       .edit_affordances_for_schema
       .includes(edit_document: :head_revision)
       .find_by(id: params[:edit_affordance_id])
-      &.edit_document
-      &.body
   end
 
   def normalize_ptr(raw)
     JsonPtr::Pointer.parse(raw.presence || "/").to_s
   rescue ArgumentError
     "/"
-  end
-
-  def schema_document_redirect_target
-    if @document.schema_document?
-      schema_path(@document)
-    else
-      document_path(@document)
-    end
-  end
-
-  def draft_redirect_target_on_error
-    if @document.schema_document?
-      draft_path(
-        @draft,
-        path: Schemas::Path.normalize(params[:path]),
-        edit_affordance_id: params[:edit_affordance_id]
-      )
-    else
-      draft_path(
-        @draft,
-        ptr: normalize_ptr(params[:ptr]),
-        edit_affordance_id: params[:edit_affordance_id]
-      )
-    end
   end
 
   def coerce_scalar_value(raw, schema_node)

@@ -25,6 +25,10 @@ module Documents
       path.name
     end
 
+    def at(path)
+      self.class.new(source:, path:)
+    end
+
     def parent
       return nil if root?
 
@@ -42,8 +46,16 @@ module Documents
       )
     end
 
+    def resolves?
+      resolved_path.schema_node.present?
+    rescue Documents::ResolvedPath::InvalidTraversalError
+      false
+    end
+
     def schema_node
       resolved_path.schema_node || {}
+    rescue Documents::ResolvedPath::InvalidTraversalError
+      {}
     end
 
     def value
@@ -106,10 +118,14 @@ module Documents
 
     def array_element?
       resolved_path.array_element?
+    rescue Documents::ResolvedPath::InvalidTraversalError
+      false
     end
 
     def object_property?
       resolved_path.object_property?
+    rescue Documents::ResolvedPath::InvalidTraversalError
+      false
     end
 
     def input_kind
