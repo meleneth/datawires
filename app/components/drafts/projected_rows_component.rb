@@ -19,11 +19,26 @@ module Drafts
     def rendered_component_for(cell)
       case cell
       when EditForms::ProjectedField
-        Drafts::ProjectedFieldComponent.new(draft: draft, field: cell)
+        projected_field_component_for(cell)
       when EditForms::ProjectedCommit
         Drafts::ProjectedCommitComponent.new(page: page, commit: cell)
       else
         raise ArgumentError, "unsupported projected cell: #{cell.inspect}"
+      end
+    end
+
+    def projected_field_component_for(cell)
+      if cell.widget == "array" || cell.cursor.array?
+        Drafts::ProjectedArrayFieldComponent.new(
+          page: page,
+          field: cell
+        )
+      else
+        Drafts::ProjectedFieldComponent.new(
+          draft: draft,
+          field: cell,
+          edit_affordance_id: page.edit_affordance&.id
+        )
       end
     end
   end
