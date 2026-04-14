@@ -20,20 +20,28 @@ module Drafts
       cursor.name.to_s.humanize
     end
 
-    def items
-      Array(cursor.value)
-    end
-
     def empty?
-      items.empty?
+      item_cards.empty?
     end
 
     def item_count_text
-      "#{items.length} item#{'s' unless items.length == 1}"
+      "#{item_cards.length} item#{'s' unless item_cards.length == 1}"
+    end
+
+    def add_item_path
+      add_item_draft_path(draft)
+    end
+
+    def add_item_button_params
+      {
+        ptr: cursor.ptr,
+        path: page.cursor.path.to_s,
+        edit_affordance_id: edit_affordance&.id
+      }
     end
 
     def item_cards
-      item_cursors.each_with_index.map do |item_cursor, index|
+      @item_cards ||= item_cursors.each_with_index.map do |item_cursor, index|
         {
           title: "Item #{index + 1}",
           child_components: child_components_for(item_cursor)
@@ -41,19 +49,10 @@ module Drafts
       end
     end
 
-    def add_item_path
-      add_document_properties_path(
-        draft_id: draft.id,
-        ptr: cursor.ptr,
-        path: page.cursor.path.to_s,
-        edit_affordance_id: edit_affordance&.id
-      )
-    end
-
     private
 
     def item_cursors
-      items.each_index.map { |index| cursor.child(index.to_s) }
+      Array(cursor.value).each_index.map { |index| cursor.child(index.to_s) }
     end
 
     def child_components_for(item_cursor)
@@ -72,11 +71,7 @@ module Drafts
     end
 
     def target_cursors_for(item_cursor)
-      if item_cursor.object?
-        item_cursor.children
-      else
-        [ item_cursor ]
-      end
+      item_cursor.object? ? item_cursor.children : [ item_cursor ]
     end
   end
 end

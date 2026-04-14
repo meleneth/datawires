@@ -8,6 +8,7 @@
     = button_to "Add item",
       add_item_path,
       method: :patch,
+      params: add_item_button_params,
       data: { turbo_frame: "editor" },
       class: "rounded-lg px-3 py-2 text-sm font-medium text-ls5-blue-4 hover:bg-ls5-violet-1"
 

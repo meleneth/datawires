@@ -181,6 +181,17 @@ module Documents
       end
     end
 
+    def seed_value
+      Documents::SeedValue.for(schema_node)
+    end
+
+    def seed_item_value
+      return nil unless array?
+
+      item_schema = schema_node["items"]
+      Documents::SeedValue.for(item_schema)
+    end
+
     private
 
     def inferred_type

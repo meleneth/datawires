@@ -27,12 +27,11 @@ module Drafts
       end
     end
 
+    private
+
     def projected_field_component_for(cell)
       if cell.widget == "array" || cell.cursor.array?
-        Drafts::ProjectedArrayFieldComponent.new(
-          page: page,
-          field: cell
-        )
+        Drafts::ProjectedArrayFieldComponent.new(page: page, field: cell)
       else
         Drafts::ProjectedFieldComponent.new(
           draft: draft,

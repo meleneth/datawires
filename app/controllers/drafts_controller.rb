@@ -26,6 +26,34 @@ class DraftsController < ApplicationController
     render plain: e.message, status: :unprocessable_entity
   end
 
+  def add_item
+    ptr = normalize_ptr(params[:ptr])
+    render_path = params[:path].presence || "/"
+    array_cursor = Documents::Cursor.new(source: @draft, path: ptr)
+
+    unless array_cursor.array?
+      render plain: "target is not an array", status: :unprocessable_entity
+      return
+    end
+
+    updated_array = Array(array_cursor.value) + [ array_cursor.seed_item_value ]
+    @draft.update!(body: JsonPtr.set(@draft.body, ptr, updated_array))
+    @page = build_show_page(path_param: render_path)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html do
+        redirect_to draft_path(
+          @draft,
+          path: render_path,
+          edit_affordance_id: params[:edit_affordance_id]
+        )
+      end
+    end
+  rescue KeyError => e
+    render plain: e.message, status: :unprocessable_entity
+  end
+
   private
 
   def build_show_page(path_param:)
