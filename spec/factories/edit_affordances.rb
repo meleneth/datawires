@@ -2,8 +2,8 @@
 
 FactoryBot.define do
   factory :edit_affordance do
-    association :for_schema_document, factory: [ :document, :with_schema_head_revision ]
-    association :edit_document, factory: [ :document, :with_plain_head_revision ]
-    sequence(:title) { |n| "affordance-#{n}" }
+    association :for_schema_document, factory: :schema_document
+    association :edit_document, factory: %i[document with_plain_head_revision]
+    sequence(:title) { |n| "Edit Affordance #{n}" }
   end
 end

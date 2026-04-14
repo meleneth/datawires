@@ -4,7 +4,7 @@ module Documents
   class Path
     class InvalidPathError < ArgumentError; end
 
-    ROOT = "/"
+    ROOT = "".freeze
 
     attr_reader :document_ptr
 
@@ -36,7 +36,7 @@ module Documents
       return nil if root?
 
       parent_tokens = tokens[0...-1]
-      ptr = parent_tokens.reduce(JsonPtr::Pointer.parse("/")) do |memo, token|
+      ptr = parent_tokens.reduce(JsonPtr::Pointer.parse(ROOT)) do |memo, token|
         memo.child(token)
       end
 
@@ -51,10 +51,23 @@ module Documents
       document_ptr
     end
 
+    def schema_ptr
+      return "" if root?
+
+      parts = []
+
+      tokens.each do |token|
+        parts << "properties"
+        parts << token
+      end
+
+      "/" + parts.join("/")
+    end
+
     private
 
     def normalize_ptr(raw)
-      JsonPtr::Pointer.parse(raw.presence || "/").to_s
+      JsonPtr::Pointer.parse(raw.nil? ? ROOT : raw).to_s
     rescue ArgumentError => e
       raise InvalidPathError, e.message
     end

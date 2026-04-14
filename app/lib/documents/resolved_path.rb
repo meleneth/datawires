@@ -1,108 +1,102 @@
+# app/lib/documents/resolved_path.rb
 # frozen_string_literal: true
 
 module Documents
   class ResolvedPath
-    class InvalidTraversalError < ArgumentError; end
+    class InvalidTraversalError < StandardError; end
 
     attr_reader :path, :schema_body
 
     def initialize(path:, schema_body:)
       @path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
-      @schema_body = schema_body
-    end
-
-    def document_ptr
-      path.document_ptr
-    end
-
-    def tokens
-      path.tokens
-    end
-
-    def root?
-      path.root?
-    end
-
-    def name
-      path.name
-    end
-
-    def child(segment)
-      self.class.new(
-        path: path.child(segment),
-        schema_body: schema_body
-      )
-    end
-
-    def parent
-      parent_path = path.parent
-      return nil unless parent_path
-
-      self.class.new(
-        path: parent_path,
-        schema_body: schema_body
-      )
-    end
-
-    def schema_ptr
-      @schema_ptr ||= resolve_schema_ptr
+      @schema_body = schema_body.is_a?(Hash) ? schema_body : {}
     end
 
     def schema_node
-      JsonPtr.get(schema_body, schema_ptr) || {}
-    end
-
-    def schema_type
-      schema_node["type"]
+      @schema_node ||= resolution.fetch(:schema_node)
     end
 
     def array_element?
-      return false if root?
-
-      parent&.schema_type == "array"
+      resolution.fetch(:array_element)
     end
 
     def object_property?
-      return false if root?
-
-      parent&.schema_type == "object"
+      resolution.fetch(:object_property)
     end
 
     private
 
-    def resolve_schema_ptr
-      current_schema_ptr = "/"
-      current_schema_node = schema_body
+    def resolution
+      @resolution ||= begin
+        resolver = Documents::SchemaResolver.new(root_schema: schema_body)
+        current = resolver.resolve(schema_body)
 
-      tokens.each do |segment|
-        case current_schema_node["type"]
-        when "object"
-          properties = current_schema_node["properties"]
-          raise InvalidTraversalError, "expected object properties at #{current_schema_ptr}" unless properties.is_a?(Hash)
-          raise InvalidTraversalError, "unknown property #{segment.inspect} at #{current_schema_ptr}" unless properties.key?(segment)
+        last_array_element = false
+        last_object_property = false
 
-          current_schema_ptr = JsonPtr::Pointer.parse(current_schema_ptr)
-            .child("properties")
-            .child(segment)
-            .to_s
+        path.tokens.each do |token|
+          current = resolver.resolve(current)
+          last_array_element = false
+          last_object_property = false
 
-          current_schema_node = properties.fetch(segment)
-        when "array"
-          items = current_schema_node["items"]
-          raise InvalidTraversalError, "expected array items at #{current_schema_ptr}" unless items.is_a?(Hash)
+          if object_schema?(current)
+            properties = current["properties"]
+            unless properties.is_a?(Hash) && properties.key?(token)
+              raise InvalidTraversalError, "property #{token.inspect} not found"
+            end
 
-          current_schema_ptr = JsonPtr::Pointer.parse(current_schema_ptr)
-            .child("items")
-            .to_s
+            current = properties[token]
+            last_object_property = true
+            next
+          end
 
-          current_schema_node = items
-        else
-          raise InvalidTraversalError,
-                "cannot traverse segment #{segment.inspect} through schema type #{current_schema_node['type'].inspect}"
+          if array_schema?(current)
+            unless integer_token?(token)
+              raise InvalidTraversalError, "array index expected, got #{token.inspect}"
+            end
+
+            items = current["items"]
+            if items.blank?
+              raise InvalidTraversalError, "array schema missing items for #{path}"
+            end
+
+            current = items
+            last_array_element = true
+            next
+          end
+
+          raise InvalidTraversalError, "cannot traverse #{token.inspect} through #{current.inspect}"
         end
-      end
 
-      current_schema_ptr
+        current = resolver.resolve(current)
+
+        {
+          schema_node: current || {},
+          array_element: last_array_element,
+          object_property: last_object_property
+        }
+      end
+    end
+
+    def object_schema?(node)
+      node.is_a?(Hash) && (
+        node["type"] == "object" ||
+        node["properties"].is_a?(Hash)
+      )
+    end
+
+    def array_schema?(node)
+      node.is_a?(Hash) && (
+        node["type"] == "array" ||
+        node.key?("items")
+      )
+    end
+
+    def integer_token?(token)
+      Integer(token, 10)
+      true
+    rescue ArgumentError, TypeError
+      false
     end
   end
 end

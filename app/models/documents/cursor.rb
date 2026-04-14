@@ -18,7 +18,7 @@ module Documents
     end
 
     def root?
-      path.root?
+      ptr.blank?
     end
 
     def name
@@ -90,6 +90,7 @@ module Documents
       end
 
       return false unless parent_value.is_a?(Hash)
+      return false if name.nil?
 
       parent_value.key?(name) || parent_value.key?(name.to_sym)
     rescue ArgumentError, TypeError
