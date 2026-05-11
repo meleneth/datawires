@@ -23,7 +23,7 @@ module Documents
 
       case normalized_type
       when "object"
-        {}
+        object_seed
       when "array"
         []
       when "boolean"
@@ -61,6 +61,18 @@ module Documents
       return "array" if schema_node.key?("items")
 
       nil
+    end
+
+    def object_seed
+      properties = schema_node["properties"]
+      return {} unless properties.is_a?(Hash)
+
+      Array(schema_node["required"]).each_with_object({}) do |property_name, seed|
+        property_schema = properties[property_name]
+        next unless property_schema.is_a?(Hash)
+
+        seed[property_name] = self.class.for(property_schema)
+      end
     end
 
     def deep_copy(value)
