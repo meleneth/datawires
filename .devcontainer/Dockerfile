@@ -1,26 +1,34 @@
-# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-FROM ruby:4.0.1-slim
+ARG RUBY_VERSION=4.0.1
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    BUNDLE_PATH=/usr/local/bundle
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    curl \
+    ca-certificates \
+    libssl-dev \
+    libyaml-dev \
+    zlib1g-dev \
+    libreadline-dev \
+    libncurses5-dev \
+    libffi-dev \
+    libgdbm-dev \
+    rustc \
+    cargo \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y \
-      build-essential \
-      ca-certificates \
-      curl \
-      git \
-      libpq-dev \
-      libvips \
-      pkg-config \
-      postgresql-client && \
-    rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv \
+    && git clone https://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build
 
-RUN useradd -m -s /bin/bash vscode && \
-    mkdir -p /usr/local/bundle && \
-    chown -R vscode:vscode /usr/local/bundle
+ENV RBENV_ROOT=/usr/local/rbenv
+ENV PATH=/usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
 
-WORKDIR /workspaces/datawires
+RUN /usr/local/rbenv/bin/rbenv install ${RUBY_VERSION} \
+    && /usr/local/rbenv/bin/rbenv global ${RUBY_VERSION} \
+    && gem install bundler
+
+RUN chown -R vscode:vscode /usr/local/rbenv
 
 USER vscode
+WORKDIR /workspaces/twitch_chatter
