@@ -1,0 +1,19 @@
+{
+  "name": "datawires",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/datawires",
+  "runServices": ["db"],
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "forwardPorts": [3000],
+  "postCreateCommand": "sh -lc 'until pg_isready -h db -U datawires >/dev/null 2>&1; do sleep 1; done && bin/setup --skip-server'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby",
+        "Shopify.ruby-lsp"
+      ]
+    }
+  }
+}

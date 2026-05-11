@@ -4,7 +4,7 @@ class DraftsController < ApplicationController
   before_action :load
 
   def show
-    @page = build_show_page(path_param: params[:path].presence || params[:ptr].presence || "/")
+    @page = build_show_page(path_param: params[:path].presence || params[:ptr].presence || "")
   end
 
   def patch_ptr
@@ -28,7 +28,7 @@ class DraftsController < ApplicationController
 
   def add_item
     ptr = normalize_ptr(params[:ptr])
-    render_path = params[:path].presence || "/"
+    render_path = params[:path].presence || ""
     array_cursor = Documents::Cursor.new(source: @draft, path: ptr)
 
     unless array_cursor.array?

@@ -1,0 +1,3 @@
+= turbo_frame_tag page.editor_dom_id do
+  - dispatcher = page.editor_dispatcher
+  = render dispatcher.partial, page: page, **dispatcher.locals

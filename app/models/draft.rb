@@ -37,8 +37,10 @@ class Draft < ApplicationRecord
     ActionView::RecordIdentifier.dom_id(self, :review)
   end
 
-  def review_dom_id
-    "review"
+  def editor_dom_id_for(path)
+    path = path.is_a?(Documents::Path) ? path : Documents::Path.new(path)
+    suffix = path.document_ptr.to_s.gsub(/[^a-zA-Z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
+    "editor_#{suffix.presence || "root"}"
   end
 
   private

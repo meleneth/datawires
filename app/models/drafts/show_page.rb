@@ -12,7 +12,21 @@ module Drafts
       @edit_affordance = edit_affordance
     end
 
+    def projection
+      @projection ||= Documents::Projection.new(
+        source: draft,
+        path: cursor.path,
+        edit_affordance: edit_affordance&.body
+      )
+    end
+
+    def editor_dispatcher
+      @editor_dispatcher ||= Editors::Dispatcher.new(projection: projection)
+    end
+
     def projected_rows
+      return [] unless projection.location_kind == :object
+
       @projected_rows ||= edit_affordance&.projected_rows(cursor) || []
     end
 
@@ -21,6 +35,14 @@ module Drafts
         before: draft.based_on_revision&.body,
         after: draft.body
       )
+    end
+
+    def editor_stream_name
+      [ draft, cursor.path.to_s, :editor ]
+    end
+
+    def editor_dom_id
+      draft.editor_dom_id_for(cursor.path)
     end
 
     def commit_path

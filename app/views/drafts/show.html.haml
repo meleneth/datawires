@@ -1,8 +1,12 @@
 = turbo_frame_tag "main_content" do
   = turbo_stream_from @page.draft.review_stream_name
 
+  = turbo_frame_tag "document_ribbon" do
+    = render Navigation::DocumentNavRibbonComponent.new(document: @page.document, draft: @page.draft, path: @page.cursor.path, turbo_frame: "editor")
+
   = turbo_frame_tag "editor" do
-    = render Drafts::EditorPageComponent.new(page: @page)
+    = turbo_stream_from @page.editor_stream_name
+    = render "drafts/inner_editor", page: @page
 
   = turbo_frame_tag @page.draft.review_dom_id do
     = render "drafts/review", diff_rows: @page.diff_rows, draft: @page.draft
