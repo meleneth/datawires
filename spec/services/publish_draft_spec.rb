@@ -60,5 +60,14 @@ RSpec.describe PublishDraft do
 
       expect(revision.created_by).to eq(actor)
     end
+
+    it "uses the draft owner as revision author when no actor is provided" do
+      doc = create(:document)
+      draft = create(:draft, document: doc, body: { "x" => 1 })
+
+      revision = described_class.call(draft:, message: "some message")
+
+      expect(revision.created_by).to eq(draft.created_by)
+    end
   end
 end

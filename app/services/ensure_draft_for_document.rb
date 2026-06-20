@@ -6,6 +6,8 @@ class EnsureDraftForDocument
   end
 
   def initialize(document:, actor:)
+    raise ArgumentError, "actor is required" unless actor
+
     @document = document
     @actor = actor
   end

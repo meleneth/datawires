@@ -3,6 +3,7 @@
 FactoryBot.define do
   factory :draft do
     document
+    created_by factory: :user
     based_on_revision { document.head_revision }
     body { based_on_revision&.body || {} }
 

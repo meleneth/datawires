@@ -25,4 +25,12 @@ RSpec.describe Document, type: :model do
     doc = create(:document, :with_head_revision, head_body: { "x" => 1 })
     expect(doc.body).to eq({ "x" => 1 })
   end
+
+  describe "#draft_for" do
+    it "requires an actor" do
+      doc = create(:document)
+
+      expect { doc.draft_for(actor: nil) }.to raise_error(ArgumentError, "actor is required")
+    end
+  end
 end

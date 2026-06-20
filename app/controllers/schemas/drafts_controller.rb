@@ -9,6 +9,7 @@ class Schemas::DraftsController < ApplicationController
 
     unless draft
       draft = @document.drafts.create!(
+        created_by: current_user,
         based_on_revision: @document.head_revision,
         body: deep_dup_json(current_body)
       )

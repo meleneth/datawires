@@ -3,6 +3,11 @@
 require "rails_helper"
 
 RSpec.describe Draft, type: :model do
+  it "requires created_by" do
+    draft = build(:draft, created_by: nil)
+    expect(draft).not_to be_valid
+  end
+
   it "requires body" do
     draft = build(:draft, body: nil)
     expect(draft).not_to be_valid

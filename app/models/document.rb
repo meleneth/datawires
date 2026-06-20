@@ -79,7 +79,9 @@ class Document < ApplicationRecord
     id
   end
 
-  def draft_for(actor: nil)
+  def draft_for(actor:)
+    raise ArgumentError, "actor is required" unless actor
+
     drafts.find_or_create_by!(created_by: actor) do |draft|
       draft.based_on_revision = head_revision
       draft.body = body

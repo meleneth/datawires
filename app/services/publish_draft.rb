@@ -13,7 +13,7 @@ class PublishDraft
     @draft = draft
     @document = draft.document
     @message = message
-    @actor = actor
+    @actor = actor || draft.created_by
   end
 
   def call

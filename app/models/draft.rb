@@ -8,8 +8,7 @@ class Draft < ApplicationRecord
              optional: true
 
   belongs_to :created_by,
-             class_name: "User",
-             optional: true
+             class_name: "User"
 
   delegate :domain, :schema_document, :schema_document?, to: :document
   after_commit :broadcast_review_update, on: %i[create update]
