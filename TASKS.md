@@ -14,3 +14,11 @@
 - [x] Move runtime edit projection objects into the `EditAffordances::*` namespace while keeping `EditAffordance` as the ActiveRecord model.
 - [x] Reconcile editor routes/controllers so every route in `routes.rb` has a real owner or is removed.
 - [x] Add full flow coverage for schema creation, document creation, draft editing, stale commit rejection, and schema wrapper synchronization.
+
+## Follow-Up Backlog
+
+- [ ] Add orphaned document verifier/tooling.
+- [ ] Improve stale draft user experience while keeping stale drafts editable.
+- [ ] Build bespoke edit affordance authoring/customization flows.
+- [ ] Revisit diff presentation so commit review compares against the current committed body.
+- [ ] Clean up the local SimpleCov coverage asset permission issue.

@@ -1,51 +1,116 @@
-We are rebuilding the Datawires draft editor around Cursor + EditAffordance and want clean, long-lived Rails code.
+# Datawires Editor Design Notes
 
-Architecture rules:
-- Documents::Cursor is the location object. It wraps `source` + `path`.
-- Cursor navigation is persistent/immutable-style: `at`, `child`, and `parent` return new Cursor objects.
-- Cursor is schema-aware enough for convenience methods like `ptr`, `value`, `schema_node`, `children`, `input_kind`, `field_value`, `checkbox_value`, `array?`, `object?`, `scalar?`, etc.
-- EditAffordance is the persisted JSON document that defines form layout.
-- EditAffordance owns projection. It interprets affordance JSON and produces projected rows/cells.
-- Projection objects like `EditForms::ProjectedRow`, `ProjectedField`, and `ProjectedCommit` are dumb render-shape data, not interpreters.
-- Drafts::ShowPage is the page/view-model object for Drafts#show.
-- ViewComponents should own render assembly. HAML should be thin.
+These notes describe the current draft editor direction. Keep them aligned with
+the code before using them as implementation guidance.
 
-Critical rendering rules:
-- NEVER instantiate components in HAML. No `Component.new(...)` in templates.
-- If a HAML file contains `.new(`, that is a bug.
-- Child component construction belongs in the ViewComponent Ruby class, exposed through methods like `projected_rows_component`, `rendered_component_for(cell)`, `item_cards`, etc.
-- HAML should only do things like:
-  - `= render some_component_method`
-  - plain markup
-  - simple conditionals/loops over already-prepared data
-- Avoid giant multiline HAML argument lists. Push branching and argument construction into Ruby methods on the component.
+## Core Rules
 
-Editor behavior rules:
-- Scalar field autosave is non-navigational.
-- Scalar autosave should not rerender or replace the form/input being edited.
-- The editor surface should remain stable during autosave so text cursor position is preserved.
-- Structural edits like array add/remove are a separate path and may rerender the editor.
+- JSON document bodies are the source of truth.
+- Drafts are mutable full-body working copies.
+- Revisions are immutable committed bodies.
+- Derived metadata updates at commit time, not while a draft is being edited.
+- A committed document is a supported schema only when its body declares
+  `$schema: "https://json-schema.org/draft/2020-12/schema"`.
+- Unsupported schema declarations are committed as `not_schema` only after
+  explicit user confirmation.
+
+## Schema Wrapper
+
+`SchemaWrapper` is derived app metadata around a schema `Document`. It is not the
+schema document itself.
+
+Commit-time behavior:
+
+- supported schema body: ensure the document has a `SchemaWrapper`;
+- non-schema or unsupported schema body: remove the wrapper;
+- wrapper removal clears dependent document `schema_document_id` values.
+
+Draft edits never create or remove wrappers.
+
+## Documents And Drafts
+
+- `Document` UUID is the canonical identity.
+- `Document#key` is required for committed supported schema documents.
+- Ordinary documents may be keyless.
+- Drafts belong to a user.
+- Each user gets at most one open draft per document.
+- Commit destroys only the committing user's draft.
+- Stale drafts stay editable, but commit is rejected when `based_on_revision`
+  differs from the current document head.
+- After commit, the user should be looking at the committed document.
+
+## Affordances
+
+Schema-backed documents always have an edit affordance:
+
+- `EditAffordances::Generated` is the default runtime affordance generated from
+  the schema.
+- Persisted `EditAffordance` records are bespoke alternatives.
+- The ActiveRecord model remains `EditAffordance`.
+- Runtime projection objects live under `EditAffordances::*`.
+
+Generated affordances expose immediate schema properties. Bespoke affordances may
+reference deeper document pointers.
+
+Runtime classes:
+
+- `EditAffordances::Generated`
+- `EditAffordances::ProjectedRow`
+- `EditAffordances::ProjectedField`
+- `EditAffordances::ProjectedCommit`
+- `EditAffordances::CellBinding`
+
+## Cursor And Projection
+
+- `Documents::Cursor` is the document location object. It wraps `source` and
+  `path`.
+- Cursor navigation is persistent: `at`, `child`, and `parent` return new cursor
+  objects.
+- Cursor owns schema-aware conveniences such as `ptr`, `value`, `schema_node`,
+  `children`, `input_kind`, `field_value`, `checkbox_value`, `array?`,
+  `object?`, and `scalar?`.
+- Affordances interpret layout and produce projected rows/cells.
+- Projected rows/cells are render-shape data, not interpreters.
+- `Drafts::ShowPage` is the page/view-model object for `DraftsController#show`.
+
+## Editor Behavior
+
+- Scalar autosave is non-navigational.
+- Scalar autosave should preserve the input being edited.
+- Structural edits, such as adding an array item or schema property, may rerender
+  the editor surface.
 - Review/diff is a separate reactive surface from the editor.
+- Diff should be against the current committed body, not an old draft baseline,
+  when presenting commit risk to the user.
 
-Hotwire/Turbo rules:
-- Prefer stable container/frame shells and update inner contents.
-- Remember the important distinction:
-  - `broadcast_replace_to` replaces the whole target element
-  - `broadcast_update_to` updates the target element’s contents
-- For the review panel, we want to preserve the frame/container and update its contents.
-- `turbo_stream_from` is used directly in HAML, never wrapped in `render`.
+## Hotwire And Haml
 
-Coding/style rules:
-- Prefer components over partial sprawl for editor UI.
-- Prefer one page object or component input over many loose locals.
-- Keep controller code lean: build page object, perform mutation, redirect/respond.
-- Keep affordance interpretation out of views and out of projected data objects.
-- We prefer rspec, factory_bot, haml, and well-factored code.
-- This is intricate, not complicated: solve by clarifying seams, not by adding magic.
-- validating mocks is the preferred testing methodology.  Verify collaborator's interfaces, but do not actually run the collaborators
+- Prefer stable Turbo frame shells and update their contents.
+- `broadcast_update_to` updates target contents; `broadcast_replace_to` replaces
+  the target element itself.
+- `turbo_stream_from` is used directly in Haml.
+- Haml is picky: a tag cannot have same-line content and nested content. For
+  nested nodes, put class names in dotted syntax or `class:`.
+- Keep Haml templates thin. Branching, component selection, and option building
+  should live in Ruby components or page objects.
 
-When proposing code:
-- Follow the architecture above.
-- Keep HAML extremely simple.
-- Put branching, child component selection, input method selection, and option building in Ruby methods on the component.
-- Do not regress into old partial-based editor assumptions.
+## Routes
+
+Every route in `config/routes.rb` should have a real controller owner. Do not
+leave missing-controller routes in place. Remove stale scaffold routes instead
+of preserving dead surface area.
+
+Current draft/editor owners:
+
+- `DraftsController`
+- `Drafts::CommitsController`
+- `Drafts::SchemaPropertiesController`
+- `Documents::DraftsController`
+- `Schemas::DocumentsController`
+
+## Known Follow-Ups
+
+- Add orphaned document verifier/tooling.
+- Improve stale draft user experience.
+- Build richer bespoke affordance authoring.
+- Keep README, AGENT, and these notes synchronized with implementation changes.
