@@ -7,8 +7,7 @@
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
   "forwardPorts": [3000],
-  "postCreateCommand": "sh -lc 'sudo chown -R vscode:vscode /usr/local/bundle && until pg_isready -h db -U datawires >/dev/null 2>&1; do sleep 1; done && (bundle check || bundle install) && bin/rails db:prepare'",
-  "postStartCommand": "sh .devcontainer/start-dev-server.sh",
+  "postCreateCommand": "sh -lc 'sudo chown -R vscode:vscode /usr/local/bundle'",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -14,7 +14,7 @@ services:
       BUNDLE_PATH: /usr/local/bundle
     depends_on:
       - db
-    command: sleep infinity
+    command: sh .devcontainer/start-dev-server.sh
     ports:
       - "3000:3000"
 

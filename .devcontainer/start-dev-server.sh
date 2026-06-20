@@ -11,8 +11,7 @@ done
 mkdir -p log tmp/pids
 rm -f tmp/pids/server.pid tmp/pids/server.foreman.development.pid
 
-if pgrep -f "bin/rails server.*-p 3000" >/dev/null 2>&1; then
-  exit 0
-fi
+bundle check || bundle install
+bundle exec bin/rails db:prepare
 
-nohup bundle exec bin/rails server -u puma -p 3000 -b 0.0.0.0 > log/devcontainer.log 2>&1 &
+exec bundle exec bin/rails server -u puma -p 3000 -b 0.0.0.0
