@@ -35,7 +35,7 @@ RSpec.describe "Schema-backed document flow", type: :request do
       }
     }
 
-    expect(response).to redirect_to(domain_path(domain))
+    expect(response).to redirect_to(document_path(schema_document))
     expect(Draft.exists?(schema_draft.id)).to be(false)
     expect(schema_document.reload.schema_wrapper).to be_present
     expect(schema_document.body.dig("properties", "name")).to eq("type" => "string")
@@ -71,7 +71,7 @@ RSpec.describe "Schema-backed document flow", type: :request do
       }
     }
 
-    expect(response).to redirect_to(domain_path(domain))
+    expect(response).to redirect_to(document_path(document))
     expect(document.reload.body).to eq("name" => "Ada")
 
     post draft_commit_path(stale_draft), params: {
@@ -95,7 +95,7 @@ RSpec.describe "Schema-backed document flow", type: :request do
       }
     }
 
-    expect(response).to redirect_to(domain_path(domain))
+    expect(response).to redirect_to(document_path(schema_document))
     expect(schema_document.reload.schema_wrapper).to be_nil
     expect(document.reload.schema_document).to be_nil
   end

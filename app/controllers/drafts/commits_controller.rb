@@ -25,7 +25,7 @@ class Drafts::CommitsController < ApplicationController
       actor: current_user
     )
 
-    redirect_to domain_path(@domain),
+    redirect_to document_path(@document),
       notice: "Draft committed."
   rescue PublishDraft::StaleDraftError => e
     redirect_to draft_path(@draft),

@@ -43,7 +43,7 @@ RSpec.describe "Draft commits", type: :request do
         }
       }
 
-      expect(response).to redirect_to(domain_path(draft.domain))
+      expect(response).to redirect_to(document_path(draft.document))
       expect(Draft.exists?(draft.id)).to be(false)
       expect(draft.document.reload.body["$schema"]).to eq("https://json-schema.org/draft/1999-09/schema")
     end
