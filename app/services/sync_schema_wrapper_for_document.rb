@@ -15,6 +15,7 @@ class SyncSchemaWrapperForDocument
     if document.supported_schema?
       document.schema_wrapper || document.create_schema_wrapper!
     else
+      clear_dependent_schema_references!
       document.schema_wrapper&.destroy!
       nil
     end
@@ -23,4 +24,11 @@ class SyncSchemaWrapperForDocument
   private
 
   attr_reader :document
+
+  def clear_dependent_schema_references!
+    document.instance_documents.update_all(
+      schema_document_id: nil,
+      updated_at: Time.current
+    )
+  end
 end

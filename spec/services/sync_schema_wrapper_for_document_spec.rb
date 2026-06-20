@@ -40,6 +40,27 @@ RSpec.describe SyncSchemaWrapperForDocument do
     expect(wrapper.document.reload.schema_wrapper).to be_nil
   end
 
+  it "clears dependent schema references when the document is no longer a supported schema" do
+    wrapper = create(:schema_wrapper)
+    dependent = create(
+      :document,
+      :with_plain_head_revision,
+      domain: wrapper.domain,
+      schema_document: wrapper.document
+    )
+    revision = create(
+      :revision,
+      document: wrapper.document,
+      parent_revision: wrapper.document.head_revision,
+      body: { "title" => "Plain document" }
+    )
+    wrapper.document.update!(head_revision: revision)
+
+    described_class.call(document: wrapper.document)
+
+    expect(dependent.reload.schema_document).to be_nil
+  end
+
   it "does not create a wrapper for unsupported schema declarations" do
     document = create(
       :document,

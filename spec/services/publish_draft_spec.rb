@@ -127,5 +127,26 @@ RSpec.describe PublishDraft do
 
       expect(doc.reload.schema_wrapper).to be_nil
     end
+
+    it "clears dependent schema references when publishing a non-schema body" do
+      wrapper = create(:schema_wrapper)
+      doc = wrapper.document
+      dependent = create(
+        :document,
+        :with_plain_head_revision,
+        domain: wrapper.domain,
+        schema_document: doc
+      )
+      draft = create(
+        :draft,
+        document: doc,
+        based_on_revision: doc.head_revision,
+        body: { "title" => "No longer a schema" }
+      )
+
+      described_class.call(draft:, message: "stop being schema")
+
+      expect(dependent.reload.schema_document).to be_nil
+    end
   end
 end

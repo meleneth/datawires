@@ -114,9 +114,9 @@ class Document < ApplicationRecord
 
   def schema_document_must_be_schema_backed
     return if schema_document.blank?
-    return if schema_document == self && schema?
-    return if schema_document.schema?
+    return if schema_document == self && supported_schema?
+    return if schema_document.supported_schema?
 
-    errors.add(:schema_document, "must reference a schema document")
+    errors.add(:schema_document, "must reference a supported schema document")
   end
 end

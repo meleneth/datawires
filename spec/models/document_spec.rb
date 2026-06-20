@@ -35,6 +35,30 @@ RSpec.describe Document, type: :model do
     expect(dup).not_to be_valid
   end
 
+  it "does not allow schema_document to point at an unsupported schema declaration" do
+    unsupported_schema = create(
+      :document,
+      :with_head_revision,
+      head_body: {
+        "$schema" => "https://json-schema.org/draft/1999-09/schema",
+        "$id" => "http://example.test/schemas/old",
+        "type" => "object"
+      }
+    )
+
+    document = build(:document, schema_document: unsupported_schema)
+
+    expect(document).not_to be_valid
+    expect(document.errors[:schema_document]).to include("must reference a supported schema document")
+  end
+
+  it "allows schema_document to point at a supported schema document" do
+    schema = create(:document, :with_schema_head_revision)
+    document = build(:document, schema_document: schema)
+
+    expect(document).to be_valid
+  end
+
   it "#body returns {} without a head revision" do
     doc = create(:document)
     expect(doc.body).to eq({})
