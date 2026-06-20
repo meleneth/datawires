@@ -24,4 +24,13 @@ RSpec.describe CreateSchemaDocument do
       "properties" => {},
     )
   end
+
+  it "requires a key" do
+    domain = create(:domain)
+    actor = create(:user)
+
+    expect {
+      described_class.call(domain:, key: "", title: "Nope", actor:)
+    }.to raise_error(ArgumentError, "key is required")
+  end
 end

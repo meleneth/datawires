@@ -48,7 +48,8 @@ class Document < ApplicationRecord
         dependent: :destroy,
         inverse_of: :document
 
-  validates :key, presence: true, uniqueness: { scope: :domain_id }
+  validates :key, uniqueness: { scope: :domain_id, allow_nil: true }
+  validate :key_required_for_supported_schema
   validate :schema_document_must_be_schema_backed, if: -> { schema_document_id.present? }
 
   scope :with_head, -> { joins(:head_revision) }
@@ -98,7 +99,18 @@ class Document < ApplicationRecord
 
   alias schema_document? schema?
 
+  def supported_schema?
+    body.is_a?(Hash) && body["$schema"] == JSON_SCHEMA_2020_12
+  end
+
   private
+
+  def key_required_for_supported_schema
+    return unless supported_schema?
+    return if key.present?
+
+    errors.add(:key, "is required for schema documents")
+  end
 
   def schema_document_must_be_schema_backed
     return if schema_document.blank?

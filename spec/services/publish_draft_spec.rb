@@ -69,5 +69,26 @@ RSpec.describe PublishDraft do
 
       expect(revision.created_by).to eq(draft.created_by)
     end
+
+    it "rejects publishing a supported schema document without a key" do
+      doc = create(:document, key: nil)
+      draft = create(
+        :draft,
+        document: doc,
+        body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/nameless",
+          "type" => "object",
+          "properties" => {}
+        }
+      )
+
+      expect {
+        described_class.call(draft:, message: "schema without key")
+      }.to raise_error(ActiveRecord::RecordInvalid, /Key is required for schema documents/)
+
+      expect(doc.reload.head_revision).to be_nil
+      expect(Draft.exists?(draft.id)).to be(true)
+    end
   end
 end

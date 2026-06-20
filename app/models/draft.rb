@@ -19,9 +19,9 @@ class Draft < ApplicationRecord
   validate :base_must_be_same_document
 
   def is_json_schema?
-    return false unless body.has_key? "$schema"
-    return false unless body.has_key? "$id"
-    true if body["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+    body.is_a?(Hash) &&
+      body.has_key?("$id") &&
+      body["$schema"] == Document::JSON_SCHEMA_2020_12
   end
 
   def schema_document?

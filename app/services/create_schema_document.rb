@@ -15,6 +15,8 @@ class CreateSchemaDocument
   end
 
   def call
+    raise ArgumentError, "key is required" if @key.blank?
+
     Document.transaction do
       document = @domain.documents.create!(key: @key, title: @title)
 

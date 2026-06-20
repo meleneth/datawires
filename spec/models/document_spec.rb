@@ -3,9 +3,28 @@
 require "rails_helper"
 
 RSpec.describe Document, type: :model do
-  it "requires key" do
+  it "allows plain documents without a key" do
     doc = build(:document, key: nil)
+    expect(doc).to be_valid
+  end
+
+  it "requires a key for committed supported schema documents" do
+    doc = create(:document, key: nil)
+    revision = create(
+      :revision,
+      document: doc,
+      body: {
+        "$schema" => Document::JSON_SCHEMA_2020_12,
+        "$id" => "http://example.test/schemas/nameless",
+        "type" => "object",
+        "properties" => {}
+      }
+    )
+
+    doc.head_revision = revision
+
     expect(doc).not_to be_valid
+    expect(doc.errors[:key]).to include("is required for schema documents")
   end
 
   it "uniqueness of key scoped to domain" do
