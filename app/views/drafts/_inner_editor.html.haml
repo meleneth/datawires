@@ -1,3 +1,6 @@
 = turbo_frame_tag page.editor_dom_id do
-  - dispatcher = page.editor_dispatcher
-  = render dispatcher.partial, page: page, **dispatcher.locals
+  - if page.draft.schema_document?
+    = render "drafts/schema_editor", domain: page.domain, document: page.document, draft: page.draft, path: (page.cursor.path.root? ? "/" : page.cursor.path.to_s)
+  - else
+    - dispatcher = page.editor_dispatcher
+    = render dispatcher.partial, page: page, **dispatcher.locals

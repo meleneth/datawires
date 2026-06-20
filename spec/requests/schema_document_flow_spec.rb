@@ -17,6 +17,12 @@ RSpec.describe "Schema-backed document flow", type: :request do
     schema_document = schema_draft.document
 
     expect(response).to redirect_to(draft_path(schema_draft))
+
+    follow_redirect!
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Schema: /")
+    expect(response.body).not_to include("No edit affordance projection available")
     expect(schema_document.head_revision).to be_nil
     expect(schema_document.schema_wrapper).to be_nil
 

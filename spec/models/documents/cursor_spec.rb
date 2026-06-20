@@ -71,6 +71,36 @@ RSpec.describe Documents::Cursor do
     it "returns the resolved schema node" do
       expect(cursor.schema_node).to eq({ "type" => "string" })
     end
+
+    context "when the draft is a new schema document without a committed schema record" do
+      let(:draft) do
+        instance_double(
+          Draft,
+          body: schema_body,
+          schema_document: nil,
+          schema_document?: true
+        )
+      end
+
+      it "uses the draft body as the schema" do
+        expect(cursor.schema_node).to eq({ "type" => "string" })
+      end
+    end
+
+    context "when the draft has no schema document" do
+      let(:draft) do
+        instance_double(
+          Draft,
+          body:,
+          schema_document: nil,
+          schema_document?: false
+        )
+      end
+
+      it "falls back to an empty schema" do
+        expect(cursor.schema_node).to eq({})
+      end
+    end
   end
 
   describe "#enum_values" do

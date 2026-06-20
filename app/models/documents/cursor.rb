@@ -42,7 +42,7 @@ module Documents
     def resolved_path
       @resolved_path ||= Documents::ResolvedPath.new(
         path:,
-        schema_body: source.schema_document.body
+        schema_body:
       )
     end
 
@@ -194,6 +194,10 @@ module Documents
     end
 
     private
+
+    def schema_body
+      source.schema_document&.body || (source.schema_document? ? source.body : {})
+    end
 
     def inferred_type
       return "object" if value.is_a?(Hash)
