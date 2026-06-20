@@ -22,6 +22,23 @@
                 scope: :commit,
                 data: { turbo_frame: "main_content" },
                 class: "space-y-4" do |f|
+      - if @preflight&.warnings&.any?
+        .space-y-3
+          - @preflight.warnings.each do |warning|
+            = render AlertComponent.new(variant: :destructive) do
+              .space-y-3
+                .font-head.font-medium
+                  = warning.title
+                %p.text-sm
+                  = warning.message
+                %label.flex.items-start.gap-2.text-sm
+                  = check_box_tag "commit[confirmed_warnings][]",
+                    warning.code,
+                    false,
+                    required: @preflight.unconfirmed_warnings.include?(warning)
+                  %span
+                    I understand and want to commit anyway.
+
       %div
         = render LabelComponent.new(text: "Log message", for_id: "commit_message", html_options: { class: "mb-2 block" })
         = f.text_area :message,

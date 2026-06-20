@@ -4,9 +4,21 @@ class Drafts::CommitsController < ApplicationController
   before_action :set_context
 
   def new
+    @preflight = DraftCommitPreflight.new(draft: @draft)
   end
 
   def create
+    @preflight = DraftCommitPreflight.new(
+      draft: @draft,
+      confirmed_warning_codes: commit_params[:confirmed_warnings]
+    )
+
+    if @preflight.blocked?
+      flash.now[:alert] = "Confirm the commit warnings to continue."
+      render :new, status: :unprocessable_entity
+      return
+    end
+
     PublishDraft.call(
       draft: @draft,
       message: commit_params[:message],
@@ -32,6 +44,6 @@ class Drafts::CommitsController < ApplicationController
   end
 
   def commit_params
-    params.require(:commit).permit(:message)
+    params.require(:commit).permit(:message, confirmed_warnings: [])
   end
 end
