@@ -20,7 +20,7 @@ RSpec.describe "Draft commits", type: :request do
         }
       }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(Draft.exists?(draft.id)).to be(true)
       expect(draft.document.reload.head_revision).to be_nil
       expect(response.body).to include("Unsupported schema declaration")

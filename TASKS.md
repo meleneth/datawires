@@ -13,4 +13,4 @@
 - [x] Add `EditAffordances::Generated` as the default PORO affordance for schema-backed documents; stored `EditAffordance` records are bespoke alternatives.
 - [x] Move runtime edit projection objects into the `EditAffordances::*` namespace while keeping `EditAffordance` as the ActiveRecord model.
 - [x] Reconcile editor routes/controllers so every route in `routes.rb` has a real owner or is removed.
-- [ ] Add full flow coverage for schema creation, document creation, draft editing, stale commit rejection, and schema wrapper synchronization.
+- [x] Add full flow coverage for schema creation, document creation, draft editing, stale commit rejection, and schema wrapper synchronization.
