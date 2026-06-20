@@ -90,5 +90,42 @@ RSpec.describe PublishDraft do
       expect(doc.reload.head_revision).to be_nil
       expect(Draft.exists?(draft.id)).to be(true)
     end
+
+    it "creates a schema wrapper when publishing a supported schema" do
+      doc = create(:document, key: "new-schema")
+      draft = create(
+        :draft,
+        document: doc,
+        body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/new-schema",
+          "type" => "object",
+          "properties" => {}
+        }
+      )
+
+      expect {
+        described_class.call(draft:, message: "publish schema")
+      }.to change(SchemaWrapper, :count).by(1)
+
+      expect(doc.reload.schema_wrapper).to be_present
+    end
+
+    it "removes the schema wrapper when publishing a non-schema body" do
+      wrapper = create(:schema_wrapper)
+      doc = wrapper.document
+      draft = create(
+        :draft,
+        document: doc,
+        based_on_revision: doc.head_revision,
+        body: { "title" => "No longer a schema" }
+      )
+
+      expect {
+        described_class.call(draft:, message: "stop being schema")
+      }.to change(SchemaWrapper, :count).by(-1)
+
+      expect(doc.reload.schema_wrapper).to be_nil
+    end
   end
 end

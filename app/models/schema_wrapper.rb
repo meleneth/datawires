@@ -22,8 +22,8 @@ class SchemaWrapper < ApplicationRecord
   private
 
   def document_must_be_schema
-    return if document&.schema?
+    return if document&.supported_schema?
 
-    errors.add(:document, "must be a schema document")
+    errors.add(:document, "must be a supported schema document")
   end
 end

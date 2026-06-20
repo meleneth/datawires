@@ -33,6 +33,7 @@ class PublishDraft
       )
 
       @document.update!(head_revision: revision)
+      SyncSchemaWrapperForDocument.call(document: @document)
       @draft.destroy!
 
       revision
