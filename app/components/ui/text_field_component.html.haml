@@ -1,7 +1,7 @@
 -# app/components/text_field_component.html.haml
 .space-y-1
-  = @form.label @name, @label, for: @id, class: label_classes
-  = @form.text_field @name, **merged_html_options
+  = render LabelComponent.new(text: @label, for_id: @id)
+  = render InputComponent.new(name: field_name, value: field_value, html_options: merged_html_options)
 
   - if error?
-    %p.text-sm.text-ls5-red-7= errors.to_sentence
+    %p.text-sm.text-destructive= errors.to_sentence

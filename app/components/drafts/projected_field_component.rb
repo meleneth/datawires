@@ -79,7 +79,7 @@ module Drafts
     end
 
     def input_html_class
-      "w-full rounded-lg border border-ls5-violet-2"
+      "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
     end
 
     def input_html_options

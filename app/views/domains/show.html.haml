@@ -1,26 +1,35 @@
 = turbo_frame_tag "main_content" do
-  = render Ui::PageHeaderComponent.new(text: "#{@domain.name} Domain")
+  = render TypographyComponent.new(as: :h1, text: "#{@domain.name} Domain", html_options: { class: "mb-4" })
 
-  = render Ui::CardComponent.new do
-    - if notice.present?
-      %p.mb-4.text-ls5-green-7= notice
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-6
+        - if notice.present?
+          = render AlertComponent.new do
+            = notice
 
-    .space-y-2
-      .text-sm.text-ls5-violet-6 Name
-      .text-lg.font-medium.text-ink= @domain.name
+        .space-y-1
+          = render TypographyComponent.new(as: :muted, text: "Name")
+          .font-head.text-lg.font-medium.text-foreground= @domain.name
 
-    .mt-6.flex.flex-wrap.items-center.gap-3
-      = link_to "Edit this domain", edit_domain_path(@domain), class: "text-ls5-blue-4 hover:text-ls5-blue-5"
-      = link_to "Back to domains", domains_path, class: "text-ls5-violet-6 hover:text-ls5-violet-7"
-      = button_to "Destroy this domain", @domain, method: :delete, class: "rounded-lg border border-ls5-red-7 bg-ls5-red-6 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-red-7"
+        .flex.flex-wrap.items-center.gap-3
+          = render ButtonComponent.new(href: edit_domain_path(@domain), variant: :secondary, size: :sm) do
+            Edit this domain
+          = render ButtonComponent.new(href: domains_path, variant: :outline, size: :sm) do
+            Back to domains
+          = button_to "Destroy this domain", @domain, method: :delete, class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
-    .mt-6.space-y-3
-      %h2.text-lg.font-semibold.text-ink Add schema
+        .space-y-3
+          = render TypographyComponent.new(as: :h3, text: "Add schema")
 
-      = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
-        = render Ui::TextFieldComponent.new(form: f, name: :key, label: "New schema name", html_options: { autofocus: true })
-        = render Ui::ButtonComponent.new(type: :submit, tone: :primary) do
-          Create
+          = form_with model: [@domain, @document], url: domain_schemas_path(@domain), class: "space-y-4" do |f|
+            .space-y-1
+              = render LabelComponent.new(text: "New schema name", for_id: "document_key")
+              = render InputComponent.new(name: f.field_name(:key), value: @document.key, html_options: { id: "document_key", autofocus: true })
+              - if @document.errors[:key].any?
+                %p.text-sm.text-destructive= @document.errors[:key].to_sentence
+            = render ButtonComponent.new(html_options: { type: :submit }) do
+              Create
 
   = render "domains/open_drafts"
   = render "domains/schemas"

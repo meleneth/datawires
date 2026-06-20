@@ -6,7 +6,7 @@
           %div{ class: label_classes }
             = @label
             - if required_mark
-              %span.text-ls5-red-6= required_mark
+              %span.text-destructive= required_mark
         - if @hint.present?
           %div{ id: hint_id, class: meta_classes }
             = @hint

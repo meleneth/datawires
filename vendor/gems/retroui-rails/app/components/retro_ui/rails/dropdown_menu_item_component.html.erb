@@ -1,0 +1,9 @@
+<% if href %>
+  <%= tag.a(**component_options) do %>
+    <%= content? ? content : text %>
+  <% end %>
+<% else %>
+  <%= tag.button(**component_options) do %>
+    <%= content? ? content : text %>
+  <% end %>
+<% end %>

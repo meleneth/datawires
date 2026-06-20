@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     ca-certificates \
+    postgresql-client \
     libssl-dev \
     libyaml-dev \
     zlib1g-dev \
@@ -28,7 +29,8 @@ RUN /usr/local/rbenv/bin/rbenv install ${RUBY_VERSION} \
     && /usr/local/rbenv/bin/rbenv global ${RUBY_VERSION} \
     && gem install bundler
 
-RUN chown -R vscode:vscode /usr/local/rbenv
+RUN mkdir -p /usr/local/bundle \
+    && chown -R vscode:vscode /usr/local/rbenv /usr/local/bundle
 
 USER vscode
-WORKDIR /workspaces/twitch_chatter
+WORKDIR /workspaces/datawires

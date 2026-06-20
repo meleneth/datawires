@@ -1,24 +1,29 @@
 = turbo_frame_tag "main_content" do
-  %h1= @document.title.presence || @document.key
+  = render TypographyComponent.new(as: :h1, text: @document.title.presence || @document.key, html_options: { class: "mb-4" })
 
-  %p
-    %strong Domain:
-    = @domain.name
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      %dl.grid.gap-3.text-sm.md:grid-cols-2
+        %div
+          %dt.text-muted-foreground Domain
+          %dd.font-head.text-foreground= @domain.name
 
-  %p
-    %strong Key:
-    = @document.key
+        %div
+          %dt.text-muted-foreground Key
+          %dd.font-head.text-foreground= @document.key
 
-  - if @schema_document
-    %p
-      %strong Schema:
-      = link_to @schema_document.key,
-        schema_path(@schema_document),
-        data: { turbo_frame: "main_content", turbo_action: "advance" }
+        - if @schema_document
+          %div
+            %dt.text-muted-foreground Schema
+            %dd
+              = link_to @schema_document.key,
+                schema_path(@schema_document),
+                data: { turbo_frame: "main_content", turbo_action: "advance" },
+                class: "font-head text-foreground underline"
 
   - if @edit_affordances.any?
     .mt-6
-      %h2.text-lg.font-semibold Edit affordances
+      = render TypographyComponent.new(as: :h2, text: "Edit affordances")
 
       %ul.mt-2.space-y-2
         - @edit_affordances.each do |affordance|
@@ -26,20 +31,20 @@
             = button_to document_draft_path(@document, edit_affordance_id: affordance.id),
               method: :post,
               form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
-              class: "block w-full rounded-md border border-ls5-blue-1 px-3 py-2 text-left hover:bg-ls5-blue-1" do
-              .font-medium= affordance.title
-              .text-xs.text-ls5-violet-6= affordance.edit_document.key
+              class: "block w-full rounded border-2 border-black bg-card px-3 py-2 text-left text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              .font-head.font-medium= affordance.title
+              .text-xs.text-muted-foreground= affordance.edit_document.key
 
   - if @view_affordances.any?
     .mt-6
-      %h2.text-lg.font-semibold View affordances
+      = render TypographyComponent.new(as: :h2, text: "View affordances")
 
       %ul.mt-2.space-y-2
         - @view_affordances.each do |view_affordance|
-          %li.rounded-md.border.border-ls5-violet-2.px-3.py-2
-            .font-medium= view_affordance.title
-            .text-xs.text-ls5-violet-6= view_affordance.view_document.key
+          %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+            .font-head.font-medium= view_affordance.title
+            .text-xs.text-muted-foreground= view_affordance.view_document.key
 
   .mt-6
-    %pre
+    %pre.rounded.border-2.border-black.bg-muted.p-4.text-sm.text-foreground.shadow-sm
       = JSON.pretty_generate(@document.body)

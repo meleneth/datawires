@@ -83,6 +83,8 @@ gem "importmap-rails", "~> 2.2"
 
 gem "view_component", "~> 4.2"
 
+gem "retroui-rails", path: "vendor/gems/retroui-rails", require: "retro_ui/rails"
+
 gem "rufo", "~> 0.18.2", group: :development, require: false
 
 group :test do

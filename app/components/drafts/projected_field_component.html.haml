@@ -1,7 +1,6 @@
 .space-y-1
   - if show_label?
-    %label.block.text-sm.font-medium.text-ink{ for: dom_id }
-      = label_text
+    = render LabelComponent.new(text: label_text, for_id: dom_id)
 
   = form_with url: patch_path, method: :patch, data: form_data_attributes do |form|
     = form.hidden_field :ptr, value: ptr

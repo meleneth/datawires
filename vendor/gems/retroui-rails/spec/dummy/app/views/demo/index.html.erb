@@ -1,0 +1,636 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RetroUI Rails Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="module">
+      import { Application, Controller } from "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm"
+      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
+
+      class ToastController extends Controller {
+        static values = {
+          duration: { type: Number, default: 0 },
+          remove: { type: Boolean, default: true }
+        }
+
+        connect() {
+          if (this.durationValue > 0) {
+            this.timeout = window.setTimeout(() => this.dismiss(), this.durationValue)
+          }
+        }
+
+        disconnect() {
+          if (this.timeout) window.clearTimeout(this.timeout)
+        }
+
+        dismiss(event) {
+          if (event) event.preventDefault()
+          this.element.dataset.state = "closed"
+          window.setTimeout(() => {
+            if (this.removeValue) {
+              this.element.remove()
+            } else {
+              this.element.hidden = true
+            }
+          }, 200)
+        }
+      }
+
+      class ThemeController extends Controller {
+        static targets = ["label"]
+
+        connect() {
+          const saved = window.localStorage.getItem("retroui-demo-theme")
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+          this.setTheme(saved || (prefersDark ? "dark" : "light"))
+        }
+
+        toggle() {
+          this.setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark")
+        }
+
+        setTheme(theme) {
+          document.documentElement.dataset.theme = theme
+          window.localStorage.setItem("retroui-demo-theme", theme)
+          if (this.hasLabelTarget) {
+            this.labelTarget.textContent = theme === "dark" ? "Light Mode" : "Dark Mode"
+          }
+        }
+      }
+
+      class AccordionController extends Controller {
+        static targets = ["trigger", "content"]
+        static values = { multiple: { type: Boolean, default: false } }
+
+        toggle(event) {
+          const trigger = event.currentTarget
+          const index = this.triggerTargets.indexOf(trigger)
+          const content = this.contentTargets[index]
+          const opening = trigger.getAttribute("aria-expanded") !== "true"
+          if (!this.multipleValue) this.closeAll()
+          this.setOpen(trigger, content, opening)
+        }
+
+        closeAll() {
+          this.triggerTargets.forEach((trigger, index) => this.setOpen(trigger, this.contentTargets[index], false))
+        }
+
+        setOpen(trigger, content, open) {
+          trigger.setAttribute("aria-expanded", open ? "true" : "false")
+          if (content) content.hidden = !open
+        }
+      }
+
+      class TabsController extends Controller {
+        static targets = ["trigger", "content"]
+        static values = { defaultValue: String }
+
+        connect() {
+          const first = this.triggerTargets[0]
+          const value = this.hasDefaultValueValue ? this.defaultValueValue : first?.getAttribute("data-retro-ui--tabs-value-param")
+          if (value) this.activate(value)
+        }
+
+        select(event) {
+          this.activate(event.params.value || event.currentTarget.getAttribute("data-retro-ui--tabs-value-param"))
+        }
+
+        activate(value) {
+          this.triggerTargets.forEach((trigger) => {
+            const active = trigger.getAttribute("data-retro-ui--tabs-value-param") === value
+            trigger.dataset.state = active ? "active" : "inactive"
+            trigger.setAttribute("aria-selected", active ? "true" : "false")
+          })
+          this.contentTargets.forEach((content) => {
+            content.hidden = content.getAttribute("data-retro-ui--tabs-value") !== value
+          })
+        }
+      }
+
+      class DialogController extends Controller {
+        static targets = ["panel"]
+
+        open() {
+          this.panelTarget.hidden = false
+        }
+
+        close() {
+          this.panelTarget.hidden = true
+        }
+
+        backdropClose(event) {
+          if (event.target === this.panelTarget) this.close()
+        }
+      }
+
+      class ToggleContentController extends Controller {
+        static targets = ["content"]
+
+        toggle(event) {
+          event.preventDefault()
+          this.contentTarget.hidden = !this.contentTarget.hidden
+          event.currentTarget.setAttribute("aria-expanded", this.contentTarget.hidden ? "false" : "true")
+        }
+      }
+
+      class TooltipController extends Controller {
+        static targets = ["content"]
+
+        show() {
+          this.contentTarget.hidden = false
+        }
+
+        hide() {
+          this.contentTarget.hidden = true
+        }
+      }
+
+      class ChartController extends Controller {
+        static targets = ["svg"]
+        static values = { data: Array, type: String, xKey: String, yKey: String, labelKey: String, valueKey: String }
+
+        connect() {
+          this.render()
+        }
+
+        render() {
+          const svg = d3.select(this.svgTarget)
+          svg.selectAll("*").remove()
+          const width = this.svgTarget.clientWidth || 640
+          const height = Number(this.svgTarget.getAttribute("height")) || 300
+          this.svgTarget.setAttribute("viewBox", `0 0 ${width} ${height}`)
+          if (this.typeValue === "pie") return this.renderPie(svg, width, height)
+
+          const margin = { top: 10, right: 14, bottom: 34, left: 42 }
+          const innerWidth = width - margin.left - margin.right
+          const innerHeight = height - margin.top - margin.bottom
+          const data = this.dataValue.map((item) => ({ label: String(item[this.xKeyValue]), value: Number(item[this.yKeyValue]) || 0 }))
+          const x = d3.scaleBand().domain(data.map((item) => item.label)).range([0, innerWidth]).padding(0.22)
+          const y = d3.scaleLinear().domain([0, d3.max(data, (item) => item.value) || 1]).nice().range([innerHeight, 0])
+          const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`)
+          g.append("g").attr("transform", `translate(0,${innerHeight})`).call(d3.axisBottom(x).tickSizeOuter(0))
+          g.append("g").call(d3.axisLeft(y).ticks(4).tickSizeOuter(0))
+          g.selectAll("path,line").attr("stroke", "hsl(var(--border))").attr("stroke-width", 2)
+          g.selectAll("text").attr("class", "fill-foreground text-xs")
+
+          if (this.typeValue === "line" || this.typeValue === "area") {
+            const centered = (item) => x(item.label) + x.bandwidth() / 2
+            if (this.typeValue === "area") {
+              g.append("path").datum(data).attr("d", d3.area().x(centered).y0(innerHeight).y1((item) => y(item.value)).curve(d3.curveMonotoneX)).attr("fill", "hsl(var(--primary) / 0.35)").attr("stroke", "hsl(var(--border))").attr("stroke-width", 2)
+            } else {
+              g.append("path").datum(data).attr("d", d3.line().x(centered).y((item) => y(item.value)).curve(d3.curveMonotoneX)).attr("fill", "none").attr("stroke", "hsl(var(--primary))").attr("stroke-width", 3)
+            }
+          } else {
+            g.selectAll("rect").data(data).join("rect").attr("x", (item) => x(item.label)).attr("y", (item) => y(item.value)).attr("width", x.bandwidth()).attr("height", (item) => innerHeight - y(item.value)).attr("fill", "hsl(var(--primary))").attr("stroke", "hsl(var(--border))").attr("stroke-width", 2)
+          }
+        }
+
+        renderPie(svg, width, height) {
+          const data = this.dataValue.map((item) => ({ label: String(item[this.labelKeyValue]), value: Number(item[this.valueKeyValue]) || 0 }))
+          const radius = Math.min(width, height) / 2 - 14
+          const color = d3.scaleOrdinal().range(["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--muted))"])
+          const g = svg.append("g").attr("transform", `translate(${width / 2},${height / 2})`)
+          g.selectAll("path").data(d3.pie().value((item) => item.value)(data)).join("path").attr("d", d3.arc().innerRadius(0).outerRadius(radius)).attr("fill", (item) => color(item.data.label)).attr("stroke", "hsl(var(--border))").attr("stroke-width", 2)
+        }
+      }
+
+      const application = Application.start()
+      application.register("retro-ui--accordion", AccordionController)
+      application.register("retro-ui--chart", ChartController)
+      application.register("retro-ui--tabs", TabsController)
+      application.register("retro-ui--dialog", DialogController)
+      application.register("retro-ui--dropdown-menu", ToggleContentController)
+      application.register("retro-ui--popover", ToggleContentController)
+      application.register("retro-ui--theme", ThemeController)
+      application.register("retro-ui--tooltip", TooltipController)
+      application.register("retro-ui--toast", ToastController)
+    </script>
+    <style type="text/tailwindcss">
+      @theme {
+        --color-background: hsl(var(--background));
+        --color-foreground: hsl(var(--foreground));
+        --color-card: hsl(var(--card));
+        --color-card-foreground: hsl(var(--card-foreground));
+        --color-primary: hsl(var(--primary));
+        --color-primary-foreground: hsl(var(--primary-foreground));
+        --color-secondary: hsl(var(--secondary));
+        --color-secondary-foreground: hsl(var(--secondary-foreground));
+        --color-muted: hsl(var(--muted));
+        --color-muted-foreground: hsl(var(--muted-foreground));
+        --color-accent: hsl(var(--accent));
+        --color-accent-foreground: hsl(var(--accent-foreground));
+        --color-destructive: hsl(var(--destructive));
+        --color-destructive-foreground: hsl(var(--destructive-foreground));
+        --color-border: hsl(var(--border));
+        --font-head: ui-sans-serif, system-ui, sans-serif;
+      }
+    </style>
+    <style>
+      :root {
+        --background: 0 0% 100%;
+        --foreground: 0 0% 5%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 5%;
+        --primary: 52 100% 50%;
+        --primary-foreground: 0 0% 5%;
+        --secondary: 190 95% 55%;
+        --secondary-foreground: 0 0% 5%;
+        --muted: 0 0% 90%;
+        --muted-foreground: 0 0% 32%;
+        --accent: 330 100% 65%;
+        --accent-foreground: 0 0% 5%;
+        --destructive: 0 85% 58%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 5%;
+        --shadow-xs: 1px 1px 0 0 hsl(var(--border));
+        --shadow-sm: 2px 2px 0 0 hsl(var(--border));
+        --shadow: 3px 3px 0 0 hsl(var(--border));
+        --shadow-md: 4px 4px 0 0 hsl(var(--border));
+        --shadow-lg: 6px 6px 0 0 hsl(var(--border));
+        --shadow-xl: 8px 8px 0 0 hsl(var(--border));
+        --shadow-2xl: 12px 12px 0 0 hsl(var(--border));
+      }
+
+      [data-theme="dark"] {
+        color-scheme: dark;
+        --background: 230 24% 8%;
+        --foreground: 52 100% 92%;
+        --card: 230 22% 12%;
+        --card-foreground: 52 100% 92%;
+        --primary: 52 100% 54%;
+        --primary-foreground: 230 24% 8%;
+        --secondary: 190 95% 52%;
+        --secondary-foreground: 230 24% 8%;
+        --muted: 230 16% 22%;
+        --muted-foreground: 52 24% 76%;
+        --accent: 330 100% 68%;
+        --accent-foreground: 230 24% 8%;
+        --destructive: 0 84% 62%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 52 100% 88%;
+      }
+
+      body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: hsl(var(--background)); color: hsl(var(--foreground)); }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px; }
+      section { margin-top: 32px; padding-top: 24px; border-top: 2px solid hsl(var(--border)); }
+      .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start; }
+      .demo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+      .demo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+      .demo-stack { display: grid; gap: 12px; }
+    </style>
+  </head>
+  <body data-controller="retro-ui--theme">
+    <main>
+      <div class="demo-header">
+        <div>
+          <%= render RetroUI::Rails::TypographyComponent.new(as: :h1, text: "RetroUI Rails") %>
+          <%= render RetroUI::Rails::TypographyComponent.new(as: :lead, text: "A Tailwind-first ViewComponent port of RetroUI primitives.") %>
+        </div>
+        <%= render RetroUI::Rails::ButtonComponent.new(variant: :secondary, size: :sm, html_options: { type: "button", data: { action: "retro-ui--theme#toggle" } }) do %>
+          <span data-retro-ui--theme-target="label">Dark Mode</span>
+        <% end %>
+      </div>
+
+      <%= render RetroUI::Rails::ToastViewportComponent.new do %>
+        <%= render RetroUI::Rails::ToastComponent.new(duration: 0) do %>
+          <%= render RetroUI::Rails::ToastTitleComponent.new(text: "Hotwire toast online") %>
+          <%= render RetroUI::Rails::ToastDescriptionComponent.new(text: "This one is powered by a Stimulus controller.") %>
+          <%= render RetroUI::Rails::ToastCloseComponent.new %>
+        <% end %>
+      <% end %>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Buttons") %>
+        <div class="demo-row">
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Default") %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Secondary", variant: :secondary) %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Outline", variant: :outline) %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Ghost", variant: :ghost) %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Link", variant: :link) %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Delete", variant: :destructive) %>
+          <%= render RetroUI::Rails::ButtonComponent.new(label: "Docs", href: "/components", size: :sm) %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Hotwire") %>
+        <div class="demo-grid">
+          <%= render RetroUI::Rails::CardComponent.new do %>
+            <%= render RetroUI::Rails::CardHeaderComponent.new do %>
+              <%= render RetroUI::Rails::CardTitleComponent.new do %>Accordion<% end %>
+            <% end %>
+            <%= render RetroUI::Rails::CardContentComponent.new do %>
+              <%= render RetroUI::Rails::AccordionComponent.new do %>
+                <%= render RetroUI::Rails::AccordionItemComponent.new do %>
+                  <%= render RetroUI::Rails::AccordionTriggerComponent.new(text: "What powers this?") %>
+                  <%= render RetroUI::Rails::AccordionContentComponent.new do %>
+                    ViewComponent markup and a tiny Stimulus controller.
+                  <% end %>
+                <% end %>
+                <%= render RetroUI::Rails::AccordionItemComponent.new do %>
+                  <%= render RetroUI::Rails::AccordionTriggerComponent.new(text: "Can I vendor it?") %>
+                  <%= render RetroUI::Rails::AccordionContentComponent.new do %>
+                    Yes. Components and controllers are copied into app-owned paths.
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <%= render RetroUI::Rails::CardComponent.new do %>
+            <%= render RetroUI::Rails::CardHeaderComponent.new do %>
+              <%= render RetroUI::Rails::CardTitleComponent.new do %>Tabs<% end %>
+            <% end %>
+            <%= render RetroUI::Rails::CardContentComponent.new do %>
+              <%= render RetroUI::Rails::TabsComponent.new(default_value: "stats") do %>
+                <%= render RetroUI::Rails::TabsListComponent.new do %>
+                  <%= render RetroUI::Rails::TabsTriggerComponent.new(value: "stats", text: "Stats") %>
+                  <%= render RetroUI::Rails::TabsTriggerComponent.new(value: "gear", text: "Gear") %>
+                <% end %>
+                <%= render RetroUI::Rails::TabsContentComponent.new(value: "stats") do %>
+                  Strength: questionable. Confidence: high.
+                <% end %>
+                <%= render RetroUI::Rails::TabsContentComponent.new(value: "gear") do %>
+                  One yellow button and a stubborn border.
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <%= render RetroUI::Rails::CardComponent.new do %>
+            <%= render RetroUI::Rails::CardHeaderComponent.new do %>
+              <%= render RetroUI::Rails::CardTitleComponent.new do %>Overlays<% end %>
+            <% end %>
+            <%= render RetroUI::Rails::CardContentComponent.new do %>
+              <div class="demo-row">
+                <%= render RetroUI::Rails::DialogComponent.new do %>
+                  <%= render RetroUI::Rails::DialogTriggerComponent.new(label: "Dialog") %>
+                  <%= render RetroUI::Rails::DialogContentComponent.new do %>
+                    <%= render RetroUI::Rails::DialogCloseComponent.new %>
+                    <%= render RetroUI::Rails::DialogHeaderComponent.new do %>
+                      <%= render RetroUI::Rails::DialogTitleComponent.new(text: "Modal Save Point") %>
+                      <%= render RetroUI::Rails::DialogDescriptionComponent.new(text: "Hotwire opens this without React or Node.") %>
+                    <% end %>
+                    <%= render RetroUI::Rails::DialogFooterComponent.new do %>
+                      <%= render RetroUI::Rails::ButtonComponent.new(label: "Nice", size: :sm) %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+
+                <%= render RetroUI::Rails::DropdownMenuComponent.new do %>
+                  <%= render RetroUI::Rails::DropdownMenuTriggerComponent.new(label: "Menu") %>
+                  <%= render RetroUI::Rails::DropdownMenuContentComponent.new do %>
+                    <%= render RetroUI::Rails::DropdownMenuItemComponent.new(text: "Profile") %>
+                    <%= render RetroUI::Rails::DropdownMenuItemComponent.new(text: "Settings") %>
+                    <%= render RetroUI::Rails::DropdownMenuItemComponent.new(text: "Logout") %>
+                  <% end %>
+                <% end %>
+
+                <%= render RetroUI::Rails::PopoverComponent.new do %>
+                  <%= render RetroUI::Rails::PopoverTriggerComponent.new(label: "Popover") %>
+                  <%= render RetroUI::Rails::PopoverContentComponent.new do %>
+                    Small contextual surfaces are Stimulus toggles too.
+                  <% end %>
+                <% end %>
+              </div>
+              <p style="margin-top: 16px;">
+                Hover
+                <%= render RetroUI::Rails::TooltipComponent.new do %>
+                  <%= render RetroUI::Rails::TooltipTriggerComponent.new(text: "this text") %>
+                  <%= render RetroUI::Rails::TooltipContentComponent.new(text: "Tooltip via Stimulus") %>
+                <% end %>
+                for a tooltip.
+              </p>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Badges And Alerts") %>
+        <div class="demo-stack">
+          <div class="demo-row">
+            <%= render RetroUI::Rails::BadgeComponent.new(label: "Default") %>
+            <%= render RetroUI::Rails::BadgeComponent.new(label: "Secondary", variant: :secondary) %>
+            <%= render RetroUI::Rails::BadgeComponent.new(label: "Outline", variant: :outline) %>
+            <%= render RetroUI::Rails::BadgeComponent.new(label: "Danger", variant: :destructive) %>
+          </div>
+
+          <%= render RetroUI::Rails::AlertComponent.new do %>
+            <%= render RetroUI::Rails::AlertTitleComponent.new do %>
+              Autosave complete
+            <% end %>
+            <%= render RetroUI::Rails::AlertDescriptionComponent.new do %>
+              Your progress is mostly imaginary, but it has been saved.
+            <% end %>
+          <% end %>
+
+          <%= render RetroUI::Rails::AlertComponent.new(variant: :destructive) do %>
+            <%= render RetroUI::Rails::AlertTitleComponent.new do %>
+              Danger zone
+            <% end %>
+            <%= render RetroUI::Rails::AlertDescriptionComponent.new do %>
+              This action has a very dramatic button nearby.
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Cards") %>
+        <div class="demo-grid">
+          <%= render RetroUI::Rails::CardComponent.new do %>
+            <%= render RetroUI::Rails::CardHeaderComponent.new do %>
+              <%= render RetroUI::Rails::CardTitleComponent.new do %>
+                Save Point
+              <% end %>
+              <%= render RetroUI::Rails::CardDescriptionComponent.new do %>
+                A compositional card made from explicit components.
+              <% end %>
+            <% end %>
+            <%= render RetroUI::Rails::CardContentComponent.new do %>
+              <div class="demo-row">
+                <%= render RetroUI::Rails::ButtonComponent.new(label: "Continue", size: :sm) %>
+                <%= render RetroUI::Rails::ButtonComponent.new(label: "Reset", variant: :outline, size: :sm) %>
+              </div>
+            <% end %>
+          <% end %>
+
+          <%= render RetroUI::Rails::CardComponent.new do %>
+            <%= render RetroUI::Rails::CardHeaderComponent.new do %>
+              <%= render RetroUI::Rails::CardTitleComponent.new do %>
+                Profile
+              <% end %>
+              <%= render RetroUI::Rails::CardDescriptionComponent.new do %>
+                Avatar and fallback primitives.
+              <% end %>
+            <% end %>
+            <%= render RetroUI::Rails::CardContentComponent.new do %>
+              <div class="demo-row">
+                <%= render RetroUI::Rails::AvatarComponent.new(html_options: { class: "h-12 w-12" }) do %>
+                  <%= render RetroUI::Rails::AvatarFallbackComponent.new(text: "RU") %>
+                <% end %>
+                <%= render RetroUI::Rails::BadgeComponent.new(label: "Online", variant: :secondary) %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Forms") %>
+        <div class="demo-grid">
+          <div class="demo-stack">
+            <%= render RetroUI::Rails::LabelComponent.new(text: "Email", for_id: "email") %>
+            <%= render RetroUI::Rails::InputComponent.new(type: :email, name: "email", html_options: { id: "email", placeholder: "hero@example.com" }) %>
+            <%= render RetroUI::Rails::LabelComponent.new(text: "Message", for_id: "message") %>
+            <%= render RetroUI::Rails::TextareaComponent.new(name: "message", html_options: { id: "message", placeholder: "Write something..." }) %>
+            <%= render RetroUI::Rails::SelectComponent.new(name: "size", options: [["Small", "s"], ["Medium", "m"], ["Large", "l"]], selected: "m") %>
+          </div>
+
+          <div class="demo-stack">
+            <label class="demo-row">
+              <%= render RetroUI::Rails::CheckboxComponent.new(name: "confirm", checked: true) %>
+              Confirm quest rewards
+            </label>
+            <label class="demo-row">
+              <%= render RetroUI::Rails::RadioComponent.new(name: "plan", value: "starter", checked: true) %>
+              Starter
+            </label>
+            <label class="demo-row">
+              <%= render RetroUI::Rails::RadioComponent.new(name: "plan", value: "pro") %>
+              Pro
+            </label>
+            <label class="demo-row">
+              <%= render RetroUI::Rails::SwitchComponent.new(name: "enabled", checked: true) %>
+              Enable retro mode
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Navigation") %>
+        <div class="demo-stack">
+          <%= render RetroUI::Rails::BreadcrumbComponent.new do %>
+            <%= render RetroUI::Rails::BreadcrumbListComponent.new do %>
+              <%= render RetroUI::Rails::BreadcrumbItemComponent.new do %>
+                <%= render RetroUI::Rails::BreadcrumbLinkComponent.new(href: "/", text: "Home") %>
+              <% end %>
+              <%= render RetroUI::Rails::BreadcrumbSeparatorComponent.new %>
+              <%= render RetroUI::Rails::BreadcrumbItemComponent.new do %>
+                <%= render RetroUI::Rails::BreadcrumbPageComponent.new(text: "Components") %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <%= render RetroUI::Rails::PaginationComponent.new do %>
+            <%= render RetroUI::Rails::PaginationContentComponent.new do %>
+              <%= render RetroUI::Rails::PaginationItemComponent.new do %>
+                <%= render RetroUI::Rails::PaginationLinkComponent.new(href: "?page=1", label: "1", active: true) %>
+              <% end %>
+              <%= render RetroUI::Rails::PaginationItemComponent.new do %>
+                <%= render RetroUI::Rails::PaginationLinkComponent.new(href: "?page=2", label: "2") %>
+              <% end %>
+              <%= render RetroUI::Rails::PaginationItemComponent.new do %>
+                <%= render RetroUI::Rails::PaginationLinkComponent.new(href: "?page=3", label: "3") %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Utilities") %>
+        <div class="demo-stack">
+          <%= render RetroUI::Rails::AspectRatioComponent.new(ratio: "16/9", html_options: { class: "bg-muted border-2 border-black" }) do %>
+            <div style="display: grid; height: 100%; place-items: center;">16 / 9</div>
+          <% end %>
+          <%= render RetroUI::Rails::ProgressComponent.new(value: 42) %>
+          <%= render RetroUI::Rails::SkeletonComponent.new(html_options: { class: "h-10 w-full" }) %>
+          <%= render RetroUI::Rails::SeparatorComponent.new %>
+          <p>
+            Press <%= render RetroUI::Rails::KbdComponent.new(text: "K") %>
+            after running <%= render RetroUI::Rails::CodeComponent.new(text: "rails generate retro_ui:vendor") %>.
+          </p>
+          <%= render RetroUI::Rails::TypographyComponent.new(as: :blockquote, text: "Own your components. Modify them without asking permission." ) %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Charts") %>
+        <div class="demo-grid">
+          <%= render RetroUI::Rails::BarChartComponent.new(
+            title: "Shipments",
+            description: "D3 rendered from ViewComponent data.",
+            data: [
+              { month: "Jan", count: 12 },
+              { month: "Feb", count: 18 },
+              { month: "Mar", count: 9 },
+              { month: "Apr", count: 24 }
+            ],
+            x_key: :month,
+            y_key: :count
+          ) %>
+
+          <%= render RetroUI::Rails::PieChartComponent.new(
+            title: "Plan Mix",
+            data: [
+              { plan: "Free", users: 32 },
+              { plan: "Pro", users: 18 },
+              { plan: "Team", users: 9 }
+            ],
+            label_key: :plan,
+            value_key: :users
+          ) %>
+        </div>
+      </section>
+
+      <section>
+        <%= render RetroUI::Rails::TypographyComponent.new(as: :h2, text: "Table") %>
+        <%= render RetroUI::Rails::TableComponent.new do %>
+          <%= render RetroUI::Rails::TableCaptionComponent.new do %>
+            Current component batches
+          <% end %>
+          <%= render RetroUI::Rails::TableHeaderComponent.new do %>
+            <%= render RetroUI::Rails::TableRowComponent.new do %>
+              <%= render RetroUI::Rails::TableHeadComponent.new do %>
+                Batch
+              <% end %>
+              <%= render RetroUI::Rails::TableHeadComponent.new do %>
+                Status
+              <% end %>
+            <% end %>
+          <% end %>
+          <%= render RetroUI::Rails::TableBodyComponent.new do %>
+            <%= render RetroUI::Rails::TableRowComponent.new do %>
+              <%= render RetroUI::Rails::TableCellComponent.new do %>
+                Foundation
+              <% end %>
+              <%= render RetroUI::Rails::TableCellComponent.new do %>
+                Committed
+              <% end %>
+            <% end %>
+            <%= render RetroUI::Rails::TableRowComponent.new do %>
+              <%= render RetroUI::Rails::TableCellComponent.new do %>
+                No-JS primitives
+              <% end %>
+              <%= render RetroUI::Rails::TableCellComponent.new do %>
+                Committed
+              <% end %>
+            <% end %>
+          <% end %>
+          <%= render RetroUI::Rails::TableFooterComponent.new do %>
+            <%= render RetroUI::Rails::TableRowComponent.new do %>
+              <%= render RetroUI::Rails::TableCellComponent.new(html_options: { colspan: 2 }) do %>
+                Ready for Tailwind wiring
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,2 +1,3 @@
-%div{ class: card_classes }
-  = content
+= render CardComponent.new(html_options: @html_options) do
+  = render CardContentComponent.new do
+    = content

@@ -20,14 +20,11 @@ module Ui
     end
 
     def label_classes
-      "block text-sm font-medium text-ink"
+      "font-head text-sm font-medium text-foreground"
     end
 
     def input_classes
       [
-        "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink",
-        "placeholder:text-ls5-violet-5",
-        "focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4",
         html_options[:class]
       ].compact.join(" ")
     end
@@ -38,6 +35,16 @@ module Ui
         placeholder: placeholder,
         class: input_classes
       )
+    end
+
+    def field_name
+      form.field_name(name)
+    end
+
+    def field_value
+      form.object.public_send(name)
+    rescue NoMethodError
+      nil
     end
 
     def errors

@@ -1,0 +1,14 @@
+<%= tag.div(**component_options) do %>
+  <% if title || description %>
+    <div class="mb-4 grid gap-1">
+      <% if title %>
+        <h3 class="font-head text-lg font-bold leading-none"><%= title %></h3>
+      <% end %>
+      <% if description %>
+        <p class="text-sm text-muted-foreground"><%= description %></p>
+      <% end %>
+    </div>
+  <% end %>
+  <%= tag.svg(**svg_options) %>
+  <%= tag.div("Chart data is available in the component data attributes.", **fallback_options) %>
+<% end %>

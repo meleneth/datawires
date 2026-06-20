@@ -1,3 +1,2 @@
-%button{ type: @type, class: classes, disabled: @disabled, **@html_options.except(:class) }
+= render ButtonComponent.new(variant: @variant, size: @size, html_options: retro_options) do
   = content
-

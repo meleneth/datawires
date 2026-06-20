@@ -1,49 +1,52 @@
 = turbo_frame_tag "main_content" do
-  %h1 Schema
+  = render TypographyComponent.new(as: :h1, text: "Schema", html_options: { class: "mb-4" })
 
   .mb-4.flex.gap-2
     = button_to "New document",
       schema_documents_path(@schema_document),
       method: :post,
       form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
-      class: "inline-flex items-center rounded-lg bg-ls5-violet-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-violet-5"
+      class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
     = button_to "Edit schema",
       document_draft_path(@schema_document.document),
       method: :post,
       form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
-      class: "inline-flex items-center rounded-lg bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+      class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-secondary px-4 py-2 font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
-  %p
-    %strong Domain:
-    = @schema_document.domain.name
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      %dl.grid.gap-3.text-sm.md:grid-cols-2
+        %div
+          %dt.text-muted-foreground Domain
+          %dd.font-head.text-foreground= @schema_document.domain.name
 
-  %p
-    %strong Key:
-    = @schema_document.key
+        %div
+          %dt.text-muted-foreground Key
+          %dd.font-head.text-foreground= @schema_document.key
 
   .mt-6
-    %h2.text-lg.font-semibold Edit affordances
+    = render TypographyComponent.new(as: :h2, text: "Edit affordances")
 
     - if @edit_affordances.any?
       %ul.mt-2.space-y-2
         - @edit_affordances.each do |affordance|
-          %li.flex.items-center.justify-between.rounded-md.border.border-ls5-blue-2.px-3.py-2
+          %li.flex.items-center.justify-between.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
             .min-w-0
-              .font-medium.text-ls5-blue-4= affordance.title
+              .font-head.font-medium= affordance.title
               - if affordance.edit_document.present?
-                .text-xs.text-ls5-violet-6= affordance.edit_document.title.presence || affordance.edit_document.key
+                .text-xs.text-muted-foreground= affordance.edit_document.title.presence || affordance.edit_document.key
 
             = button_to "New with this affordance",
               schema_documents_path(@schema_document, edit_affordance_id: affordance.id),
               method: :post,
               form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
-              class: "inline-flex items-center rounded-lg bg-ls5-green-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-green-5"
+              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
     - else
-      %p.mt-2.text-sm.text-ls5-violet-6 No edit affordances exist for this schema yet.
+      = render TypographyComponent.new(as: :muted, text: "No edit affordances exist for this schema yet.", html_options: { class: "mt-2" })
 
   .mt-6
-    %h2.text-lg.font-semibold Documents using this schema
+    = render TypographyComponent.new(as: :h2, text: "Documents using this schema")
 
     - if @documents.any?
       %ul.mt-2.space-y-2
@@ -51,12 +54,12 @@
           %li
             = link_to document_path(document),
               data: { turbo_frame: "main_content", turbo_action: "advance" },
-              class: "block rounded-md border border-ls5-violet-2 px-3 py-2 hover:bg-ls5-violet-1" do
-              .font-medium.text-ls5-blue-4= document.title.presence || document.key
-              .text-xs.text-ls5-violet-6= document.key
+              class: "block rounded border-2 border-black bg-card px-3 py-2 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              .font-head.font-medium= document.title.presence || document.key
+              .text-xs.text-muted-foreground= document.key
     - else
-      %p.mt-2.text-sm.text-ls5-violet-6 No documents use this schema yet.
+      = render TypographyComponent.new(as: :muted, text: "No documents use this schema yet.", html_options: { class: "mt-2" })
 
   .mt-6
-    %pre
+    %pre.rounded.border-2.border-black.bg-muted.p-4.text-sm.text-foreground.shadow-sm
       = JSON.pretty_generate(@schema_document.body)

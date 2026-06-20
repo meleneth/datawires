@@ -9,9 +9,10 @@
 
 .space-y-4
   .flex.items-center.justify-between
-    %h3.text-lg.font-semibold.text-ink= "Schema: #{path}"
+    = render TypographyComponent.new(as: :h3, text: "Schema: #{path}")
 
-    = link_to "Commit…", new_draft_commit_path(draft), class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5", data: { turbo_frame: "main_content" }
+    = render ButtonComponent.new(href: new_draft_commit_path(draft), size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+      Commit
 
   .space-y-3
     - properties.each do |name, prop_schema|
@@ -19,44 +20,46 @@
       - openable = prop_schema.is_a?(Hash) && nav.object_schema?(prop_schema)
 
       - if openable
-        = link_to draft_path(draft, path: child_path), data: { turbo_frame: "editor", turbo_action: "advance" }, class: "block rounded-lg border border-ls5-violet-3 bg-white p-3 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
+        = link_to draft_path(draft, path: child_path), data: { turbo_frame: "editor", turbo_action: "advance" }, class: "block rounded border-2 border-black bg-card p-3 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none focus:outline-none" do
           .flex.items-center.justify-between.gap-4
             .min-w-0
-              .font-medium.text-ink= name
-              .text-sm.text-ls5-violet-6= prop_schema["type"] || "(no type)"
+              .font-head.font-medium= name
+              .text-sm.text-muted-foreground= prop_schema["type"] || "(no type)"
 
               - if required.include?(name)
-                .mt-1.text-xs.text-ls5-violet-5 required
+                .mt-1.text-xs.text-muted-foreground required
 
-            .text-sm.font-medium.text-ls5-blue-4 Open
+            = render BadgeComponent.new(variant: :secondary) do
+              Open
       - else
-        .rounded-lg.border.border-ls5-violet-3.bg-white.p-3
+        .rounded.border-2.border-black.bg-card.p-3.text-card-foreground.shadow-sm
           .flex.items-center.justify-between.gap-4
             .min-w-0
-              .font-medium.text-ink= name
-              .text-sm.text-ls5-violet-6= prop_schema["type"] || "(no type)"
+              .font-head.font-medium= name
+              .text-sm.text-muted-foreground= prop_schema["type"] || "(no type)"
 
               - if required.include?(name)
-                .mt-1.text-xs.text-ls5-violet-5 required
+                .mt-1.text-xs.text-muted-foreground required
 
-  .rounded-lg.border.border-ls5-violet-3.bg-white.p-4
-    %h4.mb-3.font-medium.text-ink Add property
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      = render TypographyComponent.new(as: :h4, text: "Add property", html_options: { class: "mb-3" })
 
-    = form_with url: add_draft_schema_properties_path(draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor" }, class: "space-y-4" do
-      = hidden_field_tag :path, path
+      = form_with url: add_draft_schema_properties_path(draft), method: :patch, format: :turbo_stream, data: { turbo_frame: "editor" }, class: "space-y-4" do
+        = hidden_field_tag :path, path
 
-      .grid.gap-3.md:grid-cols-3
-        .space-y-1
-          = label_tag :name, "Name", class: "block text-sm font-medium text-ink"
-          = text_field_tag :name, nil, class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink placeholder:text-ls5-violet-5 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4"
+        .grid.gap-3.md:grid-cols-3
+          .space-y-1
+            = render LabelComponent.new(text: "Name", for_id: "name")
+            = text_field_tag :name, nil, class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
 
-        .space-y-1
-          = label_tag :property_type, "Type", class: "block text-sm font-medium text-ink"
-          = select_tag :property_type, options_for_select(%w[string integer number boolean object array]), class: "w-full rounded-md border border-ls5-violet-3 bg-white px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-ls5-blue-3 focus:border-ls5-blue-4"
+          .space-y-1
+            = render LabelComponent.new(text: "Type", for_id: "property_type")
+            = select_tag :property_type, options_for_select(%w[string integer number boolean object array]), class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
 
-        .flex.items-end.gap-3
-          %label.flex.items-center.gap-2.text-ink
-            = check_box_tag :required, "1", false, class: "rounded border-ls5-violet-3 text-ls5-blue-4 focus:ring-ls5-blue-3"
-            %span Required
+          .flex.items-end.gap-3
+            %label.flex.items-center.gap-2.text-foreground
+              = check_box_tag :required, "1", false, class: "h-4 w-4 rounded border-2 border-black"
+              %span Required
 
-          = submit_tag "Add", class: "rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 font-medium text-ink-inverse hover:bg-ls5-blue-5"
+            = submit_tag "Add", class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"

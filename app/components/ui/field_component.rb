@@ -3,11 +3,11 @@ module Ui
     renders_one :actions
 
     STATES = {
-      normal: { frame: "border-ls5-blue-3 bg-ls5-blue-1", label: "text-ink", hint: "text-ls5-blue-8", error: "text-ls5-red-7" },
-      focus: { frame: "border-ls5-blue-4 bg-ls5-blue-1", label: "text-ink", hint: "text-ls5-blue-8", error: "text-ls5-red-7" },
-      dirty: { frame: "border-ls5-yellow-4 bg-ls5-yellow-1", label: "text-ink", hint: "text-ls5-yellow-8", error: "text-ls5-red-7" },
-      error: { frame: "border-ls5-red-6 bg-ls5-red-1", label: "text-ink", hint: "text-ls5-red-7", error: "text-ls5-red-7" },
-      disabled: { frame: "border-ls5-violet-3 bg-ls5-violet-1", label: "text-ls5-violet-7", hint: "text-ls5-violet-7", error: "text-ls5-red-7" },
+      normal: { frame: "border-black bg-card", label: "text-foreground", hint: "text-muted-foreground", error: "text-destructive" },
+      focus: { frame: "border-black bg-card shadow-md", label: "text-foreground", hint: "text-muted-foreground", error: "text-destructive" },
+      dirty: { frame: "border-black bg-secondary", label: "text-secondary-foreground", hint: "text-secondary-foreground", error: "text-destructive" },
+      error: { frame: "border-black bg-destructive", label: "text-destructive-foreground", hint: "text-destructive-foreground", error: "text-destructive-foreground" },
+      disabled: { frame: "border-black bg-muted", label: "text-muted-foreground", hint: "text-muted-foreground", error: "text-destructive" },
     }.freeze
 
     def initialize(
@@ -49,7 +49,7 @@ module Ui
 
     def label_classes
       s = STATES.fetch(@state)
-      cx("font-semibold", s[:label])
+      cx("font-head font-medium", s[:label])
     end
 
     def meta_classes

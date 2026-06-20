@@ -1,14 +1,18 @@
 = form_with(model: domain, class: "space-y-6") do |form|
   - if domain.errors.any?
-    .rounded-lg.border.border-ls5-red-6.bg-ls5-red-1.p-4.text-ls5-red-8
-      %h2.font-semibold
+    = render AlertComponent.new(variant: :destructive) do
+      = render AlertTitleComponent.new do
         = "#{pluralize(domain.errors.count, "error")} prohibited this domain from being saved:"
-      %ul.mt-2.list-disc.pl-5
+      %ul.mt-2.list-disc.pl-5.text-sm
         - domain.errors.each do |error|
           %li= error.full_message
 
   .space-y-4
-    = render Ui::TextFieldComponent.new(form: form, name: :name)
+    .space-y-1
+      = render LabelComponent.new(text: "Name", for_id: "domain_name")
+      = render InputComponent.new(name: form.field_name(:name), value: domain.name, html_options: { id: "domain_name" })
+      - if domain.errors[:name].any?
+        %p.text-sm.text-destructive= domain.errors[:name].to_sentence
   .pt-2
-    = render Ui::ButtonComponent.new(type: :submit, tone: :primary) do
+    = render ButtonComponent.new(html_options: { type: :submit }) do
       Save domain

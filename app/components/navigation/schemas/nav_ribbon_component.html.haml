@@ -1,0 +1,14 @@
+%nav.flex.flex-wrap.items-center.gap-2.border-b-2.border-black.bg-background.px-4.py-3.text-sm.text-foreground{ "aria-label" => "Schema path" }
+  - segments.each_with_index do |segment, index|
+    - if index.positive?
+      %span.text-muted-foreground /
+
+    - if current?(segment)
+      %span.rounded.border-2.border-black.bg-card.px-3.py-1.font-medium.shadow-sm= segment_label(segment)
+    - else
+      = link_to segment_label(segment), segment_url(segment), data: link_data, class: "rounded border-2 border-black bg-background px-3 py-1 font-medium shadow-sm transition-all hover:translate-y-0.5 hover:shadow-none"
+
+  - if child_links.any?
+    .ml-auto.flex.flex-wrap.items-center.gap-2
+      - child_links.each do |label, url|
+        = link_to label, url, data: link_data, class: "rounded border-2 border-black bg-secondary px-3 py-1 font-medium text-secondary-foreground shadow-sm transition-all hover:translate-y-0.5 hover:shadow-none"

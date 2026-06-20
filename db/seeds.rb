@@ -3,11 +3,13 @@
 require_relative "seeds/support/document_seed_helper"
 require_relative "seeds/support/journey_event_schema"
 require_relative "seeds/support/journey_event_example_document"
+require_relative "seeds/json_schema_2020_12"
 require_relative "seeds/journey_event_edit_affordance"
 require_relative "seeds/edit_form_schema"
 require_relative "seeds/journey_item_collection_schema"
 require_relative "seeds/journey_item_collection_edit_affordance"
 
+Seeds::JsonSchema202012.seed!
 Seeds::EditFormSchema.seed!
 Seeds::JourneyEventSchema.seed!
 Seeds::JourneyEventExampleDocument.seed!

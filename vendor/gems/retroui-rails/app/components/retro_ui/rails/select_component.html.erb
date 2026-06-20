@@ -1,0 +1,9 @@
+<%= tag.select(**component_options) do %>
+  <% if content? %>
+    <%= content %>
+  <% else %>
+    <% option_pairs.each do |label, value| %>
+      <%= tag.option(label, value: value, selected: value == selected) %>
+    <% end %>
+  <% end %>
+<% end %>

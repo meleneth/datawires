@@ -1,21 +1,25 @@
 - content_for :title, "Domains"
 
-= render Ui::PageHeaderComponent.new(text: "Domains")
+= render TypographyComponent.new(as: :h1, text: "Domains", html_options: { class: "mb-4" })
 
 - if notice.present?
-  %p.mb-4.text-ls5-green-7= notice
+  .mb-4
+    = render AlertComponent.new do
+      = notice
 
-= render Ui::CardComponent.new do
-  - if @domains.empty?
-    .text-ls5-violet-6 No domains yet.
+= render CardComponent.new(html_options: { class: "w-full" }) do
+  = render CardContentComponent.new do
+    .space-y-4
+      - if @domains.empty?
+        = render TypographyComponent.new(as: :muted, text: "No domains yet.")
 
-  %ul.divide-y.divide-ls5-violet-2
-    - @domains.each do |domain|
-      %li
-        = link_to domain, class: "flex items-center justify-between px-3 py-3 rounded-md hover:bg-ls5-violet-1 transition-colors" do
-          .min-w-0
-            .font-medium.text-ink= domain.name
-          .text-ls5-violet-5.text-sm →
-  
-  .mt-4
-    = link_to "New domain", new_domain_path, class: "inline-flex items-center rounded-lg border border-ls5-blue-5 bg-ls5-blue-4 px-3 py-2 text-sm font-medium text-ink-inverse hover:bg-ls5-blue-5"
+      %ul.space-y-2
+        - @domains.each do |domain|
+          %li
+            = link_to domain, class: "flex items-center justify-between rounded border-2 border-black bg-card px-3 py-3 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              .min-w-0
+                .font-head.font-medium= domain.name
+              .text-sm.text-muted-foreground= "Open"
+
+      = render ButtonComponent.new(href: new_domain_path, size: :sm) do
+        New domain

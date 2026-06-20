@@ -2,8 +2,7 @@
 
 .space-y-1
   - if field.label
-    %label.block.text-sm.font-medium.text-ink{ for: field_cursor.ptr.parameterize }
-      = field_cursor.name.to_s.humanize
+    = render LabelComponent.new(text: field_cursor.name.to_s.humanize, for_id: field_cursor.ptr.parameterize)
 
   - case field_cursor.input_kind
   - when :checkbox
@@ -22,7 +21,7 @@
       = form.select :value,
         options_for_select(field_cursor.enum_values, field_cursor.field_value),
         {},
-        class: "w-full rounded-lg border border-ls5-violet-2"
+        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
   - else
     = form_with url: patch_ptr_draft_path(draft),
       method: :patch,
@@ -31,4 +30,4 @@
       = form.hidden_field :path, value: field_cursor.path.to_s
       = form.text_field :value,
         value: field_cursor.field_value,
-        class: "w-full rounded-lg border border-ls5-violet-2"
+        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"

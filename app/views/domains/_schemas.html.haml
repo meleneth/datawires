@@ -1,15 +1,16 @@
 = turbo_frame_tag "main_content" do
-  = render Ui::PageHeaderComponent.new(text: "Schemas")
+  = render TypographyComponent.new(as: :h2, text: "Schemas", html_options: { class: "mb-4 mt-6" })
 
-  = render Ui::CardComponent.new do
-    - if @schemas.any?
-      %ul.mt-2.space-y-2
-        - @schemas.each do |schema|
-          %li
-            = link_to schema_path(schema),
-              data: { turbo_frame: "main_content",  turbo_action: "advance" },
-              class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
-              .font-medium.text-ls5-blue-4= schema.key
-              .text-xs.text-ls5-violet-6= "updated #{time_ago_in_words(schema.updated_at)} ago"
-    - else
-      %p.mt-2.text-ls5-violet-6 No schemas yet
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      - if @schemas.any?
+        %ul.space-y-2
+          - @schemas.each do |schema|
+            %li
+              = link_to schema_path(schema),
+                data: { turbo_frame: "main_content",  turbo_action: "advance" },
+                class: "flex items-center justify-between rounded border-2 border-black bg-card px-3 py-2 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+                .font-head.font-medium= schema.key
+                .text-xs.text-muted-foreground= "updated #{time_ago_in_words(schema.updated_at)} ago"
+      - else
+        = render TypographyComponent.new(as: :muted, text: "No schemas yet")

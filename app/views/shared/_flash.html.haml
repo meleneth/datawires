@@ -2,11 +2,5 @@
   #flash.space-y-2
     - flash.each do |type, message|
       - next if message.blank?
-      .rounded-lg.px-3.py-2.text-sm{
-        class: case type.to_sym
-               when :notice then "bg-ls5-blue-1 text-ls5-blue-8 border border-ls5-blue-3"
-               when :alert  then "bg-ls5-red-1 text-ls5-red-8 border border-ls5-red-3"
-               else "bg-slate-800 text-slate-100 border border-slate-700"
-               end
-      }
+      = render AlertComponent.new(variant: type.to_sym == :alert ? :destructive : :default) do
         = message

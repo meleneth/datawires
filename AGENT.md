@@ -52,5 +52,8 @@ coverage.
   `Gemfile.lock` was modified and `fetch.sh` was untracked.
 - Prefer existing Rails, Haml, ViewComponent, Turbo, and Tailwind patterns over
   introducing new frontend or service abstractions.
+- Haml is strict about same-line tag content: if a tag has nested children, do
+  not leave class names or text after a space on the tag line. Chain Tailwind
+  classes with dots (`%nav.flex.px-4.py-3`) or put attributes in `class:`.
 - Keep document bodies as JSON-compatible Ruby hashes/arrays/scalars and prefer
   the existing `JsonPtr` helpers for pointer parsing, lookup, and mutation.

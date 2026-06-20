@@ -1,14 +1,15 @@
-= render Ui::PageHeaderComponent.new(text: "Open Drafts")
+= render TypographyComponent.new(as: :h2, text: "Open Drafts", html_options: { class: "mb-4 mt-6" })
 
-= render Ui::CardComponent.new do
-  - if @drafts.any?
-    %ul.mt-2.space-y-2
-      - @drafts.each do |draft|
-        %li
-          = link_to draft_path(draft), class: "flex items-center justify-between rounded-md px-3 py-2 hover:bg-ls5-violet-1 focus:outline-none focus:ring-2 focus:ring-ls5-blue-3" do
-            .min-w-0
-              .font-medium.text-ls5-blue-4= draft.document.key
-              .text-xs.text-ls5-violet-6
-                = "updated #{time_ago_in_words(draft.updated_at)} ago"
-  - else
-    %p.mt-2.text-ls5-violet-6 No drafts yet
+= render CardComponent.new(html_options: { class: "w-full" }) do
+  = render CardContentComponent.new do
+    - if @drafts.any?
+      %ul.space-y-2
+        - @drafts.each do |draft|
+          %li
+            = link_to draft_path(draft), class: "flex items-center justify-between rounded border-2 border-black bg-card px-3 py-2 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              .min-w-0
+                .font-head.font-medium= draft.document.key
+                .text-xs.text-muted-foreground
+                  = "updated #{time_ago_in_words(draft.updated_at)} ago"
+    - else
+      = render TypographyComponent.new(as: :muted, text: "No drafts yet")

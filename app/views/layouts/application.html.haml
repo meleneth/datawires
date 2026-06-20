@@ -15,20 +15,14 @@
     %link{:href => "/icon.png", :rel => "apple-touch-icon"}/
     = stylesheet_link_tag :app
     = javascript_importmap_tags
-  %body.bg-ls5-yellow-6
+  %body.bg-background.text-foreground
     - if Rails.env.development?
-      .w-full.bg-yellow-500.text-black.text-center.text-sm.font-semibold.py-1
-        🚧 DATAWIRES UNDER CONSTRUCTION 🚧
-    = link_to "Domains", "/domains"
-    %main.bg-ls5-green-3.rounded-xl.shadow.p-6.ls5-blue-6
-      = render Ui::SplitOneFourOneComponent.new do |c|
-        - c.with_one do
-          Left slot content
-
-        - c.with_two do
-          = render "shared/flash"
-          = yield
-
-        - c.with_six do
-          Right slot content
-
+      .w-full.border-b-2.border-black.bg-secondary.px-3.py-1.text-center.text-sm.font-semibold.text-secondary-foreground
+        DATAWIRES UNDER CONSTRUCTION
+    %header.mx-auto.flex.max-w-7xl.items-center.justify-between.px-6.py-4
+      = link_to "Datawires", "/domains", class: "font-head text-xl font-medium text-foreground"
+      = link_to "Domains", "/domains", class: "font-head rounded border-2 border-black bg-primary px-3 py-1 text-sm text-primary-foreground shadow-sm hover:shadow-none"
+    %main.mx-auto.grid.max-w-7xl.grid-cols-1.gap-4.px-6.pb-8.lg:grid-cols-6
+      .lg:col-span-4.lg:col-start-2
+        = render "shared/flash"
+        = yield

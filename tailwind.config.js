@@ -1,69 +1,52 @@
 export default {
   content: [
     "./app/views/**/*.{erb,haml}",
-    "./app/components/**/*.{rb,erb,haml}"
+    "./app/components/**/*.{rb,erb,haml}",
+    "./vendor/gems/retroui-rails/app/components/**/*.{rb,erb}"
   ],
   theme: {
     extend: {
       colors: {
-        ls5: {
-          yellow: {
-            1: "hsl(55 78% 84%)",
-            2: "hsl(47 69% 71%)",
-            3: "hsl(38 61% 62%)",
-            4: "hsl(37 88% 58%)",
-            5: "hsl(26 80% 56%)",
-            6: "hsl(33 56% 55%)",
-            7: "hsl(28 44% 44%)",
-            8: "hsl(26 39% 31%)"
-          },
-          red: {
-            1: "hsl(24 48% 92%)",
-            2: "hsl(355 100% 91%)",
-            3: "hsl(353 100% 82%)",
-            4: "hsl(355 93% 71%)",
-            5: "hsl(13 73% 55%)",
-            6: "hsl(354 83% 54%)",
-            7: "hsl(10 43% 40%)",
-            8: "hsl(5 20% 25%)"
-          },
-          violet: {
-            1: "#deceed",
-            2: "#cc99ff",
-            3: "hsl(269 11% 69%)",
-            4: "hsl(324 41% 63%)",
-            5: "hsl(327 33% 45%)",
-            6: "hsl(344 62% 42%)",
-            7: "hsl(333 48% 28%)",
-            8: "#2c1e31"
-          },
-          blue:{
-            1: "#36c5f4",
-            2: "#8c78a5",
-            3: "#3388de",
-            4: "#3859b3",
-            5: "hsl(244 21% 45%)",
-            6: "hsl(244 27% 31%)",
-            7: "hsl(180 100% 27%)",
-            8: "hsl(187 39% 19%)"
-          },
-          green:{
-            1: "hsl(120 39% 88%)",
-            2: "hsl(106 32% 69%)",
-            3: "hsl(168 70% 67%)",
-            4: "hsl(89 73% 61%)",
-            5: "hsl(116 40% 52%)",
-            6: "hsl(145 26% 51%)",
-            7: "hsl(142 55% 34%)",
-            8: "hsl(169 100% 20%)"
-          },
+        background: "hsl(var(--background) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
+        card: {
+          DEFAULT: "hsl(var(--card) / <alpha-value>)",
+          foreground: "hsl(var(--card-foreground) / <alpha-value>)"
         },
-        ink: {
-          DEFAULT: "#10121c",
-          inverse: "#ffffff"
-        }
+        primary: {
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)"
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)"
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)"
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)"
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)"
+        },
+        border: "hsl(var(--border) / <alpha-value>)"
+      },
+      boxShadow: {
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        DEFAULT: "var(--shadow)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
+        "2xl": "var(--shadow-2xl)"
+      },
+      fontFamily: {
+        head: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "monospace"]
       }
     }
   }
 }
-

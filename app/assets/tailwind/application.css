@@ -1,11 +1,11 @@
 @config "../../../tailwind.config.js";
 @import "tailwindcss";
+@import "../../../vendor/gems/retroui-rails/app/assets/stylesheets/retro_ui/rails/theme.css";
 
 @source "../../views/**/*.{erb,haml,html}";
 @source "../../components/**/*.{rb,erb,haml}";
 @source "../../helpers/**/*.rb";
+@source "../../../vendor/gems/retroui-rails/app/components/**/*.{rb,erb}";
 
 @source inline("col-span-{1..12}");
-@source inline("{bg,text,border,ring}-ls5-{yellow,red,violet,blue,green}-{1..8}");
-@source inline("ls5-{yellow,red,violet,blue,green}-{1..8}");
 @source inline("grid-cols-{1..12}");
