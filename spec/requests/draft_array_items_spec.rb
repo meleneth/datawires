@@ -1,0 +1,101 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "Draft array items", type: :request do
+  let(:domain) { create(:domain) }
+
+  let(:schema_body) do
+    {
+      "$schema" => Document::JSON_SCHEMA_2020_12,
+      "$id" => "http://example.test/schemas/list",
+      "type" => "object",
+      "properties" => {
+        "items" => {
+          "type" => "array",
+          "items" => {
+            "type" => "object",
+            "properties" => {
+              "name" => { "type" => "string" },
+              "quantity" => { "type" => "integer" }
+            },
+            "required" => [ "name" ]
+          }
+        }
+      }
+    }
+  end
+
+  let(:schema_document) do
+    create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "list",
+      head_body: schema_body
+    )
+  end
+
+  let!(:schema_wrapper) { create(:schema_wrapper, document: schema_document) }
+
+  let(:document) do
+    create(
+      :document,
+      domain: domain,
+      schema_document: schema_document
+    )
+  end
+
+  let(:draft) { create(:draft, document: document, body: {}) }
+
+  it "shows a dangerous abandon button on the draft editor" do
+    get draft_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Abandon")
+    expect(response.body).to include(%(action="#{draft_path(draft)}"))
+  end
+
+  it "redirects to the new object item screen after adding an item" do
+    patch add_item_draft_path(draft), params: {
+      ptr: "/items"
+    }
+
+    expect(response).to redirect_to(draft_path(draft, path: "/items/0"))
+    expect(draft.reload.body).to eq(
+      "items" => [
+        { "name" => nil }
+      ]
+    )
+  end
+
+  it "renders the new object item editor after adding an item over turbo stream" do
+    patch add_item_draft_path(draft, format: :turbo_stream), params: {
+      ptr: "/items"
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(%(target="editor"))
+    expect(response.body).to include("Name")
+    expect(response.body).to include("Quantity")
+    expect(response.body).not_to include("Item 1")
+  end
+
+  it "renders existing object items as openable rows instead of inline fields" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "First", "quantity" => 2 }
+        ]
+      }
+    )
+
+    get draft_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("1 item")
+    expect(response.body).to include("First")
+    expect(response.body).to include("Open")
+    expect(response.body).not_to include("Quantity")
+  end
+end

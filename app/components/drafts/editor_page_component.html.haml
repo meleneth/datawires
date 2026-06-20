@@ -8,8 +8,14 @@
       .flex.items-center.justify-between
         = render TypographyComponent.new(as: :h3, text: title)
 
-        = render ButtonComponent.new(href: commit_path, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
-          Commit
+        .flex.items-center.gap-2
+          = button_to "Abandon",
+            draft_path(draft),
+            method: :delete,
+            form: { data: { turbo_frame: "main_content" } },
+            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+          = render ButtonComponent.new(href: commit_path, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+            Commit
 
       - if projected_rows?
         = render projected_rows_component

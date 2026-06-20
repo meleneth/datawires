@@ -1,7 +1,5 @@
-- dispatcher = @page.editor_dispatcher
-
-= turbo_stream.update @page.editor_dom_id do
-  = render dispatcher.partial, page: @page, **dispatcher.locals
+= turbo_stream.update "editor" do
+  = render "drafts/inner_editor", page: @page
 
 = turbo_stream.update @draft.review_dom_id do
   = render "drafts/review", diff_rows: @page.diff_rows, draft: @page.draft

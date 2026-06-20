@@ -28,7 +28,6 @@ class DraftsController < ApplicationController
 
   def add_item
     ptr = normalize_ptr(params[:ptr])
-    render_path = params[:path].presence || ""
     array_cursor = Documents::Cursor.new(source: @draft, path: ptr)
 
     unless array_cursor.array?
@@ -37,15 +36,16 @@ class DraftsController < ApplicationController
     end
 
     updated_array = Array(array_cursor.value) + [ array_cursor.seed_item_value ]
+    item_path = array_cursor.path.child(updated_array.length - 1).to_s
     @draft.update!(body: JsonPtr.set(@draft.body, ptr, updated_array))
-    @page = build_show_page(path_param: render_path)
+    @page = build_show_page(path_param: item_path)
 
     respond_to do |format|
       format.turbo_stream
       format.html do
         redirect_to draft_path(
           @draft,
-          path: render_path,
+          path: item_path,
           edit_affordance_id: params[:edit_affordance_id]
         )
       end
