@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :schema_document do
+  factory :schema_wrapper do
     association :document, factory: %i[document with_schema_head_revision]
   end
 end

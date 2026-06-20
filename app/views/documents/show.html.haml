@@ -12,12 +12,12 @@
           %dt.text-muted-foreground Key
           %dd.font-head.text-foreground= @document.key
 
-        - if @schema_document
+        - if @schema_wrapper
           %div
             %dt.text-muted-foreground Schema
             %dd
-              = link_to @schema_document.key,
-                schema_path(@schema_document),
+              = link_to @schema_wrapper.key,
+                schema_path(@schema_wrapper),
                 data: { turbo_frame: "main_content", turbo_action: "advance" },
                 class: "font-head text-foreground underline"
 

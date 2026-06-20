@@ -27,7 +27,7 @@ module Seeds
         message: "Seed items schema"
       )
 
-      SchemaDocument.find_or_create_by!(document:)
+      SchemaWrapper.find_or_create_by!(document:)
     end
 
     def schema_body

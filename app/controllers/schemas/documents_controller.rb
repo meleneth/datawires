@@ -3,10 +3,10 @@
 module Schemas
   class DocumentsController < ApplicationController
     def create
-      schema_document = SchemaDocument.find(params[:schema_id])
+      schema_wrapper = SchemaWrapper.find(params[:schema_id])
 
       document, draft = Documents::CreateFromSchema.call(
-        schema_document: schema_document,
+        schema_wrapper: schema_wrapper,
         actor: current_user
       )
 

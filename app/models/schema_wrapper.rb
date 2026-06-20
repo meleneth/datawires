@@ -1,16 +1,14 @@
 # frozen_string_literal: true
 
-class SchemaDocument < ApplicationRecord
-  belongs_to :document, inverse_of: :schema_document_record
+class SchemaWrapper < ApplicationRecord
+  belongs_to :document, inverse_of: :schema_wrapper
 
   has_many :edit_affordances,
-           foreign_key: :for_schema_document_id,
-           inverse_of: :for_schema_document,
+           inverse_of: :schema_wrapper,
            dependent: :destroy
 
   has_many :view_affordances,
-           foreign_key: :for_schema_document_id,
-           inverse_of: :for_schema_document,
+           inverse_of: :schema_wrapper,
            dependent: :destroy
 
   delegate :key, :title, :domain, :head_revision, :body, to: :document

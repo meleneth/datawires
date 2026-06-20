@@ -2,15 +2,15 @@
 
 module Documents
   class CreateFromSchema
-    def self.call(schema_document:, actor: nil)
-      new(schema_document:, actor:).call
+    def self.call(schema_wrapper:, actor: nil)
+      new(schema_wrapper:, actor:).call
     end
 
-    def initialize(schema_document:, actor:)
-      raise ArgumentError, "schema_document must be a SchemaDocument" unless schema_document.is_a?(SchemaDocument)
+    def initialize(schema_wrapper:, actor:)
+      raise ArgumentError, "schema_wrapper must be a SchemaWrapper" unless schema_wrapper.is_a?(SchemaWrapper)
 
-      @schema_document = schema_document
-      @schema = schema_document.document
+      @schema_wrapper = schema_wrapper
+      @schema = schema_wrapper.document
       @actor = actor
     end
 

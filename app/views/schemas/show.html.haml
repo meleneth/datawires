@@ -3,13 +3,13 @@
 
   .mb-4.flex.gap-2
     = button_to "New document",
-      schema_documents_path(@schema_document),
+      schema_documents_path(@schema_wrapper),
       method: :post,
       form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
       class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
     = button_to "Edit schema",
-      document_draft_path(@schema_document.document),
+      document_draft_path(@schema_wrapper.document),
       method: :post,
       form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
       class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-secondary px-4 py-2 font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
@@ -19,11 +19,11 @@
       %dl.grid.gap-3.text-sm.md:grid-cols-2
         %div
           %dt.text-muted-foreground Domain
-          %dd.font-head.text-foreground= @schema_document.domain.name
+          %dd.font-head.text-foreground= @schema_wrapper.domain.name
 
         %div
           %dt.text-muted-foreground Key
-          %dd.font-head.text-foreground= @schema_document.key
+          %dd.font-head.text-foreground= @schema_wrapper.key
 
   .mt-6
     = render TypographyComponent.new(as: :h2, text: "Edit affordances")
@@ -38,7 +38,7 @@
                 .text-xs.text-muted-foreground= affordance.edit_document.title.presence || affordance.edit_document.key
 
             = button_to "New with this affordance",
-              schema_documents_path(@schema_document, edit_affordance_id: affordance.id),
+              schema_documents_path(@schema_wrapper, edit_affordance_id: affordance.id),
               method: :post,
               form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
               class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
@@ -62,4 +62,4 @@
 
   .mt-6
     %pre.rounded.border-2.border-black.bg-muted.p-4.text-sm.text-foreground.shadow-sm
-      = JSON.pretty_generate(@schema_document.body)
+      = JSON.pretty_generate(@schema_wrapper.body)

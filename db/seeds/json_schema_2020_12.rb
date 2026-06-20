@@ -19,7 +19,7 @@ module Seeds
         message: "Seed JSON Schema 2020-12 meta-schema"
       )
 
-      SchemaDocument.find_or_create_by!(document:)
+      SchemaWrapper.find_or_create_by!(document:)
     end
 
     def schema_body

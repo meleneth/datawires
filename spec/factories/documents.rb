@@ -77,11 +77,11 @@ FactoryBot.define do
 
     trait :conforming_to_schema do
       transient do
-        schema_document_record { nil }
+        schema_wrapper { nil }
       end
 
       after(:build) do |document, evaluator|
-        document.schema_document = evaluator.schema_document_record if evaluator.schema_document_record
+        document.schema_document = evaluator.schema_wrapper.document if evaluator.schema_wrapper
       end
     end
   end

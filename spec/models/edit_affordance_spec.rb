@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe EditAffordance, type: :model do
   describe "associations" do
-    it { is_expected.to belong_to(:for_schema_document).class_name("SchemaDocument") }
+    it { is_expected.to belong_to(:schema_wrapper).class_name("SchemaWrapper") }
     it { is_expected.to belong_to(:edit_document).class_name("Document") }
   end
 
@@ -13,18 +13,18 @@ RSpec.describe EditAffordance, type: :model do
 
     it { is_expected.to validate_presence_of(:title) }
 
-    it "validates uniqueness of title scoped to for_schema_document_id" do
-      schema_document = create(:schema_document)
+    it "validates uniqueness of title scoped to schema_wrapper_id" do
+      schema_wrapper = create(:schema_wrapper)
 
       create(
         :edit_affordance,
-        for_schema_document: schema_document,
+        schema_wrapper: schema_wrapper,
         title: "default"
       )
 
       duplicate = build(
         :edit_affordance,
-        for_schema_document: schema_document,
+        schema_wrapper: schema_wrapper,
         title: "default"
       )
 
@@ -32,19 +32,19 @@ RSpec.describe EditAffordance, type: :model do
       expect(duplicate.errors[:title]).to include("has already been taken")
     end
 
-    it "allows the same title for a different schema document" do
-      first_schema_document = create(:schema_document)
-      second_schema_document = create(:schema_document)
+    it "allows the same title for a different schema wrapper" do
+      first_schema_wrapper = create(:schema_wrapper)
+      second_schema_wrapper = create(:schema_wrapper)
 
       create(
         :edit_affordance,
-        for_schema_document: first_schema_document,
+        schema_wrapper: first_schema_wrapper,
         title: "default"
       )
 
       other = build(
         :edit_affordance,
-        for_schema_document: second_schema_document,
+        schema_wrapper: second_schema_wrapper,
         title: "default"
       )
 
@@ -53,13 +53,13 @@ RSpec.describe EditAffordance, type: :model do
   end
 
   describe "custom validations" do
-    let(:schema_document) { create(:schema_document) }
+    let(:schema_wrapper) { create(:schema_wrapper) }
     let(:edit_document) { create(:document, :with_plain_head_revision) }
 
-    it "is valid when for_schema_document is a schema document" do
+    it "is valid when schema_wrapper wraps a schema document" do
       affordance = build(
         :edit_affordance,
-        for_schema_document: schema_document,
+        schema_wrapper: schema_wrapper,
         edit_document: edit_document
       )
 
@@ -69,8 +69,8 @@ RSpec.describe EditAffordance, type: :model do
     it "is invalid when edit_document equals the wrapped schema document" do
       affordance = build(
         :edit_affordance,
-        for_schema_document: schema_document,
-        edit_document: schema_document.document
+        schema_wrapper: schema_wrapper,
+        edit_document: schema_wrapper.document
       )
 
       expect(affordance).not_to be_valid

@@ -8,7 +8,7 @@ class DomainsController < ApplicationController
 
   # GET /domains/1 or /domains/1.json
   def show
-    @schemas = SchemaDocument
+    @schemas = SchemaWrapper
       .includes(:document)
       .joins(:document)
       .where(documents: { domain_id: @domain.id })

@@ -18,7 +18,7 @@ module Seeds
       journey_domain = DocumentSeedHelper.ensure_domain!(name: JOURNEY_DOMAIN_NAME)
       datawires_domain = DocumentSeedHelper.ensure_domain!(name: DATAWIRES_DOMAIN_NAME)
 
-      journey_schema_document = SchemaDocument.joins(:document).find_by!(
+      journey_schema_wrapper = SchemaWrapper.joins(:document).find_by!(
         documents: { domain_id: journey_domain.id, key: JOURNEY_SCHEMA_KEY }
       )
 
@@ -37,7 +37,7 @@ module Seeds
       )
 
       EditAffordance.find_or_create_by!(
-        for_schema_document: journey_schema_document,
+        schema_wrapper: journey_schema_wrapper,
         edit_document: edit_document
       ) do |edit_affordance|
         edit_affordance.title = EDIT_AFFORDANCE_TITLE

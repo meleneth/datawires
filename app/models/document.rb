@@ -29,18 +29,6 @@ class Document < ApplicationRecord
            foreign_key: :schema_document_id,
            inverse_of: :schema_document
 
-  has_many :edit_affordances_for_schema,
-           class_name: "EditAffordance",
-           foreign_key: :for_schema_document_id,
-           inverse_of: :for_schema_document,
-           dependent: :destroy
-
-  has_many :view_affordances_for_schema,
-         class_name: "ViewAffordance",
-         foreign_key: :for_schema_document_id,
-         inverse_of: :for_schema_document,
-         dependent: :restrict_with_exception
-
   has_one :view_affordance,
         class_name: "ViewAffordance",
         foreign_key: :view_document_id,
@@ -55,8 +43,8 @@ class Document < ApplicationRecord
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
-  has_one :schema_document_record,
-        class_name: "SchemaDocument",
+  has_one :schema_wrapper,
+        class_name: "SchemaWrapper",
         dependent: :destroy,
         inverse_of: :document
 
@@ -75,16 +63,12 @@ class Document < ApplicationRecord
       .where("revisions.id IS NULL OR NOT (revisions.body ? '$schema')")
   }
 
-  has_one :schema_document_record,
-          class_name: "SchemaDocument",
-          inverse_of: :document
-
   def edit_affordances
     schema_record&.edit_affordances || EditAffordance.none
   end
 
   def schema_record
-    schema_document&.schema_document_record
+    schema_document&.schema_wrapper
   end
 
   def edit_affordances_for_schema

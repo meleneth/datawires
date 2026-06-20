@@ -3,7 +3,7 @@
 class SchemasController < ApplicationController
   def index
     @domain = Domain.find(params[:domain_id])
-    @schemas = SchemaDocument
+    @schemas = SchemaWrapper
       .includes(document: [ :domain, :head_revision ])
       .joins(:document)
       .where(documents: { domain_id: @domain.id })
@@ -29,7 +29,7 @@ class SchemasController < ApplicationController
   end
 
   def show
-    @schema_document = SchemaDocument
+    @schema_wrapper = SchemaWrapper
       .includes(
         document: [
           :domain,
@@ -41,10 +41,10 @@ class SchemasController < ApplicationController
       )
       .find(params[:id])
 
-    @domain = @schema_document.domain
-    @documents = @schema_document.conforming_documents
-    @edit_affordances = @schema_document.edit_affordances.order(:title)
-    @view_affordances = @schema_document.view_affordances.order(:title)
+    @domain = @schema_wrapper.domain
+    @documents = @schema_wrapper.conforming_documents
+    @edit_affordances = @schema_wrapper.edit_affordances.order(:title)
+    @view_affordances = @schema_wrapper.view_affordances.order(:title)
   end
 
   private
