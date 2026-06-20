@@ -33,9 +33,9 @@ class ViewAffordance < ApplicationRecord
   def schema_wrapper_must_wrap_schema_document
     return unless schema_wrapper&.document
 
-    return if schema_wrapper.document.schema?
+    return if schema_wrapper.document.supported_schema?
 
-    errors.add(:schema_wrapper, "must wrap a schema document")
+    errors.add(:schema_wrapper, "must wrap a supported schema document")
   end
 
   def view_document_must_not_equal_schema_document_body

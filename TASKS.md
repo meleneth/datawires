@@ -10,7 +10,7 @@
 - [x] Add `DraftCommitPreflight` for user-facing semantic blockers, starting with unsupported `$schema` declarations requiring confirmation.
 - [x] Add `SyncSchemaWrapperForDocument` and call it synchronously from `PublishDraft` after `head_revision` advances.
 - [x] Clear dependent document `schema_document_id` values when a schema document stops being a supported schema.
-- [ ] Add `EditAffordances::Generated` as the default PORO affordance for schema-backed documents; stored `EditAffordance` records are bespoke alternatives.
+- [x] Add `EditAffordances::Generated` as the default PORO affordance for schema-backed documents; stored `EditAffordance` records are bespoke alternatives.
 - [ ] Move runtime edit projection objects into the `EditAffordances::*` namespace while keeping `EditAffordance` as the ActiveRecord model.
 - [ ] Reconcile editor routes/controllers so every route in `routes.rb` has a real owner or is removed.
 - [ ] Add full flow coverage for schema creation, document creation, draft editing, stale commit rejection, and schema wrapper synchronization.

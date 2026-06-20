@@ -38,7 +38,7 @@ class EditAffordance < ApplicationRecord
   end
 
   def projected_rows(root_cursor)
-    return default_projected_rows(root_cursor) if body["rows"].blank?
+    return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projected_rows(root_cursor) if body["rows"].blank?
 
     Array(body["rows"]).map do |row_data|
       EditForms::ProjectedRow.new(
@@ -46,22 +46,6 @@ class EditAffordance < ApplicationRecord
         column_count: column_count
       )
     end.reject(&:empty?)
-  end
-
-  def default_projected_rows(root_cursor)
-    root_cursor.children.map do |child_cursor|
-      EditForms::ProjectedRow.new(
-        cells: [
-          EditForms::ProjectedField.new(
-            cursor: child_cursor,
-            span: nil,
-            widget: "auto",
-            label: true
-          )
-        ],
-        column_count: column_count
-      )
-    end
   end
 
   private
@@ -135,9 +119,9 @@ class EditAffordance < ApplicationRecord
   def schema_wrapper_must_wrap_schema_document
     return unless schema_wrapper&.document
 
-    return if schema_wrapper.document.schema?
+    return if schema_wrapper.document.supported_schema?
 
-    errors.add(:schema_wrapper, "must wrap a schema document")
+    errors.add(:schema_wrapper, "must wrap a supported schema document")
   end
 
   def edit_document_must_not_equal_schema_document_body

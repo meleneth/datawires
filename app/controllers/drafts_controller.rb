@@ -87,12 +87,16 @@ class DraftsController < ApplicationController
   end
 
   def selected_edit_affordance
-    return nil if params[:edit_affordance_id].blank?
+    schema_wrapper = @document.schema_record
+    return nil unless schema_wrapper
+
+    return EditAffordances::Generated.new(schema_wrapper:) if params[:edit_affordance_id].blank?
 
     @document
       .edit_affordances_for_schema
       .includes(edit_document: :head_revision)
-      .find_by(id: params[:edit_affordance_id])
+      .find_by(id: params[:edit_affordance_id]) ||
+      EditAffordances::Generated.new(schema_wrapper:)
   end
 
   def normalize_ptr(raw)
