@@ -41,7 +41,7 @@ class EditAffordance < ApplicationRecord
     return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projected_rows(root_cursor) if body["rows"].blank?
 
     Array(body["rows"]).map do |row_data|
-      EditForms::ProjectedRow.new(
+      EditAffordances::ProjectedRow.new(
         cells: Array(row_data).filter_map { |cell_data| project_cell(root_cursor, cell_data) },
         column_count: column_count
       )
@@ -58,7 +58,7 @@ class EditAffordance < ApplicationRecord
   end
 
   def project_commit_cell(cell_data)
-    EditForms::ProjectedCommit.new(
+    EditAffordances::ProjectedCommit.new(
       span: cell_data["span"],
       message_mode: cell_data["message_mode"] || "hidden"
     )
@@ -69,7 +69,7 @@ class EditAffordance < ApplicationRecord
     cursor = cursor_for_binding(root_cursor, binding_data)
     return nil unless cursor
 
-    EditForms::ProjectedField.new(
+    EditAffordances::ProjectedField.new(
       cursor: cursor,
       span: cell_data["span"],
       widget: cell_data["widget"] || "auto",
@@ -79,7 +79,7 @@ class EditAffordance < ApplicationRecord
   end
 
   def cursor_for_binding(root_cursor, binding_data)
-    binding = EditForms::CellBinding.new(binding_data)
+    binding = EditAffordances::CellBinding.new(binding_data)
 
     case binding.kind
     when "document_ptr"

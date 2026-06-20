@@ -59,7 +59,7 @@ module Drafts
       target_cursors_for(item_cursor).map do |child_cursor|
         Drafts::ProjectedFieldComponent.new(
           draft: draft,
-          field: EditForms::ProjectedField.new(
+          field: EditAffordances::ProjectedField.new(
             cursor: child_cursor,
             span: nil,
             widget: "auto",

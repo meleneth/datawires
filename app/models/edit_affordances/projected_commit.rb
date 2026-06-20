@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module EditForms
+module EditAffordances
   class ProjectedCommit
     attr_reader :span, :message_mode
 

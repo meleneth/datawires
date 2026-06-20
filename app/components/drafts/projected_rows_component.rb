@@ -18,9 +18,9 @@ module Drafts
 
     def rendered_component_for(cell)
       case cell
-      when EditForms::ProjectedField
+      when EditAffordances::ProjectedField
         projected_field_component_for(cell)
-      when EditForms::ProjectedCommit
+      when EditAffordances::ProjectedCommit
         Drafts::ProjectedCommitComponent.new(page: page, commit: cell)
       else
         raise ArgumentError, "unsupported projected cell: #{cell.inspect}"

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module EditForms
+module EditAffordances
   class ProjectedRow
     attr_reader :cells, :column_count
 

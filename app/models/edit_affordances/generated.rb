@@ -28,9 +28,9 @@ module EditAffordances
 
     def projected_rows(root_cursor)
       root_cursor.children.map do |child_cursor|
-        EditForms::ProjectedRow.new(
+        EditAffordances::ProjectedRow.new(
           cells: [
-            EditForms::ProjectedField.new(
+            EditAffordances::ProjectedField.new(
               cursor: child_cursor,
               span: nil,
               widget: "auto",

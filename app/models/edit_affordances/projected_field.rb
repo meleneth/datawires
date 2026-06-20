@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module EditForms
+module EditAffordances
   class ProjectedField
     attr_reader :cursor, :span, :widget, :label, :item_rows
 
