@@ -8,16 +8,11 @@ Rails.application.routes.draw do
     resources :documents, only: %i[create], module: :schemas
   end
 
-  resource :document_properties, only: [], module: :drafts do
-    patch :add
-    patch :remove
-  end
-
   resources :documents, only: %i[show] do
     resource :draft, only: %i[create], module: :documents
   end
 
-  resources :drafts, only: %i[show update destroy] do
+  resources :drafts, only: %i[show destroy] do
     member do
       patch :patch_ptr
       patch :add_item
@@ -35,9 +30,6 @@ Rails.application.routes.draw do
   end
 
   resources :users
-  resources :rooms do
-    resources :messages
-  end
 
   root to: "domains#index"
 

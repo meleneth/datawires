@@ -1,0 +1,5 @@
+= turbo_stream.update "editor" do
+  = render "drafts/schema_editor", draft: @draft, path: @path
+
+= turbo_stream.update @draft.review_dom_id do
+  = render "drafts/review", diff_rows: @diff_rows, draft: @draft
