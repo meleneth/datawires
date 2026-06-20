@@ -16,7 +16,7 @@ class SchemaWrapper < ApplicationRecord
   validate :document_must_be_schema
 
   def conforming_documents
-    document.instance_documents.order(:title, :key)
+    document.instance_documents.with_head.order(:title, :key)
   end
 
   private

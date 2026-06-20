@@ -54,6 +54,15 @@ class DraftsController < ApplicationController
     render plain: e.message, status: :unprocessable_entity
   end
 
+  def destroy
+    shell_document = @document if @document.head_revision.nil?
+
+    @draft.destroy!
+    shell_document.destroy! if shell_document && shell_document.drafts.reload.empty?
+
+    redirect_to domain_path(@domain), notice: "Draft discarded."
+  end
+
   private
 
   def build_show_page(path_param:)
