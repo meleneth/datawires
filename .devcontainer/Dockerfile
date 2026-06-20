@@ -4,6 +4,7 @@ ARG RUBY_VERSION=4.0.1
 
 RUN apt-get update && apt-get install -y \
     build-essential \
+    bubblewrap \
     git \
     curl \
     ca-certificates \

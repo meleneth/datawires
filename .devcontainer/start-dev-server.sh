@@ -4,6 +4,9 @@ set -eu
 
 cd /workspaces/datawires
 
+sudo mkdir -p /usr/local/bundle /home/vscode/.codex
+sudo chown -R "$(id -u):$(id -g)" /usr/local/bundle /home/vscode/.codex
+
 until pg_isready -h "${DATABASE_HOST:-db}" -U "${DATABASE_USERNAME:-datawires}" >/dev/null 2>&1; do
   sleep 1
 done

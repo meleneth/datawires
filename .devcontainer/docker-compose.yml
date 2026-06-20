@@ -6,15 +6,20 @@ services:
     volumes:
       - ..:/workspaces/datawires:cached
       - bundle-data:/usr/local/bundle
+      - codex-home:/home/vscode/.codex
     environment:
       DATABASE_HOST: db
       DATABASE_USERNAME: datawires
       DATABASE_PASSWORD: datawires
       RAILS_ENV: development
       BUNDLE_PATH: /usr/local/bundle
+      CODEX_HOME: /home/vscode/.codex
     depends_on:
       - db
     command: sh .devcontainer/start-dev-server.sh
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
     ports:
       - "3000:3000"
 
@@ -31,3 +36,4 @@ services:
 volumes:
   bundle-data:
   postgres-data:
+  codex-home:
