@@ -122,6 +122,64 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response.body).to include(">*</span>")
   end
 
+  it "uses schema inventory metadata for bespoke field defaults" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/person",
+          "type" => "object",
+          "properties" => {
+            "name" => {
+              "type" => "string",
+              "title" => "Display Name"
+            }
+          },
+          "required" => [ "name" ]
+        }
+      )
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    draft = create(:draft, document:, body: {})
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/name"
+              }
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Display Name")
+    expect(response.body).to include(">*</span>")
+  end
+
   it "renders field display options and autosave actions for supported widgets" do
     schema_wrapper = create(
       :schema_wrapper,

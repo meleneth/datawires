@@ -62,6 +62,41 @@ RSpec.describe EditAffordances::Generated do
     expect(cell.collection.creation).to eq("new_screen")
   end
 
+  it "stores schema inventory entries on generated cells" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/generated-labels",
+          "type" => "object",
+          "properties" => {
+            "name" => {
+              "type" => "string",
+              "title" => "Display Name"
+            }
+          },
+          "required" => [ "name" ]
+        }
+      )
+    )
+    draft = build(
+      :draft,
+      document: build(:document, schema_document: schema_wrapper.document),
+      body: {}
+    )
+    cursor = Documents::Cursor.new(source: draft, path: "")
+
+    cell = described_class.new(schema_wrapper:).projected_rows(cursor).flat_map(&:cells).first
+
+    expect(cell.schema_entry.label).to eq("Display Name")
+    expect(cell.default_label).to eq("Display Name")
+    expect(cell).to be_required
+    expect(cell.inferred_widget).to eq("text")
+  end
+
   it "projects generated rows into a projection with typed cells" do
     schema_wrapper = create(
       :schema_wrapper,

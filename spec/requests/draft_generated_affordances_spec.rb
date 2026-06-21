@@ -6,7 +6,22 @@ RSpec.describe "Generated draft affordances", type: :request do
   it "renders generated fields for schema-backed drafts without a stored edit affordance" do
     schema_wrapper = create(
       :schema_wrapper,
-      document: create(:document, :with_name_schema)
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/generated-render",
+          "type" => "object",
+          "properties" => {
+            "name" => {
+              "type" => "string",
+              "title" => "Display Name"
+            }
+          },
+          "required" => [ "name" ]
+        }
+      )
     )
     document = create(
       :document,
@@ -19,8 +34,7 @@ RSpec.describe "Generated draft affordances", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).not_to include("No edit affordance projection available")
-    schema_wrapper.document.body.fetch("properties").each_key do |property_name|
-      expect(response.body).to include(property_name.humanize)
-    end
+    expect(response.body).to include("Display Name")
+    expect(response.body).to include(">*</span>")
   end
 end

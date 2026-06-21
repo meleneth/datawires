@@ -58,11 +58,13 @@ class EditAffordance < ApplicationRecord
     column_count = column_count_for(affordance_body)
     default_span = default_span_for(affordance_body)
     diagnostics = []
+    inventory = SchemaPaths::Inventory.new(root_cursor: root_cursor)
     rows = Array(affordance_body["rows"]).map do |row_data|
       EditAffordances::ProjectedRow.new(
         cells: project_row_cells(
           root_cursor,
           row_data,
+          inventory: inventory,
           default_span: default_span,
           mode: mode,
           diagnostics: diagnostics
@@ -113,9 +115,9 @@ class EditAffordance < ApplicationRecord
     affordance_body.fetch("screen", {})
   end
 
-  def project_row_cells(root_cursor, row_data, default_span:, mode:, diagnostics:)
+  def project_row_cells(root_cursor, row_data, inventory:, default_span:, mode:, diagnostics:)
     Array(row_data).filter_map do |cell_data|
-      project_cell(root_cursor, cell_data, default_span: default_span)
+      project_cell(root_cursor, cell_data, inventory: inventory, default_span: default_span)
     rescue ArgumentError, KeyError => e
       raise unless mode.to_sym == :authoring
 
@@ -137,9 +139,9 @@ class EditAffordance < ApplicationRecord
     cell_data["span"] if cell_data.respond_to?(:[])
   end
 
-  def project_cell(root_cursor, cell_data, default_span:)
+  def project_cell(root_cursor, cell_data, inventory:, default_span:)
     return project_commit_cell(cell_data, default_span: default_span) if commit_cell?(cell_data)
-    return project_field_cell(root_cursor, cell_data, default_span: default_span) if field_cell?(cell_data)
+    return project_field_cell(root_cursor, cell_data, inventory: inventory, default_span: default_span) if field_cell?(cell_data)
 
     raise ArgumentError, "unsupported edit affordance cell: #{cell_data.inspect}"
   end
@@ -151,7 +153,7 @@ class EditAffordance < ApplicationRecord
     )
   end
 
-  def project_field_cell(root_cursor, cell_data, default_span:)
+  def project_field_cell(root_cursor, cell_data, inventory:, default_span:)
     binding_data = cell_data.fetch("binding")
     cursor = cursor_for_binding(root_cursor, binding_data)
     return nil unless cursor
@@ -165,7 +167,8 @@ class EditAffordance < ApplicationRecord
       item_rows: cell_data["item_rows"],
       help: cell_data["help"],
       placeholder: cell_data["placeholder"],
-      display: cell_data["display"]
+      display: cell_data["display"],
+      schema_entry: inventory.entry_for(cursor)
     }
     cell_args[:collection] = cell_data["collection"] if cell_class == EditAffordances::Cells::Array
 

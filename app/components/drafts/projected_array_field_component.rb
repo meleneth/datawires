@@ -17,7 +17,7 @@ module Drafts
     end
 
     def label_text
-      cursor.name.to_s.humanize
+      projected_field.default_label
     end
 
     def help_text
@@ -25,7 +25,7 @@ module Drafts
     end
 
     def required?
-      cursor.required?
+      projected_field.required?
     end
 
     def compact?
@@ -95,7 +95,8 @@ module Drafts
           cursor: field_cursor,
           span: 12,
           widget: "auto",
-          label: true
+          label: true,
+          schema_entry: SchemaPaths::Inventory.new(root_cursor: cursor).entry_for(field_cursor)
         )
       end
     end

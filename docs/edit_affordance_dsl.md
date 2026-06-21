@@ -94,6 +94,8 @@ Collection item actions currently use regenerated array index paths. After delet
 
 Collection bindings support `property`, `value_label`, and `none`. A `property` binding needs a `name`.
 
+Schema path metadata is centralized through `SchemaPaths::Inventory`. Generated affordances and projected bespoke fields use inventory entries for widget inference, default labels, and required markers; the structured builder and preview/example generation should use the same inventory source.
+
 ## Commit Cells
 
 Commit cells place a commit action in the projected editor. If `span` is omitted, projection uses `screen.default_span`.

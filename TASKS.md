@@ -43,7 +43,7 @@ Architecture path:
 - [x] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
 - [x] Add projection diagnostics so authoring errors can be shown in the UI.
 - [x] Add `SchemaPaths::Inventory` as an early service for schema path discovery.
-- [ ] Use `SchemaPaths::Inventory` for generated fallback affordances, builder field picking, diagnostics, widget inference, required markers, default labels, and later preview/example generation.
+- [x] Use `SchemaPaths::Inventory` for generated fallback affordances, builder field picking, diagnostics, widget inference, required markers, default labels, and later preview/example generation.
 
 ## Phase 2: Improve Single-Screen Forms
 

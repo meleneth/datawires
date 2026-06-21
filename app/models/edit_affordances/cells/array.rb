@@ -14,6 +14,7 @@ module EditAffordances
         help: nil,
         placeholder: nil,
         display: {},
+        schema_entry: nil,
         collection: nil
       )
         @collection = collection.is_a?(EditAffordances::Collection) ? collection : EditAffordances::Collection.new(collection)
@@ -25,7 +26,8 @@ module EditAffordances
           item_rows: item_rows,
           help: help,
           placeholder: placeholder,
-          display: display
+          display: display,
+          schema_entry: schema_entry
         )
       end
     end

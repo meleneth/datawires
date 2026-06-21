@@ -35,7 +35,7 @@ module EditAffordances
 
       inventory.root_entries.each do |entry|
         if entry.object?
-          object_rows << build_section_row(entry.cursor)
+          object_rows << build_section_row(entry)
           object_rows.concat(build_field_rows(inventory.entries_for(entry.cursor)))
         else
           scalar_fields << build_field_cell(entry)
@@ -54,13 +54,14 @@ module EditAffordances
 
     private
 
-    def build_section_row(cursor)
+    def build_section_row(entry)
       EditAffordances::ProjectedRow.new(
         cells: [
           EditAffordances::Cells::Section.new(
-            cursor: cursor,
+            cursor: entry.cursor,
             span: column_count,
-            label: true
+            label: true,
+            schema_entry: entry
           )
         ],
         column_count: column_count
@@ -78,7 +79,8 @@ module EditAffordances
         cursor: entry.cursor,
         span: DEFAULT_FIELD_SPAN,
         widget: entry.widget == "array" ? "array" : "auto",
-        label: true
+        label: true,
+        schema_entry: entry
       }
       cell_args[:collection] = EditAffordances::Collection.default if cell_class == EditAffordances::Cells::Array
 

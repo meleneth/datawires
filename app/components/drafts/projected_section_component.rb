@@ -11,7 +11,7 @@ module Drafts
     end
 
     def title
-      cursor.name.to_s.humanize
+      section.default_label
     end
   end
 end

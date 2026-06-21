@@ -30,7 +30,7 @@ module Drafts
     def input_kind
       return widget.to_sym unless widget == "auto"
 
-      cursor.input_kind
+      projected_field.inferred_widget.to_sym
     end
 
     def dom_id
@@ -42,7 +42,7 @@ module Drafts
     end
 
     def label_text
-      cursor.name.to_s.humanize
+      projected_field.default_label
     end
 
     def help_text
@@ -50,7 +50,7 @@ module Drafts
     end
 
     def required?
-      cursor.required?
+      projected_field.required?
     end
 
     def show_label?

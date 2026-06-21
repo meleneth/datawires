@@ -3,9 +3,9 @@
 module EditAffordances
   module Cells
     class Field
-      attr_reader :cursor, :span, :widget, :label, :item_rows, :help, :placeholder, :display
+      attr_reader :cursor, :span, :widget, :label, :item_rows, :help, :placeholder, :display, :schema_entry
 
-      def initialize(cursor:, span:, widget:, label:, item_rows: nil, help: nil, placeholder: nil, display: {})
+      def initialize(cursor:, span:, widget:, label:, item_rows: nil, help: nil, placeholder: nil, display: {}, schema_entry: nil)
         @cursor = cursor
         @span = span
         @widget = widget
@@ -14,6 +14,7 @@ module EditAffordances
         @help = help
         @placeholder = placeholder
         @display = display || {}
+        @schema_entry = schema_entry
       end
 
       delegate :name,
@@ -52,7 +53,21 @@ module EditAffordances
       end
 
       def widget_kind
-        widget == "auto" ? input_kind : widget.to_sym
+        widget == "auto" ? inferred_widget.to_sym : widget.to_sym
+      end
+
+      def inferred_widget
+        schema_entry&.widget || input_kind.to_s
+      end
+
+      def default_label
+        schema_entry&.label || cursor.name.to_s.humanize
+      end
+
+      def required?
+        return schema_entry.required? unless schema_entry.nil?
+
+        cursor.required?
       end
     end
   end
