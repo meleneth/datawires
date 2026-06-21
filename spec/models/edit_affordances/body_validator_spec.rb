@@ -31,6 +31,21 @@ RSpec.describe EditAffordances::BodyValidator do
             "display" => {
               "compact" => true,
               "readonly" => false
+            },
+            "collection" => {
+              "behavior" => "list_open",
+              "presentation" => "list",
+              "creation" => "append_and_open",
+              "navigation" => "open_item",
+              "delete" => "disabled",
+              "reorder" => "disabled",
+              "item_title" => {
+                "kind" => "property",
+                "name" => "name"
+              },
+              "item_subtitle" => {
+                "kind" => "value_label"
+              }
             }
           },
           {
@@ -145,6 +160,58 @@ RSpec.describe EditAffordances::BodyValidator do
       "rows/0/0/display/compact must be a boolean",
       "rows/0/0/display/readonly must be a boolean",
       "rows/1/0/display must be an object"
+    )
+  end
+
+  it "rejects invalid collection config" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/items"
+            },
+            "widget" => "array",
+            "collection" => {
+              "behavior" => "mega_grid",
+              "presentation" => "table",
+              "creation" => "inline_blank_form",
+              "navigation" => "modal",
+              "delete" => "enabled",
+              "reorder" => "enabled",
+              "item_title" => {
+                "kind" => "property"
+              },
+              "item_subtitle" => {
+                "kind" => "property",
+                "name" => ""
+              }
+            }
+          },
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/other_items"
+            },
+            "widget" => "array",
+            "collection" => true
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "rows/0/0/collection/behavior must be one of: list_open",
+      "rows/0/0/collection/presentation must be one of: list",
+      "rows/0/0/collection/creation must be one of: append_and_open",
+      "rows/0/0/collection/navigation must be one of: open_item",
+      "rows/0/0/collection/delete must be one of: disabled",
+      "rows/0/0/collection/reorder must be one of: disabled",
+      "rows/0/0/collection/item_title/name must be a string",
+      "rows/0/0/collection/item_subtitle/name must be a string",
+      "rows/0/1/collection must be an object"
     )
   end
 

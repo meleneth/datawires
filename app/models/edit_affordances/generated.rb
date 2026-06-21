@@ -74,12 +74,15 @@ module EditAffordances
     def build_field_cell(entry)
       cell_class = entry.widget == "array" ? EditAffordances::Cells::Array : EditAffordances::Cells::Field
 
-      cell_class.new(
+      cell_args = {
         cursor: entry.cursor,
         span: DEFAULT_FIELD_SPAN,
         widget: entry.widget == "array" ? "array" : "auto",
         label: true
-      )
+      }
+      cell_args[:collection] = EditAffordances::Collection.default if cell_class == EditAffordances::Cells::Array
+
+      cell_class.new(**cell_args)
     end
 
     def grouped_rows(cells)

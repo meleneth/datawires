@@ -5,7 +5,7 @@ module Drafts
     attr_reader :page, :projected_field
 
     delegate :draft, :edit_affordance, to: :page
-    delegate :cursor, :label, :help, :display, to: :projected_field
+    delegate :cursor, :label, :help, :display, :collection, to: :projected_field
 
     def initialize(page:, field:)
       @page = page
@@ -59,7 +59,7 @@ module Drafts
       @item_links ||= item_cursors.each_with_index.map do |item_cursor, index|
         {
           title: item_title(item_cursor, index),
-          value_label: item_cursor.value_label,
+          value_label: collection.item_subtitle_for(item_cursor),
           path: draft_path_for(item_cursor)
         }
       end
@@ -72,10 +72,7 @@ module Drafts
     end
 
     def item_title(item_cursor, index)
-      value = item_cursor.value
-      name = value["name"] if value.is_a?(Hash)
-
-      name.presence || "Item #{index + 1}"
+      collection.item_title_for(item_cursor, fallback: "Item #{index + 1}")
     end
 
     def draft_path_for(item_cursor)

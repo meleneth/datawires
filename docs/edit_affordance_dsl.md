@@ -45,6 +45,21 @@ Field cells bind an editor widget to a document path. If `span` is omitted, proj
   "display": {
     "compact": false,
     "readonly": false
+  },
+  "collection": {
+    "behavior": "list_open",
+    "presentation": "list",
+    "creation": "append_and_open",
+    "navigation": "open_item",
+    "delete": "disabled",
+    "reorder": "disabled",
+    "item_title": {
+      "kind": "property",
+      "name": "name"
+    },
+    "item_subtitle": {
+      "kind": "value_label"
+    }
   }
 }
 ```
@@ -64,6 +79,18 @@ Supported widgets today:
 `label` controls whether the field label is shown. `help` renders short guidance beneath the field. `placeholder` is passed to text-like inputs. Required fields are marked from schema metadata during rendering.
 
 `display.compact` tightens spacing and control height for dense forms. `display.readonly` renders an inert value preview instead of an autosaving input.
+
+Array fields may include `collection`. The current supported behavior is `list_open`, represented as separate axes so future collection work can add presentations and workflows without turning collection behavior into one large enum:
+
+- `presentation`: currently `list`
+- `creation`: currently `append_and_open`
+- `navigation`: currently `open_item`
+- `delete`: currently `disabled`
+- `reorder`: currently `disabled`
+- `item_title`: optional item label binding, defaulting to the item object `name` property
+- `item_subtitle`: optional subtitle binding, defaulting to the item value preview
+
+Collection bindings support `property`, `value_label`, and `none`. A `property` binding needs a `name`.
 
 ## Commit Cells
 

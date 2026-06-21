@@ -201,6 +201,96 @@ RSpec.describe EditAffordance, type: :model do
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
     end
 
+    it "projects array fields with explicit collection config" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(
+          :document,
+          :with_head_revision,
+          head_body: {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://example.test/schemas/list",
+            "type" => "object",
+            "properties" => {
+              "items" => {
+                "type" => "array",
+                "items" => {
+                  "type" => "object",
+                  "properties" => {
+                    "name" => { "type" => "string" },
+                    "quantity" => { "type" => "integer" }
+                  }
+                }
+              }
+            }
+          }
+        )
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/items"
+                },
+                "widget" => "array",
+                "collection" => {
+                  "behavior" => "list_open",
+                  "presentation" => "list",
+                  "creation" => "append_and_open",
+                  "navigation" => "open_item",
+                  "delete" => "disabled",
+                  "reorder" => "disabled",
+                  "item_title" => {
+                    "kind" => "property",
+                    "name" => "name"
+                  },
+                  "item_subtitle" => {
+                    "kind" => "property",
+                    "name" => "quantity"
+                  }
+                }
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      cell = affordance.projection(cursor).rows.first.cells.first
+
+      expect(cell).to be_a(EditAffordances::Cells::Array)
+      expect(cell.collection.behavior).to eq("list_open")
+      expect(cell.collection.presentation).to eq("list")
+      expect(cell.collection.creation).to eq("append_and_open")
+      expect(cell.collection.navigation).to eq("open_item")
+      expect(cell.collection.delete_policy).to eq("disabled")
+      expect(cell.collection.reorder_policy).to eq("disabled")
+      expect(cell.collection.item_title).to eq(
+        "kind" => "property",
+        "name" => "name"
+      )
+      expect(cell.collection.item_subtitle).to eq(
+        "kind" => "property",
+        "name" => "quantity"
+      )
+    end
+
     it "uses screen default_span when projected cells omit spans" do
       schema_wrapper = create(
         :schema_wrapper,

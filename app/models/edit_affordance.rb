@@ -156,9 +156,8 @@ class EditAffordance < ApplicationRecord
     cursor = cursor_for_binding(root_cursor, binding_data)
     return nil unless cursor
 
-    cell_class = cell_data["widget"] == "array" ? EditAffordances::Cells::Array : EditAffordances::Cells::Field
-
-    cell_class.new(
+    cell_class = cell_data["widget"] == "array" || cursor.array? ? EditAffordances::Cells::Array : EditAffordances::Cells::Field
+    cell_args = {
       cursor: cursor,
       span: cell_data["span"] || default_span,
       widget: cell_data["widget"] || "auto",
@@ -167,7 +166,10 @@ class EditAffordance < ApplicationRecord
       help: cell_data["help"],
       placeholder: cell_data["placeholder"],
       display: cell_data["display"]
-    )
+    }
+    cell_args[:collection] = cell_data["collection"] if cell_class == EditAffordances::Cells::Array
+
+    cell_class.new(**cell_args)
   end
 
   def cursor_for_binding(root_cursor, binding_data)

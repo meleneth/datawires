@@ -102,6 +102,59 @@ module Seeds
             ]
           },
 
+          "collection_binding" => {
+            "type" => "object",
+            "required" => [ "kind" ],
+            "additionalProperties" => false,
+            "properties" => {
+              "kind" => {
+                "type" => "string",
+                "enum" => %w[property value_label none]
+              },
+              "name" => {
+                "type" => "string",
+                "minLength" => 1
+              }
+            }
+          },
+
+          "collection" => {
+            "type" => "object",
+            "additionalProperties" => false,
+            "properties" => {
+              "behavior" => {
+                "type" => "string",
+                "enum" => %w[list_open]
+              },
+              "presentation" => {
+                "type" => "string",
+                "enum" => %w[list]
+              },
+              "creation" => {
+                "type" => "string",
+                "enum" => %w[append_and_open]
+              },
+              "navigation" => {
+                "type" => "string",
+                "enum" => %w[open_item]
+              },
+              "delete" => {
+                "type" => "string",
+                "enum" => %w[disabled]
+              },
+              "reorder" => {
+                "type" => "string",
+                "enum" => %w[disabled]
+              },
+              "item_title" => {
+                "$ref" => "#/$defs/collection_binding"
+              },
+              "item_subtitle" => {
+                "$ref" => "#/$defs/collection_binding"
+              }
+            }
+          },
+
           "field_cell" => {
             "type" => "object",
             "required" => [ "binding" ],
@@ -138,6 +191,9 @@ module Seeds
                     "type" => "boolean"
                   }
                 }
+              },
+              "collection" => {
+                "$ref" => "#/$defs/collection"
               }
             }
           },

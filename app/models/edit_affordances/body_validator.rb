@@ -6,6 +6,12 @@ module EditAffordances
     SCREEN_MODES = %w[page full_width].freeze
     COMMIT_MODES = %w[immediate review_screen].freeze
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
+    COLLECTION_BEHAVIORS = %w[list_open].freeze
+    COLLECTION_PRESENTATIONS = %w[list].freeze
+    COLLECTION_CREATIONS = %w[append_and_open].freeze
+    COLLECTION_NAVIGATIONS = %w[open_item].freeze
+    COLLECTION_POLICIES = %w[disabled].freeze
+    COLLECTION_BINDING_KINDS = %w[property value_label none].freeze
 
     attr_reader :body
 
@@ -104,6 +110,7 @@ module EditAffordances
       validate_string(errors, cell, "help", "#{path}/help")
       validate_string(errors, cell, "placeholder", "#{path}/placeholder")
       validate_display(errors, cell, "#{path}/display")
+      validate_collection(errors, cell, "#{path}/collection")
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 
@@ -138,6 +145,44 @@ module EditAffordances
 
       %w[compact readonly].each do |key|
         errors << "#{path}/#{key} must be a boolean" if display.key?(key) && !boolean?(display[key])
+      end
+    end
+
+    def validate_collection(errors, cell, path)
+      return unless cell.key?("collection")
+
+      collection = cell["collection"]
+      unless collection.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      validate_enum(errors, collection, "behavior", COLLECTION_BEHAVIORS, "#{path}/behavior")
+      validate_enum(errors, collection, "presentation", COLLECTION_PRESENTATIONS, "#{path}/presentation")
+      validate_enum(errors, collection, "creation", COLLECTION_CREATIONS, "#{path}/creation")
+      validate_enum(errors, collection, "navigation", COLLECTION_NAVIGATIONS, "#{path}/navigation")
+      validate_enum(errors, collection, "delete", COLLECTION_POLICIES, "#{path}/delete")
+      validate_enum(errors, collection, "reorder", COLLECTION_POLICIES, "#{path}/reorder")
+      validate_collection_binding(errors, collection, "item_title", "#{path}/item_title")
+      validate_collection_binding(errors, collection, "item_subtitle", "#{path}/item_subtitle")
+    end
+
+    def validate_collection_binding(errors, collection, key, path)
+      return unless collection.key?(key)
+
+      binding = collection[key]
+      unless binding.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/kind is required" unless binding.key?("kind")
+      validate_enum(errors, binding, "kind", COLLECTION_BINDING_KINDS, "#{path}/kind")
+
+      if binding["kind"] == "property"
+        errors << "#{path}/name must be a string" unless binding["name"].is_a?(String) && binding["name"].present?
+      elsif binding.key?("name")
+        errors << "#{path}/name is only supported for property bindings"
       end
     end
 

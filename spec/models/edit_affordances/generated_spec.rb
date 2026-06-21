@@ -55,7 +55,10 @@ RSpec.describe EditAffordances::Generated do
 
     rows = described_class.new(schema_wrapper:).projected_rows(cursor)
 
-    expect(rows.flat_map(&:cells).first.widget).to eq("array")
+    cell = rows.flat_map(&:cells).first
+
+    expect(cell.widget).to eq("array")
+    expect(cell.collection.behavior).to eq("list_open")
   end
 
   it "projects generated rows into a projection with typed cells" do
