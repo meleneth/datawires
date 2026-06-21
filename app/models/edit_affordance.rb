@@ -25,7 +25,7 @@ class EditAffordance < ApplicationRecord
   validate :edit_document_must_not_equal_schema_document_body
 
   def body
-    head_revision&.body || {}
+    EditAffordances::Versions.upgrade(head_revision&.body)
   end
 
   def screen

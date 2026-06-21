@@ -77,4 +77,22 @@ RSpec.describe EditAffordance, type: :model do
       expect(affordance.errors[:edit_document]).to include("must be a separate document")
     end
   end
+
+  describe "#body" do
+    it "returns the upgraded edit document head body" do
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "rows" => []
+        }
+      )
+      affordance = build(:edit_affordance, edit_document: edit_document)
+
+      expect(affordance.body).to eq(
+        "version" => 1,
+        "rows" => []
+      )
+    end
+  end
 end

@@ -30,9 +30,9 @@ Architecture path:
 ## Phase 1: Stabilize DSL, Versioning, Projection, And Diagnostics
 
 - [ ] Rename or document the current JSON format as the first edit affordance DSL.
-- [ ] Keep affordance documents versioned with an explicit `version`.
-- [ ] Add compatibility handling for older affordance versions.
-- [ ] Add an upgrade entry point, even while only one version exists.
+- [x] Keep affordance documents versioned with an explicit `version`.
+- [x] Add compatibility handling for older affordance versions.
+- [x] Add an upgrade entry point, even while only one version exists.
 - [x] Expand the `edit-form` schema to include all currently accepted runtime values, including collection widgets.
 - [ ] Add schema validation for edit affordance document bodies before they can be attached to a schema.
 - [ ] Introduce an internal projected edit model separate from raw affordance JSON.
