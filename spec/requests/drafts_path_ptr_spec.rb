@@ -24,13 +24,17 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
         "notes" => {
           "type" => "string"
         },
+        "required_name" => {
+          "type" => "string"
+        },
         "attributes" => {
           "type" => "object",
           "properties" => {
             "hair_color" => { "type" => "string" }
           }
         }
-      }
+      },
+      "required" => [ "required_name" ]
     }
   end
 
@@ -95,12 +99,20 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
     expect(draft.reload.body).to eq("notes" => "Found Sander's RipRap")
   end
 
-  it "stores blank enum as nil" do
+  it "does not persist optional blank enum values" do
     patch patch_ptr_draft_path(draft, format: :turbo_stream),
       params: { ptr: "/character_class", value: "" }
 
     expect(response).to have_http_status(:no_content)
-    expect(draft.reload.body).to eq("character_class" => nil)
+    expect(draft.reload.body).to eq({})
+  end
+
+  it "persists required blank values so the key exists" do
+    patch patch_ptr_draft_path(draft, format: :turbo_stream),
+      params: { ptr: "/required_name", value: "" }
+
+    expect(response).to have_http_status(:no_content)
+    expect(draft.reload.body).to eq("required_name" => "")
   end
 
   it "creates missing parent objects for nested field updates" do

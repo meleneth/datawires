@@ -12,7 +12,13 @@ class DraftsController < ApplicationController
     field_cursor = Documents::Cursor.new(source: @draft, path: ptr)
     value = coerce_scalar_value(params[:value], field_cursor.schema_node)
 
-    @draft.update!(body: set_json_ptr_value(@draft.body, ptr, value))
+    next_body = if optional_blank_value?(value, field_cursor)
+      delete_json_ptr_value(@draft.body, ptr)
+    else
+      set_json_ptr_value(@draft.body, ptr, value)
+    end
+
+    @draft.update!(body: next_body)
     @diff_rows = Documents::Diff.rows(
       before: @draft.based_on_revision&.body,
       after: @draft.body
@@ -134,6 +140,21 @@ class DraftsController < ApplicationController
     JsonPtr.set(seeded_body, ptr, value)
   end
 
+  def delete_json_ptr_value(body, ptr)
+    pointer = JsonPtr::Pointer.parse(ptr)
+    return body if pointer.root?
+
+    tokens = pointer.tokens
+    parent_ptr = JsonPtr::Pointer.new(tokens[0...-1])
+    parent_value = JsonPtr.fetch(body, parent_ptr, default: JsonPtr::UNDEFINED)
+    return body if parent_value == JsonPtr::UNDEFINED
+
+    updated_parent = delete_from_container(parent_value, tokens.last.unescaped)
+    next_body = parent_ptr.root? ? updated_parent : JsonPtr.set(body, parent_ptr, updated_parent)
+
+    prune_empty_parent_containers(next_body, tokens)
+  end
+
   def ensure_parent_paths(body, ptr)
     pointer = JsonPtr::Pointer.parse(ptr)
     return body if pointer.root?
@@ -156,5 +177,61 @@ class DraftsController < ApplicationController
 
   def array_index_token?(token)
     token.to_s.match?(/\A\d+\z/)
+  end
+
+  def optional_blank_value?(value, field_cursor)
+    return false if field_cursor.required?
+
+    value.nil? || (value.is_a?(String) && value.strip.empty?)
+  end
+
+  def delete_from_container(container, token)
+    case container
+    when Hash
+      dup = container.dup
+      if dup.key?(token)
+        dup.delete(token)
+      else
+        symbolized = safe_to_sym(token)
+        dup.delete(symbolized) if symbolized && dup.key?(symbolized)
+      end
+      dup
+    when Array
+      idx = Integer(token, 10)
+      dup = container.dup
+      dup.delete_at(idx) if idx >= 0 && idx < dup.length
+      dup
+    else
+      container
+    end
+  rescue ArgumentError, TypeError
+    container
+  end
+
+  def prune_empty_parent_containers(body, tokens)
+    pruned_body = body
+
+    (tokens.length - 1).downto(1) do |depth|
+      node_ptr = JsonPtr::Pointer.new(tokens[0...depth])
+      node_value = JsonPtr.fetch(pruned_body, node_ptr, default: JsonPtr::UNDEFINED)
+      break unless node_value.is_a?(Hash) && node_value.empty?
+
+      ancestor_ptr = JsonPtr::Pointer.new(tokens[0...(depth - 1)])
+      ancestor_value = JsonPtr.fetch(pruned_body, ancestor_ptr, default: JsonPtr::UNDEFINED)
+      break if ancestor_value == JsonPtr::UNDEFINED
+
+      updated_ancestor = delete_from_container(ancestor_value, tokens[depth - 1].unescaped)
+      pruned_body = ancestor_ptr.root? ? updated_ancestor : JsonPtr.set(pruned_body, ancestor_ptr, updated_ancestor)
+    end
+
+    pruned_body
+  end
+
+  def safe_to_sym(token)
+    return nil unless token.is_a?(String)
+    return nil if token.empty? || token.bytesize > 200
+    return nil unless token.match?(/\A[a-zA-Z_][a-zA-Z0-9_]*[!?=]?\z/)
+
+    token.to_sym
   end
 end
