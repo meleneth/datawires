@@ -30,7 +30,9 @@ module Drafts
     private
 
     def projected_field_component_for(cell)
-      if cell.widget == "array" || cell.cursor.array?
+      if cell.widget == "section"
+        Drafts::ProjectedSectionComponent.new(section: cell)
+      elsif cell.widget == "array" || cell.cursor.array?
         Drafts::ProjectedArrayFieldComponent.new(page: page, field: cell)
       else
         Drafts::ProjectedFieldComponent.new(

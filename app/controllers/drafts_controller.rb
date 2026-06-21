@@ -12,14 +12,14 @@ class DraftsController < ApplicationController
     field_cursor = Documents::Cursor.new(source: @draft, path: ptr)
     value = coerce_scalar_value(params[:value], field_cursor.schema_node)
 
-    @draft.update!(body: JsonPtr.set(@draft.body, ptr, value))
+    @draft.update!(body: set_json_ptr_value(@draft.body, ptr, value))
     @diff_rows = Documents::Diff.rows(
       before: @draft.based_on_revision&.body,
       after: @draft.body
     )
 
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream { head :no_content }
       format.html { head :no_content }
     end
   rescue KeyError => e
@@ -127,5 +127,34 @@ class DraftsController < ApplicationController
     end
   rescue ArgumentError, TypeError
     raw
+  end
+
+  def set_json_ptr_value(body, ptr, value)
+    seeded_body = ensure_parent_paths(body, ptr)
+    JsonPtr.set(seeded_body, ptr, value)
+  end
+
+  def ensure_parent_paths(body, ptr)
+    pointer = JsonPtr::Pointer.parse(ptr)
+    return body if pointer.root?
+
+    seeded_body = body
+    parent_tokens = pointer.tokens[0...-1]
+
+    parent_tokens.each_with_index do |token, index|
+      parent_ptr = JsonPtr::Pointer.new(parent_tokens[0..index])
+      existing = JsonPtr.fetch(seeded_body, parent_ptr, default: JsonPtr::UNDEFINED)
+      next unless existing == JsonPtr::UNDEFINED
+
+      next_token = parent_tokens[index + 1]&.unescaped || pointer.tokens.last.unescaped
+      seed_value = array_index_token?(next_token) ? [] : {}
+      seeded_body = JsonPtr.set(seeded_body, parent_ptr, seed_value)
+    end
+
+    seeded_body
+  end
+
+  def array_index_token?(token)
+    token.to_s.match?(/\A\d+\z/)
   end
 end

@@ -23,6 +23,12 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
         },
         "notes" => {
           "type" => "string"
+        },
+        "attributes" => {
+          "type" => "object",
+          "properties" => {
+            "hair_color" => { "type" => "string" }
+          }
         }
       }
     }
@@ -95,5 +101,15 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
 
     expect(response).to have_http_status(:no_content)
     expect(draft.reload.body).to eq("character_class" => nil)
+  end
+
+  it "creates missing parent objects for nested field updates" do
+    patch patch_ptr_draft_path(draft, format: :turbo_stream),
+      params: { ptr: "/attributes/hair_color", value: "brown" }
+
+    expect(response).to have_http_status(:no_content)
+    expect(draft.reload.body).to eq(
+      "attributes" => { "hair_color" => "brown" }
+    )
   end
 end

@@ -3,8 +3,10 @@
     .space-y-4
       .flex.items-center.justify-between
         = render TypographyComponent.new(as: :h3, text: "Changes")
-        = render BadgeComponent.new(variant: :outline) do
-          = pluralize(diff_rows.size, "change")
+        .flex.items-center.gap-2
+          = render TypographyComponent.new(as: :muted, text: "Last saved #{time_ago_in_words(draft.updated_at)} ago")
+          = render BadgeComponent.new(variant: :outline) do
+            = pluralize(diff_rows.size, "change")
 
       - if diff_rows.empty?
         = render AlertComponent.new do
@@ -37,3 +39,8 @@
                   = render TableCellComponent.new(html_options: { class: "font-mono text-xs" }) do
                     - unless row.after.nil?
                       %pre.whitespace-pre-wrap.break-all= JSON.pretty_generate(row.after)
+
+      .space-y-2
+        = render TypographyComponent.new(as: :h4, text: "Current Draft JSON")
+        .rounded.border-2.border-black.bg-muted.p-3
+          %pre.whitespace-pre-wrap.break-all.font-mono.text-xs= JSON.pretty_generate(draft.body || {})
