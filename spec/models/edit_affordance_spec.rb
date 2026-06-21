@@ -242,7 +242,7 @@ RSpec.describe EditAffordance, type: :model do
                 "collection" => {
                   "behavior" => "list_open",
                   "presentation" => "list",
-                  "creation" => "append_and_open",
+                  "creation" => "new_screen",
                   "navigation" => "open_item",
                   "delete" => "disabled",
                   "reorder" => "disabled",
@@ -277,7 +277,7 @@ RSpec.describe EditAffordance, type: :model do
       expect(cell).to be_a(EditAffordances::Cells::Array)
       expect(cell.collection.behavior).to eq("list_open")
       expect(cell.collection.presentation).to eq("list")
-      expect(cell.collection.creation).to eq("append_and_open")
+      expect(cell.collection.creation).to eq("new_screen")
       expect(cell.collection.navigation).to eq("open_item")
       expect(cell.collection.delete_policy).to eq("disabled")
       expect(cell.collection.reorder_policy).to eq("disabled")

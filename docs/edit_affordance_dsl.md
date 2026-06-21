@@ -49,7 +49,7 @@ Field cells bind an editor widget to a document path. If `span` is omitted, proj
   "collection": {
     "behavior": "list_open",
     "presentation": "list",
-    "creation": "append_and_open",
+    "creation": "new_screen",
     "navigation": "open_item",
     "delete": "disabled",
     "reorder": "disabled",
@@ -83,7 +83,7 @@ Supported widgets today:
 Array fields may include `collection`. The current supported behavior is `list_open`, represented as separate axes so future collection work can add presentations and workflows without turning collection behavior into one large enum:
 
 - `presentation`: `list`, `table`, or `cards`
-- `creation`: currently `append_and_open`
+- `creation`: currently `new_screen`; `append_and_open` is accepted as a compatibility alias
 - `navigation`: currently `open_item`
 - `delete`: currently `disabled`
 - `reorder`: currently `disabled`

@@ -8,7 +8,7 @@ module EditAffordances
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     COLLECTION_BEHAVIORS = %w[list_open].freeze
     COLLECTION_PRESENTATIONS = %w[cards list table].freeze
-    COLLECTION_CREATIONS = %w[append_and_open].freeze
+    COLLECTION_CREATIONS = %w[append_and_open new_screen].freeze
     COLLECTION_NAVIGATIONS = %w[open_item].freeze
     COLLECTION_POLICIES = %w[disabled].freeze
     COLLECTION_BINDING_KINDS = %w[property value_label none].freeze

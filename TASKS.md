@@ -59,7 +59,7 @@ Architecture path:
 - [x] Add explicit `collection` config to array field cells.
 - [x] Avoid modeling collection behavior as one large enum; split it into presentation, creation behavior, navigation behavior, delete policy, reorder policy, and item title/subtitle bindings.
 - [x] Support the current behavior as `list_open`.
-- [ ] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
+- [x] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
 - [ ] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
 - [x] Add `table` presentation for collections of small scalar/object records.
 - [x] Add `cards` or `list_cards` presentation for richer repeated objects.

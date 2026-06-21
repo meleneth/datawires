@@ -124,7 +124,7 @@ RSpec.describe "Draft array items", type: :request do
               "collection" => {
                 "behavior" => "list_open",
                 "presentation" => "list",
-                "creation" => "append_and_open",
+                "creation" => "new_screen",
                 "navigation" => "open_item",
                 "delete" => "disabled",
                 "reorder" => "disabled",
@@ -176,6 +176,18 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include("Open")
   end
 
+  it "submits collection creation and navigation policy when adding an item" do
+    edit_affordance = create_collection_affordance(presentation: "list")
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('name="collection_creation"')
+    expect(response.body).to include('value="new_screen"')
+    expect(response.body).to include('name="collection_navigation"')
+    expect(response.body).to include('value="open_item"')
+  end
+
   it "renders collection cards presentation" do
     draft.update!(
       body: {
@@ -212,7 +224,7 @@ RSpec.describe "Draft array items", type: :request do
               "collection" => {
                 "behavior" => "list_open",
                 "presentation" => presentation,
-                "creation" => "append_and_open",
+                "creation" => "new_screen",
                 "navigation" => "open_item",
                 "delete" => "disabled",
                 "reorder" => "disabled",

@@ -132,7 +132,7 @@ module Seeds
               },
               "creation" => {
                 "type" => "string",
-                "enum" => %w[append_and_open]
+                "enum" => %w[append_and_open new_screen]
               },
               "navigation" => {
                 "type" => "string",

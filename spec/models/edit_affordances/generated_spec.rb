@@ -59,6 +59,7 @@ RSpec.describe EditAffordances::Generated do
 
     expect(cell.widget).to eq("array")
     expect(cell.collection.behavior).to eq("list_open")
+    expect(cell.collection.creation).to eq("new_screen")
   end
 
   it "projects generated rows into a projection with typed cells" do

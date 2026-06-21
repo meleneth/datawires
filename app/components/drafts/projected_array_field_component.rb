@@ -59,7 +59,9 @@ module Drafts
     def add_item_button_params
       {
         ptr: cursor.ptr,
-        edit_affordance_id: edit_affordance&.id
+        edit_affordance_id: edit_affordance&.id,
+        collection_creation: collection.creation,
+        collection_navigation: collection.navigation
       }
     end
 

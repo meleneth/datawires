@@ -9,10 +9,20 @@ RSpec.describe EditAffordances::Collection do
 
       expect(collection.behavior).to eq("list_open")
       expect(collection.presentation).to eq("list")
-      expect(collection.creation).to eq("append_and_open")
+      expect(collection.creation).to eq("new_screen")
       expect(collection.navigation).to eq("open_item")
       expect(collection.delete_policy).to eq("disabled")
       expect(collection.reorder_policy).to eq("disabled")
+    end
+  end
+
+  describe "#creation" do
+    it "normalizes the old append_and_open creation name to new_screen" do
+      collection = described_class.new(
+        "creation" => "append_and_open"
+      )
+
+      expect(collection.creation).to eq("new_screen")
     end
   end
 
