@@ -41,7 +41,11 @@ Field cells bind an editor widget to a document path. If `span` is omitted, proj
   "widget": "auto",
   "label": true,
   "help": "Use the public display name.",
-  "placeholder": "Ada Lovelace"
+  "placeholder": "Ada Lovelace",
+  "display": {
+    "compact": false,
+    "readonly": false
+  }
 }
 ```
 
@@ -58,6 +62,8 @@ Supported widgets today:
 `auto` lets schema metadata choose the editor. Arrays render through the current collection/list editor.
 
 `label` controls whether the field label is shown. `help` renders short guidance beneath the field. `placeholder` is passed to text-like inputs. Required fields are marked from schema metadata during rendering.
+
+`display.compact` tightens spacing and control height for dense forms. `display.readonly` renders an inert value preview instead of an autosaving input.
 
 ## Commit Cells
 

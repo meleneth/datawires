@@ -3,7 +3,7 @@
 module EditAffordances
   module Cells
     class Section < Field
-      def initialize(cursor:, span:, label:, item_rows: nil, widget: "section", help: nil, placeholder: nil)
+      def initialize(cursor:, span:, label:, item_rows: nil, widget: "section", help: nil, placeholder: nil, display: {})
         super
       end
     end

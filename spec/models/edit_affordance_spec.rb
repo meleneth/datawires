@@ -159,7 +159,11 @@ RSpec.describe EditAffordance, type: :model do
                 },
                 "span" => 3,
                 "help" => "Use the public display name.",
-                "placeholder" => "Ada Lovelace"
+                "placeholder" => "Ada Lovelace",
+                "display" => {
+                  "compact" => true,
+                  "readonly" => false
+                }
               },
               {
                 "kind" => "commit",
@@ -190,6 +194,10 @@ RSpec.describe EditAffordance, type: :model do
       expect(cells.first).to be_a(EditAffordances::Cells::Field)
       expect(cells.first.help).to eq("Use the public display name.")
       expect(cells.first.placeholder).to eq("Ada Lovelace")
+      expect(cells.first.display).to eq(
+        "compact" => true,
+        "readonly" => false
+      )
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
     end
 

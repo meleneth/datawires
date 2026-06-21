@@ -126,6 +126,18 @@ module Seeds
               },
               "placeholder" => {
                 "type" => "string"
+              },
+              "display" => {
+                "type" => "object",
+                "additionalProperties" => false,
+                "properties" => {
+                  "compact" => {
+                    "type" => "boolean"
+                  },
+                  "readonly" => {
+                    "type" => "boolean"
+                  }
+                }
               }
             }
           },

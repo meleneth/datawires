@@ -27,7 +27,11 @@ RSpec.describe EditAffordances::BodyValidator do
             "widget" => "textarea",
             "label" => true,
             "help" => "Short guidance for authors.",
-            "placeholder" => "Write something useful"
+            "placeholder" => "Write something useful",
+            "display" => {
+              "compact" => true,
+              "readonly" => false
+            }
           },
           {
             "kind" => "commit",
@@ -106,6 +110,41 @@ RSpec.describe EditAffordances::BodyValidator do
     expect(validator.errors).to include(
       "rows/0/0/help must be a string",
       "rows/0/0/placeholder must be a string"
+    )
+  end
+
+  it "rejects invalid field display options" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/title"
+            },
+            "display" => {
+              "compact" => "yes",
+              "readonly" => nil
+            }
+          }
+        ],
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/summary"
+            },
+            "display" => true
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "rows/0/0/display/compact must be a boolean",
+      "rows/0/0/display/readonly must be a boolean",
+      "rows/1/0/display must be an object"
     )
   end
 

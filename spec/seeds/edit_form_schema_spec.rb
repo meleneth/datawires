@@ -34,6 +34,12 @@ RSpec.describe Seeds::EditFormSchema do
 
       expect(field_properties.fetch("help")).to eq("type" => "string")
       expect(field_properties.fetch("placeholder")).to eq("type" => "string")
+      expect(field_properties.fetch("display")).to include(
+        "type" => "object",
+        "additionalProperties" => false
+      )
+      expect(field_properties.dig("display", "properties", "compact")).to eq("type" => "boolean")
+      expect(field_properties.dig("display", "properties", "readonly")).to eq("type" => "boolean")
     end
   end
 end

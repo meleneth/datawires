@@ -165,7 +165,8 @@ class EditAffordance < ApplicationRecord
       label: cell_data.key?("label") ? cell_data["label"] : true,
       item_rows: cell_data["item_rows"],
       help: cell_data["help"],
-      placeholder: cell_data["placeholder"]
+      placeholder: cell_data["placeholder"],
+      display: cell_data["display"]
     )
   end
 

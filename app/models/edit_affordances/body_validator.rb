@@ -103,6 +103,7 @@ module EditAffordances
       validate_enum(errors, cell, "widget", SUPPORTED_WIDGETS, "#{path}/widget")
       validate_string(errors, cell, "help", "#{path}/help")
       validate_string(errors, cell, "placeholder", "#{path}/placeholder")
+      validate_display(errors, cell, "#{path}/display")
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 
@@ -124,6 +125,20 @@ module EditAffordances
 
       ptr = binding["ptr"]
       errors << "#{path}/ptr is required" unless ptr.is_a?(String) && ptr.present?
+    end
+
+    def validate_display(errors, cell, path)
+      return unless cell.key?("display")
+
+      display = cell["display"]
+      unless display.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      %w[compact readonly].each do |key|
+        errors << "#{path}/#{key} must be a boolean" if display.key?(key) && !boolean?(display[key])
+      end
     end
 
     def validate_positive_integer(errors, object, key, path)

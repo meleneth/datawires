@@ -5,7 +5,7 @@ module Drafts
     attr_reader :page, :projected_field
 
     delegate :draft, :edit_affordance, to: :page
-    delegate :cursor, :label, :help, to: :projected_field
+    delegate :cursor, :label, :help, :display, to: :projected_field
 
     def initialize(page:, field:)
       @page = page
@@ -26,6 +26,14 @@ module Drafts
 
     def required?
       cursor.required?
+    end
+
+    def compact?
+      display.is_a?(Hash) && display["compact"] == true
+    end
+
+    def wrapper_class
+      compact? ? "space-y-2" : "space-y-3"
     end
 
     def empty?

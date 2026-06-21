@@ -4,7 +4,7 @@ module Drafts
   class ProjectedFieldComponent < ApplicationComponent
     attr_reader :draft, :projected_field, :edit_affordance_id
 
-    delegate :cursor, :label, :widget, :help, :placeholder, to: :projected_field
+    delegate :cursor, :label, :widget, :help, :placeholder, :display, to: :projected_field
 
     def initialize(draft:, field:, edit_affordance_id: nil)
       @draft = draft
@@ -57,6 +57,24 @@ module Drafts
       label
     end
 
+    def compact?
+      display_option_enabled?("compact")
+    end
+
+    def readonly?
+      display_option_enabled?("readonly")
+    end
+
+    def wrapper_class
+      compact? ? "space-y-0.5" : "space-y-1"
+    end
+
+    def value_preview
+      return "Blank" unless cursor.present?
+
+      cursor.value_label
+    end
+
     def patch_path
       patch_ptr_draft_path(draft)
     end
@@ -89,11 +107,17 @@ module Drafts
     end
 
     def input_html_class
-      "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+      cx(
+        "flex w-full rounded border-2 border-black bg-background text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md",
+        compact? ? "h-8 px-2 py-1" : "h-10 px-3 py-2"
+      )
     end
 
     def textarea_html_class
-      "flex min-h-24 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+      cx(
+        "flex w-full rounded border-2 border-black bg-background text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md",
+        compact? ? "min-h-16 px-2 py-1" : "min-h-24 px-3 py-2"
+      )
     end
 
     def input_html_options
@@ -144,6 +168,10 @@ module Drafts
 
     def placeholder_options
       placeholder.present? ? { placeholder: placeholder } : {}
+    end
+
+    def display_option_enabled?(key)
+      display.is_a?(Hash) && display[key] == true
     end
 
     def dom_id_suffix
