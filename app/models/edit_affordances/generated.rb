@@ -31,13 +31,14 @@ module EditAffordances
     def projected_rows(root_cursor)
       object_rows = []
       scalar_fields = []
+      inventory = SchemaPaths::Inventory.new(root_cursor: root_cursor)
 
-      root_cursor.children.each do |child_cursor|
-        if child_cursor.object?
-          object_rows << build_section_row(child_cursor)
-          object_rows.concat(build_field_rows(child_cursor.children))
+      inventory.root_entries.each do |entry|
+        if entry.object?
+          object_rows << build_section_row(entry.cursor)
+          object_rows.concat(build_field_rows(inventory.entries_for(entry.cursor)))
         else
-          scalar_fields << build_field_cell(child_cursor)
+          scalar_fields << build_field_cell(entry)
         end
       end
 
@@ -60,15 +61,15 @@ module EditAffordances
       )
     end
 
-    def build_field_rows(cursors)
-      grouped_rows(cursors.map { |cursor| build_field_cell(cursor) })
+    def build_field_rows(entries)
+      grouped_rows(entries.map { |entry| build_field_cell(entry) })
     end
 
-    def build_field_cell(cursor)
+    def build_field_cell(entry)
       EditAffordances::ProjectedField.new(
-        cursor: cursor,
+        cursor: entry.cursor,
         span: DEFAULT_FIELD_SPAN,
-        widget: cursor.array? ? "array" : "auto",
+        widget: entry.widget == "array" ? "array" : "auto",
         label: true
       )
     end

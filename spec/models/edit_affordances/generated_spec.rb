@@ -24,4 +24,37 @@ RSpec.describe EditAffordances::Generated do
       schema_wrapper.document.body.fetch("properties").keys
     )
   end
+
+  it "uses schema path inventory metadata for generated array widgets" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/list",
+          "type" => "object",
+          "properties" => {
+            "items" => {
+              "type" => "array",
+              "items" => {
+                "type" => "string"
+              }
+            }
+          }
+        }
+      )
+    )
+    draft = build(
+      :draft,
+      document: build(:document, schema_document: schema_wrapper.document),
+      body: {}
+    )
+    cursor = Documents::Cursor.new(source: draft, path: "")
+
+    rows = described_class.new(schema_wrapper:).projected_rows(cursor)
+
+    expect(rows.flat_map(&:cells).first.widget).to eq("array")
+  end
 end

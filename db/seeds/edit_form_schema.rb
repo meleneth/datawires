@@ -116,7 +116,7 @@ module Seeds
               },
               "widget" => {
                 "type" => "string",
-                "enum" => %w[text textarea select auto]
+                "enum" => %w[array auto checkbox number select text textarea]
               },
               "label" => {
                 "type" => "boolean"

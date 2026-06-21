@@ -1,24 +1,116 @@
 # Task List
 
-## Model Redesign Goals
+## Edit Affordance Roadmap
 
-- [x] Rename `SchemaDocument` to `SchemaWrapper` so the wrapper is clearly derived app metadata around a schema `Document`, not the schema document itself.
-- [x] Replace the placeholder JSON Schema 2020-12 seed with the actual vendored meta-schema JSON. The bootstrap document should be committed, self-schema-backed, and have a `SchemaWrapper`.
-- [x] Require committed schema documents to have a key. Make ordinary document keys optional later; UUID remains the canonical system identity.
-- [x] Require drafts to belong to a user. Keep one open draft per document/user, store full mutable draft bodies, and destroy only the committing user's draft.
-- [x] Keep document shells for new document/schema drafts, but hide uncommitted shells from committed lists and delete a shell when its never-committed draft is discarded.
-- [x] Add `DraftCommitPreflight` for user-facing semantic blockers, starting with unsupported `$schema` declarations requiring confirmation.
-- [x] Add `SyncSchemaWrapperForDocument` and call it synchronously from `PublishDraft` after `head_revision` advances.
-- [x] Clear dependent document `schema_document_id` values when a schema document stops being a supported schema.
-- [x] Add `EditAffordances::Generated` as the default PORO affordance for schema-backed documents; stored `EditAffordance` records are bespoke alternatives.
-- [x] Move runtime edit projection objects into the `EditAffordances::*` namespace while keeping `EditAffordance` as the ActiveRecord model.
-- [x] Reconcile editor routes/controllers so every route in `routes.rb` has a real owner or is removed.
-- [x] Add full flow coverage for schema creation, document creation, draft editing, stale commit rejection, and schema wrapper synchronization.
+The next major design goal is to make bespoke editing experiences for schema-backed JSON documents. An edit affordance should describe both layout and workflow: what fields appear together, how collections are edited, what opens into another screen, and how a draft reaches review/commit.
 
-## Follow-Up Backlog
+Keep affordances as ordinary schema-backed documents, but avoid making the affordance editor fully self-referential too early. Build a constrained authoring experience first, then let it grow into its own affordance once the concepts are stable.
 
-- [ ] Add orphaned document verifier/tooling.
-- [ ] Improve stale draft user experience while keeping stale drafts editable.
-- [ ] Build bespoke edit affordance authoring/customization flows.
-- [ ] Revisit diff presentation so commit review compares against the current committed body.
-- [ ] Clean up the local SimpleCov coverage asset permission issue.
+**Invariant:** A broken bespoke affordance must never prevent editing the document or repairing the affordance.
+
+Architecture path:
+
+- [ ] Raw affordance document JSON.
+- [ ] Schema validation.
+- [ ] Compatibility/version upgrade.
+- [ ] Projection into an immutable editor model.
+- [ ] Rendering by components.
+- [ ] Emission of draft mutations, navigation actions, and commit actions.
+
+## Current Baseline
+
+- [x] Store bespoke edit affordances as documents attached to a `SchemaWrapper`.
+- [x] Provide a generated fallback edit affordance for schema-backed documents without a bespoke affordance.
+- [x] Project simple rows, fields, labels, spans, widgets, and commit cells from an affordance body.
+- [x] Bind fields to document JSON pointers.
+- [x] Render arrays as openable item lists.
+- [x] Add array items by seeding from item schema and navigating to the new item screen.
+- [x] Prepare the test database during devcontainer startup.
+
+## Phase 1: Stabilize DSL, Versioning, Projection, And Diagnostics
+
+- [ ] Rename or document the current JSON format as the first edit affordance DSL.
+- [ ] Keep affordance documents versioned with an explicit `version`.
+- [ ] Add compatibility handling for older affordance versions.
+- [ ] Add an upgrade entry point, even while only one version exists.
+- [x] Expand the `edit-form` schema to include all currently accepted runtime values, including collection widgets.
+- [ ] Add schema validation for edit affordance document bodies before they can be attached to a schema.
+- [ ] Introduce an internal projected edit model separate from raw affordance JSON.
+- [ ] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
+- [ ] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
+- [ ] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
+- [ ] In authoring mode, project invalid cells into diagnostics and inert invalid cells so affordances can be repaired.
+- [ ] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
+- [ ] Add projection diagnostics so authoring errors can be shown in the UI.
+- [x] Add `SchemaPaths::Inventory` as an early service for schema path discovery.
+- [ ] Use `SchemaPaths::Inventory` for generated fallback affordances, builder field picking, diagnostics, widget inference, required markers, default labels, and later preview/example generation.
+
+## Phase 2: Improve Single-Screen Forms
+
+- [ ] Support field help text, placeholder text, and required markers.
+- [x] Support `textarea`, `select`, `checkbox`, `number`, `text`, and `auto` consistently in both schema and runtime.
+- [ ] Add field-level display options such as hidden label, compact width, and read-only/value preview.
+- [ ] Honor `screen.default_span` when a cell span is omitted.
+- [ ] Add tests for required optional blank behavior in the projected editor UI.
+- [ ] Review autosave and review-panel updates for all widget types.
+
+## Phase 3: Model Collection Editing
+
+- [ ] Add explicit `collection` config to array field cells.
+- [ ] Avoid modeling collection behavior as one large enum; split it into presentation, creation behavior, navigation behavior, delete policy, reorder policy, and item title/subtitle bindings.
+- [ ] Support the current behavior as `list_open`.
+- [ ] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
+- [ ] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
+- [ ] Add `table` presentation for collections of small scalar/object records.
+- [ ] Add `cards` or `list_cards` presentation for richer repeated objects.
+- [ ] Add item title and subtitle bindings, defaulting to `name` when present.
+- [ ] Decide a stable item identity strategy before exposing destructive collection controls, because index-addressed item screens are fragile when reorder/delete exists.
+- [ ] Add delete and reorder policy controls only after stable item identity is settled.
+- [ ] Add request/component coverage for each collection presentation and behavior.
+
+## Phase 4: Add Screens And Navigation
+
+- [ ] Replace the single implicit screen with a `screens` collection while preserving compatibility with current `screen`/`rows`.
+- [ ] Add screen ids, titles, root bindings, and row definitions.
+- [ ] Add navigation actions between screens.
+- [ ] Add affordance-level start screen selection.
+- [ ] Add path variables for screens rooted at collection items, such as `/items/:index`.
+- [ ] Support commit behavior per screen or globally.
+- [ ] Add route/controller tests for screen navigation and item-screen navigation.
+
+## Phase 5: Add Subforms And Rooted Reuse
+
+- [ ] Introduce named subforms for object fields and collection item objects.
+- [ ] Let a subform declare its own rows relative to a root binding.
+- [ ] Allow collection item screens to reuse a named subform.
+- [ ] Decide whether subforms live inline in the affordance document or as separate affordance documents.
+- [ ] Add projection tests for nested object and collection-item roots.
+
+## Phase 6: Build The Structured Affordance Authoring UI
+
+- [ ] Add a way to create an edit affordance for a schema from the schema page.
+- [ ] Start with a structured builder, not raw JSON-only editing.
+- [ ] Let authors add rows and fields by selecting from schema paths.
+- [ ] Let authors configure spans, labels, widget type, and help text.
+- [ ] Let authors configure collection policy and item title/subtitle bindings.
+- [ ] Show a live preview against a draft or seeded example document.
+- [ ] Show projection diagnostics and schema validation errors inline.
+- [ ] Keep a raw JSON editor/escape hatch so bad affordance documents can be repaired.
+- [ ] Save affordance changes through the normal draft/commit flow.
+
+## Phase 7: Let Affordance Authoring Become Bespoke
+
+- [ ] Create a bespoke edit affordance for the `edit-form` schema after the builder concepts are stable.
+- [ ] Use that affordance to author ordinary affordances, but preserve the generated/raw fallback.
+- [ ] Add guardrails so a broken affordance editor never blocks repairing affordances.
+- [ ] Document the self-hosting path and the fallback recovery path.
+
+## Fixtures And Documentation
+
+- [ ] Add fixture affordances for a flat object.
+- [ ] Add fixture affordances for a nested object.
+- [ ] Add fixture affordances for an object array.
+- [ ] Add fixture affordances for a scalar array.
+- [ ] Add fixture affordances for a mixed workflow.
+- [ ] Improve commit review so users understand what the affordance changed in the draft body.
+- [ ] Add developer docs for the affordance DSL once collection editing stabilizes.

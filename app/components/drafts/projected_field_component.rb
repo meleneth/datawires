@@ -20,6 +20,8 @@ module Drafts
         :select
       when :number
         :number_field
+      when :textarea
+        :text_area
       else
         :text_field
       end
@@ -82,6 +84,10 @@ module Drafts
       "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
     end
 
+    def textarea_html_class
+      "flex min-h-24 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+    end
+
     def input_html_options
       base = {
         id: dom_id,
@@ -93,6 +99,8 @@ module Drafts
         base.merge(class: input_html_class)
       when :number_field, :text_field
         base.merge(class: input_html_class, value: field_value)
+      when :text_area
+        base.merge(class: textarea_html_class, value: field_value)
       when :check_box
         base.merge(checked: checkbox_value)
       else
