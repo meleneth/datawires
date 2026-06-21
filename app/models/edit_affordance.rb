@@ -38,10 +38,25 @@ class EditAffordance < ApplicationRecord
   end
 
   def projection(root_cursor, mode: :runtime)
-    return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projection(root_cursor) if body["rows"].blank?
+    build_projection(root_cursor, body, mode: mode.to_sym)
+  rescue ArgumentError, KeyError => e
+    raise if mode.to_sym == :authoring
 
+    fallback_projection(root_cursor, e)
+  end
+
+  def projected_rows(root_cursor)
+    projection(root_cursor).rows
+  end
+
+  private
+
+  def build_projection(root_cursor, affordance_body, mode:)
+    return generated_projection(root_cursor) if affordance_body["rows"].blank?
+
+    column_count = column_count_for(affordance_body)
     diagnostics = []
-    rows = Array(body["rows"]).map do |row_data|
+    rows = Array(affordance_body["rows"]).map do |row_data|
       EditAffordances::ProjectedRow.new(
         cells: project_row_cells(root_cursor, row_data, mode: mode, diagnostics: diagnostics),
         column_count: column_count
@@ -55,11 +70,35 @@ class EditAffordance < ApplicationRecord
     )
   end
 
-  def projected_rows(root_cursor)
-    projection(root_cursor).rows
+  def generated_projection(root_cursor)
+    EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projection(root_cursor)
   end
 
-  private
+  def fallback_projection(root_cursor, exception)
+    fallback = generated_projection(root_cursor)
+    diagnostic = EditAffordances::Projection::Diagnostic.new(
+      severity: "error",
+      message: "Fell back to generated editor: #{exception.message}",
+      cell_data: nil
+    )
+
+    EditAffordances::Projection.new(
+      rows: fallback.rows,
+      screens: fallback.screens,
+      bindings: fallback.bindings,
+      defaults: fallback.defaults,
+      diagnostics: fallback.diagnostics + [ diagnostic ]
+    )
+  end
+
+  def column_count_for(affordance_body)
+    count = screen_for(affordance_body)["columns"]
+    count.present? ? count.to_i : 12
+  end
+
+  def screen_for(affordance_body)
+    affordance_body.fetch("screen", {})
+  end
 
   def project_row_cells(root_cursor, row_data, mode:, diagnostics:)
     Array(row_data).filter_map do |cell_data|

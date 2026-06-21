@@ -40,7 +40,7 @@ Architecture path:
 - [x] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
 - [ ] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
 - [x] In authoring mode, project invalid cells into diagnostics and inert invalid cells so affordances can be repaired.
-- [ ] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
+- [x] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
 - [x] Add projection diagnostics so authoring errors can be shown in the UI.
 - [x] Add `SchemaPaths::Inventory` as an early service for schema path discovery.
 - [ ] Use `SchemaPaths::Inventory` for generated fallback affordances, builder field picking, diagnostics, widget inference, required markers, default labels, and later preview/example generation.

@@ -63,4 +63,43 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response.body).to include("<textarea")
     expect(response.body).to include("Already here")
   end
+
+  it "falls back to generated fields when a bespoke affordance is invalid" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(:document, :with_name_schema)
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    draft = create(:draft, document:, body: {})
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "kind" => "unknown"
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = create(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Name")
+    expect(response.body).not_to include("No edit affordance projection available")
+  end
 end

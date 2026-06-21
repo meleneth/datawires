@@ -189,7 +189,7 @@ RSpec.describe EditAffordance, type: :model do
       expect(projection.diagnostics).to contain_exactly(invalid_cell.diagnostic)
     end
 
-    it "raises invalid bespoke cells in runtime mode" do
+    it "falls back to generated projection for invalid bespoke cells in runtime mode" do
       schema_wrapper = create(
         :schema_wrapper,
         document: create(:document, :with_name_schema)
@@ -220,9 +220,72 @@ RSpec.describe EditAffordance, type: :model do
       )
       cursor = Documents::Cursor.new(source: draft, path: "")
 
+      projection = affordance.projection(cursor)
+
+      expect(projection.rows.flat_map(&:cells).map(&:name)).to eq([ "name" ])
+      expect(projection.diagnostics.first.message).to include("Fell back to generated editor")
+      expect(projection.diagnostics.first.message).to include("unsupported edit affordance cell")
+    end
+
+    it "falls back to generated projection for unsupported affordance versions in runtime mode" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 99,
+          "rows" => []
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor)
+
+      expect(projection.rows.flat_map(&:cells).map(&:name)).to eq([ "name" ])
+      expect(projection.diagnostics.first.message).to include("unsupported edit affordance version")
+    end
+
+    it "raises unsupported affordance versions in authoring mode" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 99,
+          "rows" => []
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
       expect {
-        affordance.projection(cursor)
-      }.to raise_error(ArgumentError, /unsupported edit affordance cell/)
+        affordance.projection(cursor, mode: :authoring)
+      }.to raise_error(EditAffordances::Versions::UnsupportedVersionError)
     end
   end
 end
