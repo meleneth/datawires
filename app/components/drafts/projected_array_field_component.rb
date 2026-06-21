@@ -60,6 +60,10 @@ module Drafts
       remove_item_draft_path(draft)
     end
 
+    def reorder_item_path
+      reorder_item_draft_path(draft)
+    end
+
     def add_item_button_params
       {
         ptr: cursor.ptr,
@@ -81,6 +85,10 @@ module Drafts
       collection.delete_enabled?
     end
 
+    def reorder_enabled?
+      collection.reorder_enabled?
+    end
+
     def new_item_fields
       @new_item_fields ||= new_item_cursors.map do |field_cursor|
         EditAffordances::Cells::Field.new(
@@ -98,7 +106,11 @@ module Drafts
           title: item_title(item_cursor, index),
           value_label: collection.item_subtitle_for(item_cursor),
           path: draft_path_for(item_cursor),
-          remove_params: remove_item_button_params(index)
+          remove_params: remove_item_button_params(index),
+          move_up_params: reorder_item_button_params(index, "up"),
+          move_down_params: reorder_item_button_params(index, "down"),
+          first: index.zero?,
+          last: index == item_cursors.length - 1
         }
       end
     end
@@ -128,6 +140,10 @@ module Drafts
       }
       params[:edit_affordance_id] = edit_affordance.id if edit_affordance&.id
       params
+    end
+
+    def reorder_item_button_params(index, direction)
+      remove_item_button_params(index).merge(direction: direction)
     end
 
     def draft_path_for(item_cursor)

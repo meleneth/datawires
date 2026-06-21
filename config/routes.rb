@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       patch :patch_ptr
       patch :add_item
       patch :remove_item
+      patch :reorder_item
     end
 
     resource :schema_properties, only: [], module: :drafts do

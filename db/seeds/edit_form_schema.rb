@@ -144,7 +144,7 @@ module Seeds
               },
               "reorder" => {
                 "type" => "string",
-                "enum" => %w[disabled]
+                "enum" => %w[disabled enabled]
               },
               "item_title" => {
                 "$ref" => "#/$defs/collection_binding"

@@ -49,6 +49,20 @@
                     data: { turbo_frame: "editor", turbo_action: "advance" },
                     class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
                     Open
+                  - if reorder_enabled? && !item_link[:first]
+                    = button_to "Up",
+                      reorder_item_path,
+                      method: :patch,
+                      params: item_link[:move_up_params],
+                      data: { turbo_frame: "editor" },
+                      class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                  - if reorder_enabled? && !item_link[:last]
+                    = button_to "Down",
+                      reorder_item_path,
+                      method: :patch,
+                      params: item_link[:move_down_params],
+                      data: { turbo_frame: "editor" },
+                      class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                   - if delete_enabled?
                     = button_to "Delete",
                       remove_item_path,
@@ -70,6 +84,20 @@
             .flex.shrink-0.items-center.gap-2
               = render BadgeComponent.new(variant: :secondary) do
                 Open
+              - if reorder_enabled? && !item_link[:first]
+                = button_to "Up",
+                  reorder_item_path,
+                  method: :patch,
+                  params: item_link[:move_up_params],
+                  data: { turbo_frame: "editor" },
+                  class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+              - if reorder_enabled? && !item_link[:last]
+                = button_to "Down",
+                  reorder_item_path,
+                  method: :patch,
+                  params: item_link[:move_down_params],
+                  data: { turbo_frame: "editor" },
+                  class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
               - if delete_enabled?
                 = button_to "Delete",
                   remove_item_path,
@@ -90,6 +118,20 @@
           .flex.shrink-0.items-center.gap-2
             = render BadgeComponent.new(variant: :secondary) do
               Open
+            - if reorder_enabled? && !item_link[:first]
+              = button_to "Up",
+                reorder_item_path,
+                method: :patch,
+                params: item_link[:move_up_params],
+                data: { turbo_frame: "editor" },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+            - if reorder_enabled? && !item_link[:last]
+              = button_to "Down",
+                reorder_item_path,
+                method: :patch,
+                params: item_link[:move_down_params],
+                data: { turbo_frame: "editor" },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
             - if delete_enabled?
               = button_to "Delete",
                 remove_item_path,

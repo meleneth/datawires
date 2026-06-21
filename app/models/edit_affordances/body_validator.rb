@@ -11,7 +11,7 @@ module EditAffordances
     COLLECTION_CREATIONS = %w[append_and_open inline_blank_form new_screen].freeze
     COLLECTION_NAVIGATIONS = %w[open_item].freeze
     COLLECTION_DELETE_POLICIES = %w[disabled enabled].freeze
-    COLLECTION_REORDER_POLICIES = %w[disabled].freeze
+    COLLECTION_REORDER_POLICIES = %w[disabled enabled].freeze
     COLLECTION_BINDING_KINDS = %w[property value_label none].freeze
 
     attr_reader :body

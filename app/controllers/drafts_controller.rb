@@ -78,7 +78,44 @@ class DraftsController < ApplicationController
 
     updated_array.delete_at(index)
     @draft.update!(body: JsonPtr.set(@draft.body, ptr, updated_array))
-    @page = build_show_page(path_param: cursor_path_after_item_removal(array_cursor.path))
+    @page = build_show_page(path_param: cursor_path_after_collection_mutation(array_cursor.path))
+
+    respond_to do |format|
+      format.turbo_stream { render :add_item }
+      format.html do
+        redirect_to draft_path(
+          @draft,
+          path: @page.cursor.path.to_s,
+          edit_affordance_id: params[:edit_affordance_id]
+        )
+      end
+    end
+  rescue ArgumentError, KeyError => e
+    render plain: e.message, status: :unprocessable_entity
+  end
+
+  def reorder_item
+    ptr = normalize_ptr(params[:ptr])
+    index = Integer(params[:index], 10)
+    direction = params[:direction].to_s
+    array_cursor = Documents::Cursor.new(source: @draft, path: ptr)
+
+    unless array_cursor.array?
+      render plain: "target is not an array", status: :unprocessable_entity
+      return
+    end
+
+    updated_array = Array(array_cursor.value).dup
+    target_index = reorder_target_index(index, direction)
+
+    unless target_index && index >= 0 && index < updated_array.length && target_index >= 0 && target_index < updated_array.length
+      render plain: "item cannot be moved #{direction}", status: :unprocessable_entity
+      return
+    end
+
+    updated_array[index], updated_array[target_index] = updated_array[target_index], updated_array[index]
+    @draft.update!(body: JsonPtr.set(@draft.body, ptr, updated_array))
+    @page = build_show_page(path_param: cursor_path_after_collection_mutation(array_cursor.path))
 
     respond_to do |format|
       format.turbo_stream { render :add_item }
@@ -139,7 +176,7 @@ class DraftsController < ApplicationController
       EditAffordances::Generated.new(schema_wrapper:)
   end
 
-  def cursor_path_after_item_removal(array_path)
+  def cursor_path_after_collection_mutation(array_path)
     requested_path = params[:path].presence
     if requested_path.present?
       requested_documents_path = Documents::Path.new(requested_path)
@@ -156,6 +193,15 @@ class DraftsController < ApplicationController
     candidate_tokens = candidate_path.tokens
 
     candidate_tokens.first(root_tokens.length) == root_tokens
+  end
+
+  def reorder_target_index(index, direction)
+    case direction
+    when "up"
+      index - 1
+    when "down"
+      index + 1
+    end
   end
 
   def normalize_ptr(raw)

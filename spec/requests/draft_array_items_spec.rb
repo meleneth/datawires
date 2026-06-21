@@ -269,7 +269,59 @@ RSpec.describe "Draft array items", type: :request do
     )
   end
 
-  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled")
+  it "renders reorder controls only when collection reorder policy is enabled" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 },
+          { "name" => "Paper", "quantity" => 5 }
+        ]
+      }
+    )
+
+    get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list").id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include("Up")
+    expect(response.body).not_to include("Down")
+
+    get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list", reorder: "enabled").id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Up")
+    expect(response.body).to include("Down")
+    expect(response.body).to include('name="direction"')
+  end
+
+  it "reorders an array item and rerenders the collection editor" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 },
+          { "name" => "Paper", "quantity" => 5 }
+        ]
+      }
+    )
+    edit_affordance = create_collection_affordance(presentation: "list", reorder: "enabled")
+
+    patch reorder_item_draft_path(draft, format: :turbo_stream), params: {
+      ptr: "/items",
+      index: 1,
+      direction: "up",
+      edit_affordance_id: edit_affordance.id
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(%(target="editor"))
+    expect(draft.reload.body).to eq(
+      "items" => [
+        { "name" => "Paper", "quantity" => 5 },
+        { "name" => "Ink", "quantity" => 2 }
+      ]
+    )
+  end
+
+  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled", reorder: "disabled")
     edit_document = create(
       :document,
       :with_head_revision,
@@ -290,7 +342,7 @@ RSpec.describe "Draft array items", type: :request do
                 "creation" => creation,
                 "navigation" => "open_item",
                 "delete" => delete,
-                "reorder" => "disabled",
+                "reorder" => reorder,
                 "item_title" => {
                   "kind" => "property",
                   "name" => "name"

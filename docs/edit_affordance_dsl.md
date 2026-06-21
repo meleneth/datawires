@@ -86,7 +86,9 @@ Array fields may include `collection`. The current supported behavior is `list_o
 - `creation`: `new_screen` or `inline_blank_form`; `append_and_open` is accepted as a compatibility alias for `new_screen`
 - `navigation`: currently `open_item`
 - `delete`: `disabled` or `enabled`
-- `reorder`: currently `disabled`
+- `reorder`: `disabled` or `enabled`
+
+Collection item actions currently use regenerated array index paths. After delete or reorder, Hotwire rerenders the collection view with fresh item links.
 - `item_title`: optional item label binding, defaulting to the item object `name` property
 - `item_subtitle`: optional subtitle binding, defaulting to the item value preview
 

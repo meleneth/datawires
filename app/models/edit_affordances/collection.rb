@@ -55,6 +55,10 @@ module EditAffordances
       delete_policy == "enabled"
     end
 
+    def reorder_enabled?
+      reorder_policy == "enabled"
+    end
+
     private
 
     def normalize_creation(value)

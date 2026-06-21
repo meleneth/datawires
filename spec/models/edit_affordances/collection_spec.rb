@@ -41,6 +41,13 @@ RSpec.describe EditAffordances::Collection do
     end
   end
 
+  describe "#reorder_enabled?" do
+    it "is enabled only when the collection reorder policy opts in" do
+      expect(described_class.default).not_to be_reorder_enabled
+      expect(described_class.new("reorder" => "enabled")).to be_reorder_enabled
+    end
+  end
+
   describe "#item_title_for" do
     it "defaults to a name property and falls back when it is blank" do
       schema_document = build(:document, :with_name_schema)
