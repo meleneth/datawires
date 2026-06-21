@@ -50,7 +50,7 @@ Architecture path:
 - [ ] Support field help text, placeholder text, and required markers.
 - [x] Support `textarea`, `select`, `checkbox`, `number`, `text`, and `auto` consistently in both schema and runtime.
 - [ ] Add field-level display options such as hidden label, compact width, and read-only/value preview.
-- [ ] Honor `screen.default_span` when a cell span is omitted.
+- [x] Honor `screen.default_span` when a cell span is omitted.
 - [ ] Add tests for required optional blank behavior in the projected editor UI.
 - [ ] Review autosave and review-panel updates for all widget types.
 

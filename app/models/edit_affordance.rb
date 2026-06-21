@@ -56,10 +56,17 @@ class EditAffordance < ApplicationRecord
     return generated_projection(root_cursor) if affordance_body["rows"].blank?
 
     column_count = column_count_for(affordance_body)
+    default_span = default_span_for(affordance_body)
     diagnostics = []
     rows = Array(affordance_body["rows"]).map do |row_data|
       EditAffordances::ProjectedRow.new(
-        cells: project_row_cells(root_cursor, row_data, mode: mode, diagnostics: diagnostics),
+        cells: project_row_cells(
+          root_cursor,
+          row_data,
+          default_span: default_span,
+          mode: mode,
+          diagnostics: diagnostics
+        ),
         column_count: column_count
       )
     end.reject(&:empty?)
@@ -97,13 +104,18 @@ class EditAffordance < ApplicationRecord
     count.present? ? count.to_i : 12
   end
 
+  def default_span_for(affordance_body)
+    span = screen_for(affordance_body)["default_span"]
+    span.present? ? span.to_i : column_count_for(affordance_body)
+  end
+
   def screen_for(affordance_body)
     affordance_body.fetch("screen", {})
   end
 
-  def project_row_cells(root_cursor, row_data, mode:, diagnostics:)
+  def project_row_cells(root_cursor, row_data, default_span:, mode:, diagnostics:)
     Array(row_data).filter_map do |cell_data|
-      project_cell(root_cursor, cell_data)
+      project_cell(root_cursor, cell_data, default_span: default_span)
     rescue ArgumentError, KeyError => e
       raise unless mode.to_sym == :authoring
 
@@ -116,7 +128,7 @@ class EditAffordance < ApplicationRecord
       EditAffordances::Cells::Invalid.new(
         cell_data: cell_data,
         diagnostic: diagnostic,
-        span: invalid_cell_span(cell_data)
+        span: invalid_cell_span(cell_data) || default_span
       )
     end
   end
@@ -125,21 +137,21 @@ class EditAffordance < ApplicationRecord
     cell_data["span"] if cell_data.respond_to?(:[])
   end
 
-  def project_cell(root_cursor, cell_data)
-    return project_commit_cell(cell_data) if commit_cell?(cell_data)
-    return project_field_cell(root_cursor, cell_data) if field_cell?(cell_data)
+  def project_cell(root_cursor, cell_data, default_span:)
+    return project_commit_cell(cell_data, default_span: default_span) if commit_cell?(cell_data)
+    return project_field_cell(root_cursor, cell_data, default_span: default_span) if field_cell?(cell_data)
 
     raise ArgumentError, "unsupported edit affordance cell: #{cell_data.inspect}"
   end
 
-  def project_commit_cell(cell_data)
+  def project_commit_cell(cell_data, default_span:)
     EditAffordances::Cells::Commit.new(
-      span: cell_data["span"],
+      span: cell_data["span"] || default_span,
       message_mode: cell_data["message_mode"] || "hidden"
     )
   end
 
-  def project_field_cell(root_cursor, cell_data)
+  def project_field_cell(root_cursor, cell_data, default_span:)
     binding_data = cell_data.fetch("binding")
     cursor = cursor_for_binding(root_cursor, binding_data)
     return nil unless cursor
@@ -148,7 +160,7 @@ class EditAffordance < ApplicationRecord
 
     cell_class.new(
       cursor: cursor,
-      span: cell_data["span"],
+      span: cell_data["span"] || default_span,
       widget: cell_data["widget"] || "auto",
       label: cell_data.key?("label") ? cell_data["label"] : true,
       item_rows: cell_data["item_rows"]

@@ -29,7 +29,7 @@ This document names the current DSL shape. The runtime path is:
 
 ## Field Cells
 
-Field cells bind an editor widget to a document path.
+Field cells bind an editor widget to a document path. If `span` is omitted, projection uses `screen.default_span`.
 
 ```json
 {
@@ -57,7 +57,7 @@ Supported widgets today:
 
 ## Commit Cells
 
-Commit cells place a commit action in the projected editor.
+Commit cells place a commit action in the projected editor. If `span` is omitted, projection uses `screen.default_span`.
 
 ```json
 {

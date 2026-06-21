@@ -189,6 +189,52 @@ RSpec.describe EditAffordance, type: :model do
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
     end
 
+    it "uses screen default_span when projected cells omit spans" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screen" => {
+            "columns" => 12,
+            "default_span" => 5
+          },
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/name"
+                }
+              },
+              {
+                "kind" => "commit"
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      cells = affordance.projection(cursor).rows.flat_map(&:cells)
+
+      expect(cells.map(&:span)).to eq([ 5, 5 ])
+    end
+
     it "projects invalid authoring cells into diagnostics and inert cells" do
       schema_wrapper = create(
         :schema_wrapper,
