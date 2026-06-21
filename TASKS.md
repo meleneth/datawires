@@ -60,7 +60,7 @@ Architecture path:
 - [x] Avoid modeling collection behavior as one large enum; split it into presentation, creation behavior, navigation behavior, delete policy, reorder policy, and item title/subtitle bindings.
 - [x] Support the current behavior as `list_open`.
 - [x] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
-- [ ] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
+- [x] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
 - [x] Add `table` presentation for collections of small scalar/object records.
 - [x] Add `cards` or `list_cards` presentation for richer repeated objects.
 - [x] Add item title and subtitle bindings, defaulting to `name` when present.

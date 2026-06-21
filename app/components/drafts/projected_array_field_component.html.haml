@@ -10,13 +10,22 @@
     - if help_text.present?
       %p.text-xs.text-muted-foreground= help_text
 
-  .flex.justify-end
-    = button_to "Add item",
-      add_item_path,
-      method: :patch,
-      params: add_item_button_params,
-      data: { turbo_frame: "editor" },
-      class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+  - if show_add_item_button?
+    .flex.justify-end
+      = button_to "Add item",
+        add_item_path,
+        method: :patch,
+        params: add_item_button_params,
+        data: { turbo_frame: "editor" },
+        class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+  - if inline_blank_form? && new_item_fields.any?
+    .rounded.border-2.border-black.bg-card.p-3.shadow-sm
+      .space-y-3
+        = render TypographyComponent.new(as: :h4, text: "New item")
+        .grid.grid-cols-1.gap-3
+          - new_item_fields.each do |field|
+            = render Drafts::ProjectedFieldComponent.new(draft: draft, field: field, edit_affordance_id: edit_affordance&.id)
 
   - if empty?
     = render AlertComponent.new do

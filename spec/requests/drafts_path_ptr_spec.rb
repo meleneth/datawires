@@ -124,4 +124,16 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
       "attributes" => { "hair_color" => "brown" }
     )
   end
+
+  it "creates missing array item parents for indexed nested field updates" do
+    patch patch_ptr_draft_path(draft, format: :turbo_stream),
+      params: { ptr: "/items/0/name", value: "Ink" }
+
+    expect(response).to have_http_status(:no_content)
+    expect(draft.reload.body).to eq(
+      "items" => [
+        { "name" => "Ink" }
+      ]
+    )
+  end
 end

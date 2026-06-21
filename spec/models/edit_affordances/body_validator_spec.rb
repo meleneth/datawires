@@ -177,7 +177,7 @@ RSpec.describe EditAffordances::BodyValidator do
             "collection" => {
               "behavior" => "mega_grid",
               "presentation" => "mosaic",
-              "creation" => "inline_blank_form",
+              "creation" => "side_panel",
               "navigation" => "modal",
               "delete" => "enabled",
               "reorder" => "enabled",
@@ -205,7 +205,7 @@ RSpec.describe EditAffordances::BodyValidator do
     expect(validator.errors).to include(
       "rows/0/0/collection/behavior must be one of: list_open",
       "rows/0/0/collection/presentation must be one of: cards, list, table",
-      "rows/0/0/collection/creation must be one of: append_and_open, new_screen",
+      "rows/0/0/collection/creation must be one of: append_and_open, inline_blank_form, new_screen",
       "rows/0/0/collection/navigation must be one of: open_item",
       "rows/0/0/collection/delete must be one of: disabled",
       "rows/0/0/collection/reorder must be one of: disabled",

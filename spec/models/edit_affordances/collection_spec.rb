@@ -24,6 +24,14 @@ RSpec.describe EditAffordances::Collection do
 
       expect(collection.creation).to eq("new_screen")
     end
+
+    it "identifies inline blank form creation" do
+      collection = described_class.new(
+        "creation" => "inline_blank_form"
+      )
+
+      expect(collection).to be_inline_blank_form
+    end
   end
 
   describe "#item_title_for" do

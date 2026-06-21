@@ -65,6 +65,25 @@ module Drafts
       }
     end
 
+    def show_add_item_button?
+      !inline_blank_form?
+    end
+
+    def inline_blank_form?
+      collection.inline_blank_form?
+    end
+
+    def new_item_fields
+      @new_item_fields ||= new_item_cursors.map do |field_cursor|
+        EditAffordances::Cells::Field.new(
+          cursor: field_cursor,
+          span: 12,
+          widget: "auto",
+          label: true
+        )
+      end
+    end
+
     def item_links
       @item_links ||= item_cursors.each_with_index.map do |item_cursor, index|
         {
@@ -79,6 +98,13 @@ module Drafts
 
     def item_cursors
       Array(cursor.value).each_index.map { |index| cursor.child(index.to_s) }
+    end
+
+    def new_item_cursors
+      item_cursor = cursor.child(Array(cursor.value).length.to_s)
+      return item_cursor.children.select(&:scalar?) if item_cursor.object?
+
+      [ item_cursor ].select(&:scalar?)
     end
 
     def item_title(item_cursor, index)

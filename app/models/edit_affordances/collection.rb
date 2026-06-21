@@ -47,6 +47,10 @@ module EditAffordances
       value_for_binding(item_subtitle, item_cursor).presence || item_cursor.value_label
     end
 
+    def inline_blank_form?
+      creation == "inline_blank_form"
+    end
+
     private
 
     def normalize_creation(value)

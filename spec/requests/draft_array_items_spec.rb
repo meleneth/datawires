@@ -206,7 +206,22 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include("Open")
   end
 
-  def create_collection_affordance(presentation:)
+  it "renders inline blank form creation for the next array item" do
+    edit_affordance = create_collection_affordance(
+      presentation: "list",
+      creation: "inline_blank_form"
+    )
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("New item")
+    expect(response.body).to include('value="/items/0/name"')
+    expect(response.body).to include('value="/items/0/quantity"')
+    expect(response.body).not_to include("Add item")
+  end
+
+  def create_collection_affordance(presentation:, creation: "new_screen")
     edit_document = create(
       :document,
       :with_head_revision,
@@ -224,7 +239,7 @@ RSpec.describe "Draft array items", type: :request do
               "collection" => {
                 "behavior" => "list_open",
                 "presentation" => presentation,
-                "creation" => "new_screen",
+                "creation" => creation,
                 "navigation" => "open_item",
                 "delete" => "disabled",
                 "reorder" => "disabled",
