@@ -23,6 +23,7 @@ class EditAffordance < ApplicationRecord
 
   validate :schema_wrapper_must_wrap_schema_document
   validate :edit_document_must_not_equal_schema_document_body
+  validate :edit_document_body_must_match_affordance_dsl
 
   def body
     EditAffordances::Versions.upgrade(head_revision&.body)
@@ -206,5 +207,16 @@ class EditAffordance < ApplicationRecord
     return unless edit_document_id == schema_wrapper.document_id
 
     errors.add(:edit_document, "must be a separate document")
+  end
+
+  def edit_document_body_must_match_affordance_dsl
+    return if edit_document.blank?
+
+    validator = EditAffordances::BodyValidator.new(head_revision&.body)
+    return if validator.valid?
+
+    validator.errors.each do |message|
+      errors.add(:edit_document, message)
+    end
   end
 end

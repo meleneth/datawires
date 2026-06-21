@@ -11,7 +11,7 @@ Keep affordances as ordinary schema-backed documents, but avoid making the affor
 Architecture path:
 
 - [ ] Raw affordance document JSON.
-- [ ] Schema validation.
+- [x] Schema validation.
 - [ ] Compatibility/version upgrade.
 - [x] Projection into an immutable editor model.
 - [ ] Rendering by components.
@@ -34,7 +34,7 @@ Architecture path:
 - [x] Add compatibility handling for older affordance versions.
 - [x] Add an upgrade entry point, even while only one version exists.
 - [x] Expand the `edit-form` schema to include all currently accepted runtime values, including collection widgets.
-- [ ] Add schema validation for edit affordance document bodies before they can be attached to a schema.
+- [x] Add schema validation for edit affordance document bodies before they can be attached to a schema.
 - [x] Introduce an internal projected edit model separate from raw affordance JSON.
 - [x] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
 - [x] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.

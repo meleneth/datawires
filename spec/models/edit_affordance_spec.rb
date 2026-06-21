@@ -54,7 +54,22 @@ RSpec.describe EditAffordance, type: :model do
 
   describe "custom validations" do
     let(:schema_wrapper) { create(:schema_wrapper) }
-    let(:edit_document) { create(:document, :with_plain_head_revision) }
+    let(:edit_document) do
+      create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "rows" => [
+            [
+              {
+                "kind" => "commit"
+              }
+            ]
+          ]
+        }
+      )
+    end
 
     it "is valid when schema_wrapper wraps a schema document" do
       affordance = build(
@@ -92,6 +107,31 @@ RSpec.describe EditAffordance, type: :model do
       expect(affordance.body).to eq(
         "version" => 1,
         "rows" => []
+      )
+    end
+  end
+
+  describe "edit document body validation" do
+    it "rejects invalid edit affordance document bodies" do
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "rows" => [
+            [
+              {
+                "kind" => "unknown"
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(:edit_affordance, edit_document: edit_document)
+
+      expect(affordance).not_to be_valid
+      expect(affordance.errors[:edit_document]).to include(
+        "rows/0/0 must be a field or commit cell"
       )
     end
   end

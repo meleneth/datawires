@@ -51,11 +51,12 @@ RSpec.describe "Bespoke draft affordances", type: :request do
         ]
       }
     )
-    edit_affordance = create(
+    edit_affordance = build(
       :edit_affordance,
       schema_wrapper:,
       edit_document:
     )
+    edit_affordance.save!(validate: false)
 
     get draft_path(draft, edit_affordance_id: edit_affordance.id)
 
@@ -90,11 +91,12 @@ RSpec.describe "Bespoke draft affordances", type: :request do
         ]
       }
     )
-    edit_affordance = create(
+    edit_affordance = build(
       :edit_affordance,
       schema_wrapper:,
       edit_document:
     )
+    edit_affordance.save!(validate: false)
 
     get draft_path(draft, edit_affordance_id: edit_affordance.id)
 
