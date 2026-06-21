@@ -156,4 +156,86 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include("2")
     expect(response.body).to include("Open")
   end
+
+  it "renders collection table presentation" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 }
+        ]
+      }
+    )
+    edit_affordance = create_collection_affordance(presentation: "table")
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("<table")
+    expect(response.body).to include("<th")
+    expect(response.body).to include("Ink")
+    expect(response.body).to include("Open")
+  end
+
+  it "renders collection cards presentation" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 }
+        ]
+      }
+    )
+    edit_affordance = create_collection_affordance(presentation: "cards")
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("md:grid-cols-2")
+    expect(response.body).to include("Ink")
+    expect(response.body).to include("Open")
+  end
+
+  def create_collection_affordance(presentation:)
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/items"
+              },
+              "widget" => "array",
+              "collection" => {
+                "behavior" => "list_open",
+                "presentation" => presentation,
+                "creation" => "append_and_open",
+                "navigation" => "open_item",
+                "delete" => "disabled",
+                "reorder" => "disabled",
+                "item_title" => {
+                  "kind" => "property",
+                  "name" => "name"
+                },
+                "item_subtitle" => {
+                  "kind" => "property",
+                  "name" => "quantity"
+                }
+              }
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper: schema_wrapper,
+      edit_document: edit_document
+    )
+    edit_affordance.save!(validate: false)
+    edit_affordance
+  end
 end

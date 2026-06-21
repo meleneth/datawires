@@ -61,8 +61,8 @@ Architecture path:
 - [x] Support the current behavior as `list_open`.
 - [ ] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
 - [ ] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
-- [ ] Add `table` presentation for collections of small scalar/object records.
-- [ ] Add `cards` or `list_cards` presentation for richer repeated objects.
+- [x] Add `table` presentation for collections of small scalar/object records.
+- [x] Add `cards` or `list_cards` presentation for richer repeated objects.
 - [x] Add item title and subtitle bindings, defaulting to `name` when present.
 - [ ] Decide a stable item identity strategy before exposing destructive collection controls, because index-addressed item screens are fragile when reorder/delete exists.
 - [ ] Add delete and reorder policy controls only after stable item identity is settled.

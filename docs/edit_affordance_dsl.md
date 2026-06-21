@@ -82,7 +82,7 @@ Supported widgets today:
 
 Array fields may include `collection`. The current supported behavior is `list_open`, represented as separate axes so future collection work can add presentations and workflows without turning collection behavior into one large enum:
 
-- `presentation`: currently `list`
+- `presentation`: `list`, `table`, or `cards`
 - `creation`: currently `append_and_open`
 - `navigation`: currently `open_item`
 - `delete`: currently `disabled`

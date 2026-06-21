@@ -36,6 +36,14 @@ module Drafts
       compact? ? "space-y-2" : "space-y-3"
     end
 
+    def table_presentation?
+      collection.presentation == "table"
+    end
+
+    def cards_presentation?
+      collection.presentation == "cards"
+    end
+
     def empty?
       item_links.empty?
     end

@@ -128,7 +128,7 @@ module Seeds
               },
               "presentation" => {
                 "type" => "string",
-                "enum" => %w[list]
+                "enum" => %w[cards list table]
               },
               "creation" => {
                 "type" => "string",

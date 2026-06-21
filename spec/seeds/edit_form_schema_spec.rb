@@ -49,7 +49,7 @@ RSpec.describe Seeds::EditFormSchema do
         .fetch("properties")
 
       expect(collection_properties.dig("behavior", "enum")).to eq([ "list_open" ])
-      expect(collection_properties.dig("presentation", "enum")).to eq([ "list" ])
+      expect(collection_properties.dig("presentation", "enum")).to contain_exactly("cards", "list", "table")
       expect(collection_properties.dig("creation", "enum")).to eq([ "append_and_open" ])
       expect(collection_properties.dig("navigation", "enum")).to eq([ "open_item" ])
       expect(collection_properties.dig("delete", "enum")).to eq([ "disabled" ])

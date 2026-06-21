@@ -176,7 +176,7 @@ RSpec.describe EditAffordances::BodyValidator do
             "widget" => "array",
             "collection" => {
               "behavior" => "mega_grid",
-              "presentation" => "table",
+              "presentation" => "mosaic",
               "creation" => "inline_blank_form",
               "navigation" => "modal",
               "delete" => "enabled",
@@ -204,7 +204,7 @@ RSpec.describe EditAffordances::BodyValidator do
 
     expect(validator.errors).to include(
       "rows/0/0/collection/behavior must be one of: list_open",
-      "rows/0/0/collection/presentation must be one of: list",
+      "rows/0/0/collection/presentation must be one of: cards, list, table",
       "rows/0/0/collection/creation must be one of: append_and_open",
       "rows/0/0/collection/navigation must be one of: open_item",
       "rows/0/0/collection/delete must be one of: disabled",

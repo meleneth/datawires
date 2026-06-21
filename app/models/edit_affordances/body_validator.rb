@@ -7,7 +7,7 @@ module EditAffordances
     COMMIT_MODES = %w[immediate review_screen].freeze
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     COLLECTION_BEHAVIORS = %w[list_open].freeze
-    COLLECTION_PRESENTATIONS = %w[list].freeze
+    COLLECTION_PRESENTATIONS = %w[cards list table].freeze
     COLLECTION_CREATIONS = %w[append_and_open].freeze
     COLLECTION_NAVIGATIONS = %w[open_item].freeze
     COLLECTION_POLICIES = %w[disabled].freeze
