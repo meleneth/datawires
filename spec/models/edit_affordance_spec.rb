@@ -148,5 +148,81 @@ RSpec.describe EditAffordance, type: :model do
       expect(cells.first).to be_a(EditAffordances::Cells::Field)
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
     end
+
+    it "projects invalid authoring cells into diagnostics and inert cells" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "rows" => [
+            [
+              {
+                "kind" => "unknown",
+                "span" => 12
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor, mode: :authoring)
+      invalid_cell = projection.rows.first.cells.first
+
+      expect(invalid_cell).to be_a(EditAffordances::Cells::Invalid)
+      expect(invalid_cell.diagnostic.message).to include("unsupported edit affordance cell")
+      expect(projection.diagnostics).to contain_exactly(invalid_cell.diagnostic)
+    end
+
+    it "raises invalid bespoke cells in runtime mode" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "rows" => [
+            [
+              {
+                "kind" => "unknown"
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      expect {
+        affordance.projection(cursor)
+      }.to raise_error(ArgumentError, /unsupported edit affordance cell/)
+    end
   end
 end

@@ -37,19 +37,21 @@ class EditAffordance < ApplicationRecord
     count.present? ? count.to_i : 12
   end
 
-  def projection(root_cursor)
+  def projection(root_cursor, mode: :runtime)
     return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projection(root_cursor) if body["rows"].blank?
 
+    diagnostics = []
     rows = Array(body["rows"]).map do |row_data|
       EditAffordances::ProjectedRow.new(
-        cells: Array(row_data).filter_map { |cell_data| project_cell(root_cursor, cell_data) },
+        cells: project_row_cells(root_cursor, row_data, mode: mode, diagnostics: diagnostics),
         column_count: column_count
       )
     end.reject(&:empty?)
 
     EditAffordances::Projection.new(
       rows: rows,
-      defaults: EditAffordances::Projection::Defaults.new(column_count: column_count)
+      defaults: EditAffordances::Projection::Defaults.new(column_count: column_count),
+      diagnostics: diagnostics
     )
   end
 
@@ -58,6 +60,30 @@ class EditAffordance < ApplicationRecord
   end
 
   private
+
+  def project_row_cells(root_cursor, row_data, mode:, diagnostics:)
+    Array(row_data).filter_map do |cell_data|
+      project_cell(root_cursor, cell_data)
+    rescue ArgumentError, KeyError => e
+      raise unless mode.to_sym == :authoring
+
+      diagnostic = EditAffordances::Projection::Diagnostic.new(
+        severity: "error",
+        message: e.message,
+        cell_data: cell_data
+      )
+      diagnostics << diagnostic
+      EditAffordances::Cells::Invalid.new(
+        cell_data: cell_data,
+        diagnostic: diagnostic,
+        span: invalid_cell_span(cell_data)
+      )
+    end
+  end
+
+  def invalid_cell_span(cell_data)
+    cell_data["span"] if cell_data.respond_to?(:[])
+  end
 
   def project_cell(root_cursor, cell_data)
     return project_commit_cell(cell_data) if commit_cell?(cell_data)

@@ -3,6 +3,7 @@
 module EditAffordances
   class Projection
     Defaults = Struct.new(:column_count, keyword_init: true)
+    Diagnostic = Struct.new(:severity, :message, :cell_data, keyword_init: true)
 
     attr_reader :rows, :screens, :bindings, :defaults, :diagnostics
 
