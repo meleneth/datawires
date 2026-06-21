@@ -37,7 +37,7 @@ RSpec.describe EditAffordances::BodyValidator do
               "presentation" => "list",
               "creation" => "new_screen",
               "navigation" => "open_item",
-              "delete" => "disabled",
+              "delete" => "enabled",
               "reorder" => "disabled",
               "item_title" => {
                 "kind" => "property",
@@ -179,8 +179,8 @@ RSpec.describe EditAffordances::BodyValidator do
               "presentation" => "mosaic",
               "creation" => "side_panel",
               "navigation" => "modal",
-              "delete" => "enabled",
-              "reorder" => "enabled",
+              "delete" => "soft_delete",
+              "reorder" => "drag",
               "item_title" => {
                 "kind" => "property"
               },
@@ -207,7 +207,7 @@ RSpec.describe EditAffordances::BodyValidator do
       "rows/0/0/collection/presentation must be one of: cards, list, table",
       "rows/0/0/collection/creation must be one of: append_and_open, inline_blank_form, new_screen",
       "rows/0/0/collection/navigation must be one of: open_item",
-      "rows/0/0/collection/delete must be one of: disabled",
+      "rows/0/0/collection/delete must be one of: disabled, enabled",
       "rows/0/0/collection/reorder must be one of: disabled",
       "rows/0/0/collection/item_title/name must be a string",
       "rows/0/0/collection/item_subtitle/name must be a string",

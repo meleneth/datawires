@@ -65,7 +65,7 @@ Architecture path:
 - [x] Add `cards` or `list_cards` presentation for richer repeated objects.
 - [x] Add item title and subtitle bindings, defaulting to `name` when present.
 - [ ] Decide a stable item identity strategy before exposing destructive collection controls, because index-addressed item screens are fragile when reorder/delete exists.
-- [ ] Add delete and reorder policy controls only after stable item identity is settled.
+- [ ] Add reorder policy controls only after stable item identity is settled.
 - [x] Add request/component coverage for each collection presentation and behavior.
 
 ## Phase 4: Add Screens And Navigation

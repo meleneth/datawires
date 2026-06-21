@@ -34,6 +34,13 @@ RSpec.describe EditAffordances::Collection do
     end
   end
 
+  describe "#delete_enabled?" do
+    it "is enabled only when the collection delete policy opts in" do
+      expect(described_class.default).not_to be_delete_enabled
+      expect(described_class.new("delete" => "enabled")).to be_delete_enabled
+    end
+  end
+
   describe "#item_title_for" do
     it "defaults to a name property and falls back when it is blank" do
       schema_document = build(:document, :with_name_schema)

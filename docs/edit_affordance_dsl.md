@@ -85,7 +85,7 @@ Array fields may include `collection`. The current supported behavior is `list_o
 - `presentation`: `list`, `table`, or `cards`
 - `creation`: `new_screen` or `inline_blank_form`; `append_and_open` is accepted as a compatibility alias for `new_screen`
 - `navigation`: currently `open_item`
-- `delete`: currently `disabled`
+- `delete`: `disabled` or `enabled`
 - `reorder`: currently `disabled`
 - `item_title`: optional item label binding, defaulting to the item object `name` property
 - `item_subtitle`: optional subtitle binding, defaulting to the item value preview

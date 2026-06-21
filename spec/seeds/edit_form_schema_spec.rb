@@ -56,7 +56,7 @@ RSpec.describe Seeds::EditFormSchema do
         "new_screen"
       )
       expect(collection_properties.dig("navigation", "enum")).to eq([ "open_item" ])
-      expect(collection_properties.dig("delete", "enum")).to eq([ "disabled" ])
+      expect(collection_properties.dig("delete", "enum")).to contain_exactly("disabled", "enabled")
       expect(collection_properties.dig("reorder", "enum")).to eq([ "disabled" ])
       expect(definitions.dig("collection_binding", "properties", "kind", "enum")).to contain_exactly(
         "none",

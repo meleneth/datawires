@@ -221,7 +221,55 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).not_to include("Add item")
   end
 
-  def create_collection_affordance(presentation:, creation: "new_screen")
+  it "renders delete controls only when collection delete policy is enabled" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 }
+        ]
+      }
+    )
+
+    get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list").id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include("Delete")
+
+    get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list", delete: "enabled").id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Delete")
+    expect(response.body).to include('name="index"')
+    expect(response.body).to include('value="0"')
+  end
+
+  it "removes an array item and rerenders the collection editor" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 },
+          { "name" => "Paper", "quantity" => 5 }
+        ]
+      }
+    )
+    edit_affordance = create_collection_affordance(presentation: "list", delete: "enabled")
+
+    patch remove_item_draft_path(draft, format: :turbo_stream), params: {
+      ptr: "/items",
+      index: 0,
+      edit_affordance_id: edit_affordance.id
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(%(target="editor"))
+    expect(draft.reload.body).to eq(
+      "items" => [
+        { "name" => "Paper", "quantity" => 5 }
+      ]
+    )
+  end
+
+  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled")
     edit_document = create(
       :document,
       :with_head_revision,
@@ -241,7 +289,7 @@ RSpec.describe "Draft array items", type: :request do
                 "presentation" => presentation,
                 "creation" => creation,
                 "navigation" => "open_item",
-                "delete" => "disabled",
+                "delete" => delete,
                 "reorder" => "disabled",
                 "item_title" => {
                   "kind" => "property",

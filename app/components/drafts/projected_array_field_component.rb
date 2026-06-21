@@ -56,6 +56,10 @@ module Drafts
       add_item_draft_path(draft)
     end
 
+    def remove_item_path
+      remove_item_draft_path(draft)
+    end
+
     def add_item_button_params
       {
         ptr: cursor.ptr,
@@ -71,6 +75,10 @@ module Drafts
 
     def inline_blank_form?
       collection.inline_blank_form?
+    end
+
+    def delete_enabled?
+      collection.delete_enabled?
     end
 
     def new_item_fields
@@ -89,7 +97,8 @@ module Drafts
         {
           title: item_title(item_cursor, index),
           value_label: collection.item_subtitle_for(item_cursor),
-          path: draft_path_for(item_cursor)
+          path: draft_path_for(item_cursor),
+          remove_params: remove_item_button_params(index)
         }
       end
     end
@@ -109,6 +118,16 @@ module Drafts
 
     def item_title(item_cursor, index)
       collection.item_title_for(item_cursor, fallback: "Item #{index + 1}")
+    end
+
+    def remove_item_button_params(index)
+      params = {
+        ptr: cursor.ptr,
+        index: index,
+        path: cursor.path.to_s
+      }
+      params[:edit_affordance_id] = edit_affordance.id if edit_affordance&.id
+      params
     end
 
     def draft_path_for(item_cursor)

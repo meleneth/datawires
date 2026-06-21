@@ -10,7 +10,8 @@ module EditAffordances
     COLLECTION_PRESENTATIONS = %w[cards list table].freeze
     COLLECTION_CREATIONS = %w[append_and_open inline_blank_form new_screen].freeze
     COLLECTION_NAVIGATIONS = %w[open_item].freeze
-    COLLECTION_POLICIES = %w[disabled].freeze
+    COLLECTION_DELETE_POLICIES = %w[disabled enabled].freeze
+    COLLECTION_REORDER_POLICIES = %w[disabled].freeze
     COLLECTION_BINDING_KINDS = %w[property value_label none].freeze
 
     attr_reader :body
@@ -161,8 +162,8 @@ module EditAffordances
       validate_enum(errors, collection, "presentation", COLLECTION_PRESENTATIONS, "#{path}/presentation")
       validate_enum(errors, collection, "creation", COLLECTION_CREATIONS, "#{path}/creation")
       validate_enum(errors, collection, "navigation", COLLECTION_NAVIGATIONS, "#{path}/navigation")
-      validate_enum(errors, collection, "delete", COLLECTION_POLICIES, "#{path}/delete")
-      validate_enum(errors, collection, "reorder", COLLECTION_POLICIES, "#{path}/reorder")
+      validate_enum(errors, collection, "delete", COLLECTION_DELETE_POLICIES, "#{path}/delete")
+      validate_enum(errors, collection, "reorder", COLLECTION_REORDER_POLICIES, "#{path}/reorder")
       validate_collection_binding(errors, collection, "item_title", "#{path}/item_title")
       validate_collection_binding(errors, collection, "item_subtitle", "#{path}/item_subtitle")
     end

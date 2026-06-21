@@ -140,7 +140,7 @@ module Seeds
               },
               "delete" => {
                 "type" => "string",
-                "enum" => %w[disabled]
+                "enum" => %w[disabled enabled]
               },
               "reorder" => {
                 "type" => "string",

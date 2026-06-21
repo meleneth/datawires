@@ -51,6 +51,10 @@ module EditAffordances
       creation == "inline_blank_form"
     end
 
+    def delete_enabled?
+      delete_policy == "enabled"
+    end
+
     private
 
     def normalize_creation(value)
