@@ -1,9 +1,14 @@
 .space-y-3
   - if show_label?
     .flex.items-center.justify-between.gap-3
-      = render TypographyComponent.new(as: :h4, text: label_text)
+      .flex.items-center.gap-1
+        = render TypographyComponent.new(as: :h4, text: label_text)
+        - if required?
+          %span.text-sm.font-semibold.text-destructive *
       = render BadgeComponent.new(variant: :outline) do
         = item_count_text
+    - if help_text.present?
+      %p.text-xs.text-muted-foreground= help_text
 
   .flex.justify-end
     = button_to "Add item",

@@ -157,7 +157,9 @@ RSpec.describe EditAffordance, type: :model do
                   "kind" => "document_ptr",
                   "ptr" => "/name"
                 },
-                "span" => 3
+                "span" => 3,
+                "help" => "Use the public display name.",
+                "placeholder" => "Ada Lovelace"
               },
               {
                 "kind" => "commit",
@@ -186,6 +188,8 @@ RSpec.describe EditAffordance, type: :model do
       expect(projection).to be_a(EditAffordances::Projection)
       expect(projection.defaults.column_count).to eq(6)
       expect(cells.first).to be_a(EditAffordances::Cells::Field)
+      expect(cells.first.help).to eq("Use the public display name.")
+      expect(cells.first.placeholder).to eq("Ada Lovelace")
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
     end
 

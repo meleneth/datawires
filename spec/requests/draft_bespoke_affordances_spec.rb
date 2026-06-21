@@ -65,6 +65,59 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response.body).to include("Already here")
   end
 
+  it "renders field help, placeholders, and required markers" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(:document, :with_name_schema)
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    draft = create(:draft, document:, body: {})
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "screen" => {
+          "mode" => "page",
+          "columns" => 6,
+          "default_span" => 6,
+          "commit_mode" => "review_screen"
+        },
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/name"
+              },
+              "widget" => "text",
+              "help" => "Use the public display name.",
+              "placeholder" => "Ada Lovelace"
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Use the public display name.")
+    expect(response.body).to include('placeholder="Ada Lovelace"')
+    expect(response.body).to include(">*</span>")
+  end
+
   it "falls back to generated fields when a bespoke affordance is invalid" do
     schema_wrapper = create(
       :schema_wrapper,

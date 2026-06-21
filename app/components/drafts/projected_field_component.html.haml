@@ -1,6 +1,9 @@
 .space-y-1
   - if show_label?
-    = render LabelComponent.new(text: label_text, for_id: dom_id)
+    .flex.items-center.gap-1
+      = render LabelComponent.new(text: label_text, for_id: dom_id)
+      - if required?
+        %span.text-sm.font-semibold.text-destructive *
 
   = form_with url: patch_path, method: :patch, format: :turbo_stream, data: form_data_attributes do |form|
     = form.hidden_field :ptr, value: ptr
@@ -8,3 +11,6 @@
     = form.hidden_field :edit_affordance_id, value: edit_affordance_id if edit_affordance_id.present?
 
     = form.public_send(input_method, *input_leading_args)
+
+  - if help_text.present?
+    %p.text-xs.text-muted-foreground= help_text

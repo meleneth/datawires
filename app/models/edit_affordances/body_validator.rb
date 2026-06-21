@@ -101,6 +101,8 @@ module EditAffordances
       validate_binding(errors, cell["binding"], "#{path}/binding")
       validate_positive_integer(errors, cell, "span", "#{path}/span")
       validate_enum(errors, cell, "widget", SUPPORTED_WIDGETS, "#{path}/widget")
+      validate_string(errors, cell, "help", "#{path}/help")
+      validate_string(errors, cell, "placeholder", "#{path}/placeholder")
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 
@@ -136,6 +138,13 @@ module EditAffordances
       return if allowed.include?(object[key])
 
       errors << "#{path} must be one of: #{allowed.join(', ')}"
+    end
+
+    def validate_string(errors, object, key, path)
+      return unless object.key?(key)
+      return if object[key].is_a?(String)
+
+      errors << "#{path} must be a string"
     end
 
     def integer?(value)

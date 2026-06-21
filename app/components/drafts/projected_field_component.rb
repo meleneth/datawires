@@ -4,7 +4,7 @@ module Drafts
   class ProjectedFieldComponent < ApplicationComponent
     attr_reader :draft, :projected_field, :edit_affordance_id
 
-    delegate :cursor, :label, :widget, to: :projected_field
+    delegate :cursor, :label, :widget, :help, :placeholder, to: :projected_field
 
     def initialize(draft:, field:, edit_affordance_id: nil)
       @draft = draft
@@ -43,6 +43,14 @@ module Drafts
 
     def label_text
       cursor.name.to_s.humanize
+    end
+
+    def help_text
+      help.presence
+    end
+
+    def required?
+      cursor.required?
     end
 
     def show_label?
@@ -98,9 +106,9 @@ module Drafts
       when :select
         base.merge(class: input_html_class)
       when :number_field, :text_field
-        base.merge(class: input_html_class, value: field_value)
+        base.merge(class: input_html_class, value: field_value).merge(placeholder_options)
       when :text_area
-        base.merge(class: textarea_html_class, value: field_value)
+        base.merge(class: textarea_html_class, value: field_value).merge(placeholder_options)
       when :check_box
         base.merge(checked: checkbox_value)
       else
@@ -133,6 +141,10 @@ module Drafts
     end
 
     private
+
+    def placeholder_options
+      placeholder.present? ? { placeholder: placeholder } : {}
+    end
 
     def dom_id_suffix
       sanitized = cursor.ptr.to_s.gsub(/[^a-zA-Z0-9]+/, "_").gsub(/\A_+|_+\z/, "")

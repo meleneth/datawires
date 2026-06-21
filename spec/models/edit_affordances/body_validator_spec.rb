@@ -25,7 +25,9 @@ RSpec.describe EditAffordances::BodyValidator do
             },
             "span" => 6,
             "widget" => "textarea",
-            "label" => true
+            "label" => true,
+            "help" => "Short guidance for authors.",
+            "placeholder" => "Write something useful"
           },
           {
             "kind" => "commit",
@@ -81,6 +83,29 @@ RSpec.describe EditAffordances::BodyValidator do
 
     expect(validator.errors).to include(
       "rows/0/0/widget must be one of: array, auto, checkbox, number, select, text, textarea"
+    )
+  end
+
+  it "rejects non-string field metadata" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/title"
+            },
+            "help" => [ "explain it" ],
+            "placeholder" => 12
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "rows/0/0/help must be a string",
+      "rows/0/0/placeholder must be a string"
     )
   end
 

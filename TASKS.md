@@ -47,7 +47,7 @@ Architecture path:
 
 ## Phase 2: Improve Single-Screen Forms
 
-- [ ] Support field help text, placeholder text, and required markers.
+- [x] Support field help text, placeholder text, and required markers.
 - [x] Support `textarea`, `select`, `checkbox`, `number`, `text`, and `auto` consistently in both schema and runtime.
 - [ ] Add field-level display options such as hidden label, compact width, and read-only/value preview.
 - [x] Honor `screen.default_span` when a cell span is omitted.

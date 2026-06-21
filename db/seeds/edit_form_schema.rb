@@ -120,6 +120,12 @@ module Seeds
               },
               "label" => {
                 "type" => "boolean"
+              },
+              "help" => {
+                "type" => "string"
+              },
+              "placeholder" => {
+                "type" => "string"
               }
             }
           },

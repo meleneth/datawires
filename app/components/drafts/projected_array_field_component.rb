@@ -5,7 +5,7 @@ module Drafts
     attr_reader :page, :projected_field
 
     delegate :draft, :edit_affordance, to: :page
-    delegate :cursor, :label, to: :projected_field
+    delegate :cursor, :label, :help, to: :projected_field
 
     def initialize(page:, field:)
       @page = page
@@ -18,6 +18,14 @@ module Drafts
 
     def label_text
       cursor.name.to_s.humanize
+    end
+
+    def help_text
+      help.presence
+    end
+
+    def required?
+      cursor.required?
     end
 
     def empty?

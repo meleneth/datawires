@@ -163,7 +163,9 @@ class EditAffordance < ApplicationRecord
       span: cell_data["span"] || default_span,
       widget: cell_data["widget"] || "auto",
       label: cell_data.key?("label") ? cell_data["label"] : true,
-      item_rows: cell_data["item_rows"]
+      item_rows: cell_data["item_rows"],
+      help: cell_data["help"],
+      placeholder: cell_data["placeholder"]
     )
   end
 

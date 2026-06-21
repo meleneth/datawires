@@ -24,5 +24,16 @@ RSpec.describe Seeds::EditFormSchema do
         "textarea"
       )
     end
+
+    it "allows field metadata supported by projection" do
+      field_properties = described_class
+        .schema_body
+        .fetch("$defs")
+        .fetch("field_cell")
+        .fetch("properties")
+
+      expect(field_properties.fetch("help")).to eq("type" => "string")
+      expect(field_properties.fetch("placeholder")).to eq("type" => "string")
+    end
   end
 end
