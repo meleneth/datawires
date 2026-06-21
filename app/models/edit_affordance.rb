@@ -37,15 +37,24 @@ class EditAffordance < ApplicationRecord
     count.present? ? count.to_i : 12
   end
 
-  def projected_rows(root_cursor)
-    return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projected_rows(root_cursor) if body["rows"].blank?
+  def projection(root_cursor)
+    return EditAffordances::Generated.new(schema_wrapper: schema_wrapper).projection(root_cursor) if body["rows"].blank?
 
-    Array(body["rows"]).map do |row_data|
+    rows = Array(body["rows"]).map do |row_data|
       EditAffordances::ProjectedRow.new(
         cells: Array(row_data).filter_map { |cell_data| project_cell(root_cursor, cell_data) },
         column_count: column_count
       )
     end.reject(&:empty?)
+
+    EditAffordances::Projection.new(
+      rows: rows,
+      defaults: EditAffordances::Projection::Defaults.new(column_count: column_count)
+    )
+  end
+
+  def projected_rows(root_cursor)
+    projection(root_cursor).rows
   end
 
   private
@@ -58,7 +67,7 @@ class EditAffordance < ApplicationRecord
   end
 
   def project_commit_cell(cell_data)
-    EditAffordances::ProjectedCommit.new(
+    EditAffordances::Cells::Commit.new(
       span: cell_data["span"],
       message_mode: cell_data["message_mode"] || "hidden"
     )
@@ -69,7 +78,9 @@ class EditAffordance < ApplicationRecord
     cursor = cursor_for_binding(root_cursor, binding_data)
     return nil unless cursor
 
-    EditAffordances::ProjectedField.new(
+    cell_class = cell_data["widget"] == "array" ? EditAffordances::Cells::Array : EditAffordances::Cells::Field
+
+    cell_class.new(
       cursor: cursor,
       span: cell_data["span"],
       widget: cell_data["widget"] || "auto",

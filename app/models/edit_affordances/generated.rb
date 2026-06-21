@@ -28,7 +28,7 @@ module EditAffordances
       12
     end
 
-    def projected_rows(root_cursor)
+    def projection(root_cursor)
       object_rows = []
       scalar_fields = []
       inventory = SchemaPaths::Inventory.new(root_cursor: root_cursor)
@@ -42,7 +42,14 @@ module EditAffordances
         end
       end
 
-      grouped_rows(scalar_fields) + object_rows
+      EditAffordances::Projection.new(
+        rows: grouped_rows(scalar_fields) + object_rows,
+        defaults: EditAffordances::Projection::Defaults.new(column_count: column_count)
+      )
+    end
+
+    def projected_rows(root_cursor)
+      projection(root_cursor).rows
     end
 
     private
@@ -50,10 +57,9 @@ module EditAffordances
     def build_section_row(cursor)
       EditAffordances::ProjectedRow.new(
         cells: [
-          EditAffordances::ProjectedField.new(
+          EditAffordances::Cells::Section.new(
             cursor: cursor,
             span: column_count,
-            widget: "section",
             label: true
           )
         ],
@@ -66,7 +72,9 @@ module EditAffordances
     end
 
     def build_field_cell(entry)
-      EditAffordances::ProjectedField.new(
+      cell_class = entry.widget == "array" ? EditAffordances::Cells::Array : EditAffordances::Cells::Field
+
+      cell_class.new(
         cursor: entry.cursor,
         span: DEFAULT_FIELD_SPAN,
         widget: entry.widget == "array" ? "array" : "auto",

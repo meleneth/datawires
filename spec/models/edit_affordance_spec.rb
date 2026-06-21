@@ -95,4 +95,58 @@ RSpec.describe EditAffordance, type: :model do
       )
     end
   end
+
+  describe "#projection" do
+    it "projects bespoke rows into a projection with typed cells" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screen" => {
+            "columns" => 6
+          },
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/name"
+                },
+                "span" => 3
+              },
+              {
+                "kind" => "commit",
+                "span" => 3,
+                "message_mode" => "inline_optional"
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor)
+      cells = projection.rows.flat_map(&:cells)
+
+      expect(projection).to be_a(EditAffordances::Projection)
+      expect(projection.defaults.column_count).to eq(6)
+      expect(cells.first).to be_a(EditAffordances::Cells::Field)
+      expect(cells.second).to be_a(EditAffordances::Cells::Commit)
+    end
+  end
 end

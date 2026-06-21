@@ -57,4 +57,48 @@ RSpec.describe EditAffordances::Generated do
 
     expect(rows.flat_map(&:cells).first.widget).to eq("array")
   end
+
+  it "projects generated rows into a projection with typed cells" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/generated",
+          "type" => "object",
+          "properties" => {
+            "name" => { "type" => "string" },
+            "metadata" => {
+              "type" => "object",
+              "properties" => {
+                "notes" => { "type" => "string" }
+              }
+            },
+            "items" => {
+              "type" => "array",
+              "items" => { "type" => "string" }
+            }
+          }
+        }
+      )
+    )
+    draft = build(
+      :draft,
+      document: build(:document, schema_document: schema_wrapper.document),
+      body: {}
+    )
+    cursor = Documents::Cursor.new(source: draft, path: "")
+
+    projection = described_class.new(schema_wrapper:).projection(cursor)
+    cells = projection.rows.flat_map(&:cells)
+
+    expect(projection).to be_a(EditAffordances::Projection)
+    expect(cells).to include(
+      an_instance_of(EditAffordances::Cells::Field),
+      an_instance_of(EditAffordances::Cells::Section),
+      an_instance_of(EditAffordances::Cells::Array)
+    )
+  end
 end

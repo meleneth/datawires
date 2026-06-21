@@ -13,7 +13,7 @@ Architecture path:
 - [ ] Raw affordance document JSON.
 - [ ] Schema validation.
 - [ ] Compatibility/version upgrade.
-- [ ] Projection into an immutable editor model.
+- [x] Projection into an immutable editor model.
 - [ ] Rendering by components.
 - [ ] Emission of draft mutations, navigation actions, and commit actions.
 
@@ -35,9 +35,9 @@ Architecture path:
 - [x] Add an upgrade entry point, even while only one version exists.
 - [x] Expand the `edit-form` schema to include all currently accepted runtime values, including collection widgets.
 - [ ] Add schema validation for edit affordance document bodies before they can be attached to a schema.
-- [ ] Introduce an internal projected edit model separate from raw affordance JSON.
-- [ ] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
-- [ ] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
+- [x] Introduce an internal projected edit model separate from raw affordance JSON.
+- [x] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
+- [x] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
 - [ ] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
 - [ ] In authoring mode, project invalid cells into diagnostics and inert invalid cells so affordances can be repaired.
 - [ ] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.

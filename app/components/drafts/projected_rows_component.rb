@@ -18,9 +18,9 @@ module Drafts
 
     def rendered_component_for(cell)
       case cell
-      when EditAffordances::ProjectedField
+      when EditAffordances::Cells::Field
         projected_field_component_for(cell)
-      when EditAffordances::ProjectedCommit
+      when EditAffordances::Cells::Commit
         Drafts::ProjectedCommitComponent.new(page: page, commit: cell)
       else
         raise ArgumentError, "unsupported projected cell: #{cell.inspect}"
@@ -30,9 +30,9 @@ module Drafts
     private
 
     def projected_field_component_for(cell)
-      if cell.widget == "section"
+      if cell.is_a?(EditAffordances::Cells::Section)
         Drafts::ProjectedSectionComponent.new(section: cell)
-      elsif cell.widget == "array" || cell.cursor.array?
+      elsif cell.is_a?(EditAffordances::Cells::Array) || cell.cursor.array?
         Drafts::ProjectedArrayFieldComponent.new(page: page, field: cell)
       else
         Drafts::ProjectedFieldComponent.new(
