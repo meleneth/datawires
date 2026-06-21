@@ -29,7 +29,7 @@ Architecture path:
 
 ## Phase 1: Stabilize DSL, Versioning, Projection, And Diagnostics
 
-- [ ] Rename or document the current JSON format as the first edit affordance DSL.
+- [x] Rename or document the current JSON format as the first edit affordance DSL.
 - [x] Keep affordance documents versioned with an explicit `version`.
 - [x] Add compatibility handling for older affordance versions.
 - [x] Add an upgrade entry point, even while only one version exists.
@@ -38,7 +38,7 @@ Architecture path:
 - [x] Introduce an internal projected edit model separate from raw affordance JSON.
 - [x] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
 - [x] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
-- [ ] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
+- [x] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
 - [x] In authoring mode, project invalid cells into diagnostics and inert invalid cells so affordances can be repaired.
 - [x] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
 - [x] Add projection diagnostics so authoring errors can be shown in the UI.
