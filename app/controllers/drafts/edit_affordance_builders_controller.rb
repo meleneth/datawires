@@ -77,6 +77,24 @@ module Drafts
         notice: "Row deleted."
     end
 
+    def move_row
+      body = deep_dup_json(@draft.body)
+      rows = main_rows_for(body)
+      row_index = row_index_param
+      row_at!(row_index, rows: rows)
+      target_index = target_row_index(row_index, params[:direction])
+      unless target_index >= 0 && target_index < rows.length
+        return redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+          alert: "Row cannot be moved #{params[:direction]}."
+      end
+
+      rows[row_index], rows[target_index] = rows[target_index], rows[row_index]
+      @draft.update!(body: body)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Row moved."
+    end
+
     def delete_cell
       body = deep_dup_json(@draft.body)
       rows = main_rows_for(body)
@@ -282,6 +300,17 @@ module Drafts
       return row[index] if index >= 0 && index < row.length && row[index].is_a?(Hash)
 
       raise ActiveRecord::RecordNotFound, "field not found"
+    end
+
+    def target_row_index(row_index, direction)
+      case direction
+      when "up"
+        row_index - 1
+      when "down"
+        row_index + 1
+      else
+        row_index
+      end
     end
 
     def target_cell_index(cell_index, direction)

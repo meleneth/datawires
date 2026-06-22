@@ -192,6 +192,44 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(draft.reload.body.dig("screens", 0, "rows")).to eq([])
   end
 
+  it "reorders rows from the main builder screen" do
+    draft = create_builder_draft
+
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "new",
+      label: "1"
+    }
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "new",
+      label: "1"
+    }
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Up")
+    expect(response.body).to include("Down")
+    expect(response.body).to include(move_row_draft_edit_affordance_builder_path(draft, row_index: 1))
+
+    patch move_row_draft_edit_affordance_builder_path(draft, row_index: 1), params: {
+      direction: "up"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows").map { |row| row.first.dig("binding", "ptr") }).to eq(%w[/bio /name])
+
+    patch move_row_draft_edit_affordance_builder_path(draft, row_index: 0), params: {
+      direction: "down"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows").map { |row| row.first.dig("binding", "ptr") }).to eq(%w[/name /bio])
+  end
+
   it "updates screen width and default span" do
     draft = create_builder_draft
 

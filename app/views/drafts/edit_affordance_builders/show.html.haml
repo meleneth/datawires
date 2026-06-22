@@ -167,7 +167,22 @@
                       row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
                       data: { turbo_frame: "main_content" },
                       class: "font-head underline decoration-2 underline-offset-4"
-                    .text-xs.text-muted-foreground= pluralize(row.length, "cell")
+                    .flex.flex-wrap.items-center.justify-end.gap-2
+                      - if row_index.positive?
+                        = button_to "Up",
+                          move_row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                          method: :patch,
+                          params: { direction: "up" },
+                          form: { data: { turbo_frame: "main_content" } },
+                          class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                      - if row_index < @rows.length - 1
+                        = button_to "Down",
+                          move_row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                          method: :patch,
+                          params: { direction: "down" },
+                          form: { data: { turbo_frame: "main_content" } },
+                          class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                      .text-xs.text-muted-foreground= pluralize(row.length, "cell")
                   - if row.empty?
                     .mt-2.text-muted-foreground Empty row
                   - else
