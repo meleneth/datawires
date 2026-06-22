@@ -161,6 +161,32 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft))
   end
 
+  it "deletes an edit affordance and its backing draft document from the builder" do
+    draft = create_builder_draft
+    edit_document = draft.document
+    edit_affordance = edit_document.edit_affordance
+    revision = edit_document.head_revision
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Delete affordance")
+    expect(response.body).to include(affordance_draft_edit_affordance_builder_path(draft))
+
+    expect {
+      delete affordance_draft_edit_affordance_builder_path(draft)
+    }.to change(EditAffordance, :count).by(-1)
+      .and change(Draft, :count).by(-1)
+      .and change(Document, :count).by(-1)
+      .and change(Revision, :count).by(-1)
+
+    expect(EditAffordance.exists?(edit_affordance.id)).to be(false)
+    expect(Draft.exists?(draft.id)).to be(false)
+    expect(Document.exists?(edit_document.id)).to be(false)
+    expect(Revision.exists?(revision.id)).to be(false)
+    expect(response).to redirect_to(schema_path(schema_wrapper))
+  end
+
   it "adds explicit empty rows and shows row diagnostics until filled" do
     draft = create_builder_draft
 

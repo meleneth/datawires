@@ -65,6 +65,22 @@ module Drafts
         alert: "Invalid JSON: #{e.message}"
     end
 
+    def destroy_affordance
+      schema_wrapper = @schema_wrapper
+      edit_document = @edit_affordance.edit_document
+
+      ApplicationRecord.transaction do
+        @edit_affordance.destroy!
+        edit_document.reload
+        edit_document.drafts.destroy_all
+        edit_document.revisions.destroy_all
+        edit_document.destroy!
+      end
+
+      redirect_to schema_path(schema_wrapper),
+        notice: "Edit affordance deleted."
+    end
+
     def delete_row
       body = deep_dup_json(@draft.body)
       rows = main_rows_for(body)

@@ -12,6 +12,11 @@
           class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black px-3 text-sm font-medium shadow-sm transition-all hover:translate-y-1 hover:shadow-none #{@tab == tab ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}"
       = render ButtonComponent.new(href: new_draft_commit_path(@draft), size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
         Commit affordance
+      = button_to "Delete affordance",
+        affordance_draft_edit_affordance_builder_path(@draft),
+        method: :delete,
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance", turbo_confirm: "Delete this edit affordance? This cannot be undone." } },
+        class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
 
     - if flash[:alert].present?
       = render AlertComponent.new(variant: :destructive) do

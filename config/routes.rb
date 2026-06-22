@@ -37,6 +37,7 @@ Rails.application.routes.draw do
       patch :add_row
       patch :update_screen
       patch :update_raw
+      delete :affordance, action: :destroy_affordance
       get "rows/:row_index", action: :row, as: :row
       delete "rows/:row_index", action: :delete_row
       patch "rows/:row_index/move", action: :move_row, as: :move_row
