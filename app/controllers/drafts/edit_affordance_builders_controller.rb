@@ -42,6 +42,9 @@ module Drafts
 
       redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
         notice: "Field added."
+    rescue ArgumentError => e
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        alert: e.message
     end
 
     def update_screen
@@ -214,15 +217,17 @@ module Drafts
 
     def target_row(main_screen)
       rows = main_screen["rows"] = Array(main_screen["rows"])
-      selected_index = params[:row_index].presence
-      return append_row(rows) if selected_index == "new" || rows.empty?
+      raise ArgumentError, "Add a row before adding fields." if rows.empty?
 
-      index = Integer(selected_index, 10)
+      selected_index = params[:row_index].presence || (rows.length - 1).to_s
+      index = begin
+        Integer(selected_index, 10)
+      rescue ArgumentError
+        raise ArgumentError, "Select an existing row before adding a field."
+      end
       return rows[index] if index >= 0 && index < rows.length
 
-      append_row(rows)
-    rescue ArgumentError
-      append_row(rows)
+      raise ArgumentError, "Select an existing row before adding a field."
     end
 
     def append_row(rows)

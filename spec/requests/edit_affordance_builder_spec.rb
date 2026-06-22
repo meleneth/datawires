@@ -79,12 +79,17 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Biography (/bio)")
     expect(response.body).to include("Screen layout")
     expect(response.body).to include("Add row")
+    expect(response.body).to include("Add a row before adding fields.")
     expect(response.body).to include("Collection policy: array fields only.")
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
 
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/name",
       widget: "text",
-      row_index: "new",
+      row_index: "0",
       label: "1",
       help: "Use the public name."
     }
@@ -121,6 +126,23 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Seeded preview")
     expect(response.body).to include("Display Name")
     expect(response.body).to include("/name")
+  end
+
+  it "requires an existing row before adding a field" do
+    draft = create_builder_draft
+
+    expect {
+      patch add_field_draft_edit_affordance_builder_path(draft), params: {
+        ptr: "/name",
+        widget: "text",
+        row_index: "new",
+        label: "1"
+      }
+    }.not_to change { draft.reload.body.dig("screens", 0, "rows") }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    follow_redirect!
+    expect(response.body).to include("Add a row before adding fields.")
   end
 
   it "continues an uncommitted edit affordance draft from the schema page" do
@@ -204,10 +226,11 @@ RSpec.describe "Edit affordance builder", type: :request do
   it "visits row and field nodes, reorders fields, and deletes created nodes" do
     draft = create_builder_draft
 
+    patch add_row_draft_edit_affordance_builder_path(draft)
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/name",
       widget: "text",
-      row_index: "new",
+      row_index: "0",
       label: "1"
     }
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
@@ -259,16 +282,18 @@ RSpec.describe "Edit affordance builder", type: :request do
   it "reorders rows from the main builder screen" do
     draft = create_builder_draft
 
+    patch add_row_draft_edit_affordance_builder_path(draft)
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/name",
       widget: "text",
-      row_index: "new",
+      row_index: "0",
       label: "1"
     }
+    patch add_row_draft_edit_affordance_builder_path(draft)
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/bio",
       widget: "textarea",
-      row_index: "new",
+      row_index: "1",
       label: "1"
     }
 
@@ -325,11 +350,12 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Title binding")
     expect(response.body).to include("data-array=\"true\"")
 
+    patch add_row_draft_edit_affordance_builder_path(draft)
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/items",
       widget: "array",
       span: "12",
-      row_index: "new",
+      row_index: "0",
       label: "1",
       collection_presentation: "cards",
       collection_creation: "inline_blank_form",

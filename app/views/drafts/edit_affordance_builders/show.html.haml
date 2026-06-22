@@ -60,6 +60,9 @@
         = render CardContentComponent.new do
           .space-y-4
             = render TypographyComponent.new(as: :h3, text: "Add field")
+            - if @rows.empty?
+              = render AlertComponent.new do
+                Add a row before adding fields.
             = form_with url: add_field_draft_edit_affordance_builder_path(@draft),
               method: :patch,
               data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
@@ -78,9 +81,9 @@
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Row", for_id: "row_index")
-                  - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] } + [["New row", "new"]]
+                  - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] }
                   = select_tag :row_index,
-                    options_for_select(row_options, @rows.empty? ? "new" : [@rows.length - 1, 0].max),
+                    options_for_select(row_options, @rows.empty? ? nil : @rows.length - 1),
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Span", for_id: "span")
@@ -155,7 +158,8 @@
                 Collection policy: array fields only.
 
               = submit_tag "Add field",
-                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+                disabled: @rows.empty?,
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none#{@rows.empty? ? " cursor-not-allowed opacity-50" : ""}"
 
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
