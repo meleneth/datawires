@@ -74,6 +74,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Preview")
     expect(response.body).to include("Diagnostics")
     expect(response.body).to include("Raw")
+    expect(response.body).to include("max-width: 1920px;")
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
     expect(response.body).to include("Screen layout")

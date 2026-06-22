@@ -1,5 +1,5 @@
 = turbo_frame_tag "main_content" do
-  %section.space-y-6
+  %section{ class: "mx-auto w-full space-y-6", style: "max-width: 1920px;" }
     %header.space-y-2
       = render TypographyComponent.new(as: :h1, text: "Edit affordance builder")
       = render TypographyComponent.new(as: :muted, text: "#{@edit_affordance.title} for #{@schema_wrapper.key}")
