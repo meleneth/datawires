@@ -10,12 +10,12 @@ Keep affordances as ordinary schema-backed documents, but avoid making the affor
 
 Architecture path:
 
-- [ ] Raw affordance document JSON.
+- [x] Raw affordance document JSON.
 - [x] Schema validation.
-- [ ] Compatibility/version upgrade.
+- [x] Compatibility/version upgrade.
 - [x] Projection into an immutable editor model.
-- [ ] Rendering by components.
-- [ ] Emission of draft mutations, navigation actions, and commit actions.
+- [x] Rendering by components.
+- [x] Emission of draft mutations, navigation actions, and commit actions.
 
 ## Current Baseline
 
@@ -70,47 +70,47 @@ Architecture path:
 
 ## Phase 4: Add Screens And Navigation
 
-- [ ] Replace the single implicit screen with a `screens` collection while preserving compatibility with current `screen`/`rows`.
-- [ ] Add screen ids, titles, root bindings, and row definitions.
-- [ ] Add navigation actions between screens.
-- [ ] Add affordance-level start screen selection.
-- [ ] Add path variables for screens rooted at collection items, such as `/items/:index`.
-- [ ] Support commit behavior per screen or globally.
-- [ ] Add route/controller tests for screen navigation and item-screen navigation.
+- [x] Replace the single implicit screen with a `screens` collection while preserving compatibility with current `screen`/`rows`.
+- [x] Add screen ids, titles, root bindings, and row definitions.
+- [x] Add navigation actions between screens.
+- [x] Add affordance-level start screen selection.
+- [x] Add path variables for screens rooted at collection items, such as `/items/:index`.
+- [x] Support commit behavior per screen or globally.
+- [x] Add route/controller tests for screen navigation and item-screen navigation.
 
 ## Phase 5: Add Subforms And Rooted Reuse
 
-- [ ] Introduce named subforms for object fields and collection item objects.
-- [ ] Let a subform declare its own rows relative to a root binding.
-- [ ] Allow collection item screens to reuse a named subform.
-- [ ] Decide whether subforms live inline in the affordance document or as separate affordance documents.
-- [ ] Add projection tests for nested object and collection-item roots.
+- [x] Introduce named subforms for object fields and collection item objects.
+- [x] Let a subform declare its own rows relative to a root binding.
+- [x] Allow collection item screens to reuse a named subform.
+- [x] Decide whether subforms live inline in the affordance document or as separate affordance documents.
+- [x] Add projection tests for nested object and collection-item roots.
 
 ## Phase 6: Build The Structured Affordance Authoring UI
 
-- [ ] Add a way to create an edit affordance for a schema from the schema page.
-- [ ] Start with a structured builder, not raw JSON-only editing.
-- [ ] Let authors add rows and fields by selecting from schema paths.
-- [ ] Let authors configure spans, labels, widget type, and help text.
-- [ ] Let authors configure collection policy and item title/subtitle bindings.
-- [ ] Show a live preview against a draft or seeded example document.
-- [ ] Show projection diagnostics and schema validation errors inline.
-- [ ] Keep a raw JSON editor/escape hatch so bad affordance documents can be repaired.
-- [ ] Save affordance changes through the normal draft/commit flow.
+- [x] Add a way to create an edit affordance for a schema from the schema page.
+- [x] Start with a structured builder, not raw JSON-only editing.
+- [x] Let authors add rows and fields by selecting from schema paths.
+- [x] Let authors configure spans, labels, widget type, and help text.
+- [x] Let authors configure collection policy and item title/subtitle bindings.
+- [x] Show a live preview against a draft or seeded example document.
+- [x] Show projection diagnostics and schema validation errors inline.
+- [x] Keep a raw JSON editor/escape hatch so bad affordance documents can be repaired.
+- [x] Save affordance changes through the normal draft/commit flow.
 
 ## Phase 7: Let Affordance Authoring Become Bespoke
 
-- [ ] Create a bespoke edit affordance for the `edit-form` schema after the builder concepts are stable.
-- [ ] Use that affordance to author ordinary affordances, but preserve the generated/raw fallback.
-- [ ] Add guardrails so a broken affordance editor never blocks repairing affordances.
-- [ ] Document the self-hosting path and the fallback recovery path.
+- [x] Create a bespoke edit affordance for the `edit-form` schema after the builder concepts are stable.
+- [x] Use that affordance to author ordinary affordances, but preserve the generated/raw fallback.
+- [x] Add guardrails so a broken affordance editor never blocks repairing affordances.
+- [x] Document the self-hosting path and the fallback recovery path.
 
 ## Fixtures And Documentation
 
-- [ ] Add fixture affordances for a flat object.
-- [ ] Add fixture affordances for a nested object.
-- [ ] Add fixture affordances for an object array.
-- [ ] Add fixture affordances for a scalar array.
-- [ ] Add fixture affordances for a mixed workflow.
-- [ ] Improve commit review so users understand what the affordance changed in the draft body.
-- [ ] Add developer docs for the affordance DSL once collection editing stabilizes.
+- [x] Add fixture affordances for a flat object.
+- [x] Add fixture affordances for a nested object.
+- [x] Add fixture affordances for an object array.
+- [x] Add fixture affordances for a scalar array.
+- [x] Add fixture affordances for a mixed workflow.
+- [x] Improve commit review so users understand what the affordance changed in the draft body.
+- [x] Add developer docs for the affordance DSL once collection editing stabilizes.

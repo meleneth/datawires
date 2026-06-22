@@ -3,6 +3,37 @@
 require "rails_helper"
 
 RSpec.describe "Draft commits", type: :request do
+  describe "GET /drafts/:draft_id/commit/new" do
+    it "shows draft body changes before publishing" do
+      document = create(
+        :document,
+        :with_plain_head_revision,
+        head_body: {
+          "name" => "Old name",
+          "status" => "draft"
+        }
+      )
+      draft = create(
+        :draft,
+        document: document,
+        based_on_revision: document.head_revision,
+        body: {
+          "name" => "New name",
+          "status" => "draft"
+        }
+      )
+
+      get new_draft_commit_path(draft)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Commit draft")
+      expect(response.body).to include("Changes")
+      expect(response.body).to include("/name")
+      expect(response.body).to include("Old name")
+      expect(response.body).to include("New name")
+    end
+  end
+
   describe "POST /drafts/:draft_id/commit" do
     it "blocks unsupported schema declarations until confirmed" do
       draft = create(

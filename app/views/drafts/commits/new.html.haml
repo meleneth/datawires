@@ -17,7 +17,9 @@
             %dt.text-muted-foreground Draft
             %dd.font-head.text-foreground= @draft.id
 
-    = form_with url: draft_commit_path(@draft),
+    = render "drafts/review", draft: @draft, diff_rows: @diff_rows
+
+    = form_with url: draft_commit_path(@draft, path: @path, screen: @screen, edit_affordance_id: @edit_affordance_id),
                 method: :post,
                 scope: :commit,
                 data: { turbo_frame: "main_content" },
@@ -49,5 +51,5 @@
         = f.submit "Commit draft",
           name: nil,
           class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
-        = render ButtonComponent.new(href: draft_path(@draft), variant: :outline, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+        = render ButtonComponent.new(href: draft_path(@draft, path: @path, screen: @screen, edit_affordance_id: @edit_affordance_id), variant: :outline, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
           Back to editor

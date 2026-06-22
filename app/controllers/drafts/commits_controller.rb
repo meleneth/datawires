@@ -5,6 +5,7 @@ class Drafts::CommitsController < ApplicationController
 
   def new
     @preflight = DraftCommitPreflight.new(draft: @draft)
+    @diff_rows = draft_diff_rows
   end
 
   def create
@@ -14,6 +15,7 @@ class Drafts::CommitsController < ApplicationController
     )
 
     if @preflight.blocked?
+      @diff_rows = draft_diff_rows
       flash.now[:alert] = "Confirm the commit warnings to continue."
       render :new, status: :unprocessable_entity
       return
@@ -31,6 +33,7 @@ class Drafts::CommitsController < ApplicationController
     redirect_to draft_path(@draft),
       alert: e.message
   rescue ActiveRecord::RecordInvalid
+    @diff_rows = draft_diff_rows
     flash.now[:alert] = "Could not commit draft."
     render :new, status: :unprocessable_entity
   end
@@ -41,9 +44,19 @@ class Drafts::CommitsController < ApplicationController
     @draft = Draft.find(params[:draft_id])
     @document = @draft.document
     @domain = @document.domain
+    @path = params[:path].presence
+    @screen = params[:screen].presence
+    @edit_affordance_id = params[:edit_affordance_id].presence
   end
 
   def commit_params
     params.require(:commit).permit(:message, confirmed_warnings: [])
+  end
+
+  def draft_diff_rows
+    Documents::Diff.rows(
+      before: @draft.based_on_revision&.body,
+      after: @draft.body
+    )
   end
 end

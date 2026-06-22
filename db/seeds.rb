@@ -6,16 +6,20 @@ require_relative "seeds/support/journey_event_example_document"
 require_relative "seeds/json_schema_2020_12"
 require_relative "seeds/journey_event_edit_affordance"
 require_relative "seeds/edit_form_schema"
+require_relative "seeds/edit_form_edit_affordance"
 require_relative "seeds/journey_item_collection_schema"
 require_relative "seeds/journey_item_collection_edit_affordance"
+require_relative "seeds/affordance_fixture_examples"
 
 Seeds::JsonSchema202012.seed!
 Seeds::EditFormSchema.seed!
+Seeds::EditFormEditAffordance.seed!
 Seeds::JourneyEventSchema.seed!
 Seeds::JourneyEventExampleDocument.seed!
 Seeds::JourneyEventEditAffordance.seed!
 Seeds::JourneyItemCollectionSchema.seed!
 Seeds::JourneyItemCollectionEditAffordance.seed!
+Seeds::AffordanceFixtureExamples.seed!
 
 
 # This file should ensure the existence of records required to run the application in every environment (production,
