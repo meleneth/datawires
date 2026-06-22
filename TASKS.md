@@ -1,135 +1,36 @@
 # Task List
 
-## Edit Affordance Roadmap
+This file is now the live working list only. Historical roadmap detail lives in
+the commit history.
 
-The next major design goal is to make bespoke editing experiences for schema-backed JSON documents. An edit affordance should describe both layout and workflow: what fields appear together, how collections are edited, what opens into another screen, and how a draft reaches review/commit.
+## Current Focus
 
-Keep affordances as ordinary schema-backed documents, but avoid making the affordance editor fully self-referential too early. Build a constrained authoring experience first, then let it grow into its own affordance once the concepts are stable.
+Keep shaping the edit affordance builder through hands-on use. Optimize for
+small, practical wins that make the builder easier to thrash, repair, and trust.
 
-**Invariant:** A broken bespoke affordance must never prevent editing the document or repairing the affordance.
+**Invariant:** A broken bespoke affordance must never prevent editing the
+document or repairing the affordance.
 
-Architecture path:
+## Current State
 
-- [x] Raw affordance document JSON.
-- [x] Schema validation.
-- [x] Compatibility/version upgrade.
-- [x] Projection into an immutable editor model.
-- [x] Rendering by components.
-- [x] Emission of draft mutations, navigation actions, and commit actions.
+- [x] Edit affordances are schema-backed documents attached to schemas.
+- [x] Bespoke affordances have a generated/raw fallback path.
+- [x] The affordance DSL is versioned, validated, projected, documented, and
+      covered by diagnostics.
+- [x] Runtime editing supports screens, navigation, subforms, collection
+      behavior, draft mutation, and commit flow.
+- [x] The structured builder can create/edit affordance drafts from schema
+      pages.
+- [x] The builder supports rows, fields, spans, labels, widgets, help text,
+      collection policy, preview, diagnostics, raw JSON, and normal save/commit.
+- [x] The builder supports visiting row/field nodes, reordering rows and fields,
+      deleting rows/fields, continuing existing drafts, deleting affordances, and
+      requiring a row before fields can be added.
 
-## Current Baseline
+## Next Thrash Targets
 
-- [x] Store bespoke edit affordances as documents attached to a `SchemaWrapper`.
-- [x] Provide a generated fallback edit affordance for schema-backed documents without a bespoke affordance.
-- [x] Project simple rows, fields, labels, spans, widgets, and commit cells from an affordance body.
-- [x] Bind fields to document JSON pointers.
-- [x] Render arrays as openable item lists.
-- [x] Add array items by seeding from item schema and navigating to the new item screen.
-- [x] Prepare the test database during devcontainer startup.
-
-## Phase 1: Stabilize DSL, Versioning, Projection, And Diagnostics
-
-- [x] Rename or document the current JSON format as the first edit affordance DSL.
-- [x] Keep affordance documents versioned with an explicit `version`.
-- [x] Add compatibility handling for older affordance versions.
-- [x] Add an upgrade entry point, even while only one version exists.
-- [x] Expand the `edit-form` schema to include all currently accepted runtime values, including collection widgets.
-- [x] Add schema validation for edit affordance document bodies before they can be attached to a schema.
-- [x] Introduce an internal projected edit model separate from raw affordance JSON.
-- [x] Add `EditAffordances::Projection` with screens, rows, cells, bindings, defaults, and diagnostics.
-- [x] Split projected cells into value objects such as `EditAffordances::Cells::Field`, `Section`, `Array`, `Commit`, and `Invalid`.
-- [x] Add tests for projecting multi-field rows, object sections, array cells, commit cells, and invalid cells.
-- [x] In authoring mode, project invalid cells into diagnostics and inert invalid cells so affordances can be repaired.
-- [x] In runtime mode, fall back to generated/raw editing when a bespoke affordance is invalid.
-- [x] Add projection diagnostics so authoring errors can be shown in the UI.
-- [x] Add `SchemaPaths::Inventory` as an early service for schema path discovery.
-- [x] Use `SchemaPaths::Inventory` for generated fallback affordances, builder field picking, diagnostics, widget inference, required markers, default labels, and later preview/example generation.
-
-## Phase 2: Improve Single-Screen Forms
-
-- [x] Support field help text, placeholder text, and required markers.
-- [x] Support `textarea`, `select`, `checkbox`, `number`, `text`, and `auto` consistently in both schema and runtime.
-- [x] Add field-level display options such as hidden label, compact width, and read-only/value preview.
-- [x] Honor `screen.default_span` when a cell span is omitted.
-- [x] Add tests for required optional blank behavior in the projected editor UI.
-- [x] Review autosave and review-panel updates for all widget types.
-
-## Phase 3: Model Collection Editing
-
-- [x] Add explicit `collection` config to array field cells.
-- [x] Avoid modeling collection behavior as one large enum; split it into presentation, creation behavior, navigation behavior, delete policy, reorder policy, and item title/subtitle bindings.
-- [x] Support the current behavior as `list_open`.
-- [x] Add `new_screen` behavior for collections that should create an item and navigate to its own screen.
-- [x] Add `inline_blank_form` behavior for collections that should show a new-item form in place.
-- [x] Add `table` presentation for collections of small scalar/object records.
-- [x] Add `cards` or `list_cards` presentation for richer repeated objects.
-- [x] Add item title and subtitle bindings, defaulting to `name` when present.
-- [x] Decide a stable item identity strategy before exposing destructive collection controls, because index-addressed item screens are fragile when reorder/delete exists.
-- [x] Add reorder policy controls only after stable item identity is settled.
-- [x] Add request/component coverage for each collection presentation and behavior.
-
-## Phase 4: Add Screens And Navigation
-
-- [x] Replace the single implicit screen with a `screens` collection while preserving compatibility with current `screen`/`rows`.
-- [x] Add screen ids, titles, root bindings, and row definitions.
-- [x] Add navigation actions between screens.
-- [x] Add affordance-level start screen selection.
-- [x] Add path variables for screens rooted at collection items, such as `/items/:index`.
-- [x] Support commit behavior per screen or globally.
-- [x] Add route/controller tests for screen navigation and item-screen navigation.
-
-## Phase 5: Add Subforms And Rooted Reuse
-
-- [x] Introduce named subforms for object fields and collection item objects.
-- [x] Let a subform declare its own rows relative to a root binding.
-- [x] Allow collection item screens to reuse a named subform.
-- [x] Decide whether subforms live inline in the affordance document or as separate affordance documents.
-- [x] Add projection tests for nested object and collection-item roots.
-
-## Phase 6: Build The Structured Affordance Authoring UI
-
-- [x] Add a way to create an edit affordance for a schema from the schema page.
-- [x] Start with a structured builder, not raw JSON-only editing.
-- [x] Let authors add rows and fields by selecting from schema paths.
-- [x] Let authors configure spans, labels, widget type, and help text.
-- [x] Let authors configure collection policy and item title/subtitle bindings.
-- [x] Show a live preview against a draft or seeded example document.
-- [x] Show projection diagnostics and schema validation errors inline.
-- [x] Keep a raw JSON editor/escape hatch so bad affordance documents can be repaired.
-- [x] Save affordance changes through the normal draft/commit flow.
-
-## Phase 7: Let Affordance Authoring Become Bespoke
-
-- [x] Create a bespoke edit affordance for the `edit-form` schema after the builder concepts are stable.
-- [x] Use that affordance to author ordinary affordances, but preserve the generated/raw fallback.
-- [x] Add guardrails so a broken affordance editor never blocks repairing affordances.
-- [x] Document the self-hosting path and the fallback recovery path.
-
-## Fixtures And Documentation
-
-- [x] Add fixture affordances for a flat object.
-- [x] Add fixture affordances for a nested object.
-- [x] Add fixture affordances for an object array.
-- [x] Add fixture affordances for a scalar array.
-- [x] Add fixture affordances for a mixed workflow.
-- [x] Improve commit review so users understand what the affordance changed in the draft body.
-- [x] Add developer docs for the affordance DSL once collection editing stabilizes.
-
-## Phase 8: Builder Thrash Pass
-
-Manual testing in the edit affordance builder exposed the first set of "almost coherent" usability gaps. Optimize this pass for practical authoring on 2k and 4k screens, while keeping the raw/repair escape hatch intact.
-
-- [x] Add explicit row creation in the structured builder.
-- [x] Let authors choose whether a newly added field goes into an existing row or a new row.
-- [x] Show row boundaries clearly in the builder so field grouping is understandable before preview.
-- [x] Allow field spans from 1 through 12 in the structured builder and `edit-form` schema.
-- [x] Default newly added field spans to 3 so simple forms are not cramped by default.
-- [x] Add builder coverage for multiple fields sharing one row with spans that sum to the screen columns.
-- [x] Add validation or diagnostics for spans that are outside the supported range or produce unusably cramped rows.
-- [x] Add an affordance-level or screen-level width setting with at least `narrow`, `medium`, `large`, and `full`.
-- [x] Default editor pages to a `large` width that uses at least two thirds of available horizontal space on 2k and 4k displays.
-- [x] Apply the width setting consistently to the runtime editor, builder preview, and self-hosted affordance editor.
-- [x] Display field help text in the builder's current-screen field cards, preferably in a right-side affordance/details area.
-- [x] Hide collection-policy controls unless the selected schema path is an array node.
-- [x] When collection controls are hidden, make it clear that collection policy only applies to array fields.
-- [x] Add request/system coverage for builder row creation, default spans, contextual collection controls, and page-width settings.
+- [ ] Use the builder to author or revise a real edit affordance and capture the
+      next rough edges here.
+- [ ] Keep every new builder affordance reachable, reversible, and repairable.
+- [ ] Prefer constrained wins over broad abstractions until the missing shapes
+      are obvious from use.
