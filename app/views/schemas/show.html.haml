@@ -44,11 +44,18 @@
               - if affordance.edit_document.present?
                 .text-xs.text-muted-foreground= affordance.edit_document.title.presence || affordance.edit_document.key
 
-            = button_to "New with this affordance",
-              schema_documents_path(@schema_wrapper, edit_affordance_id: affordance.id),
-              method: :post,
-              form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
-              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            .flex.flex-wrap.justify-end.gap-2
+              - affordance_draft = @edit_affordance_drafts[affordance.edit_document_id]
+              = button_to(affordance_draft ? "Continue editing" : "Edit affordance",
+                draft_schema_edit_affordance_path(@schema_wrapper, affordance),
+                method: :post,
+                form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none")
+              = button_to "New with this affordance",
+                schema_documents_path(@schema_wrapper, edit_affordance_id: affordance.id),
+                method: :post,
+                form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
     - else
       = render TypographyComponent.new(as: :muted, text: "No edit affordances exist for this schema yet.", html_options: { class: "mt-2" })
 

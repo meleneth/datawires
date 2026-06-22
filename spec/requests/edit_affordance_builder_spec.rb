@@ -123,6 +123,44 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("/name")
   end
 
+  it "continues an uncommitted edit affordance draft from the schema page" do
+    draft = create_builder_draft
+    edit_affordance = draft.document.edit_affordance
+
+    get schema_path(schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Continue editing")
+    expect(response.body).to include(draft_schema_edit_affordance_path(schema_wrapper, edit_affordance))
+
+    expect {
+      post draft_schema_edit_affordance_path(schema_wrapper, edit_affordance)
+    }.not_to change(Draft, :count)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft))
+  end
+
+  it "opens a new builder draft for an existing committed edit affordance" do
+    original_draft = create_builder_draft
+    edit_affordance = original_draft.document.edit_affordance
+    original_draft.destroy!
+
+    get schema_path(schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Edit affordance")
+
+    expect {
+      post draft_schema_edit_affordance_path(schema_wrapper, edit_affordance)
+    }.to change(Draft, :count).by(1)
+
+    draft = Draft.order(:created_at).last
+    expect(draft.document).to eq(edit_affordance.edit_document)
+    expect(draft.based_on_revision).to eq(edit_affordance.edit_document.head_revision)
+    expect(draft.body).to eq(edit_affordance.edit_document.body)
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft))
+  end
+
   it "adds explicit empty rows and shows row diagnostics until filled" do
     draft = create_builder_draft
 

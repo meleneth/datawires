@@ -44,6 +44,9 @@ class SchemasController < ApplicationController
     @domain = @schema_wrapper.domain
     @documents = @schema_wrapper.conforming_documents
     @edit_affordances = @schema_wrapper.edit_affordances.order(:title)
+    @edit_affordance_drafts = Draft
+      .where(document_id: @edit_affordances.map(&:edit_document_id), created_by: current_user)
+      .index_by(&:document_id)
     @view_affordances = @schema_wrapper.view_affordances.order(:title)
   end
 

@@ -6,7 +6,9 @@ Rails.application.routes.draw do
 
   resources :schemas, only: %i[show] do
     resources :documents, only: %i[create], module: :schemas
-    resources :edit_affordances, only: %i[create], module: :schemas
+    resources :edit_affordances, only: %i[create], module: :schemas do
+      post :draft, on: :member
+    end
   end
 
   resources :documents, only: %i[show] do
