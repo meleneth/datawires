@@ -137,6 +137,61 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("screens/0/rows/0 must contain at least one cell")
   end
 
+  it "visits row and field nodes, reorders fields, and deletes created nodes" do
+    draft = create_builder_draft
+
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "new",
+      label: "1"
+    }
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "0",
+      label: "1"
+    }
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(row_draft_edit_affordance_builder_path(draft, row_index: 0))
+    expect(response.body).to include(cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0))
+
+    get row_draft_edit_affordance_builder_path(draft, row_index: 0)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Row 1")
+    expect(response.body).to include("Left")
+    expect(response.body).to include("Right")
+    expect(response.body).to include("Delete row")
+
+    patch move_cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      direction: "right"
+    }
+
+    expect(response).to redirect_to(row_draft_edit_affordance_builder_path(draft, row_index: 0))
+    expect(draft.reload.body.dig("screens", 0, "rows", 0).map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/bio /name])
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 1)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Field 2")
+    expect(response.body).to include("/name")
+    expect(response.body).to include("Delete field")
+
+    delete cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 1)
+
+    expect(response).to redirect_to(row_draft_edit_affordance_builder_path(draft, row_index: 0))
+    expect(draft.reload.body.dig("screens", 0, "rows", 0).map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/bio])
+
+    delete row_draft_edit_affordance_builder_path(draft, row_index: 0)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows")).to eq([])
+  end
+
   it "updates screen width and default span" do
     draft = create_builder_draft
 

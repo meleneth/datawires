@@ -35,6 +35,11 @@ Rails.application.routes.draw do
       patch :add_row
       patch :update_screen
       patch :update_raw
+      get "rows/:row_index", action: :row, as: :row
+      delete "rows/:row_index", action: :delete_row
+      get "rows/:row_index/cells/:cell_index", action: :cell, as: :cell
+      delete "rows/:row_index/cells/:cell_index", action: :delete_cell
+      patch "rows/:row_index/cells/:cell_index/move", action: :move_cell, as: :move_cell
     end
   end
 

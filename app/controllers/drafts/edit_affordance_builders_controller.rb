@@ -12,6 +12,22 @@ module Drafts
       @tab = tab_param
     end
 
+    def row
+      @tab = "row"
+      @row_index = row_index_param
+      @row = row_at!(@row_index)
+      render :show
+    end
+
+    def cell
+      @tab = "cell"
+      @row_index = row_index_param
+      @cell_index = cell_index_param
+      @row = row_at!(@row_index)
+      @cell = cell_at!(@row, @cell_index)
+      render :show
+    end
+
     def add_row
       body = deep_dup_json(@draft.body)
       ensure_main_screen(body)["rows"] << []
@@ -47,6 +63,52 @@ module Drafts
     rescue JSON::ParserError => e
       redirect_to draft_edit_affordance_builder_path(@draft, tab: "raw"),
         alert: "Invalid JSON: #{e.message}"
+    end
+
+    def delete_row
+      body = deep_dup_json(@draft.body)
+      rows = main_rows_for(body)
+      index = row_index_param
+      row_at!(index, rows: rows)
+      rows.delete_at(index)
+      @draft.update!(body: body)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Row deleted."
+    end
+
+    def delete_cell
+      body = deep_dup_json(@draft.body)
+      rows = main_rows_for(body)
+      row_index = row_index_param
+      cell_index = cell_index_param
+      row = row_at!(row_index, rows: rows)
+      cell_at!(row, cell_index)
+      row.delete_at(cell_index)
+      @draft.update!(body: body)
+
+      redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+        notice: "Field deleted."
+    end
+
+    def move_cell
+      body = deep_dup_json(@draft.body)
+      rows = main_rows_for(body)
+      row_index = row_index_param
+      cell_index = cell_index_param
+      row = row_at!(row_index, rows: rows)
+      cell_at!(row, cell_index)
+      target_index = target_cell_index(cell_index, params[:direction])
+      unless target_index >= 0 && target_index < row.length
+        return redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+          alert: "Field cannot be moved #{params[:direction]}."
+      end
+
+      row[cell_index], row[target_index] = row[target_index], row[cell_index]
+      @draft.update!(body: body)
+
+      redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+        notice: "Field moved."
     end
 
     private
@@ -196,6 +258,41 @@ module Drafts
 
     def current_main_screen
       Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
+    end
+
+    def main_rows_for(body)
+      Array(ensure_main_screen(body)["rows"])
+    end
+
+    def row_index_param
+      Integer(params.require(:row_index), 10)
+    end
+
+    def cell_index_param
+      Integer(params.require(:cell_index), 10)
+    end
+
+    def row_at!(index, rows: @rows)
+      return rows[index] if index >= 0 && index < rows.length && rows[index].is_a?(Array)
+
+      raise ActiveRecord::RecordNotFound, "row not found"
+    end
+
+    def cell_at!(row, index)
+      return row[index] if index >= 0 && index < row.length && row[index].is_a?(Hash)
+
+      raise ActiveRecord::RecordNotFound, "field not found"
+    end
+
+    def target_cell_index(cell_index, direction)
+      case direction
+      when "left"
+        cell_index - 1
+      when "right"
+        cell_index + 1
+      else
+        cell_index
+      end
     end
 
     def width_class_for(width)

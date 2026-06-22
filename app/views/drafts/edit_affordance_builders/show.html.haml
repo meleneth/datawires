@@ -163,13 +163,16 @@
               - @rows.each_with_index do |row, row_index|
                 %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
                   .flex.items-center.justify-between.gap-3
-                    .font-head Row #{row_index + 1}
+                    = link_to "Row #{row_index + 1}",
+                      row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                      data: { turbo_frame: "main_content" },
+                      class: "font-head underline decoration-2 underline-offset-4"
                     .text-xs.text-muted-foreground= pluralize(row.length, "cell")
                   - if row.empty?
                     .mt-2.text-muted-foreground Empty row
                   - else
                     .mt-3.space-y-2
-                      - row.each do |cell|
+                      - row.each_with_index do |cell, cell_index|
                         .grid.gap-3.rounded.border-2.border-black.bg-background.p-3.md:grid-cols-3
                           .md:col-span-2
                             .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
@@ -185,6 +188,100 @@
                               = cell["help"]
                             - else
                               No help text.
+                            .mt-3
+                              = link_to "Open field",
+                                cell_draft_edit_affordance_builder_path(@draft, row_index: row_index, cell_index: cell_index),
+                                data: { turbo_frame: "main_content" },
+                                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+
+    - elsif @tab == "row"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            .flex.flex-wrap.items-center.justify-between.gap-3
+              .space-y-1
+                = render TypographyComponent.new(as: :h3, text: "Row #{@row_index + 1}")
+                = render TypographyComponent.new(as: :muted, text: pluralize(@row.length, "field"))
+              .flex.flex-wrap.gap-2
+                = link_to "Back to builder",
+                  draft_edit_affordance_builder_path(@draft, tab: "builder"),
+                  data: { turbo_frame: "main_content" },
+                  class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                = button_to "Delete row",
+                  row_draft_edit_affordance_builder_path(@draft, row_index: @row_index),
+                  method: :delete,
+                  form: { data: { turbo_frame: "main_content" } },
+                  class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+
+            - if @row.empty?
+              = render AlertComponent.new do
+                Empty row.
+            - else
+              %ol.space-y-2
+                - @row.each_with_index do |cell, cell_index|
+                  %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
+                    .flex.flex-wrap.items-start.justify-between.gap-3
+                      .space-y-1
+                        .font-head Field #{cell_index + 1}
+                        .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
+                        .text-xs.text-muted-foreground
+                          Span #{cell["span"] || @main_screen&.fetch("default_span", 3)}
+                      .flex.flex-wrap.gap-2
+                        - if cell_index.positive?
+                          = button_to "Left",
+                            move_cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                            method: :patch,
+                            params: { direction: "left" },
+                            form: { data: { turbo_frame: "main_content" } },
+                            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                        - if cell_index < @row.length - 1
+                          = button_to "Right",
+                            move_cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                            method: :patch,
+                            params: { direction: "right" },
+                            form: { data: { turbo_frame: "main_content" } },
+                            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                        = link_to "Open",
+                          cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                          data: { turbo_frame: "main_content" },
+                          class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                        = button_to "Delete",
+                          cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                          method: :delete,
+                          form: { data: { turbo_frame: "main_content" } },
+                          class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-xs font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+
+    - elsif @tab == "cell"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            .flex.flex-wrap.items-start.justify-between.gap-3
+              .space-y-1
+                = render TypographyComponent.new(as: :h3, text: "Field #{@cell_index + 1}")
+                = render TypographyComponent.new(as: :muted, text: "Row #{@row_index + 1}")
+              .flex.flex-wrap.gap-2
+                = link_to "Back to row",
+                  row_draft_edit_affordance_builder_path(@draft, row_index: @row_index),
+                  data: { turbo_frame: "main_content" },
+                  class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                = button_to "Delete field",
+                  cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+                  method: :delete,
+                  form: { data: { turbo_frame: "main_content" } },
+                  class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+            .grid.gap-3.md:grid-cols-2
+              .rounded.border-2.border-black.bg-background.p-3
+                .font-head.text-sm Binding
+                .mt-2.font-mono.text-xs.text-muted-foreground= @cell.dig("binding", "ptr") || @cell["kind"]
+              .rounded.border-2.border-black.bg-background.p-3
+                .font-head.text-sm Span
+                .mt-2.text-sm= @cell["span"] || @main_screen&.fetch("default_span", 3)
+              .rounded.border-2.border-black.bg-background.p-3
+                .font-head.text-sm Widget
+                .mt-2.text-sm= @cell["widget"] || "auto"
+              .rounded.border-2.border-black.bg-background.p-3
+                .font-head.text-sm Help
+                .mt-2.text-sm.text-muted-foreground= @cell["help"].presence || "No help text."
 
     - elsif @tab == "preview"
       %div{ class: @builder_width_class }
