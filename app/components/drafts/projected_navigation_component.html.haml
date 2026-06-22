@@ -1,0 +1,3 @@
+.flex.items-end.h-full
+  = render ButtonComponent.new(href: navigation_path, html_options: { data: { turbo_frame: "editor", turbo_action: "advance" } }) do
+    = navigation.label

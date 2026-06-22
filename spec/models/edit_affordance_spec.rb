@@ -131,7 +131,7 @@ RSpec.describe EditAffordance, type: :model do
 
       expect(affordance).not_to be_valid
       expect(affordance.errors[:edit_document]).to include(
-        "rows/0/0 must be a field or commit cell"
+        "rows/0/0 must be a field, navigation, or commit cell"
       )
     end
   end
@@ -199,6 +199,514 @@ RSpec.describe EditAffordance, type: :model do
         "readonly" => false
       )
       expect(cells.second).to be_a(EditAffordances::Cells::Commit)
+    end
+
+    it "projects legacy rows as a main screen for compatibility" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screen" => {
+            "columns" => 6,
+            "default_span" => 3,
+            "commit_mode" => "review_screen"
+          },
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/name"
+                }
+              }
+            ]
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor)
+      screen = projection.start_screen
+
+      expect(projection.start_screen_id).to eq("main")
+      expect(projection.rows).to eq(screen.rows)
+      expect(projection.screens.map(&:id)).to eq([ "main" ])
+      expect(screen.defaults.column_count).to eq(6)
+      expect(screen.rows.first.cells.first.span).to eq(3)
+      expect(screen.commit_mode).to eq("review_screen")
+    end
+
+    it "projects multiple screens and uses the configured start screen rows" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(
+          :document,
+          :with_head_revision,
+          head_body: {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://example.test/schemas/person",
+            "type" => "object",
+            "properties" => {
+              "name" => { "type" => "string" },
+              "profile" => {
+                "type" => "object",
+                "properties" => {
+                  "bio" => { "type" => "string" }
+                }
+              }
+            }
+          }
+        )
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "start_screen" => "profile",
+          "screens" => [
+            {
+              "id" => "summary",
+              "title" => "Summary",
+              "columns" => 12,
+              "default_span" => 6,
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/name"
+                    }
+                  }
+                ]
+              ]
+            },
+            {
+              "id" => "profile",
+              "title" => "Profile",
+              "columns" => 6,
+              "default_span" => 3,
+              "root_binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/profile"
+              },
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/profile/bio"
+                    }
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {
+          "profile" => {}
+        }
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor)
+      active_screen = projection.start_screen
+
+      expect(projection.start_screen_id).to eq("profile")
+      expect(projection.screens.map(&:id)).to eq([ "summary", "profile" ])
+      expect(active_screen.title).to eq("Profile")
+      expect(active_screen.root_cursor.path.to_s).to eq("/profile")
+      expect(active_screen.defaults.column_count).to eq(6)
+      expect(projection.rows).to eq(active_screen.rows)
+      expect(projection.rows.first.cells.first.name).to eq("bio")
+      expect(projection.rows.first.cells.first.span).to eq(3)
+    end
+
+    it "projects navigation cells between screens" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screens" => [
+            {
+              "id" => "summary",
+              "rows" => [
+                [
+                  {
+                    "kind" => "navigation",
+                    "target_screen" => "details",
+                    "span" => 12
+                  }
+                ]
+              ]
+            },
+            {
+              "id" => "details",
+              "title" => "Details",
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/name"
+                    }
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      summary_projection = affordance.projection(cursor)
+      details_projection = affordance.projection(cursor, screen_id: "details")
+      navigation = summary_projection.rows.first.cells.first
+
+      expect(navigation).to be_a(EditAffordances::Cells::Navigation)
+      expect(navigation.target_screen_id).to eq("details")
+      expect(navigation.label).to eq("Details")
+      expect(navigation.span).to eq(12)
+      expect(details_projection.rows.first.cells.first.name).to eq("name")
+    end
+
+    it "resolves global, screen, and cell commit modes" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "commit_mode" => "immediate",
+          "screens" => [
+            {
+              "id" => "summary",
+              "rows" => [
+                [
+                  {
+                    "kind" => "commit"
+                  }
+                ]
+              ]
+            },
+            {
+              "id" => "review",
+              "commit_mode" => "review_screen",
+              "rows" => [
+                [
+                  {
+                    "kind" => "commit",
+                    "commit_mode" => "immediate"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      summary_projection = affordance.projection(cursor)
+      review_projection = affordance.projection(cursor, screen_id: "review")
+
+      expect(summary_projection.start_screen.commit_mode).to eq("immediate")
+      expect(summary_projection.rows.first.cells.first.commit_mode).to eq("immediate")
+      expect(review_projection.start_screen.commit_mode).to eq("review_screen")
+      expect(review_projection.rows.first.cells.first.commit_mode).to eq("immediate")
+    end
+
+    it "substitutes path variables for collection item screens" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(
+          :document,
+          :with_head_revision,
+          head_body: {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://example.test/schemas/list",
+            "type" => "object",
+            "properties" => {
+              "items" => {
+                "type" => "array",
+                "items" => {
+                  "type" => "object",
+                  "properties" => {
+                    "name" => { "type" => "string" }
+                  }
+                }
+              }
+            }
+          }
+        )
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screens" => [
+            {
+              "id" => "item",
+              "root_binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/items/:index"
+              },
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/items/:index/name"
+                    }
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {
+          "items" => [
+            { "name" => "Ink" }
+          ]
+        }
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "/items/0")
+
+      projection = affordance.projection(cursor, screen_id: "item")
+      screen = projection.start_screen
+      cell = projection.rows.first.cells.first
+
+      expect(screen.root_cursor.path.to_s).to eq("/items/0")
+      expect(cell.cursor.path.to_s).to eq("/items/0/name")
+      expect(cell.name).to eq("name")
+    end
+
+    it "projects a named subform relative to an object screen root" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(
+          :document,
+          :with_head_revision,
+          head_body: {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://example.test/schemas/person",
+            "type" => "object",
+            "properties" => {
+              "profile" => {
+                "type" => "object",
+                "properties" => {
+                  "name" => { "type" => "string" },
+                  "bio" => { "type" => "string" }
+                }
+              }
+            }
+          }
+        )
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "subforms" => [
+            {
+              "id" => "profile_fields",
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/name"
+                    }
+                  },
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/bio"
+                    }
+                  }
+                ]
+              ]
+            }
+          ],
+          "screens" => [
+            {
+              "id" => "profile",
+              "root_binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/profile"
+              },
+              "subform" => "profile_fields"
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {
+          "profile" => {}
+        }
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor, screen_id: "profile")
+      cells = projection.rows.flat_map(&:cells)
+
+      expect(projection.start_screen.root_cursor.path.to_s).to eq("/profile")
+      expect(cells.map { |cell| cell.cursor.path.to_s }).to eq([ "/profile/name", "/profile/bio" ])
+    end
+
+    it "reuses a named subform for a collection item screen" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(
+          :document,
+          :with_head_revision,
+          head_body: {
+            "$schema" => Document::JSON_SCHEMA_2020_12,
+            "$id" => "http://example.test/schemas/list",
+            "type" => "object",
+            "properties" => {
+              "items" => {
+                "type" => "array",
+                "items" => {
+                  "type" => "object",
+                  "properties" => {
+                    "name" => { "type" => "string" },
+                    "quantity" => { "type" => "integer" }
+                  }
+                }
+              }
+            }
+          }
+        )
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "subforms" => [
+            {
+              "id" => "item_fields",
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/name"
+                    }
+                  },
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/quantity"
+                    }
+                  }
+                ]
+              ]
+            }
+          ],
+          "screens" => [
+            {
+              "id" => "item",
+              "root_binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/items/:index"
+              },
+              "subform" => "item_fields"
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {
+          "items" => [
+            { "name" => "Ink", "quantity" => 2 }
+          ]
+        }
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "/items/0")
+
+      projection = affordance.projection(cursor, screen_id: "item")
+      cells = projection.rows.flat_map(&:cells)
+
+      expect(projection.start_screen.root_cursor.path.to_s).to eq("/items/0")
+      expect(cells.map { |cell| cell.cursor.path.to_s }).to eq([ "/items/0/name", "/items/0/quantity" ])
     end
 
     it "projects array fields with explicit collection config" do

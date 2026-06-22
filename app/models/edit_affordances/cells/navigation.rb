@@ -2,13 +2,13 @@
 
 module EditAffordances
   module Cells
-    class Commit
-      attr_reader :span, :message_mode, :commit_mode
+    class Navigation
+      attr_reader :span, :target_screen_id, :label
 
-      def initialize(span:, message_mode:, commit_mode: "review_screen")
+      def initialize(span:, target_screen_id:, label:)
         @span = span
-        @message_mode = message_mode
-        @commit_mode = commit_mode
+        @target_screen_id = target_screen_id
+        @label = label
       end
 
       def field?
@@ -16,7 +16,7 @@ module EditAffordances
       end
 
       def commit?
-        true
+        false
       end
 
       def span_class(column_count)

@@ -35,8 +35,12 @@ module EditAffordances
       return [ "body must be a JSON object" ] unless body.is_a?(Hash)
 
       validate_version(errors)
+      validate_enum(errors, body, "commit_mode", COMMIT_MODES, "commit_mode")
       validate_screen(errors)
-      validate_rows(errors)
+      validate_start_screen(errors)
+      subform_ids = validate_subforms(errors)
+      validate_screens(errors, subform_ids: subform_ids)
+      validate_body_rows(errors) unless body.key?("screens")
 
       errors
     end
@@ -68,28 +72,134 @@ module EditAffordances
       validate_enum(errors, screen, "commit_mode", COMMIT_MODES, "screen.commit_mode")
     end
 
-    def validate_rows(errors)
-      rows = body["rows"]
+    def validate_start_screen(errors)
+      return unless body.key?("start_screen")
+      return if body["start_screen"].is_a?(String) && body["start_screen"].present?
+
+      errors << "start_screen must be a string"
+    end
+
+    def validate_subforms(errors)
+      return [] unless body.key?("subforms")
+
+      subforms = body["subforms"]
+      unless subforms.is_a?(Array)
+        errors << "subforms must be an array"
+        return []
+      end
+
+      subform_ids = []
+      subforms.each_with_index do |subform, subform_index|
+        subform_ids << subform["id"] if subform.is_a?(Hash) && subform["id"].is_a?(String)
+      end
+
+      subforms.each_with_index do |subform, subform_index|
+        validate_subform_definition(errors, subform, subform_index)
+      end
+
+      duplicate_ids(subform_ids).each { |id| errors << "subforms id #{id.inspect} must be unique" }
+      subform_ids
+    end
+
+    def validate_subform_definition(errors, subform, subform_index)
+      path = "subforms/#{subform_index}"
+
+      unless subform.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/id is required" unless subform["id"].is_a?(String) && subform["id"].present?
+      validate_binding(errors, subform["root_binding"], "#{path}/root_binding") if subform.key?("root_binding")
+      validate_rows(errors, key: "rows", path: "#{path}/rows", object: subform)
+    end
+
+    def validate_screens(errors, subform_ids:)
+      return unless body.key?("screens")
+
+      screens = body["screens"]
+      unless screens.is_a?(Array)
+        errors << "screens must be an array"
+        return
+      end
+
+      errors << "screens must contain at least one screen" if screens.empty?
+
+      screen_ids = []
+      screens.each_with_index do |screen, screen_index|
+        screen_ids << screen["id"] if screen.is_a?(Hash) && screen["id"].is_a?(String)
+      end
+
+      screens.each_with_index do |screen, screen_index|
+        validate_screen_definition(errors, screen, screen_index, screen_ids: screen_ids, subform_ids: subform_ids)
+      end
+
+      duplicate_ids(screen_ids).each { |id| errors << "screens id #{id.inspect} must be unique" }
+
+      return unless body["start_screen"].present? && !screen_ids.include?(body["start_screen"])
+
+      errors << "start_screen must match a screen id"
+    end
+
+    def validate_screen_definition(errors, screen, screen_index, screen_ids:, subform_ids:)
+      path = "screens/#{screen_index}"
+
+      unless screen.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/id is required" unless screen["id"].is_a?(String) && screen["id"].present?
+      validate_string(errors, screen, "title", "#{path}/title")
+      validate_positive_integer(errors, screen, "columns", "#{path}/columns")
+      validate_positive_integer(errors, screen, "default_span", "#{path}/default_span")
+      validate_enum(errors, screen, "mode", SCREEN_MODES, "#{path}/mode")
+      validate_enum(errors, screen, "commit_mode", COMMIT_MODES, "#{path}/commit_mode")
+      validate_binding(errors, screen["root_binding"], "#{path}/root_binding") if screen.key?("root_binding")
+      validate_screen_subform(errors, screen, "#{path}/subform", subform_ids: subform_ids)
+
+      if screen.key?("rows")
+        validate_rows(errors, key: "rows", path: "#{path}/rows", object: screen, screen_ids: screen_ids)
+      elsif !screen.key?("subform")
+        errors << "#{path}/rows must be an array"
+      end
+    end
+
+    def validate_screen_subform(errors, screen, path, subform_ids:)
+      return unless screen.key?("subform")
+
+      subform_id = screen["subform"]
+      if !subform_id.is_a?(String) || subform_id.blank?
+        errors << "#{path} must be a string"
+      elsif !subform_ids.include?(subform_id)
+        errors << "#{path} must match a subform id"
+      end
+    end
+
+    def validate_body_rows(errors)
+      validate_rows(errors, key: "rows", path: "rows", object: body)
+    end
+
+    def validate_rows(errors, key: "rows", path: "rows", object: body, screen_ids: nil)
+      rows = object[key]
 
       unless rows.is_a?(Array)
-        errors << "rows must be an array"
+        errors << "#{path} must be an array"
         return
       end
 
       rows.each_with_index do |row, row_index|
         unless row.is_a?(Array)
-          errors << "rows/#{row_index} must be an array"
+          errors << "#{path}/#{row_index} must be an array"
           next
         end
 
-        errors << "rows/#{row_index} must contain at least one cell" if row.empty?
-        row.each_with_index { |cell, cell_index| validate_cell(errors, cell, row_index, cell_index) }
+        errors << "#{path}/#{row_index} must contain at least one cell" if row.empty?
+        row.each_with_index { |cell, cell_index| validate_cell(errors, cell, "#{path}/#{row_index}/#{cell_index}", screen_ids: screen_ids) }
       end
     end
 
-    def validate_cell(errors, cell, row_index, cell_index)
-      path = "rows/#{row_index}/#{cell_index}"
-
+    def validate_cell(errors, cell, path, screen_ids: nil)
       unless cell.is_a?(Hash)
         errors << "#{path} must be an object"
         return
@@ -97,21 +207,23 @@ module EditAffordances
 
       if cell["kind"] == "commit"
         validate_commit_cell(errors, cell, path)
+      elsif cell["kind"] == "navigation"
+        validate_navigation_cell(errors, cell, path, screen_ids: screen_ids)
       elsif cell.key?("binding")
-        validate_field_cell(errors, cell, path)
+        validate_field_cell(errors, cell, path, screen_ids: screen_ids)
       else
-        errors << "#{path} must be a field or commit cell"
+        errors << "#{path} must be a field, navigation, or commit cell"
       end
     end
 
-    def validate_field_cell(errors, cell, path)
+    def validate_field_cell(errors, cell, path, screen_ids:)
       validate_binding(errors, cell["binding"], "#{path}/binding")
       validate_positive_integer(errors, cell, "span", "#{path}/span")
       validate_enum(errors, cell, "widget", SUPPORTED_WIDGETS, "#{path}/widget")
       validate_string(errors, cell, "help", "#{path}/help")
       validate_string(errors, cell, "placeholder", "#{path}/placeholder")
       validate_display(errors, cell, "#{path}/display")
-      validate_collection(errors, cell, "#{path}/collection")
+      validate_collection(errors, cell, "#{path}/collection", screen_ids: screen_ids)
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 
@@ -121,6 +233,19 @@ module EditAffordances
     def validate_commit_cell(errors, cell, path)
       validate_positive_integer(errors, cell, "span", "#{path}/span")
       validate_enum(errors, cell, "message_mode", MESSAGE_MODES, "#{path}/message_mode")
+      validate_enum(errors, cell, "commit_mode", COMMIT_MODES, "#{path}/commit_mode")
+    end
+
+    def validate_navigation_cell(errors, cell, path, screen_ids:)
+      validate_positive_integer(errors, cell, "span", "#{path}/span")
+      validate_string(errors, cell, "label", "#{path}/label")
+
+      target_screen = cell["target_screen"]
+      if !target_screen.is_a?(String) || target_screen.blank?
+        errors << "#{path}/target_screen is required"
+      elsif screen_ids && !screen_ids.include?(target_screen)
+        errors << "#{path}/target_screen must match a screen id"
+      end
     end
 
     def validate_binding(errors, binding, path)
@@ -149,7 +274,7 @@ module EditAffordances
       end
     end
 
-    def validate_collection(errors, cell, path)
+    def validate_collection(errors, cell, path, screen_ids:)
       return unless cell.key?("collection")
 
       collection = cell["collection"]
@@ -164,8 +289,20 @@ module EditAffordances
       validate_enum(errors, collection, "navigation", COLLECTION_NAVIGATIONS, "#{path}/navigation")
       validate_enum(errors, collection, "delete", COLLECTION_DELETE_POLICIES, "#{path}/delete")
       validate_enum(errors, collection, "reorder", COLLECTION_REORDER_POLICIES, "#{path}/reorder")
+      validate_collection_item_screen(errors, collection, "#{path}/item_screen", screen_ids: screen_ids)
       validate_collection_binding(errors, collection, "item_title", "#{path}/item_title")
       validate_collection_binding(errors, collection, "item_subtitle", "#{path}/item_subtitle")
+    end
+
+    def validate_collection_item_screen(errors, collection, path, screen_ids:)
+      return unless collection.key?("item_screen")
+
+      item_screen = collection["item_screen"]
+      if !item_screen.is_a?(String) || item_screen.blank?
+        errors << "#{path} must be a string"
+      elsif screen_ids && !screen_ids.include?(item_screen)
+        errors << "#{path} must match a screen id"
+      end
     end
 
     def validate_collection_binding(errors, collection, key, path)
@@ -214,6 +351,10 @@ module EditAffordances
 
     def boolean?(value)
       value == true || value == false
+    end
+
+    def duplicate_ids(ids)
+      ids.tally.select { |_id, count| count > 1 }.keys
     end
   end
 end

@@ -157,6 +157,93 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include("Open")
   end
 
+  it "navigates collection items to an item screen with path variables" do
+    draft.update!(
+      body: {
+        "items" => [
+          { "name" => "Ink", "quantity" => 2 }
+        ]
+      }
+    )
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      head_body: {
+        "version" => 1,
+        "start_screen" => "summary",
+        "screens" => [
+          {
+            "id" => "summary",
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/items"
+                  },
+                  "widget" => "array",
+                  "collection" => {
+                    "behavior" => "list_open",
+                    "presentation" => "list",
+                    "creation" => "new_screen",
+                    "navigation" => "open_item",
+                    "item_screen" => "item"
+                  }
+                }
+              ]
+            ]
+          },
+          {
+            "id" => "item",
+            "title" => "Item",
+            "root_binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/items/:index"
+            },
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/items/:index/name"
+                  }
+                },
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/items/:index/quantity"
+                  }
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper: schema_wrapper,
+      edit_document: edit_document
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("screen=item")
+    expect(response.body).to include("Ink")
+    expect(response.body).not_to include("Quantity")
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id, path: "/items/0", screen: "item")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Name")
+    expect(response.body).to include("Quantity")
+    expect(response.body).to include("Ink")
+    expect(response.body).to include('value="2"')
+  end
+
   it "renders collection table presentation" do
     draft.update!(
       body: {
@@ -186,6 +273,18 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include('value="new_screen"')
     expect(response.body).to include('name="collection_navigation"')
     expect(response.body).to include('value="open_item"')
+  end
+
+  it "redirects added collection items to the configured item screen" do
+    edit_affordance = create_collection_affordance(presentation: "list", item_screen: "item")
+
+    patch add_item_draft_path(draft), params: {
+      ptr: "/items",
+      edit_affordance_id: edit_affordance.id,
+      collection_item_screen: "item"
+    }
+
+    expect(response).to redirect_to(draft_path(draft, path: "/items/0", screen: "item", edit_affordance_id: edit_affordance.id))
   end
 
   it "renders collection cards presentation" do
@@ -321,7 +420,7 @@ RSpec.describe "Draft array items", type: :request do
     )
   end
 
-  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled", reorder: "disabled")
+  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled", reorder: "disabled", item_screen: nil)
     edit_document = create(
       :document,
       :with_head_revision,
@@ -343,6 +442,7 @@ RSpec.describe "Draft array items", type: :request do
                 "navigation" => "open_item",
                 "delete" => delete,
                 "reorder" => reorder,
+                "item_screen" => item_screen,
                 "item_title" => {
                   "kind" => "property",
                   "name" => "name"

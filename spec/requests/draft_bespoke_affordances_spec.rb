@@ -69,6 +69,162 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response.body).to include("Already here")
   end
 
+  it "navigates between affordance screens" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/profile",
+          "type" => "object",
+          "properties" => {
+            "name" => { "type" => "string" },
+            "bio" => {
+              "type" => "string",
+              "title" => "Biography"
+            }
+          }
+        }
+      )
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    draft = create(:draft, document:, body: { "name" => "Ada", "bio" => "First programmer" })
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "start_screen" => "summary",
+        "screens" => [
+          {
+            "id" => "summary",
+            "title" => "Summary",
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/name"
+                  }
+                },
+                {
+                  "kind" => "navigation",
+                  "target_screen" => "details",
+                  "label" => "Edit details"
+                }
+              ]
+            ]
+          },
+          {
+            "id" => "details",
+            "title" => "Details",
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/bio"
+                  },
+                  "widget" => "textarea"
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Edit details")
+    expect(response.body).to include("screen=details")
+    expect(response.body).to include("Ada")
+    expect(response.body).not_to include("Biography")
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id, screen: "details")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Biography")
+    expect(response.body).to include("First programmer")
+  end
+
+  it "renders immediate commit actions for screens configured to commit immediately" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(:document, :with_name_schema)
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    draft = create(:draft, document:, body: { "name" => "Ada" })
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "commit_mode" => "immediate",
+        "screens" => [
+          {
+            "id" => "summary",
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/name"
+                  }
+                },
+                {
+                  "kind" => "commit"
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    commit_forms = parsed_body.css(%(form[action*="#{draft_commit_path(draft)}"]))
+    expect(commit_forms).not_to be_empty
+    expect(commit_forms.first["action"]).to include("screen=summary")
+
+    post draft_commit_path(draft, edit_affordance_id: edit_affordance.id, screen: "summary"), params: {
+      commit: {
+        message: ""
+      }
+    }
+
+    expect(response).to redirect_to(document_path(document))
+    expect(Draft.exists?(draft.id)).to be(false)
+    expect(document.reload.body).to eq("name" => "Ada")
+  end
+
   it "renders field help, placeholders, and required markers" do
     schema_wrapper = create(
       :schema_wrapper,

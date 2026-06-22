@@ -1,3 +1,11 @@
 .flex.items-end.h-full
-  = render ButtonComponent.new(href: commit_path, html_options: { data: { turbo_frame: "main_content" } }) do
-    Commit
+  - if immediate_commit?
+    = button_to "Commit",
+      immediate_commit_path,
+      method: :post,
+      params: { commit: { message: "" } },
+      form: { data: { turbo_frame: "main_content" } },
+      class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+  - else
+    = render ButtonComponent.new(href: commit_path, html_options: { data: { turbo_frame: "main_content" } }) do
+      Commit

@@ -15,8 +15,22 @@ module Drafts
       new_draft_commit_path(
         draft,
         path: cursor.path.to_s,
+        screen: page.edit_affordance_projection&.start_screen_id,
         edit_affordance_id: edit_affordance&.id
       )
+    end
+
+    def immediate_commit_path
+      draft_commit_path(
+        draft,
+        path: cursor.path.to_s,
+        screen: page.edit_affordance_projection&.start_screen_id,
+        edit_affordance_id: edit_affordance&.id
+      )
+    end
+
+    def immediate_commit?
+      commit.commit_mode == "immediate"
     end
   end
 end

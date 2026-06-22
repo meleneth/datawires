@@ -2,13 +2,14 @@
 
 module Drafts
   class ShowPage
-    attr_reader :domain, :document, :draft, :cursor, :edit_affordance
+    attr_reader :domain, :document, :draft, :cursor, :screen_id, :edit_affordance
 
-    def initialize(domain:, document:, draft:, cursor:, edit_affordance:)
+    def initialize(domain:, document:, draft:, cursor:, screen_id: nil, edit_affordance:)
       @domain = domain
       @document = document
       @draft = draft
       @cursor = cursor
+      @screen_id = screen_id
       @edit_affordance = edit_affordance
     end
 
@@ -27,7 +28,11 @@ module Drafts
     def projected_rows
       return [] unless projection.location_kind == :object
 
-      @projected_rows ||= edit_affordance&.projected_rows(cursor) || []
+      @projected_rows ||= edit_affordance_projection&.rows || []
+    end
+
+    def edit_affordance_projection
+      @edit_affordance_projection ||= edit_affordance&.projection(cursor, screen_id: screen_id)
     end
 
     def diff_rows
@@ -49,8 +54,22 @@ module Drafts
       Rails.application.routes.url_helpers.new_draft_commit_path(
         draft,
         edit_affordance_id: edit_affordance&.id,
-        path: cursor.path.to_s
+        path: cursor.path.to_s,
+        screen: edit_affordance_projection&.start_screen_id
       )
+    end
+
+    def immediate_commit_path
+      Rails.application.routes.url_helpers.draft_commit_path(
+        draft,
+        edit_affordance_id: edit_affordance&.id,
+        path: cursor.path.to_s,
+        screen: edit_affordance_projection&.start_screen_id
+      )
+    end
+
+    def commit_mode
+      edit_affordance_projection&.start_screen&.commit_mode.presence || "review_screen"
     end
   end
 end

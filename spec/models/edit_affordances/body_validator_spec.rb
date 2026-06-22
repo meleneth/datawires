@@ -10,6 +10,7 @@ RSpec.describe EditAffordances::BodyValidator do
   it "accepts the current affordance DSL shape" do
     validator = validator_for(
       "version" => 1,
+      "commit_mode" => "review_screen",
       "screen" => {
         "mode" => "page",
         "columns" => 12,
@@ -51,9 +52,94 @@ RSpec.describe EditAffordances::BodyValidator do
           {
             "kind" => "commit",
             "span" => 6,
+            "commit_mode" => "immediate",
             "message_mode" => "inline_optional"
           }
         ]
+      ]
+    )
+
+    expect(validator).to be_valid
+  end
+
+  it "accepts a multi-screen affordance DSL shape" do
+    validator = validator_for(
+      "version" => 1,
+      "start_screen" => "details",
+      "screens" => [
+        {
+          "id" => "summary",
+          "title" => "Summary",
+          "mode" => "page",
+          "columns" => 12,
+          "default_span" => 6,
+          "commit_mode" => "review_screen",
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/title"
+                },
+                "widget" => "text"
+              },
+              {
+                "kind" => "navigation",
+                "target_screen" => "details",
+                "label" => "Details"
+              }
+            ]
+          ]
+        },
+        {
+          "id" => "details",
+          "title" => "Details",
+          "root_binding" => {
+            "kind" => "document_ptr",
+            "ptr" => "/details"
+          },
+          "rows" => [
+            [
+              {
+                "kind" => "commit",
+                "message_mode" => "inline_optional"
+              }
+            ]
+          ]
+        }
+      ]
+    )
+
+    expect(validator).to be_valid
+  end
+
+  it "accepts inline named subforms reused by screens" do
+    validator = validator_for(
+      "version" => 1,
+      "subforms" => [
+        {
+          "id" => "item_fields",
+          "root_binding" => {
+            "kind" => "document_ptr",
+            "ptr" => "/items/:index"
+          },
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/name"
+                }
+              }
+            ]
+          ]
+        }
+      ],
+      "screens" => [
+        {
+          "id" => "item",
+          "subform" => "item_fields"
+        }
       ]
     )
 
@@ -84,6 +170,84 @@ RSpec.describe EditAffordances::BodyValidator do
     expect(validator.errors).to include("rows must be an array")
   end
 
+  it "validates screen definitions" do
+    validator = validator_for(
+      "version" => 1,
+      "start_screen" => "missing",
+      "screens" => [
+        {
+          "id" => "summary",
+          "title" => 12,
+          "columns" => 0,
+          "root_binding" => {
+            "kind" => "document_ptr"
+          },
+          "rows" => [
+            []
+          ]
+        },
+        {
+          "id" => "summary",
+          "rows" => {}
+        },
+        "nope"
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "screens/0/title must be a string",
+      "screens/0/columns must be a positive integer",
+      "screens/0/root_binding/ptr is required",
+      "screens/0/rows/0 must contain at least one cell",
+      "screens/1/rows must be an array",
+      "screens/2 must be an object",
+      "screens id \"summary\" must be unique",
+      "start_screen must match a screen id"
+    )
+  end
+
+  it "validates subform definitions" do
+    validator = validator_for(
+      "version" => 1,
+      "subforms" => [
+        {
+          "id" => "details",
+          "root_binding" => {
+            "kind" => "document_ptr"
+          },
+          "rows" => {}
+        },
+        {
+          "id" => "details",
+          "rows" => [
+            []
+          ]
+        },
+        "nope"
+      ],
+      "screens" => [
+        {
+          "id" => "summary",
+          "subform" => "missing"
+        },
+        {
+          "id" => "details",
+          "subform" => 12
+        }
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "subforms/0/root_binding/ptr is required",
+      "subforms/0/rows must be an array",
+      "subforms/1/rows/0 must contain at least one cell",
+      "subforms/2 must be an object",
+      "subforms id \"details\" must be unique",
+      "screens/0/subform must match a subform id",
+      "screens/1/subform must be a string"
+    )
+  end
+
   it "rejects unsupported field widgets" do
     validator = validator_for(
       "version" => 1,
@@ -102,6 +266,26 @@ RSpec.describe EditAffordances::BodyValidator do
 
     expect(validator.errors).to include(
       "rows/0/0/widget must be one of: array, auto, checkbox, number, select, text, textarea"
+    )
+  end
+
+  it "rejects invalid commit modes" do
+    validator = validator_for(
+      "version" => 1,
+      "commit_mode" => "later",
+      "rows" => [
+        [
+          {
+            "kind" => "commit",
+            "commit_mode" => "modal"
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "commit_mode must be one of: immediate, review_screen",
+      "rows/0/0/commit_mode must be one of: immediate, review_screen"
     )
   end
 
@@ -181,6 +365,7 @@ RSpec.describe EditAffordances::BodyValidator do
               "navigation" => "modal",
               "delete" => "soft_delete",
               "reorder" => "drag",
+              "item_screen" => 12,
               "item_title" => {
                 "kind" => "property"
               },
@@ -209,6 +394,7 @@ RSpec.describe EditAffordances::BodyValidator do
       "rows/0/0/collection/navigation must be one of: open_item",
       "rows/0/0/collection/delete must be one of: disabled, enabled",
       "rows/0/0/collection/reorder must be one of: disabled, enabled",
+      "rows/0/0/collection/item_screen must be a string",
       "rows/0/0/collection/item_title/name must be a string",
       "rows/0/0/collection/item_subtitle/name must be a string",
       "rows/0/1/collection must be an object"
@@ -227,7 +413,82 @@ RSpec.describe EditAffordances::BodyValidator do
       ]
     )
 
-    expect(validator.errors).to include("rows/0/0 must be a field or commit cell")
+    expect(validator.errors).to include("rows/0/0 must be a field, navigation, or commit cell")
+  end
+
+  it "rejects invalid navigation cells" do
+    validator = validator_for(
+      "version" => 1,
+      "screens" => [
+        {
+          "id" => "summary",
+          "rows" => [
+            [
+              {
+                "kind" => "navigation",
+                "target_screen" => "missing",
+                "label" => false
+              }
+            ]
+          ]
+        },
+        {
+          "id" => "details",
+          "rows" => [
+            [
+              {
+                "kind" => "navigation"
+              }
+            ]
+          ]
+        }
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "screens/0/rows/0/0/label must be a string",
+      "screens/0/rows/0/0/target_screen must match a screen id",
+      "screens/1/rows/0/0/target_screen is required"
+    )
+  end
+
+  it "rejects collection item screens that do not match a screen id" do
+    validator = validator_for(
+      "version" => 1,
+      "screens" => [
+        {
+          "id" => "summary",
+          "rows" => [
+            [
+              {
+                "binding" => {
+                  "kind" => "document_ptr",
+                  "ptr" => "/items"
+                },
+                "widget" => "array",
+                "collection" => {
+                  "item_screen" => "missing"
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id" => "item",
+          "rows" => [
+            [
+              {
+                "kind" => "commit"
+              }
+            ]
+          ]
+        }
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "screens/0/rows/0/0/collection/item_screen must match a screen id"
+    )
   end
 
   it "rejects missing field binding pointers" do

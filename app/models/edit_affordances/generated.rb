@@ -28,7 +28,7 @@ module EditAffordances
       12
     end
 
-    def projection(root_cursor)
+    def projection(root_cursor, screen_id: nil)
       object_rows = []
       scalar_fields = []
       inventory = SchemaPaths::Inventory.new(root_cursor: root_cursor)
@@ -48,8 +48,8 @@ module EditAffordances
       )
     end
 
-    def projected_rows(root_cursor)
-      projection(root_cursor).rows
+    def projected_rows(root_cursor, screen_id: nil)
+      projection(root_cursor, screen_id: screen_id).rows
     end
 
     private

@@ -20,7 +20,8 @@ module EditAffordances
                 :delete_policy,
                 :reorder_policy,
                 :item_title,
-                :item_subtitle
+                :item_subtitle,
+                :item_screen
 
     def initialize(config = nil)
       config = {} unless config.is_a?(Hash)
@@ -33,10 +34,24 @@ module EditAffordances
       @reorder_policy = config["reorder"].presence || DEFAULT_POLICY
       @item_title = config["item_title"].presence || DEFAULT_TITLE_BINDING
       @item_subtitle = config["item_subtitle"].presence || DEFAULT_SUBTITLE_BINDING
+      @item_screen = config["item_screen"].presence
     end
 
     def self.default
       new
+    end
+
+    def self.default_config
+      {
+        "behavior" => DEFAULT_BEHAVIOR,
+        "presentation" => DEFAULT_PRESENTATION,
+        "creation" => DEFAULT_CREATION,
+        "navigation" => DEFAULT_NAVIGATION,
+        "delete" => DEFAULT_POLICY,
+        "reorder" => DEFAULT_POLICY,
+        "item_title" => DEFAULT_TITLE_BINDING,
+        "item_subtitle" => DEFAULT_SUBTITLE_BINDING
+      }
     end
 
     def item_title_for(item_cursor, fallback:)

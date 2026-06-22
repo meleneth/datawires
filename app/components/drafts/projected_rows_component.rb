@@ -22,6 +22,8 @@ module Drafts
         projected_field_component_for(cell)
       when EditAffordances::Cells::Commit
         Drafts::ProjectedCommitComponent.new(page: page, commit: cell)
+      when EditAffordances::Cells::Navigation
+        Drafts::ProjectedNavigationComponent.new(page: page, navigation: cell)
       else
         raise ArgumentError, "unsupported projected cell: #{cell.inspect}"
       end

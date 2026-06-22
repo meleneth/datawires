@@ -22,6 +22,14 @@ module Drafts
       page.commit_path
     end
 
+    def immediate_commit_path
+      page.immediate_commit_path
+    end
+
+    def immediate_commit?
+      page.commit_mode == "immediate"
+    end
+
     def projected_rows?
       page.projected_rows.present?
     end

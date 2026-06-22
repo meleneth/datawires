@@ -69,7 +69,8 @@ module Drafts
         ptr: cursor.ptr,
         edit_affordance_id: edit_affordance&.id,
         collection_creation: collection.creation,
-        collection_navigation: collection.navigation
+        collection_navigation: collection.navigation,
+        collection_item_screen: collection.item_screen
       }
     end
 
@@ -150,6 +151,7 @@ module Drafts
     def draft_path_for(item_cursor)
       params = { path: item_cursor.path.to_s }
       params[:edit_affordance_id] = edit_affordance.id if edit_affordance&.id
+      params[:screen] = collection.item_screen if collection.item_screen
 
       draft_path(draft, params)
     end

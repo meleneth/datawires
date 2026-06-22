@@ -52,6 +52,7 @@ class DraftsController < ApplicationController
         redirect_to draft_path(
           @draft,
           path: item_path,
+          screen: screen_id_param,
           edit_affordance_id: params[:edit_affordance_id]
         )
       end
@@ -153,8 +154,13 @@ class DraftsController < ApplicationController
       document: @document,
       draft: @draft,
       cursor: cursor,
+      screen_id: screen_id_param,
       edit_affordance: selected_edit_affordance
     )
+  end
+
+  def screen_id_param
+    params[:screen].presence || params[:collection_item_screen].presence
   end
 
   def load
