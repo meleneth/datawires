@@ -58,11 +58,42 @@ RSpec.describe Seeds::EditFormSchema do
       expect(collection_properties.dig("navigation", "enum")).to eq([ "open_item" ])
       expect(collection_properties.dig("delete", "enum")).to contain_exactly("disabled", "enabled")
       expect(collection_properties.dig("reorder", "enum")).to contain_exactly("disabled", "enabled")
+      expect(collection_properties.fetch("item_screen")).to include(
+        "type" => "string",
+        "minLength" => 1
+      )
       expect(definitions.dig("collection_binding", "properties", "kind", "enum")).to contain_exactly(
         "none",
         "property",
         "value_label"
       )
+    end
+
+    it "allows screens, subforms, navigation cells, and commit modes" do
+      definitions = described_class.schema_body.fetch("$defs")
+      properties = described_class.schema_body.fetch("properties")
+
+      expect(properties.fetch("screens")).to include("type" => "array")
+      expect(properties.fetch("subforms")).to include("type" => "array")
+      expect(properties.fetch("commit_mode")).to eq("$ref" => "#/$defs/commit_mode")
+      expect(definitions.dig("commit_mode", "enum")).to contain_exactly("immediate", "review_screen")
+      expect(definitions.fetch("screen").fetch("properties")).to include(
+        "root_binding" => {
+          "$ref" => "#/$defs/binding"
+        },
+        "subform" => {
+          "type" => "string",
+          "minLength" => 1
+        }
+      )
+      expect(definitions.fetch("subform").fetch("properties")).to include(
+        "rows" => {
+          "$ref" => "#/$defs/rows"
+        }
+      )
+      expect(definitions.dig("navigation_cell", "required")).to contain_exactly("kind", "target_screen")
+      expect(definitions.dig("commit_cell", "properties", "commit_mode")).to eq("$ref" => "#/$defs/commit_mode")
+      expect(definitions.dig("cell", "oneOf")).to include("$ref" => "#/$defs/navigation_cell")
     end
   end
 end

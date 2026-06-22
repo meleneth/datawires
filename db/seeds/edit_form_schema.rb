@@ -34,7 +34,7 @@ module Seeds
         "$id" => "http://datawires/schemas/edit-form",
         "title" => DOCUMENT_TITLE,
         "type" => "object",
-        "required" => %w[version screen rows],
+        "required" => %w[version],
         "additionalProperties" => false,
 
         "properties" => {
@@ -43,43 +43,48 @@ module Seeds
             "const" => 1
           },
 
+          "start_screen" => {
+            "type" => "string"
+          },
+
+          "commit_mode" => {
+            "$ref" => "#/$defs/commit_mode"
+          },
+
           "screen" => {
-            "type" => "object",
-            "required" => %w[mode columns default_span commit_mode],
-            "additionalProperties" => false,
-            "properties" => {
-              "mode" => {
-                "type" => "string",
-                "enum" => %w[page full_width]
-              },
-              "columns" => {
-                "type" => "integer",
-                "minimum" => 1
-              },
-              "default_span" => {
-                "type" => "integer",
-                "minimum" => 1
-              },
-              "commit_mode" => {
-                "type" => "string",
-                "enum" => %w[immediate review_screen]
-              }
-            }
+            "$ref" => "#/$defs/screen_config"
           },
 
           "rows" => {
+            "$ref" => "#/$defs/rows"
+          },
+
+          "screens" => {
             "type" => "array",
             "items" => {
-              "type" => "array",
-              "minItems" => 1,
-              "items" => {
-                "$ref" => "#/$defs/cell"
-              }
+              "$ref" => "#/$defs/screen"
+            }
+          },
+
+          "subforms" => {
+            "type" => "array",
+            "items" => {
+              "$ref" => "#/$defs/subform"
             }
           }
         },
 
         "$defs" => {
+          "commit_mode" => {
+            "type" => "string",
+            "enum" => %w[immediate review_screen]
+          },
+
+          "screen_mode" => {
+            "type" => "string",
+            "enum" => %w[page full_width]
+          },
+
           "document_ptr_binding" => {
             "type" => "object",
             "required" => %w[kind ptr],
@@ -100,6 +105,98 @@ module Seeds
             "oneOf" => [
               { "$ref" => "#/$defs/document_ptr_binding" }
             ]
+          },
+
+          "rows" => {
+            "type" => "array",
+            "items" => {
+              "type" => "array",
+              "minItems" => 1,
+              "items" => {
+                "$ref" => "#/$defs/cell"
+              }
+            }
+          },
+
+          "screen_config" => {
+            "type" => "object",
+            "additionalProperties" => false,
+            "properties" => {
+              "mode" => {
+                "$ref" => "#/$defs/screen_mode"
+              },
+              "columns" => {
+                "type" => "integer",
+                "minimum" => 1
+              },
+              "default_span" => {
+                "type" => "integer",
+                "minimum" => 1
+              },
+              "commit_mode" => {
+                "$ref" => "#/$defs/commit_mode"
+              },
+              "title" => {
+                "type" => "string"
+              }
+            }
+          },
+
+          "screen" => {
+            "type" => "object",
+            "required" => [ "id" ],
+            "additionalProperties" => false,
+            "properties" => {
+              "id" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "title" => {
+                "type" => "string"
+              },
+              "mode" => {
+                "$ref" => "#/$defs/screen_mode"
+              },
+              "columns" => {
+                "type" => "integer",
+                "minimum" => 1
+              },
+              "default_span" => {
+                "type" => "integer",
+                "minimum" => 1
+              },
+              "commit_mode" => {
+                "$ref" => "#/$defs/commit_mode"
+              },
+              "root_binding" => {
+                "$ref" => "#/$defs/binding"
+              },
+              "subform" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "rows" => {
+                "$ref" => "#/$defs/rows"
+              }
+            }
+          },
+
+          "subform" => {
+            "type" => "object",
+            "required" => %w[id rows],
+            "additionalProperties" => false,
+            "properties" => {
+              "id" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "root_binding" => {
+                "$ref" => "#/$defs/binding"
+              },
+              "rows" => {
+                "$ref" => "#/$defs/rows"
+              }
+            }
           },
 
           "collection_binding" => {
@@ -145,6 +242,10 @@ module Seeds
               "reorder" => {
                 "type" => "string",
                 "enum" => %w[disabled enabled]
+              },
+              "item_screen" => {
+                "type" => "string",
+                "minLength" => 1
               },
               "item_title" => {
                 "$ref" => "#/$defs/collection_binding"
@@ -211,6 +312,9 @@ module Seeds
                 "type" => "integer",
                 "minimum" => 1
               },
+              "commit_mode" => {
+                "$ref" => "#/$defs/commit_mode"
+              },
               "message_mode" => {
                 "type" => "string",
                 "enum" => %w[hidden inline_optional inline_required]
@@ -218,9 +322,33 @@ module Seeds
             }
           },
 
+          "navigation_cell" => {
+            "type" => "object",
+            "required" => %w[kind target_screen],
+            "additionalProperties" => false,
+            "properties" => {
+              "kind" => {
+                "type" => "string",
+                "const" => "navigation"
+              },
+              "target_screen" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "label" => {
+                "type" => "string"
+              },
+              "span" => {
+                "type" => "integer",
+                "minimum" => 1
+              }
+            }
+          },
+
           "cell" => {
             "oneOf" => [
               { "$ref" => "#/$defs/field_cell" },
+              { "$ref" => "#/$defs/navigation_cell" },
               { "$ref" => "#/$defs/commit_cell" }
             ]
           }
