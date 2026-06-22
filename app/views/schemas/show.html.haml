@@ -26,7 +26,14 @@
           %dd.font-head.text-foreground= @schema_wrapper.key
 
   .mt-6
-    = render TypographyComponent.new(as: :h2, text: "Edit affordances")
+    .flex.items-center.justify-between.gap-3
+      = render TypographyComponent.new(as: :h2, text: "Edit affordances")
+      = button_to "New edit affordance",
+        schema_edit_affordances_path(@schema_wrapper),
+        method: :post,
+        params: { title: "Default" },
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+        class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
     - if @edit_affordances.any?
       %ul.mt-2.space-y-2

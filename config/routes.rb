@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
   resources :schemas, only: %i[show] do
     resources :documents, only: %i[create], module: :schemas
+    resources :edit_affordances, only: %i[create], module: :schemas
   end
 
   resources :documents, only: %i[show] do
@@ -29,6 +30,10 @@ Rails.application.routes.draw do
     end
 
     resource :commit, only: %i[new create], module: :drafts
+    resource :edit_affordance_builder, only: %i[show], module: :drafts do
+      patch :add_field
+      patch :update_raw
+    end
   end
 
   resources :users

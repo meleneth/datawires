@@ -1,0 +1,186 @@
+= turbo_frame_tag "main_content" do
+  %section.space-y-6
+    %header.space-y-2
+      = render TypographyComponent.new(as: :h1, text: "Edit affordance builder")
+      = render TypographyComponent.new(as: :muted, text: "#{@edit_affordance.title} for #{@schema_wrapper.key}")
+
+    .flex.flex-wrap.items-center.gap-2
+      - %w[builder preview diagnostics raw].each do |tab|
+        = link_to tab.titleize,
+          draft_edit_affordance_builder_path(@draft, tab: tab),
+          data: { turbo_frame: "main_content" },
+          class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black px-3 text-sm font-medium shadow-sm transition-all hover:translate-y-1 hover:shadow-none #{@tab == tab ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}"
+      = render ButtonComponent.new(href: new_draft_commit_path(@draft), size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+        Commit affordance
+
+    - if flash[:alert].present?
+      = render AlertComponent.new(variant: :destructive) do
+        = flash[:alert]
+    - if flash[:notice].present?
+      = render AlertComponent.new do
+        = flash[:notice]
+
+    - if @tab == "builder"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Add field")
+            = form_with url: add_field_draft_edit_affordance_builder_path(@draft),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "space-y-4" do
+              .grid.gap-3.md:grid-cols-2
+                .space-y-1
+                  = render LabelComponent.new(text: "Schema path", for_id: "ptr")
+                  = select_tag :ptr,
+                    options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget }] }),
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Widget", for_id: "widget")
+                  = select_tag :widget,
+                    options_for_select(%w[auto text textarea number checkbox select array]),
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Span", for_id: "span")
+                  = number_field_tag :span,
+                    4,
+                    min: 1,
+                    max: 12,
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Help", for_id: "help")
+                  = text_field_tag :help,
+                    nil,
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              %label.inline-flex.items-center.gap-2.text-sm
+                = check_box_tag :label, "1", true, class: "h-4 w-4 rounded border-2 border-black"
+                %span Show label
+
+              .rounded.border-2.border-black.bg-muted.p-3
+                .mb-3.font-head.text-sm Collection options
+                .grid.gap-3.md:grid-cols-3
+                  .space-y-1
+                    = render LabelComponent.new(text: "Presentation", for_id: "collection_presentation")
+                    = select_tag :collection_presentation,
+                      options_for_select(%w[list table cards]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Creation", for_id: "collection_creation")
+                    = select_tag :collection_creation,
+                      options_for_select(%w[new_screen inline_blank_form]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Item screen", for_id: "collection_item_screen")
+                    = text_field_tag :collection_item_screen,
+                      nil,
+                      placeholder: "item",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Delete", for_id: "collection_delete")
+                    = select_tag :collection_delete,
+                      options_for_select(%w[disabled enabled]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Reorder", for_id: "collection_reorder")
+                    = select_tag :collection_reorder,
+                      options_for_select(%w[disabled enabled]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .mt-3.grid.gap-3.md:grid-cols-2
+                  .grid.gap-2.md:grid-cols-2
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title binding", for_id: "item_title_kind")
+                      = select_tag :item_title_kind,
+                        options_for_select([["Property", "property"], ["Value label", "value_label"], ["None", "none"]]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title property", for_id: "item_title_name")
+                      = text_field_tag :item_title_name,
+                        "name",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .grid.gap-2.md:grid-cols-2
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle binding", for_id: "item_subtitle_kind")
+                      = select_tag :item_subtitle_kind,
+                        options_for_select([["Value label", "value_label"], ["Property", "property"], ["None", "none"]]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle property", for_id: "item_subtitle_name")
+                      = text_field_tag :item_subtitle_name,
+                        nil,
+                        placeholder: "quantity",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+
+              = submit_tag "Add field",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          = render TypographyComponent.new(as: :h3, text: "Current main screen", html_options: { class: "mb-3" })
+          - main_screen = Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
+          - rows = Array(main_screen&.fetch("rows", []))
+          - if rows.empty?
+            = render AlertComponent.new do
+              No fields yet.
+          - else
+            %ol.space-y-2
+              - rows.each_with_index do |row, row_index|
+                %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
+                  .font-head Row #{row_index + 1}
+                  .mt-1.text-muted-foreground= row.map { |cell| cell.dig("binding", "ptr") || cell["kind"] }.join(", ")
+                  - row.each do |cell|
+                    - if cell["collection"].is_a?(Hash)
+                      .mt-2.text-xs.text-muted-foreground
+                        Collection:
+                        = [cell.dig("collection", "presentation"), cell.dig("collection", "creation"), "delete #{cell.dig('collection', 'delete')}", "reorder #{cell.dig('collection', 'reorder')}"].compact.join(", ")
+
+    - elsif @tab == "preview"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Seeded preview")
+            - if @preview_projection.rows.empty?
+              = render AlertComponent.new do
+                No projected rows yet.
+            - else
+              - @preview_projection.rows.each do |row|
+                .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
+                  - row.cells.each do |cell|
+                    .rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm{ class: "col-span-#{cell.span}" }
+                      .font-head= cell.respond_to?(:default_label) ? cell.default_label : cell.class.name.demodulize
+                      - if cell.respond_to?(:cursor)
+                        .mt-1.font-mono.text-xs.text-muted-foreground= cell.cursor.path.to_s
+                      - if cell.respond_to?(:widget)
+                        .mt-1.text-xs.text-muted-foreground= cell.widget
+
+    - elsif @tab == "diagnostics"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Diagnostics")
+            - projection_diagnostics = @preview_projection.diagnostics
+            - if @diagnostics.empty? && projection_diagnostics.empty?
+              = render AlertComponent.new do
+                No diagnostics.
+            - else
+              - @diagnostics.each do |message|
+                = render AlertComponent.new(variant: :destructive) do
+                  = message
+              - projection_diagnostics.each do |diagnostic|
+                = render AlertComponent.new(variant: :destructive) do
+                  = diagnostic.message
+
+    - elsif @tab == "raw"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Raw JSON")
+            = form_with url: update_raw_draft_edit_affordance_builder_path(@draft),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "space-y-4" do
+              = text_area_tag :body_json,
+                JSON.pretty_generate(@draft.body),
+                rows: 24,
+                class: "w-full rounded border-2 border-black bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              = submit_tag "Update raw JSON",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
