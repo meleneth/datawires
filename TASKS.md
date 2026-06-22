@@ -114,3 +114,22 @@ Architecture path:
 - [x] Add fixture affordances for a mixed workflow.
 - [x] Improve commit review so users understand what the affordance changed in the draft body.
 - [x] Add developer docs for the affordance DSL once collection editing stabilizes.
+
+## Phase 8: Builder Thrash Pass
+
+Manual testing in the edit affordance builder exposed the first set of "almost coherent" usability gaps. Optimize this pass for practical authoring on 2k and 4k screens, while keeping the raw/repair escape hatch intact.
+
+- [x] Add explicit row creation in the structured builder.
+- [x] Let authors choose whether a newly added field goes into an existing row or a new row.
+- [x] Show row boundaries clearly in the builder so field grouping is understandable before preview.
+- [x] Allow field spans from 1 through 12 in the structured builder and `edit-form` schema.
+- [x] Default newly added field spans to 3 so simple forms are not cramped by default.
+- [x] Add builder coverage for multiple fields sharing one row with spans that sum to the screen columns.
+- [x] Add validation or diagnostics for spans that are outside the supported range or produce unusably cramped rows.
+- [x] Add an affordance-level or screen-level width setting with at least `narrow`, `medium`, `large`, and `full`.
+- [x] Default editor pages to a `large` width that uses at least two thirds of available horizontal space on 2k and 4k displays.
+- [x] Apply the width setting consistently to the runtime editor, builder preview, and self-hosted affordance editor.
+- [x] Display field help text in the builder's current-screen field cards, preferably in a right-side affordance/details area.
+- [x] Hide collection-policy controls unless the selected schema path is an array node.
+- [x] When collection controls are hidden, make it clear that collection policy only applies to array fields.
+- [x] Add request/system coverage for builder row creation, default spans, contextual collection controls, and page-width settings.

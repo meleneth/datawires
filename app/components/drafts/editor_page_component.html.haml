@@ -1,32 +1,33 @@
-= render CardComponent.new(html_options: { class: "w-full" }) do
-  = render CardContentComponent.new do
-    .space-y-4
-      .space-y-1
-        = render TypographyComponent.new(as: :muted, text: "Path")
-        .font-mono.text-sm.text-foreground= path_label
+%div{ class: width_class }
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        .space-y-1
+          = render TypographyComponent.new(as: :muted, text: "Path")
+          .font-mono.text-sm.text-foreground= path_label
 
-      .flex.items-center.justify-between
-        = render TypographyComponent.new(as: :h3, text: title)
+        .flex.items-center.justify-between
+          = render TypographyComponent.new(as: :h3, text: title)
 
-        .flex.items-center.gap-2
-          = button_to "Abandon",
-            draft_path(draft),
-            method: :delete,
-            form: { data: { turbo_frame: "main_content" } },
-            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
-          - if immediate_commit?
-            = button_to "Commit",
-              immediate_commit_path,
-              method: :post,
-              params: { commit: { message: "" } },
+          .flex.items-center.gap-2
+            = button_to "Abandon",
+              draft_path(draft),
+              method: :delete,
               form: { data: { turbo_frame: "main_content" } },
-              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
-          - else
-            = render ButtonComponent.new(href: commit_path, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
-              Commit
+              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            - if immediate_commit?
+              = button_to "Commit",
+                immediate_commit_path,
+                method: :post,
+                params: { commit: { message: "" } },
+                form: { data: { turbo_frame: "main_content" } },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            - else
+              = render ButtonComponent.new(href: commit_path, size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+                Commit
 
-      - if projected_rows?
-        = render projected_rows_component
-      - else
-        = render AlertComponent.new do
-          No edit affordance projection available for this location.
+        - if projected_rows?
+          = render projected_rows_component
+        - else
+          = render AlertComponent.new do
+            No edit affordance projection available for this location.

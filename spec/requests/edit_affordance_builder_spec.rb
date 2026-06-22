@@ -58,9 +58,13 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft))
     expect(draft.body.fetch("screens").first.fetch("id")).to eq("main")
+    expect(draft.body.fetch("screens").first).to include(
+      "default_span" => 3,
+      "width" => "large"
+    )
   end
 
-  it "adds fields through the constrained builder and previews the seeded projection" do
+  it "adds fields to selected rows through the constrained builder and previews the seeded projection" do
     draft = create_builder_draft
 
     get draft_edit_affordance_builder_path(draft)
@@ -72,11 +76,14 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Raw")
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
+    expect(response.body).to include("Screen layout")
+    expect(response.body).to include("Add row")
+    expect(response.body).to include("Collection policy: array fields only.")
 
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/name",
       widget: "text",
-      span: "6",
+      row_index: "new",
       label: "1",
       help: "Use the public name."
     }
@@ -89,9 +96,23 @@ RSpec.describe "Edit affordance builder", type: :request do
         "ptr" => "/name"
       },
       "widget" => "text",
-      "span" => 6,
+      "span" => 3,
       "help" => "Use the public name."
     )
+    expect(cell).not_to have_key("collection")
+
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "0",
+      span: "12",
+      label: "1",
+      help: "Longer author-facing copy."
+    }
+
+    rows = draft.reload.body.fetch("screens").first.fetch("rows")
+    expect(rows.length).to eq(1)
+    expect(rows.first.map { |field| field.dig("binding", "ptr") }).to eq(%w[/name /bio])
 
     get draft_edit_affordance_builder_path(draft, tab: "preview")
 
@@ -99,6 +120,40 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Seeded preview")
     expect(response.body).to include("Display Name")
     expect(response.body).to include("/name")
+  end
+
+  it "adds explicit empty rows and shows row diagnostics until filled" do
+    draft = create_builder_draft
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows")).to eq([ [] ])
+
+    get draft_edit_affordance_builder_path(draft, tab: "diagnostics")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("screens/0/rows/0 must contain at least one cell")
+  end
+
+  it "updates screen width and default span" do
+    draft = create_builder_draft
+
+    patch update_screen_draft_edit_affordance_builder_path(draft), params: {
+      width: "full",
+      default_span: "5"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.fetch("screens").first).to include(
+      "width" => "full",
+      "default_span" => 5
+    )
+
+    get draft_edit_affordance_builder_path(draft, tab: "preview")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("w-full")
   end
 
   it "configures collection policy and item bindings for array fields" do
@@ -110,11 +165,13 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Collection options")
     expect(response.body).to include("Item screen")
     expect(response.body).to include("Title binding")
+    expect(response.body).to include("data-array=\"true\"")
 
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
       ptr: "/items",
       widget: "array",
       span: "12",
+      row_index: "new",
       label: "1",
       collection_presentation: "cards",
       collection_creation: "inline_blank_form",

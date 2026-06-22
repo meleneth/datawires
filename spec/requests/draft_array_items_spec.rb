@@ -381,14 +381,14 @@ RSpec.describe "Draft array items", type: :request do
     get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list").id)
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).not_to include("Up")
-    expect(response.body).not_to include("Down")
+    expect(response.body).not_to include(">Up<")
+    expect(response.body).not_to include(">Down<")
 
     get draft_path(draft, edit_affordance_id: create_collection_affordance(presentation: "list", reorder: "enabled").id)
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Up")
-    expect(response.body).to include("Down")
+    expect(response.body).to include(">Up<")
+    expect(response.body).to include(">Down<")
     expect(response.body).to include('name="direction"')
   end
 

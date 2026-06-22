@@ -13,6 +13,8 @@ module EditAffordances
     COLLECTION_DELETE_POLICIES = %w[disabled enabled].freeze
     COLLECTION_REORDER_POLICIES = %w[disabled enabled].freeze
     COLLECTION_BINDING_KINDS = %w[property value_label none].freeze
+    WIDTHS = %w[narrow medium large full].freeze
+    SPAN_RANGE = (1..12).freeze
 
     attr_reader :body
 
@@ -36,6 +38,7 @@ module EditAffordances
 
       validate_version(errors)
       validate_enum(errors, body, "commit_mode", COMMIT_MODES, "commit_mode")
+      validate_enum(errors, body, "width", WIDTHS, "width")
       validate_screen(errors)
       validate_start_screen(errors)
       subform_ids = validate_subforms(errors)
@@ -68,7 +71,8 @@ module EditAffordances
 
       validate_enum(errors, screen, "mode", SCREEN_MODES, "screen.mode")
       validate_positive_integer(errors, screen, "columns", "screen.columns")
-      validate_positive_integer(errors, screen, "default_span", "screen.default_span")
+      validate_span(errors, screen, "default_span", "screen.default_span")
+      validate_enum(errors, screen, "width", WIDTHS, "screen.width")
       validate_enum(errors, screen, "commit_mode", COMMIT_MODES, "screen.commit_mode")
     end
 
@@ -152,7 +156,8 @@ module EditAffordances
       errors << "#{path}/id is required" unless screen["id"].is_a?(String) && screen["id"].present?
       validate_string(errors, screen, "title", "#{path}/title")
       validate_positive_integer(errors, screen, "columns", "#{path}/columns")
-      validate_positive_integer(errors, screen, "default_span", "#{path}/default_span")
+      validate_span(errors, screen, "default_span", "#{path}/default_span")
+      validate_enum(errors, screen, "width", WIDTHS, "#{path}/width")
       validate_enum(errors, screen, "mode", SCREEN_MODES, "#{path}/mode")
       validate_enum(errors, screen, "commit_mode", COMMIT_MODES, "#{path}/commit_mode")
       validate_binding(errors, screen["root_binding"], "#{path}/root_binding") if screen.key?("root_binding")
@@ -218,7 +223,7 @@ module EditAffordances
 
     def validate_field_cell(errors, cell, path, screen_ids:)
       validate_binding(errors, cell["binding"], "#{path}/binding")
-      validate_positive_integer(errors, cell, "span", "#{path}/span")
+      validate_span(errors, cell, "span", "#{path}/span")
       validate_enum(errors, cell, "widget", SUPPORTED_WIDGETS, "#{path}/widget")
       validate_string(errors, cell, "help", "#{path}/help")
       validate_string(errors, cell, "placeholder", "#{path}/placeholder")
@@ -231,13 +236,13 @@ module EditAffordances
     end
 
     def validate_commit_cell(errors, cell, path)
-      validate_positive_integer(errors, cell, "span", "#{path}/span")
+      validate_span(errors, cell, "span", "#{path}/span")
       validate_enum(errors, cell, "message_mode", MESSAGE_MODES, "#{path}/message_mode")
       validate_enum(errors, cell, "commit_mode", COMMIT_MODES, "#{path}/commit_mode")
     end
 
     def validate_navigation_cell(errors, cell, path, screen_ids:)
-      validate_positive_integer(errors, cell, "span", "#{path}/span")
+      validate_span(errors, cell, "span", "#{path}/span")
       validate_string(errors, cell, "label", "#{path}/label")
 
       target_screen = cell["target_screen"]
@@ -329,6 +334,19 @@ module EditAffordances
       return if integer?(object[key]) && object[key].to_i.positive?
 
       errors << "#{path} must be a positive integer"
+    end
+
+    def validate_span(errors, object, key, path)
+      return unless object.key?(key)
+
+      unless integer?(object[key]) && object[key].to_i.positive?
+        errors << "#{path} must be a positive integer"
+        return
+      end
+
+      return if SPAN_RANGE.cover?(object[key].to_i)
+
+      errors << "#{path} must be between #{SPAN_RANGE.begin} and #{SPAN_RANGE.end}"
     end
 
     def validate_enum(errors, object, key, allowed, path)

@@ -2,10 +2,23 @@
 
 module Drafts
   class EditAffordanceBuildersController < ApplicationController
+    BUILDER_SPAN_RANGE = (1..12).freeze
+    DEFAULT_FIELD_SPAN = 3
+    WIDTHS = %w[narrow medium large full].freeze
+
     before_action :load_context
 
     def show
       @tab = tab_param
+    end
+
+    def add_row
+      body = deep_dup_json(@draft.body)
+      ensure_main_screen(body)["rows"] << []
+      @draft.update!(body: body)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Row added."
     end
 
     def add_field
@@ -13,6 +26,17 @@ module Drafts
 
       redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
         notice: "Field added."
+    end
+
+    def update_screen
+      body = deep_dup_json(@draft.body)
+      main_screen = ensure_main_screen(body)
+      main_screen["width"] = params[:width].presence_in(WIDTHS) || "large"
+      main_screen["default_span"] = normalized_span(params[:default_span])
+      @draft.update!(body: body)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Screen layout updated."
     end
 
     def update_raw
@@ -38,6 +62,9 @@ module Drafts
       @field_entries = field_entries
       @diagnostics = EditAffordances::BodyValidator.new(@draft.body).errors
       @preview_projection = preview_projection
+      @main_screen = current_main_screen
+      @rows = Array(@main_screen&.fetch("rows", []))
+      @builder_width_class = width_class_for(@main_screen&.fetch("width", "large"))
     end
 
     def tab_param
@@ -47,7 +74,7 @@ module Drafts
     def body_with_added_field
       body = deep_dup_json(@draft.body)
       main_screen = ensure_main_screen(body)
-      main_screen["rows"] << [ field_cell_from_params ]
+      target_row(main_screen) << field_cell_from_params
       body
     end
 
@@ -64,7 +91,8 @@ module Drafts
         "id" => "main",
         "title" => "Main",
         "columns" => 12,
-        "default_span" => 4,
+        "default_span" => DEFAULT_FIELD_SPAN,
+        "width" => "large",
         "rows" => []
       }
       body["screens"].last
@@ -82,10 +110,33 @@ module Drafts
         "widget" => widget,
         "label" => ActiveModel::Type::Boolean.new.cast(params[:label])
       }
-      cell["span"] = params[:span].to_i if params[:span].present?
+      cell["span"] = normalized_span(params[:span])
       cell["help"] = params[:help] if params[:help].present?
-      cell["collection"] = collection_config_from_params if widget == "array" || field_entry&.array?
+      cell["collection"] = collection_config_from_params if field_entry&.array?
       cell
+    end
+
+    def target_row(main_screen)
+      rows = main_screen["rows"] = Array(main_screen["rows"])
+      selected_index = params[:row_index].presence
+      return append_row(rows) if selected_index == "new" || rows.empty?
+
+      index = Integer(selected_index, 10)
+      return rows[index] if index >= 0 && index < rows.length
+
+      append_row(rows)
+    rescue ArgumentError
+      append_row(rows)
+    end
+
+    def append_row(rows)
+      rows << []
+      rows.last
+    end
+
+    def normalized_span(raw_span)
+      span = raw_span.presence&.to_i || DEFAULT_FIELD_SPAN
+      span.clamp(BUILDER_SPAN_RANGE.begin, BUILDER_SPAN_RANGE.end)
     end
 
     def collection_config_from_params
@@ -141,6 +192,23 @@ module Drafts
           )
         ]
       )
+    end
+
+    def current_main_screen
+      Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
+    end
+
+    def width_class_for(width)
+      case width
+      when "narrow"
+        "mx-auto w-full max-w-3xl"
+      when "medium"
+        "mx-auto w-full max-w-5xl"
+      when "full"
+        "w-full"
+      else
+        "mx-auto w-full max-w-[2560px]"
+      end
     end
 
     def projection_affordance

@@ -5,6 +5,8 @@ require "forwardable"
 class EditAffordance < ApplicationRecord
   extend Forwardable
 
+  WIDTHS = %w[narrow medium large full].freeze
+
   belongs_to :schema_wrapper,
              class_name: "SchemaWrapper",
              inverse_of: :edit_affordances
@@ -67,7 +69,10 @@ class EditAffordance < ApplicationRecord
     start_screen_id = start_screen_id_for(affordance_body, screens, screen_id: screen_id)
     active_screen = screens.find { |screen| screen.id == start_screen_id } || screens.first
     rows = active_screen&.rows || []
-    defaults = active_screen&.defaults || EditAffordances::Projection::Defaults.new(column_count: column_count_for(affordance_body))
+    defaults = active_screen&.defaults || EditAffordances::Projection::Defaults.new(
+      column_count: column_count_for(affordance_body),
+      width: width_for(affordance_body)
+    )
 
     EditAffordances::Projection.new(
       rows: rows,
@@ -131,6 +136,7 @@ class EditAffordance < ApplicationRecord
 
       column_count = column_count_for(screen_data)
       default_span = default_span_for(screen_data)
+      width = width_for(screen_data, affordance_body: affordance_body)
       commit_mode = commit_mode_for(screen_data, affordance_body)
       relative_bindings = subform_data.present?
       rows = Array(rows_for_screen(screen_data, subform_data)).map do |row_data|
@@ -157,8 +163,9 @@ class EditAffordance < ApplicationRecord
         root_binding: root_binding,
         root_cursor: screen_root_cursor,
         rows: rows,
-        defaults: EditAffordances::Projection::Defaults.new(column_count: column_count),
-        commit_mode: commit_mode
+        defaults: EditAffordances::Projection::Defaults.new(column_count: column_count, width: width),
+        commit_mode: commit_mode,
+        width: width
       )
     end
   end
@@ -209,6 +216,11 @@ class EditAffordance < ApplicationRecord
       affordance_body["commit_mode"].presence ||
       screen_for(affordance_body)["commit_mode"].presence ||
       "review_screen"
+  end
+
+  def width_for(screen_data, affordance_body: nil)
+    width = screen_data["width"].presence || affordance_body&.fetch("width", nil).presence || "large"
+    WIDTHS.include?(width) ? width : "large"
   end
 
   def project_row_cells(root_cursor, row_data, inventory:, default_span:, screen_titles:, path_variables:, commit_mode:, relative_bindings:, mode:, diagnostics:)

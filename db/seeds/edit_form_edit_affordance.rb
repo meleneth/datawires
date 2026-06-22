@@ -47,10 +47,11 @@ module Seeds
                 field_cell("/id", span: 3),
                 field_cell("/title", span: 3),
                 field_cell("/subform", span: 3),
-                field_cell("/commit_mode", span: 3, widget: "select")
+                field_cell("/width", span: 3, widget: "select")
               ],
               [
-                field_cell("/root_binding/ptr", span: 6, help: "Use path variables such as /items/:index."),
+                field_cell("/commit_mode", span: 3, widget: "select"),
+                field_cell("/root_binding/ptr", span: 3, help: "Use path variables such as /items/:index."),
                 array_cell("/rows", span: 6, title_name: nil, subtitle_kind: "value_label")
               ]
             ]
@@ -73,13 +74,15 @@ module Seeds
             "id" => "main",
             "title" => "Affordance",
             "columns" => 12,
-            "default_span" => 4,
+            "default_span" => 3,
+            "width" => "large",
             "rows" => [
               [
                 field_cell("/version", span: 2, widget: "number"),
-                field_cell("/start_screen", span: 4),
+                field_cell("/start_screen", span: 3),
+                field_cell("/width", span: 2, widget: "select"),
                 field_cell("/commit_mode", span: 3, widget: "select"),
-                { "kind" => "commit", "span" => 3, "message_mode" => "inline_optional" }
+                { "kind" => "commit", "span" => 2, "message_mode" => "inline_optional" }
               ],
               [
                 array_cell("/screens", span: 6, item_screen: "screen", title_name: "id"),

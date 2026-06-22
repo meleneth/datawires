@@ -2,9 +2,9 @@
 
 module EditAffordances
   class Projection
-    Defaults = Struct.new(:column_count, keyword_init: true)
+    Defaults = Struct.new(:column_count, :width, keyword_init: true)
     Diagnostic = Struct.new(:severity, :message, :cell_data, keyword_init: true)
-    Screen = Struct.new(:id, :title, :root_binding, :root_cursor, :rows, :defaults, :commit_mode, keyword_init: true) do
+    Screen = Struct.new(:id, :title, :root_binding, :root_cursor, :rows, :defaults, :commit_mode, :width, keyword_init: true) do
       def empty?
         rows.empty?
       end
@@ -12,7 +12,7 @@ module EditAffordances
 
     attr_reader :rows, :screens, :bindings, :defaults, :diagnostics, :start_screen_id
 
-    def initialize(rows:, screens: [], bindings: [], defaults: Defaults.new(column_count: 12), diagnostics: [], start_screen_id: nil)
+    def initialize(rows:, screens: [], bindings: [], defaults: Defaults.new(column_count: 12, width: "large"), diagnostics: [], start_screen_id: nil)
       @rows = rows.freeze
       @screens = screens.freeze
       @bindings = bindings.freeze

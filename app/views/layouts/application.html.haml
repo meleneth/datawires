@@ -19,10 +19,9 @@
     - if Rails.env.development?
       .w-full.border-b-2.border-black.bg-secondary.px-3.py-1.text-center.text-sm.font-semibold.text-secondary-foreground
         DATAWIRES UNDER CONSTRUCTION
-    %header.mx-auto.flex.max-w-7xl.items-center.justify-between.px-6.py-4
+    %header{ class: "mx-auto flex w-full max-w-[2560px] items-center justify-between px-6 py-4" }
       = link_to "Datawires", "/domains", class: "font-head text-xl font-medium text-foreground"
       = link_to "Domains", "/domains", class: "font-head rounded border-2 border-black bg-primary px-3 py-1 text-sm text-primary-foreground shadow-sm hover:shadow-none"
-    %main.mx-auto.grid.max-w-7xl.grid-cols-1.gap-4.px-6.pb-8.lg:grid-cols-6
-      .lg:col-span-4.lg:col-start-2
-        = render "shared/flash"
-        = yield
+    %main{ class: "mx-auto w-full max-w-[2560px] px-6 pb-8" }
+      = render "shared/flash"
+      = yield

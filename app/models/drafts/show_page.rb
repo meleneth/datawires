@@ -71,5 +71,11 @@ module Drafts
     def commit_mode
       edit_affordance_projection&.start_screen&.commit_mode.presence || "review_screen"
     end
+
+    def editor_width
+      edit_affordance_projection&.start_screen&.width.presence ||
+        edit_affordance_projection&.defaults&.width.presence ||
+        "large"
+    end
   end
 end

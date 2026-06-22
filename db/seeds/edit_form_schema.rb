@@ -51,6 +51,10 @@ module Seeds
             "$ref" => "#/$defs/commit_mode"
           },
 
+          "width" => {
+            "$ref" => "#/$defs/width"
+          },
+
           "screen" => {
             "$ref" => "#/$defs/screen_config"
           },
@@ -83,6 +87,11 @@ module Seeds
           "screen_mode" => {
             "type" => "string",
             "enum" => %w[page full_width]
+          },
+
+          "width" => {
+            "type" => "string",
+            "enum" => %w[narrow medium large full]
           },
 
           "document_ptr_binding" => {
@@ -131,7 +140,11 @@ module Seeds
               },
               "default_span" => {
                 "type" => "integer",
-                "minimum" => 1
+                "minimum" => 1,
+                "maximum" => 12
+              },
+              "width" => {
+                "$ref" => "#/$defs/width"
               },
               "commit_mode" => {
                 "$ref" => "#/$defs/commit_mode"
@@ -163,7 +176,11 @@ module Seeds
               },
               "default_span" => {
                 "type" => "integer",
-                "minimum" => 1
+                "minimum" => 1,
+                "maximum" => 12
+              },
+              "width" => {
+                "$ref" => "#/$defs/width"
               },
               "commit_mode" => {
                 "$ref" => "#/$defs/commit_mode"
@@ -266,7 +283,8 @@ module Seeds
               },
               "span" => {
                 "type" => "integer",
-                "minimum" => 1
+                "minimum" => 1,
+                "maximum" => 12
               },
               "widget" => {
                 "type" => "string",
@@ -310,7 +328,8 @@ module Seeds
               },
               "span" => {
                 "type" => "integer",
-                "minimum" => 1
+                "minimum" => 1,
+                "maximum" => 12
               },
               "commit_mode" => {
                 "$ref" => "#/$defs/commit_mode"
@@ -340,7 +359,8 @@ module Seeds
               },
               "span" => {
                 "type" => "integer",
-                "minimum" => 1
+                "minimum" => 1,
+                "maximum" => 12
               }
             }
           },

@@ -44,7 +44,7 @@ module EditAffordances
 
       EditAffordances::Projection.new(
         rows: grouped_rows(scalar_fields) + object_rows,
-        defaults: EditAffordances::Projection::Defaults.new(column_count: column_count)
+        defaults: EditAffordances::Projection::Defaults.new(column_count: column_count, width: "large")
       )
     end
 

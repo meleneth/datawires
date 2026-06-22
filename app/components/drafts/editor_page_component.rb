@@ -37,5 +37,18 @@ module Drafts
     def projected_rows_component
       Drafts::ProjectedRowsComponent.new(page: page)
     end
+
+    def width_class
+      case page.editor_width
+      when "narrow"
+        "mx-auto w-full max-w-3xl"
+      when "medium"
+        "mx-auto w-full max-w-5xl"
+      when "full"
+        "w-full"
+      else
+        "mx-auto w-full max-w-[2560px]"
+      end
+    end
   end
 end

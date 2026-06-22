@@ -32,6 +32,8 @@ Rails.application.routes.draw do
     resource :commit, only: %i[new create], module: :drafts
     resource :edit_affordance_builder, only: %i[show], module: :drafts do
       patch :add_field
+      patch :add_row
+      patch :update_screen
       patch :update_raw
     end
   end

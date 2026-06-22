@@ -78,7 +78,8 @@ class CreateEditAffordance
           "id" => "main",
           "title" => "Main",
           "columns" => 12,
-          "default_span" => 4,
+          "default_span" => 3,
+          "width" => "large",
           "rows" => []
         }
       ]

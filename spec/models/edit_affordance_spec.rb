@@ -845,6 +845,52 @@ RSpec.describe EditAffordance, type: :model do
       expect(cells.map(&:span)).to eq([ 5, 5 ])
     end
 
+    it "projects screen width into defaults" do
+      schema_wrapper = create(
+        :schema_wrapper,
+        document: create(:document, :with_name_schema)
+      )
+      edit_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "screens" => [
+            {
+              "id" => "main",
+              "width" => "full",
+              "rows" => [
+                [
+                  {
+                    "binding" => {
+                      "kind" => "document_ptr",
+                      "ptr" => "/name"
+                    }
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      )
+      affordance = build(
+        :edit_affordance,
+        schema_wrapper: schema_wrapper,
+        edit_document: edit_document
+      )
+      draft = build(
+        :draft,
+        document: build(:document, schema_document: schema_wrapper.document),
+        body: {}
+      )
+      cursor = Documents::Cursor.new(source: draft, path: "")
+
+      projection = affordance.projection(cursor)
+
+      expect(projection.defaults.width).to eq("full")
+      expect(projection.start_screen.width).to eq("full")
+    end
+
     it "projects invalid authoring cells into diagnostics and inert cells" do
       schema_wrapper = create(
         :schema_wrapper,

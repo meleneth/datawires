@@ -11,10 +11,12 @@ RSpec.describe EditAffordances::BodyValidator do
     validator = validator_for(
       "version" => 1,
       "commit_mode" => "review_screen",
+      "width" => "large",
       "screen" => {
         "mode" => "page",
         "columns" => 12,
         "default_span" => 4,
+        "width" => "medium",
         "commit_mode" => "review_screen"
       },
       "rows" => [
@@ -73,6 +75,7 @@ RSpec.describe EditAffordances::BodyValidator do
           "mode" => "page",
           "columns" => 12,
           "default_span" => 6,
+          "width" => "full",
           "commit_mode" => "review_screen",
           "rows" => [
             [
@@ -111,6 +114,40 @@ RSpec.describe EditAffordances::BodyValidator do
     )
 
     expect(validator).to be_valid
+  end
+
+  it "rejects invalid widths and spans outside the supported range" do
+    validator = validator_for(
+      "version" => 1,
+      "width" => "huge",
+      "screen" => {
+        "default_span" => 13,
+        "width" => "tiny"
+      },
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/name"
+            },
+            "span" => 0
+          },
+          {
+            "kind" => "commit",
+            "span" => 99
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "width must be one of: narrow, medium, large, full",
+      "screen.default_span must be between 1 and 12",
+      "screen.width must be one of: narrow, medium, large, full",
+      "rows/0/0/span must be a positive integer",
+      "rows/0/1/span must be between 1 and 12"
+    )
   end
 
   it "accepts inline named subforms reused by screens" do

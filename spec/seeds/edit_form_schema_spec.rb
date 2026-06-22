@@ -76,6 +76,8 @@ RSpec.describe Seeds::EditFormSchema do
       expect(properties.fetch("screens")).to include("type" => "array")
       expect(properties.fetch("subforms")).to include("type" => "array")
       expect(properties.fetch("commit_mode")).to eq("$ref" => "#/$defs/commit_mode")
+      expect(properties.fetch("width")).to eq("$ref" => "#/$defs/width")
+      expect(definitions.dig("width", "enum")).to contain_exactly("full", "large", "medium", "narrow")
       expect(definitions.dig("commit_mode", "enum")).to contain_exactly("immediate", "review_screen")
       expect(definitions.fetch("screen").fetch("properties")).to include(
         "root_binding" => {
@@ -90,6 +92,14 @@ RSpec.describe Seeds::EditFormSchema do
         "rows" => {
           "$ref" => "#/$defs/rows"
         }
+      )
+      expect(definitions.dig("field_cell", "properties", "span")).to include(
+        "minimum" => 1,
+        "maximum" => 12
+      )
+      expect(definitions.dig("screen", "properties", "default_span")).to include(
+        "minimum" => 1,
+        "maximum" => 12
       )
       expect(definitions.dig("navigation_cell", "required")).to contain_exactly("kind", "target_screen")
       expect(definitions.dig("commit_cell", "properties", "commit_mode")).to eq("$ref" => "#/$defs/commit_mode")

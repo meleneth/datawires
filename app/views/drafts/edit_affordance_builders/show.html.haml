@@ -24,16 +24,47 @@
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Screen layout")
+            = form_with url: update_screen_draft_edit_affordance_builder_path(@draft),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "grid gap-3 md:grid-cols-3" do
+              .space-y-1
+                = render LabelComponent.new(text: "Width", for_id: "width")
+                = select_tag :width,
+                  options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], @main_screen&.fetch("width", "large")),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Default span", for_id: "default_span")
+                = number_field_tag :default_span,
+                  @main_screen&.fetch("default_span", 3),
+                  min: 1,
+                  max: 12,
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .flex.items-end
+                = submit_tag "Update layout",
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+            = button_to "Add row",
+              add_row_draft_edit_affordance_builder_path(@draft),
+              method: :patch,
+              form: { data: { turbo_frame: "main_content" } },
+              class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
             = render TypographyComponent.new(as: :h3, text: "Add field")
             = form_with url: add_field_draft_edit_affordance_builder_path(@draft),
               method: :patch,
-              data: { turbo_frame: "main_content" },
+              data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
               class: "space-y-4" do
-              .grid.gap-3.md:grid-cols-2
+              .grid.gap-3.md:grid-cols-3
                 .space-y-1
                   = render LabelComponent.new(text: "Schema path", for_id: "ptr")
                   = select_tag :ptr,
-                    options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget }] }),
+                    options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget, "data-array": entry.array? ? "true" : "false" }] }),
+                    data: { edit_affordance_builder_target: "path", action: "edit-affordance-builder#sync" },
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Widget", for_id: "widget")
@@ -41,9 +72,15 @@
                     options_for_select(%w[auto text textarea number checkbox select array]),
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
+                  = render LabelComponent.new(text: "Row", for_id: "row_index")
+                  - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] } + [["New row", "new"]]
+                  = select_tag :row_index,
+                    options_for_select(row_options, @rows.empty? ? "new" : [@rows.length - 1, 0].max),
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
                   = render LabelComponent.new(text: "Span", for_id: "span")
                   = number_field_tag :span,
-                    4,
+                    3,
                     min: 1,
                     max: 12,
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
@@ -56,7 +93,7 @@
                 = check_box_tag :label, "1", true, class: "h-4 w-4 rounded border-2 border-black"
                 %span Show label
 
-              .rounded.border-2.border-black.bg-muted.p-3
+              .rounded.border-2.border-black.bg-muted.p-3{ data: { edit_affordance_builder_target: "collection" } }
                 .mb-3.font-head.text-sm Collection options
                 .grid.gap-3.md:grid-cols-3
                   .space-y-1
@@ -109,6 +146,8 @@
                         nil,
                         placeholder: "quantity",
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+              .rounded.border-2.border-black.bg-muted.p-3.text-sm.text-muted-foreground{ data: { edit_affordance_builder_target: "collectionNote" } }
+                Collection policy: array fields only.
 
               = submit_tag "Add field",
                 class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
@@ -116,41 +155,56 @@
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           = render TypographyComponent.new(as: :h3, text: "Current main screen", html_options: { class: "mb-3" })
-          - main_screen = Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
-          - rows = Array(main_screen&.fetch("rows", []))
-          - if rows.empty?
+          - if @rows.empty?
             = render AlertComponent.new do
               No fields yet.
           - else
             %ol.space-y-2
-              - rows.each_with_index do |row, row_index|
+              - @rows.each_with_index do |row, row_index|
                 %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
-                  .font-head Row #{row_index + 1}
-                  .mt-1.text-muted-foreground= row.map { |cell| cell.dig("binding", "ptr") || cell["kind"] }.join(", ")
-                  - row.each do |cell|
-                    - if cell["collection"].is_a?(Hash)
-                      .mt-2.text-xs.text-muted-foreground
-                        Collection:
-                        = [cell.dig("collection", "presentation"), cell.dig("collection", "creation"), "delete #{cell.dig('collection', 'delete')}", "reorder #{cell.dig('collection', 'reorder')}"].compact.join(", ")
+                  .flex.items-center.justify-between.gap-3
+                    .font-head Row #{row_index + 1}
+                    .text-xs.text-muted-foreground= pluralize(row.length, "cell")
+                  - if row.empty?
+                    .mt-2.text-muted-foreground Empty row
+                  - else
+                    .mt-3.space-y-2
+                      - row.each do |cell|
+                        .grid.gap-3.rounded.border-2.border-black.bg-background.p-3.md:grid-cols-3
+                          .md:col-span-2
+                            .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
+                            .mt-1
+                              %span.font-head Span
+                              = cell["span"] || @main_screen&.fetch("default_span", 3)
+                            - if cell["collection"].is_a?(Hash)
+                              .mt-2.text-xs.text-muted-foreground
+                                Collection:
+                                = [cell.dig("collection", "presentation"), cell.dig("collection", "creation"), "delete #{cell.dig('collection', 'delete')}", "reorder #{cell.dig('collection', 'reorder')}"].compact.join(", ")
+                          .text-sm.text-muted-foreground
+                            - if cell["help"].present?
+                              = cell["help"]
+                            - else
+                              No help text.
 
     - elsif @tab == "preview"
-      = render CardComponent.new(html_options: { class: "w-full" }) do
-        = render CardContentComponent.new do
-          .space-y-4
-            = render TypographyComponent.new(as: :h3, text: "Seeded preview")
-            - if @preview_projection.rows.empty?
-              = render AlertComponent.new do
-                No projected rows yet.
-            - else
-              - @preview_projection.rows.each do |row|
-                .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
-                  - row.cells.each do |cell|
-                    .rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm{ class: "col-span-#{cell.span}" }
-                      .font-head= cell.respond_to?(:default_label) ? cell.default_label : cell.class.name.demodulize
-                      - if cell.respond_to?(:cursor)
-                        .mt-1.font-mono.text-xs.text-muted-foreground= cell.cursor.path.to_s
-                      - if cell.respond_to?(:widget)
-                        .mt-1.text-xs.text-muted-foreground= cell.widget
+      %div{ class: @builder_width_class }
+        = render CardComponent.new(html_options: { class: "w-full" }) do
+          = render CardContentComponent.new do
+            .space-y-4
+              = render TypographyComponent.new(as: :h3, text: "Seeded preview")
+              - if @preview_projection.rows.empty?
+                = render AlertComponent.new do
+                  No projected rows yet.
+              - else
+                - @preview_projection.rows.each do |row|
+                  .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
+                    - row.cells.each do |cell|
+                      .rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm{ class: "col-span-#{cell.span}" }
+                        .font-head= cell.respond_to?(:default_label) ? cell.default_label : cell.class.name.demodulize
+                        - if cell.respond_to?(:cursor)
+                          .mt-1.font-mono.text-xs.text-muted-foreground= cell.cursor.path.to_s
+                        - if cell.respond_to?(:widget)
+                          .mt-1.text-xs.text-muted-foreground= cell.widget
 
     - elsif @tab == "diagnostics"
       = render CardComponent.new(html_options: { class: "w-full" }) do
