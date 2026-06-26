@@ -103,17 +103,8 @@ module Clusters
           "result" => string("Result"),
           "notes" => string("Notes")
         },
-        rows: [
-          [ field("/relative_time", span: 3, widget: "number"), field("/motion_type", span: 3), field("/status", span: 3), field("/title", span: 3) ],
-          [
-            field("/new_agreement_key", span: 6, help: "For main and extend motions that create a new agreement."),
-            reference_field("/target_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select target agreement")
-          ],
-          [ field("/proposed_text", span: 12, widget: "textarea") ],
-          [ field("/mover_key", span: 6), field("/seconder_key", span: 6) ],
-          [ field("/result", span: 6), field("/notes", span: 6, widget: "textarea") ],
-          [ commit(span: 12) ]
-        ]
+        rows: [],
+        screens: motion_screens
       )
     end
 
@@ -317,7 +308,7 @@ module Clusters
       )
     end
 
-    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING)
+    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil)
       {
         key: key,
         title: title,
@@ -334,19 +325,67 @@ module Clusters
           "version" => 1,
           "start_screen" => "main",
           "commit_mode" => "review_screen",
-          "screens" => [
-            {
-              "id" => "main",
-              "title" => title,
-              "columns" => 12,
-              "default_span" => 6,
-              "width" => "large",
-              "rows" => rows
-            }
-          ],
+          "screens" => screens || default_screens(title:, rows:),
           "subforms" => []
         }
       }
+    end
+
+    def default_screens(title:, rows:)
+      [
+        {
+          "id" => "main",
+          "title" => title,
+          "columns" => 12,
+          "default_span" => 6,
+          "width" => "large",
+          "rows" => rows
+        }
+      ]
+    end
+
+    def motion_screens
+      [
+        {
+          "id" => "main",
+          "title" => "Motion",
+          "columns" => 12,
+          "default_span" => 6,
+          "width" => "large",
+          "rows" => [
+            [ field("/relative_time", span: 3, widget: "number"), field("/motion_type", span: 3), field("/status", span: 3), field("/title", span: 3) ],
+            [ field("/proposed_text", span: 12, widget: "textarea") ],
+            [ navigation("Agreement effect", target_screen: "agreement_effect", span: 6), navigation("People and result", target_screen: "people_result", span: 6) ]
+          ]
+        },
+        {
+          "id" => "agreement_effect",
+          "title" => "Agreement Effect",
+          "columns" => 12,
+          "default_span" => 6,
+          "width" => "large",
+          "rows" => [
+            [
+              field("/new_agreement_key", span: 6, help: "For main and extend motions that create a new agreement."),
+              reference_field("/target_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select target agreement")
+            ],
+            [ navigation("Motion details", target_screen: "main", span: 6), navigation("People and result", target_screen: "people_result", span: 6) ]
+          ]
+        },
+        {
+          "id" => "people_result",
+          "title" => "People and Result",
+          "columns" => 12,
+          "default_span" => 6,
+          "width" => "large",
+          "rows" => [
+            [ field("/mover_key", span: 6), field("/seconder_key", span: 6) ],
+            [ field("/result", span: 6), field("/notes", span: 6, widget: "textarea") ],
+            [ navigation("Motion details", target_screen: "main", span: 6), navigation("Agreement effect", target_screen: "agreement_effect", span: 6) ],
+            [ commit(span: 12) ]
+          ]
+        }
+      ]
     end
 
     def participant_schema
@@ -441,6 +480,15 @@ module Clusters
         "kind" => "commit",
         "span" => span,
         "message_mode" => "inline_optional"
+      }
+    end
+
+    def navigation(label, target_screen:, span:)
+      {
+        "kind" => "navigation",
+        "target_screen" => target_screen,
+        "label" => label,
+        "span" => span
       }
     end
   end

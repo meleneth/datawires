@@ -50,6 +50,8 @@ document or repairing the affordance.
 - [x] Wire Robert's Rules motion application into the document UI.
 - [x] Split Robert's Rules Motion authoring between new agreement keys and
       target agreement references.
+- [x] Split the default Robert's Rules Motion edit affordance into workflow
+      screens for details, agreement effect, and result.
 
 ## Next Thrash Targets
 
@@ -61,8 +63,8 @@ document or repairing the affordance.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.
-- [ ] Improve Robert's Rules authoring affordances now that motion application
-      has a concrete action.
+- [ ] Keep improving Robert's Rules authoring once real meeting traces expose
+      rough edges.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
       shows empty domains are too sparse.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.

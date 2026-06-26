@@ -74,7 +74,9 @@ RSpec.describe Clusters::SeedDomain do
     expect(motion_schema.body.dig("properties", "target_agreement_key")).to include("type" => "string")
 
     motion_affordance = motion_schema.schema_wrapper.edit_affordances.sole
-    target_agreement_cell = motion_affordance.body.fetch("screens").first.fetch("rows").flatten.find do |cell|
+    motion_screens = motion_affordance.body.fetch("screens")
+    expect(motion_screens.pluck("id")).to eq(%w[main agreement_effect people_result])
+    target_agreement_cell = motion_screens.find { |screen| screen.fetch("id") == "agreement_effect" }.fetch("rows").flatten.find do |cell|
       cell.dig("binding", "ptr") == "/target_agreement_key"
     end
     expect(target_agreement_cell).to include(
@@ -83,6 +85,14 @@ RSpec.describe Clusters::SeedDomain do
         "schema_key" => "agreement",
         "index_type" => "identity"
       )
+    )
+    expect(motion_screens.flat_map { |screen| screen.fetch("rows").flatten }.select { |cell| cell["kind"] == "navigation" }.pluck("target_screen")).to contain_exactly(
+      "agreement_effect",
+      "people_result",
+      "main",
+      "people_result",
+      "main",
+      "agreement_effect"
     )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).find_each do |wrapper|
