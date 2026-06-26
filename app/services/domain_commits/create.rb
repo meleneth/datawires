@@ -5,7 +5,7 @@ require "json"
 
 module DomainCommits
   class Create
-    HASH_VERSION = 1
+    HASH_VERSION = 2
 
     def self.call(domain:, message:, actor: nil)
       new(domain:, message:, actor:).call
@@ -54,7 +54,7 @@ module DomainCommits
       domain.documents
         .includes(:head_revision)
         .where.not(head_revision_id: nil)
-        .order(:key, :id)
+        .order(:key, :title, :created_at)
         .map do |document|
           revision = document.head_revision
           {
@@ -73,9 +73,7 @@ module DomainCommits
           document = entry.fetch(:document)
           revision = entry.fetch(:revision)
           {
-            "document_id" => document.id,
             "document_key" => document.key,
-            "revision_id" => revision.id,
             "revision_hash" => entry.fetch(:revision_hash)
           }
         end
@@ -85,7 +83,6 @@ module DomainCommits
 
     def revision_hash(revision)
       digest(
-        "revision_id" => revision.id,
         "body" => revision.body
       )
     end

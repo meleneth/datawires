@@ -3,7 +3,7 @@
 module DomainExports
   class Export
     FORMAT = "datawires.domain.archive"
-    VERSION = 1
+    VERSION = 2
 
     def self.call(domain:)
       new(domain:).call
@@ -16,6 +16,8 @@ module DomainExports
     end
 
     def call
+      build_refs
+
       {
         "format" => FORMAT,
         "version" => VERSION,
@@ -30,30 +32,43 @@ module DomainExports
 
     private
 
-    attr_reader :domain
+    attr_reader :domain, :document_refs, :revision_refs, :schema_wrapper_refs, :domain_commit_refs
+
+    def build_refs
+      @document_refs = ordered_documents.each_with_index.to_h do |document, index|
+        [ document.id, "document-#{index + 1}" ]
+      end
+      @revision_refs = ordered_revisions.each_with_index.to_h do |revision, index|
+        [ revision.id, "revision-#{index + 1}" ]
+      end
+      @schema_wrapper_refs = ordered_schema_wrappers.each_with_index.to_h do |wrapper, index|
+        [ wrapper.id, "schema-wrapper-#{index + 1}" ]
+      end
+      @domain_commit_refs = ordered_domain_commits.each_with_index.to_h do |commit, index|
+        [ commit.id, "commit-#{index + 1}" ]
+      end
+    end
 
     def domain_payload
       {
-        "id" => domain.id,
         "name" => domain.name,
         "repository_mode" => domain.repository_mode?,
-        "head_domain_commit_id" => domain.head_domain_commit_id
+        "head_domain_commit_ref" => domain_commit_refs[domain.head_domain_commit_id]
       }
     end
 
     def documents_payload
-      domain.documents.includes(:revisions).order(:key, :id).map do |document|
+      ordered_documents.map do |document|
         {
-          "id" => document.id,
+          "ref" => document_refs.fetch(document.id),
           "key" => document.key,
           "title" => document.title,
-          "schema_document_id" => document.schema_document_id,
-          "head_revision_id" => document.head_revision_id,
+          "schema_document_ref" => document_refs[document.schema_document_id],
+          "head_revision_ref" => revision_refs[document.head_revision_id],
           "revisions" => document.revisions.map do |revision|
             {
-              "id" => revision.id,
-              "parent_revision_id" => revision.parent_revision_id,
-              "created_by_id" => revision.created_by_id,
+              "ref" => revision_refs.fetch(revision.id),
+              "parent_revision_ref" => revision_refs[revision.parent_revision_id],
               "message" => revision.message,
               "body" => revision.body
             }
@@ -63,15 +78,12 @@ module DomainExports
     end
 
     def schema_wrappers_payload
-      SchemaWrapper.joins(:document)
-        .where(documents: { domain_id: domain.id })
-        .order(:document_id)
-        .map do |wrapper|
-          {
-            "id" => wrapper.id,
-            "document_id" => wrapper.document_id
-          }
-        end
+      ordered_schema_wrappers.map do |wrapper|
+        {
+          "ref" => schema_wrapper_refs.fetch(wrapper.id),
+          "document_ref" => document_refs.fetch(wrapper.document_id)
+        }
+      end
     end
 
     def edit_affordances_payload
@@ -80,9 +92,8 @@ module DomainExports
         .order(:schema_wrapper_id, :title)
         .map do |affordance|
           {
-            "id" => affordance.id,
-            "schema_wrapper_id" => affordance.schema_wrapper_id,
-            "edit_document_id" => affordance.edit_document_id,
+            "schema_wrapper_ref" => schema_wrapper_refs.fetch(affordance.schema_wrapper_id),
+            "edit_document_ref" => document_refs.fetch(affordance.edit_document_id),
             "title" => affordance.title
           }
         end
@@ -94,34 +105,50 @@ module DomainExports
         .order(:schema_wrapper_id, :title)
         .map do |affordance|
           {
-            "id" => affordance.id,
-            "schema_wrapper_id" => affordance.schema_wrapper_id,
-            "view_document_id" => affordance.view_document_id,
+            "schema_wrapper_ref" => schema_wrapper_refs.fetch(affordance.schema_wrapper_id),
+            "view_document_ref" => document_refs.fetch(affordance.view_document_id),
             "title" => affordance.title
           }
         end
     end
 
     def domain_commits_payload
-      domain.domain_commits.includes(:domain_commit_documents).order(:created_at, :id).map do |commit|
+      ordered_domain_commits.map do |commit|
         {
-          "id" => commit.id,
-          "parent_domain_commit_id" => commit.parent_domain_commit_id,
-          "created_by_id" => commit.created_by_id,
+          "ref" => domain_commit_refs.fetch(commit.id),
+          "parent_domain_commit_ref" => domain_commit_refs[commit.parent_domain_commit_id],
           "message" => commit.message,
           "state_hash" => commit.state_hash,
           "metadata" => commit.metadata,
-          "documents" => commit.domain_commit_documents.order(:document_key, :document_id).map do |entry|
+          "documents" => commit.domain_commit_documents.order(:document_key).map do |entry|
             {
-              "id" => entry.id,
-              "document_id" => entry.document_id,
-              "revision_id" => entry.revision_id,
+              "document_ref" => document_refs.fetch(entry.document_id),
+              "revision_ref" => revision_refs.fetch(entry.revision_id),
               "document_key" => entry.document_key,
               "revision_hash" => entry.revision_hash
             }
           end
         }
       end
+    end
+
+    def ordered_documents
+      @ordered_documents ||= domain.documents.includes(:revisions).order(:key, :title, :created_at).to_a
+    end
+
+    def ordered_revisions
+      @ordered_revisions ||= ordered_documents.flat_map(&:revisions)
+    end
+
+    def ordered_schema_wrappers
+      @ordered_schema_wrappers ||= SchemaWrapper.joins(:document)
+        .where(documents: { domain_id: domain.id })
+        .order(:document_id)
+        .to_a
+    end
+
+    def ordered_domain_commits
+      @ordered_domain_commits ||= domain.domain_commits.includes(:domain_commit_documents).order(:created_at, :id).to_a
     end
   end
 end

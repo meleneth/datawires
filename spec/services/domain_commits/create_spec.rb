@@ -36,4 +36,20 @@ RSpec.describe DomainCommits::Create do
     expect(domain.reload.head_domain_commit).to eq(second)
     expect(second.domain_commit_documents.sole.revision).to eq(revision)
   end
+
+  it "does not include database UUIDs in revision or domain state hashes" do
+    first_domain = create(:domain, repository_mode: true)
+    first_document = create(:document, :with_head_revision, domain: first_domain, key: "agreement", head_body: { "name" => "Same" })
+    second_domain = create(:domain, repository_mode: true)
+    second_document = create(:document, :with_head_revision, domain: second_domain, key: "agreement", head_body: first_document.body)
+
+    first_commit = described_class.call(domain: first_domain, message: "Same", actor: nil)
+    second_commit = described_class.call(domain: second_domain, message: "Same", actor: nil)
+
+    expect(first_document.id).not_to eq(second_document.id)
+    expect(first_document.head_revision_id).not_to eq(second_document.head_revision_id)
+    expect(first_commit.domain_commit_documents.sole.revision_hash).to eq(second_commit.domain_commit_documents.sole.revision_hash)
+    expect(first_commit.state_hash).to eq(second_commit.state_hash)
+    expect(first_commit.metadata).to include("hash_version" => 2)
+  end
 end
