@@ -12,7 +12,7 @@ module EditAffordances
     COLLECTION_NAVIGATIONS = %w[open_item].freeze
     COLLECTION_DELETE_POLICIES = %w[disabled enabled].freeze
     COLLECTION_REORDER_POLICIES = %w[disabled enabled].freeze
-    COLLECTION_BINDING_KINDS = %w[property value_label none].freeze
+    COLLECTION_BINDING_KINDS = %w[property reference_label value_label none].freeze
     WIDTHS = %w[narrow medium large full].freeze
     SPAN_RANGE = (1..12).freeze
 
@@ -313,6 +313,7 @@ module EditAffordances
       validate_string(errors, reference, "schema_key", "#{path}/schema_key")
       validate_string(errors, reference, "schema_key_from", "#{path}/schema_key_from")
       validate_string(errors, reference, "index_type", "#{path}/index_type")
+      validate_string(errors, reference, "index_key", "#{path}/index_key")
       validate_string(errors, reference, "placeholder", "#{path}/placeholder")
     end
 
@@ -341,6 +342,16 @@ module EditAffordances
 
       if binding["kind"] == "property"
         errors << "#{path}/name must be a string" unless binding["name"].is_a?(String) && binding["name"].present?
+      elsif binding["kind"] == "reference_label"
+        validate_string(errors, binding, "schema_key", "#{path}/schema_key")
+        validate_string(errors, binding, "schema_key_property", "#{path}/schema_key_property")
+        validate_string(errors, binding, "key_property", "#{path}/key_property")
+        validate_string(errors, binding, "index_type", "#{path}/index_type")
+        validate_string(errors, binding, "index_key", "#{path}/index_key")
+        errors << "#{path}/key_property is required" unless binding["key_property"].is_a?(String) && binding["key_property"].present?
+        unless binding["schema_key"].is_a?(String) && binding["schema_key"].present? || binding["schema_key_property"].is_a?(String) && binding["schema_key_property"].present?
+          errors << "#{path}/schema_key or #{path}/schema_key_property is required"
+        end
       elsif binding.key?("name")
         errors << "#{path}/name is only supported for property bindings"
       end

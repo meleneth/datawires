@@ -1,11 +1,23 @@
 .flex.items-end.h-full
   - if immediate_commit?
-    = button_to "Commit",
-      immediate_commit_path,
+    = form_with url: immediate_commit_path,
       method: :post,
-      params: { commit: { message: "" } },
-      form: { data: { turbo_frame: "main_content" } },
-      class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+      scope: :commit,
+      data: { turbo_frame: "main_content" },
+      class: "flex w-full items-end gap-2" do |f|
+      - if inline_message?
+        .min-w-0.flex-1
+          = render LabelComponent.new(text: "Commit message", for_id: "commit_message", html_options: { class: "mb-1 block" })
+          = f.text_field :message,
+            id: "commit_message",
+            required: message_required?,
+            placeholder: "Commit message",
+            class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+      - else
+        = f.hidden_field :message, value: ""
+      = f.submit "Commit Now",
+        name: nil,
+        class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
   - else
     = render ButtonComponent.new(href: commit_path, html_options: { data: { turbo_frame: "main_content" } }) do
       Commit

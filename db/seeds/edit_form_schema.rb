@@ -223,9 +223,29 @@ module Seeds
             "properties" => {
               "kind" => {
                 "type" => "string",
-                "enum" => %w[property value_label none]
+                "enum" => %w[property reference_label value_label none]
               },
               "name" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "schema_key" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "schema_key_property" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "key_property" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "index_type" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "index_key" => {
                 "type" => "string",
                 "minLength" => 1
               }

@@ -65,8 +65,11 @@ RSpec.describe Seeds::EditFormSchema do
       expect(definitions.dig("collection_binding", "properties", "kind", "enum")).to contain_exactly(
         "none",
         "property",
+        "reference_label",
         "value_label"
       )
+      expect(definitions.dig("collection_binding", "properties", "schema_key_property")).to include("type" => "string")
+      expect(definitions.dig("collection_binding", "properties", "key_property")).to include("type" => "string")
     end
 
     it "allows screens, subforms, navigation cells, and commit modes" do

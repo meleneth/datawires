@@ -32,5 +32,13 @@ module Drafts
     def immediate_commit?
       commit.commit_mode == "immediate"
     end
+
+    def inline_message?
+      commit.message_mode.in?(%w[inline_optional inline_required])
+    end
+
+    def message_required?
+      commit.message_mode == "inline_required"
+    end
   end
 end

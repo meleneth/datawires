@@ -192,7 +192,9 @@ RSpec.describe "Bespoke draft affordances", type: :request do
                   }
                 },
                 {
-                  "kind" => "commit"
+                  "kind" => "commit",
+                  "commit_mode" => "immediate",
+                  "message_mode" => "inline_optional"
                 }
               ]
             ]
@@ -212,7 +214,10 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response).to have_http_status(:ok)
     commit_forms = parsed_body.css(%(form[action*="#{draft_commit_path(draft)}"]))
     expect(commit_forms).not_to be_empty
-    expect(commit_forms.first["action"]).to include("screen=summary")
+    projected_commit_form = commit_forms.find { |form| form.to_html.include?("Commit Now") }
+    expect(projected_commit_form).to be_present
+    expect(projected_commit_form["action"]).to include("screen=summary")
+    expect(projected_commit_form.at_css("input[name='commit[message]']")).to be_present
 
     post draft_commit_path(draft, edit_affordance_id: edit_affordance.id, screen: "summary"), params: {
       commit: {
@@ -592,6 +597,7 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(select.at_css("option[value='']")&.text).to eq("Select person")
     expect(select.at_css("option[value='ada']")&.text).to eq("Ada Lovelace")
     expect(select.at_css("option[value='ada']")["selected"]).to eq("selected")
+    expect(select.css("option").map { |option| option["value"] }).to eq([ "", "ada" ])
   end
 
   it "renders optional blank fields as missing and required blank fields as present blanks" do

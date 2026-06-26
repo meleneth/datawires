@@ -201,12 +201,14 @@ module Drafts
     def reference_entries
       schema_key = dynamic_reference_schema_key.presence || reference["schema_key"].presence
       index_type = reference["index_type"].presence || "identity"
+      index_key = reference["index_key"].presence || "document_key"
       return DocumentIndexEntry.none unless schema_key
 
       DocumentIndexEntry
         .joins(:schema_document)
         .where(schema_document: { domain_id: draft.document.domain_id, key: schema_key })
         .where(index_type: index_type)
+        .where(key: index_key)
         .order(:label, :value)
     end
 

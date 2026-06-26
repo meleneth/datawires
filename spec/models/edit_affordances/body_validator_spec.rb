@@ -47,7 +47,11 @@ RSpec.describe EditAffordances::BodyValidator do
                 "name" => "name"
               },
               "item_subtitle" => {
-                "kind" => "value_label"
+                "kind" => "reference_label",
+                "schema_key_property" => "kind",
+                "key_property" => "key",
+                "index_type" => "identity",
+                "index_key" => "document_key"
               }
             }
           },
@@ -73,7 +77,8 @@ RSpec.describe EditAffordances::BodyValidator do
                   "widget" => "reference",
                   "reference" => {
                     "schema_key_from" => "/kind",
-                    "index_type" => "identity"
+                    "index_type" => "identity",
+                    "index_key" => "document_key"
                   }
                 }
               ]
@@ -361,6 +366,7 @@ RSpec.describe EditAffordances::BodyValidator do
             "reference" => {
               "schema_key" => "person",
               "index_type" => "identity",
+              "index_key" => "document_key",
               "placeholder" => "Select person"
             }
           }
@@ -386,6 +392,7 @@ RSpec.describe EditAffordances::BodyValidator do
               "schema_key" => 12,
               "schema_key_from" => [],
               "index_type" => false,
+              "index_key" => {},
               "placeholder" => []
             }
           }
@@ -397,6 +404,7 @@ RSpec.describe EditAffordances::BodyValidator do
       "rows/0/0/reference/schema_key must be a string",
       "rows/0/0/reference/schema_key_from must be a string",
       "rows/0/0/reference/index_type must be a string",
+      "rows/0/0/reference/index_key must be a string",
       "rows/0/0/reference/placeholder must be a string"
     )
   end
@@ -530,6 +538,42 @@ RSpec.describe EditAffordances::BodyValidator do
       "rows/0/0/collection/item_title/name must be a string",
       "rows/0/0/collection/item_subtitle/name must be a string",
       "rows/0/1/collection must be an object"
+    )
+  end
+
+  it "validates reference label collection bindings" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/items"
+            },
+            "widget" => "array",
+            "collection" => {
+              "item_title" => {
+                "kind" => "reference_label",
+                "schema_key" => 12,
+                "schema_key_property" => [],
+                "key_property" => "",
+                "index_type" => false,
+                "index_key" => {}
+              }
+            }
+          }
+        ]
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "rows/0/0/collection/item_title/schema_key must be a string",
+      "rows/0/0/collection/item_title/schema_key_property must be a string",
+      "rows/0/0/collection/item_title/key_property is required",
+      "rows/0/0/collection/item_title/index_type must be a string",
+      "rows/0/0/collection/item_title/index_key must be a string",
+      "rows/0/0/collection/item_title/schema_key or rows/0/0/collection/item_title/schema_key_property is required"
     )
   end
 

@@ -20,9 +20,14 @@ RSpec.describe Clusters::SeedDomain do
       "description" => "Relative timestamp. Negative values are allowed."
     )
     expect(timeline_body.dig("properties", "event_type", "enum")).to include("party_join", "party_leave")
+    expect(timeline_body.dig("properties", "participants", "items", "properties", "kind", "enum")).to eq(%w[person party])
     expect(timeline_body.dig("properties", "party_key")).to include("type" => "string")
     expect(timeline_body.dig("properties", "person_key")).to include("type" => "string")
     timeline_cells = timeline_schema.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten
+    expect(timeline_cells.find { |cell| cell["kind"] == "commit" }).to include(
+      "commit_mode" => "immediate",
+      "message_mode" => "inline_optional"
+    )
     expect(reference_cell_for(timeline_cells, "/party_key")).to include(
       "widget" => "reference",
       "reference" => include("schema_key" => "party", "index_type" => "identity")
@@ -32,6 +37,16 @@ RSpec.describe Clusters::SeedDomain do
       "reference" => include("schema_key" => "person", "index_type" => "identity")
     )
     participants_cell = reference_cell_for(timeline_cells, "/participants")
+    expect(participants_cell.dig("collection", "item_title")).to include(
+      "kind" => "reference_label",
+      "schema_key_property" => "kind",
+      "key_property" => "key",
+      "index_key" => "document_key"
+    )
+    expect(participants_cell.dig("collection", "item_subtitle")).to include(
+      "kind" => "property",
+      "name" => "notes"
+    )
     expect(reference_cell_for(participants_cell.fetch("item_rows").flatten, "/key")).to include(
       "widget" => "reference",
       "reference" => include("schema_key_from" => "/kind", "index_type" => "identity")

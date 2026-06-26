@@ -91,9 +91,34 @@ module EditAffordances
         value[binding["name"]]
       when "value_label"
         item_cursor.value_label
+      when "reference_label"
+        reference_label_for(binding, item_cursor)
       when "none"
         nil
       end
+    end
+
+    def reference_label_for(binding, item_cursor)
+      value = item_cursor.value
+      return nil unless value.is_a?(Hash)
+
+      schema_key = binding["schema_key"].presence || value[binding["schema_key_property"]].to_s.strip.presence
+      reference_key = value[binding["key_property"]].to_s.strip
+      index_type = binding["index_type"].presence || "identity"
+      index_key = binding["index_key"].presence || "document_key"
+      return nil if schema_key.blank? || reference_key.blank?
+
+      DocumentIndexEntry
+        .joins(:schema_document)
+        .where(
+          schema_document: {
+            domain_id: item_cursor.source.document.domain_id,
+            key: schema_key
+          }
+        )
+        .where(index_type: index_type, key: index_key, value: reference_key)
+        .pick(:label)
+        .presence || reference_key
     end
   end
 end

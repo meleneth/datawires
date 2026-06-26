@@ -313,8 +313,8 @@ module Clusters
             array_field(
               "/participants",
               span: 12,
-              item_title: property_binding("key"),
-              item_subtitle: property_binding("kind"),
+              item_title: reference_label_binding(schema_key_property: "kind", key_property: "key"),
+              item_subtitle: property_binding("notes"),
               item_rows: [
                 [
                   field("/kind", span: 6),
@@ -329,7 +329,7 @@ module Clusters
             reference_field("/person_key", span: 6, schema_key: "person", placeholder: "Select person", help: "For party_join and party_leave events.")
           ],
           [ field("/notes", span: 12, widget: "textarea") ],
-          [ commit(span: 12) ]
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
         ],
         view_affordances: [
           timeline_view_affordance(
@@ -449,7 +449,7 @@ module Clusters
           "kind" => {
             "type" => "string",
             "title" => "Kind",
-            "enum" => %w[person place thing party]
+            "enum" => %w[person party]
           },
           "key" => string("Document key"),
           "role" => string("Role"),
@@ -546,11 +546,22 @@ module Clusters
       }
     end
 
-    def commit(span:)
+    def reference_label_binding(schema_key_property:, key_property:)
+      {
+        "kind" => "reference_label",
+        "schema_key_property" => schema_key_property,
+        "key_property" => key_property,
+        "index_type" => "identity",
+        "index_key" => "document_key"
+      }
+    end
+
+    def commit(span:, commit_mode: "review_screen", message_mode: "inline_optional")
       {
         "kind" => "commit",
         "span" => span,
-        "message_mode" => "inline_optional"
+        "commit_mode" => commit_mode,
+        "message_mode" => message_mode
       }
     end
 

@@ -157,6 +157,83 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).to include("Open")
   end
 
+  it "renders collection item titles from referenced document labels" do
+    person_schema = create(
+      :document,
+      :with_name_schema,
+      domain: domain,
+      key: "person"
+    )
+    person = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "ada",
+      title: "Ada",
+      schema_document: person_schema,
+      head_body: { "name" => "Ada Lovelace" }
+    )
+    DocumentIndexes::Rebuild.call(document: person)
+    draft.update!(
+      body: {
+        "items" => [
+          { "kind" => "person", "key" => "ada", "notes" => "Founded the academy." }
+        ]
+      }
+    )
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/items"
+              },
+              "widget" => "array",
+              "collection" => {
+                "behavior" => "list_open",
+                "presentation" => "list",
+                "creation" => "new_screen",
+                "navigation" => "open_item",
+                "delete" => "disabled",
+                "reorder" => "disabled",
+                "item_title" => {
+                  "kind" => "reference_label",
+                  "schema_key_property" => "kind",
+                  "key_property" => "key",
+                  "index_type" => "identity",
+                  "index_key" => "document_key"
+                },
+                "item_subtitle" => {
+                  "kind" => "property",
+                  "name" => "notes"
+                }
+              }
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper: schema_wrapper,
+      edit_document: edit_document
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Ada Lovelace")
+    expect(response.body).to include("Founded the academy.")
+    expect(response.body).not_to include(">ada<")
+  end
+
   it "navigates collection items to an item screen with path variables" do
     draft.update!(
       body: {
