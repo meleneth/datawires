@@ -1,25 +1,42 @@
 = turbo_frame_tag "main_content" do
   = render TypographyComponent.new(as: :h1, text: @document.title.presence || @document.key, html_options: { class: "mb-4" })
 
+  - if notice.present?
+    .mb-4
+      = render AlertComponent.new do
+        = notice
+  - if alert.present?
+    .mb-4
+      = render AlertComponent.new(variant: :destructive) do
+        = alert
+
   = render CardComponent.new(html_options: { class: "w-full" }) do
     = render CardContentComponent.new do
-      %dl.grid.gap-3.text-sm.md:grid-cols-2
-        %div
-          %dt.text-muted-foreground Domain
-          %dd.font-head.text-foreground= @domain.name
-
-        %div
-          %dt.text-muted-foreground Key
-          %dd.font-head.text-foreground= @document.key
-
-        - if @schema_wrapper
+      .space-y-4
+        %dl.grid.gap-3.text-sm.md:grid-cols-2
           %div
-            %dt.text-muted-foreground Schema
-            %dd
-              = link_to @schema_wrapper.key,
-                schema_path(@schema_wrapper),
-                data: { turbo_frame: "main_content", turbo_action: "advance" },
-                class: "font-head text-foreground underline"
+            %dt.text-muted-foreground Domain
+            %dd.font-head.text-foreground= @domain.name
+
+          %div
+            %dt.text-muted-foreground Key
+            %dd.font-head.text-foreground= @document.key
+
+          - if @schema_wrapper
+            %div
+              %dt.text-muted-foreground Schema
+              %dd
+                = link_to @schema_wrapper.key,
+                  schema_path(@schema_wrapper),
+                  data: { turbo_frame: "main_content", turbo_action: "advance" },
+                  class: "font-head text-foreground underline"
+
+        - if @can_apply_roberts_motion
+          .flex.flex-wrap.items-center.gap-3
+            = button_to "Apply motion",
+              document_motion_application_path(@document),
+              method: :post,
+              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
   - if @edit_affordances.any?
     .mt-6
