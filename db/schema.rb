@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_26_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -49,10 +49,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_000001) do
     t.index ["schema_document_id"], name: "index_documents_on_schema_document_id"
   end
 
+  create_table "domain_commit_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "document_id", null: false
+    t.string "document_key"
+    t.uuid "domain_commit_id", null: false
+    t.string "revision_hash", null: false
+    t.uuid "revision_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id", "revision_id"], name: "index_domain_commit_documents_on_document_id_and_revision_id"
+    t.index ["document_id"], name: "index_domain_commit_documents_on_document_id"
+    t.index ["domain_commit_id", "document_id"], name: "idx_on_domain_commit_id_document_id_f784c1ed79", unique: true
+    t.index ["domain_commit_id"], name: "index_domain_commit_documents_on_domain_commit_id"
+    t.index ["revision_id"], name: "index_domain_commit_documents_on_revision_id"
+  end
+
+  create_table "domain_commits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "created_by_id"
+    t.uuid "domain_id", null: false
+    t.text "message"
+    t.jsonb "metadata", default: {}, null: false
+    t.uuid "parent_domain_commit_id"
+    t.string "state_hash", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_domain_commits_on_created_by_id"
+    t.index ["domain_id", "state_hash"], name: "index_domain_commits_on_domain_id_and_state_hash", unique: true
+    t.index ["domain_id"], name: "index_domain_commits_on_domain_id"
+    t.index ["parent_domain_commit_id"], name: "index_domain_commits_on_parent_domain_commit_id"
+  end
+
   create_table "domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.uuid "head_domain_commit_id"
     t.string "name", null: false
+    t.boolean "repository_mode", default: false, null: false
     t.datetime "updated_at", null: false
+    t.index ["head_domain_commit_id"], name: "index_domains_on_head_domain_commit_id"
     t.index ["name"], name: "index_domains_on_name", unique: true
   end
 
@@ -151,6 +184,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_000001) do
   add_foreign_key "documents", "documents", column: "schema_document_id"
   add_foreign_key "documents", "domains"
   add_foreign_key "documents", "revisions", column: "head_revision_id"
+  add_foreign_key "domain_commit_documents", "documents"
+  add_foreign_key "domain_commit_documents", "domain_commits"
+  add_foreign_key "domain_commit_documents", "revisions"
+  add_foreign_key "domain_commits", "domain_commits", column: "parent_domain_commit_id"
+  add_foreign_key "domain_commits", "domains"
+  add_foreign_key "domain_commits", "users", column: "created_by_id"
+  add_foreign_key "domains", "domain_commits", column: "head_domain_commit_id"
   add_foreign_key "drafts", "documents"
   add_foreign_key "drafts", "revisions", column: "based_on_revision_id"
   add_foreign_key "drafts", "users", column: "created_by_id"

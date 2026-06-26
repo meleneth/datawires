@@ -1,5 +1,10 @@
 class Domain < ApplicationRecord
   has_many :documents, dependent: :restrict_with_exception
+  has_many :domain_commits, dependent: :restrict_with_exception
+
+  belongs_to :head_domain_commit,
+             class_name: "DomainCommit",
+             optional: true
 
   has_many :schema_documents,
            -> { schemas },

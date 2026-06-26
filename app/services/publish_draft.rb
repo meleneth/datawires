@@ -34,6 +34,7 @@ class PublishDraft
 
       @document.update!(head_revision: revision)
       SyncSchemaWrapperForDocument.call(document: @document)
+      create_domain_commit_if_needed
       @draft.destroy!
 
       revision
@@ -58,5 +59,12 @@ class PublishDraft
 
   def deep_dup_json(value)
     Marshal.load(Marshal.dump(value))
+  end
+
+  def create_domain_commit_if_needed
+    domain = @document.domain
+    return unless domain.repository_mode?
+
+    DomainCommits::Create.call(domain: domain, message: @message, actor: @actor)
   end
 end

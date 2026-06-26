@@ -84,6 +84,34 @@ RSpec.describe PublishDraft do
       expect(DocumentIndexes::RebuildJob).to have_been_enqueued.with(doc.id, revision.id)
     end
 
+    it "advances domain head commits for repository-mode domains" do
+      domain = create(:domain, repository_mode: true)
+      doc = create(:document, domain: domain, key: "agreement")
+      draft = create(:draft, document: doc, body: { "title" => "Agreement" })
+
+      revision = described_class.call(draft: draft, message: "Adopt agreement")
+
+      domain_commit = domain.reload.head_domain_commit
+      expect(domain_commit).to be_present
+      expect(domain_commit.message).to eq("Adopt agreement")
+      expect(domain_commit.domain_commit_documents.sole).to have_attributes(
+        document: doc,
+        revision: revision
+      )
+    end
+
+    it "does not create domain commits for ordinary domains" do
+      domain = create(:domain, repository_mode: false)
+      doc = create(:document, domain: domain)
+      draft = create(:draft, document: doc, body: { "title" => "Ordinary" })
+
+      expect {
+        described_class.call(draft: draft, message: "Publish")
+      }.not_to change(DomainCommit, :count)
+
+      expect(domain.reload.head_domain_commit).to be_nil
+    end
+
     it "uses the draft owner as revision author when no actor is provided" do
       doc = create(:document)
       draft = create(:draft, document: doc, body: { "x" => 1 })

@@ -48,7 +48,7 @@ document or repairing the affordance.
 - [x] Add affordance support for rendering base64-encoded strings as images.
 - [ ] Improve worldbuilding references beyond document-key strings once document
       lookup and relationship affordances are clearer.
-- [ ] Add a general domain-as-repository mode where domain commits form a
+- [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.
 - [ ] Add domain export/import that preserves full document/domain revision
