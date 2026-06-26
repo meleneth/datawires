@@ -10,10 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_20_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "document_index_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "document_id", null: false
+    t.string "index_type", null: false
+    t.string "key"
+    t.string "label"
+    t.jsonb "metadata", default: {}, null: false
+    t.uuid "revision_id", null: false
+    t.uuid "schema_document_id", null: false
+    t.datetime "updated_at", null: false
+    t.text "value"
+    t.index ["document_id", "revision_id", "index_type", "key"], name: "index_document_index_entries_for_rebuild"
+    t.index ["document_id"], name: "index_document_index_entries_on_document_id"
+    t.index ["revision_id"], name: "index_document_index_entries_on_revision_id"
+    t.index ["schema_document_id", "index_type", "label"], name: "index_document_index_entries_on_schema_type_label"
+    t.index ["schema_document_id", "index_type", "value"], name: "index_document_index_entries_on_schema_type_value"
+    t.index ["schema_document_id", "index_type"], name: "index_document_index_entries_on_schema_and_type"
+    t.index ["schema_document_id"], name: "index_document_index_entries_on_schema_document_id"
+  end
 
   create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -125,6 +145,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_20_000003) do
     t.index ["view_document_id"], name: "index_view_affordances_on_view_document_id"
   end
 
+  add_foreign_key "document_index_entries", "documents"
+  add_foreign_key "document_index_entries", "documents", column: "schema_document_id"
+  add_foreign_key "document_index_entries", "revisions"
   add_foreign_key "documents", "documents", column: "schema_document_id"
   add_foreign_key "documents", "domains"
   add_foreign_key "documents", "revisions", column: "head_revision_id"

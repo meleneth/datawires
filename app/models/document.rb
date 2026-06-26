@@ -24,6 +24,11 @@ class Document < ApplicationRecord
            dependent: :destroy,
            inverse_of: :document
 
+  has_many :index_entries,
+           class_name: "DocumentIndexEntry",
+           dependent: :destroy,
+           inverse_of: :document
+
   has_many :instance_documents,
            class_name: "Document",
            foreign_key: :schema_document_id,

@@ -3,7 +3,21 @@
 require "rails_helper"
 
 RSpec.describe PublishDraft do
+  include ActiveJob::TestHelper
+
   describe ".call" do
+    around do |example|
+      original_adapter = ActiveJob::Base.queue_adapter
+      ActiveJob::Base.queue_adapter = :test
+      clear_enqueued_jobs
+      clear_performed_jobs
+      example.run
+    ensure
+      clear_enqueued_jobs
+      clear_performed_jobs
+      ActiveJob::Base.queue_adapter = original_adapter
+    end
+
     it "publishes a draft into a revision and advances the document head" do
       doc = create(:document)
       draft = create(:draft, document: doc, body: { "title" => "Hello" })
@@ -59,6 +73,15 @@ RSpec.describe PublishDraft do
       revision = described_class.call(draft:, actor:, message: "some message")
 
       expect(revision.created_by).to eq(actor)
+    end
+
+    it "enqueues document index rebuild after publishing" do
+      doc = create(:document)
+      draft = create(:draft, document: doc, body: { "title" => "Indexed" })
+
+      revision = described_class.call(draft:, message: "publish")
+
+      expect(DocumentIndexes::RebuildJob).to have_been_enqueued.with(doc.id, revision.id)
     end
 
     it "uses the draft owner as revision author when no actor is provided" do

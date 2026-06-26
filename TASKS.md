@@ -45,7 +45,7 @@ document or repairing the affordance.
 - [x] Add affordance support for rendering base64-encoded strings as images.
 - [ ] Improve worldbuilding references beyond document-key strings once document
       lookup and relationship affordances are clearer.
-- [ ] Add Solid Queue-backed document index rebuild jobs for derived lookup
+- [x] Add Solid Queue-backed document index rebuild jobs for derived lookup
       metadata after draft commits.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
       shows empty domains are too sparse.

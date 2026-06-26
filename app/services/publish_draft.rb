@@ -17,7 +17,7 @@ class PublishDraft
   end
 
   def call
-    ApplicationRecord.transaction do
+    revision = ApplicationRecord.transaction do
       @draft.lock!
       @document.lock!
       @document.reload
@@ -38,6 +38,8 @@ class PublishDraft
 
       revision
     end
+    DocumentIndexes::RebuildJob.perform_later(@document.id, revision.id)
+    revision
   end
 
   private
