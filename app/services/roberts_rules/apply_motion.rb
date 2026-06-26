@@ -67,10 +67,10 @@ module RobertsRules
     def apply_agreement_change!
       case motion_type
       when "main"
-        create_agreement!(motion_body["target_agreement_key"].presence || default_new_agreement_key, extends_agreement_key: nil)
+        create_agreement!(new_agreement_key(fallback_to_target: true), extends_agreement_key: nil)
       when "extend"
         target = target_agreement!
-        create_agreement!(default_new_agreement_key, extends_agreement_key: target.key)
+        create_agreement!(new_agreement_key, extends_agreement_key: target.key)
       when "amend"
         revise_agreement!(target_agreement!, status: "amended")
       when "close"
@@ -159,6 +159,12 @@ module RobertsRules
 
     def default_new_agreement_key
       "#{motion_document.key}-agreement"
+    end
+
+    def new_agreement_key(fallback_to_target: false)
+      motion_body["new_agreement_key"].presence ||
+        (motion_body["target_agreement_key"].presence if fallback_to_target) ||
+        default_new_agreement_key
     end
 
     def target_agreement!

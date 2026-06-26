@@ -95,6 +95,7 @@ module Clusters
           "motion_type" => enum_string("Motion type", %w[main extend amend postpone table call_question reconsider point_of_order appeal withdraw close]),
           "status" => enum_string("Status", %w[pending seconded open adopted rejected withdrawn expired]),
           "relative_time" => integer("Relative time"),
+          "new_agreement_key" => string("New agreement key"),
           "target_agreement_key" => string("Target agreement key"),
           "proposed_text" => string("Proposed text"),
           "mover_key" => string("Mover key"),
@@ -104,7 +105,10 @@ module Clusters
         },
         rows: [
           [ field("/relative_time", span: 3, widget: "number"), field("/motion_type", span: 3), field("/status", span: 3), field("/title", span: 3) ],
-          [ reference_field("/target_agreement_key", span: 12, schema_key: "agreement", placeholder: "Select target agreement") ],
+          [
+            field("/new_agreement_key", span: 6, help: "For main and extend motions that create a new agreement."),
+            reference_field("/target_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select target agreement")
+          ],
           [ field("/proposed_text", span: 12, widget: "textarea") ],
           [ field("/mover_key", span: 6), field("/seconder_key", span: 6) ],
           [ field("/result", span: 6), field("/notes", span: 6, widget: "textarea") ],

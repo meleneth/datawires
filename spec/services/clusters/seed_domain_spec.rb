@@ -65,10 +65,12 @@ RSpec.describe Clusters::SeedDomain do
     motion_schema = domain.documents.find_by!(key: "motion")
     expect(motion_schema.body.dig("properties", "motion_type", "enum")).to include(
       "main",
+      "extend",
       "amend",
       "reconsider",
       "close"
     )
+    expect(motion_schema.body.dig("properties", "new_agreement_key")).to include("type" => "string")
     expect(motion_schema.body.dig("properties", "target_agreement_key")).to include("type" => "string")
 
     motion_affordance = motion_schema.schema_wrapper.edit_affordances.sole

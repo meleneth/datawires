@@ -15,7 +15,7 @@ RSpec.describe RobertsRules::ApplyMotion do
         "motion_type" => "main",
         "status" => "adopted",
         "relative_time" => -2,
-        "target_agreement_key" => "speaking-rule",
+        "new_agreement_key" => "speaking-rule",
         "proposed_text" => "Members may speak twice."
       }
     )
@@ -115,6 +115,7 @@ RSpec.describe RobertsRules::ApplyMotion do
         "title" => "Extend base rule",
         "motion_type" => "extend",
         "status" => "adopted",
+        "new_agreement_key" => "base-rule-extension",
         "target_agreement_key" => "base-rule",
         "proposed_text" => "Extension text."
       }
@@ -122,13 +123,13 @@ RSpec.describe RobertsRules::ApplyMotion do
 
     described_class.call(motion_document: motion, actor: nil)
 
-    extension = domain.documents.find_by!(key: "motion-extend-rule-agreement")
+    extension = domain.documents.find_by!(key: "base-rule-extension")
     expect(extension.body).to include(
       "status" => "active",
       "body" => "Extension text.",
       "extends_agreement_key" => "base-rule"
     )
-    expect(motion.reload.body["result"]).to eq("applied: motion-extend-rule-agreement")
+    expect(motion.reload.body["result"]).to eq("applied: base-rule-extension")
   end
 
   it "closes an existing agreement from an adopted motion" do

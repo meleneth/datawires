@@ -48,6 +48,8 @@ document or repairing the affordance.
 - [x] Add a Robert's Rules service for applying adopted main, extend, amend, and
       close motions to Agreements in one domain commit.
 - [x] Wire Robert's Rules motion application into the document UI.
+- [x] Split Robert's Rules Motion authoring between new agreement keys and
+      target agreement references.
 
 ## Next Thrash Targets
 
