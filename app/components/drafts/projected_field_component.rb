@@ -199,7 +199,7 @@ module Drafts
     end
 
     def reference_entries
-      schema_key = reference["schema_key"].presence
+      schema_key = dynamic_reference_schema_key.presence || reference["schema_key"].presence
       index_type = reference["index_type"].presence || "identity"
       return DocumentIndexEntry.none unless schema_key
 
@@ -208,6 +208,26 @@ module Drafts
         .where(schema_document: { domain_id: draft.document.domain_id, key: schema_key })
         .where(index_type: index_type)
         .order(:label, :value)
+    end
+
+    def dynamic_reference_schema_key
+      schema_key_from = reference["schema_key_from"].presence
+      return nil unless schema_key_from
+
+      dynamic_cursor = cursor_for_reference_schema_key(schema_key_from)
+      return nil unless dynamic_cursor&.present?
+
+      dynamic_cursor.value.to_s.strip
+    end
+
+    def cursor_for_reference_schema_key(ptr)
+      path = Documents::Path.new(ptr)
+      root = cursor.parent || cursor
+      path.tokens.reduce(root) do |memo, token|
+        memo.child(token)
+      end
+    rescue Documents::Path::InvalidPathError
+      nil
     end
 
     def dom_id_suffix

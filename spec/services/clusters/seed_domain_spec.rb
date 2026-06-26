@@ -31,6 +31,11 @@ RSpec.describe Clusters::SeedDomain do
       "widget" => "reference",
       "reference" => include("schema_key" => "person", "index_type" => "identity")
     )
+    participants_cell = reference_cell_for(timeline_cells, "/participants")
+    expect(reference_cell_for(participants_cell.fetch("item_rows").flatten, "/key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key_from" => "/kind", "index_type" => "identity")
+    )
 
     party_schema = domain.documents.find_by!(key: "party")
     expect(party_schema.body.dig("properties", "members", "items", "properties", "person_key")).to include(

@@ -72,7 +72,7 @@ RSpec.describe EditAffordances::BodyValidator do
                   },
                   "widget" => "reference",
                   "reference" => {
-                    "schema_key" => "person",
+                    "schema_key_from" => "/kind",
                     "index_type" => "identity"
                   }
                 }
@@ -384,6 +384,7 @@ RSpec.describe EditAffordances::BodyValidator do
             "widget" => "reference",
             "reference" => {
               "schema_key" => 12,
+              "schema_key_from" => [],
               "index_type" => false,
               "placeholder" => []
             }
@@ -394,6 +395,7 @@ RSpec.describe EditAffordances::BodyValidator do
 
     expect(described_class.new(body).errors).to include(
       "rows/0/0/reference/schema_key must be a string",
+      "rows/0/0/reference/schema_key_from must be a string",
       "rows/0/0/reference/index_type must be a string",
       "rows/0/0/reference/placeholder must be a string"
     )

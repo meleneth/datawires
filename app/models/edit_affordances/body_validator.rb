@@ -311,6 +311,7 @@ module EditAffordances
       end
 
       validate_string(errors, reference, "schema_key", "#{path}/schema_key")
+      validate_string(errors, reference, "schema_key_from", "#{path}/schema_key_from")
       validate_string(errors, reference, "index_type", "#{path}/index_type")
       validate_string(errors, reference, "placeholder", "#{path}/placeholder")
     end

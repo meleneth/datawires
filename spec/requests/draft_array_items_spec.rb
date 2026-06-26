@@ -362,6 +362,90 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).not_to include('value="/items/0/quantity"')
   end
 
+  it "renders reference options from a sibling schema key field" do
+    person_schema = create(
+      :document,
+      :with_name_schema,
+      domain: domain,
+      key: "person"
+    )
+    place_schema = create(
+      :document,
+      :with_name_schema,
+      domain: domain,
+      key: "place"
+    )
+    person = create(:document, domain: domain, key: "ada", title: "Ada", schema_document: person_schema)
+    person_revision = person.revisions.create!(body: { "name" => "Ada" }, message: "Create Ada")
+    person.update!(head_revision: person_revision)
+    place = create(:document, domain: domain, key: "citadel", title: "Citadel", schema_document: place_schema)
+    place_revision = place.revisions.create!(body: { "name" => "Citadel" }, message: "Create Citadel")
+    place.update!(head_revision: place_revision)
+    DocumentIndexes::Rebuild.call(document: person)
+    DocumentIndexes::Rebuild.call(document: place)
+    draft.update!(
+      body: {
+        "items" => [
+          { "kind" => "person" }
+        ]
+      }
+    )
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      head_body: {
+        "version" => 1,
+        "start_screen" => "item",
+        "screens" => [
+          {
+            "id" => "item",
+            "title" => "Item",
+            "root_binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/items/:index"
+            },
+            "rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/items/:index/kind"
+                  }
+                },
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/items/:index/name"
+                  },
+                  "widget" => "reference",
+                  "reference" => {
+                    "schema_key_from" => "/kind",
+                    "index_type" => "identity",
+                    "placeholder" => "Select participant"
+                  }
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper: schema_wrapper,
+      edit_document: edit_document
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id, path: "/items/0", screen: "item")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Select participant")
+    expect(response.body).to include("Ada")
+    expect(response.body).not_to include("Citadel")
+  end
+
   it "renders delete controls only when collection delete policy is enabled" do
     draft.update!(
       body: {

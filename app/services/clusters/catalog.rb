@@ -305,7 +305,14 @@ module Clusters
               "/participants",
               span: 12,
               item_title: property_binding("key"),
-              item_subtitle: property_binding("kind")
+              item_subtitle: property_binding("kind"),
+              item_rows: [
+                [
+                  field("/kind", span: 6),
+                  dynamic_reference_field("/key", span: 6, schema_key_from: "/kind", placeholder: "Select participant")
+                ],
+                [ field("/role", span: 6), field("/notes", span: 6, widget: "textarea") ]
+              ]
             )
           ],
           [
@@ -457,6 +464,21 @@ module Clusters
         help: help,
         reference: {
           "schema_key" => schema_key,
+          "index_type" => index_type
+        }.tap do |config|
+          config["placeholder"] = placeholder if placeholder.present?
+        end
+      )
+    end
+
+    def dynamic_reference_field(ptr, span:, schema_key_from:, index_type: "identity", placeholder: nil, help: nil)
+      field(
+        ptr,
+        span: span,
+        widget: "reference",
+        help: help,
+        reference: {
+          "schema_key_from" => schema_key_from,
           "index_type" => index_type
         }.tap do |config|
           config["placeholder"] = placeholder if placeholder.present?
