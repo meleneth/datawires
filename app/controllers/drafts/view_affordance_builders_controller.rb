@@ -8,6 +8,18 @@ module Drafts
       @tab = tab_param
     end
 
+    def update_settings
+      body = deep_dup_json(@draft.body)
+      body["version"] = 1
+      body["renderer"] = params[:renderer].presence_in(ViewAffordances::BodyValidator::SUPPORTED_RENDERERS) || "timeline_d3"
+      body["title"] = params[:title].to_s
+      body["config"] = config_from_params
+      @draft.update!(body: body)
+
+      redirect_to draft_view_affordance_builder_path(@draft, tab: "settings"),
+        notice: "View settings updated."
+    end
+
     def update_raw
       @draft.update!(body: JSON.parse(params.require(:body_json)))
 
@@ -50,7 +62,7 @@ module Drafts
     end
 
     def tab_param
-      params[:tab].presence_in(%w[preview diagnostics raw]) || "preview"
+      params[:tab].presence_in(%w[settings preview diagnostics raw]) || "settings"
     end
 
     def preview_projection
@@ -79,6 +91,17 @@ module Drafts
       ).tap do |affordance|
         affordance.define_singleton_method(:body) { body }
       end
+    end
+
+    def config_from_params
+      {
+        "schema_key" => params[:schema_key].to_s,
+        "relative_time_label" => params[:relative_time_label].presence || "Relative time"
+      }
+    end
+
+    def deep_dup_json(value)
+      Marshal.load(Marshal.dump(value))
     end
   end
 end

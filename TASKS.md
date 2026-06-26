@@ -65,13 +65,15 @@ document or repairing the affordance.
 - [x] Add validation and diagnostics for the view affordance DSL.
 - [x] Add a raw view affordance builder so view affordance documents can be
       created, opened, diagnosed, previewed, committed, and deleted.
+- [x] Add structured settings for the first view affordance renderer while
+      keeping Raw JSON as the repair path.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
-- [ ] Add a structured view affordance builder once the seeded renderer shape
-      has been used enough to expose the right controls.
+- [ ] Expand the structured view affordance builder as additional renderer
+      shapes become clear from use.
 - [x] Add affordance support for rendering base64-encoded strings as images.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain

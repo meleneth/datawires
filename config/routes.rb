@@ -58,6 +58,7 @@ Rails.application.routes.draw do
       patch "rows/:row_index/cells/:cell_index/move", action: :move_cell, as: :move_cell
     end
     resource :view_affordance_builder, only: %i[show], module: :drafts do
+      patch :update_settings
       patch :update_raw
       delete :affordance, action: :destroy_affordance
     end

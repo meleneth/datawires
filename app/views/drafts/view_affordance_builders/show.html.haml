@@ -5,7 +5,7 @@
       = render TypographyComponent.new(as: :muted, text: "#{@view_affordance.title} for #{@schema_wrapper.key}")
 
     .flex.flex-wrap.items-center.gap-2
-      - %w[preview diagnostics raw].each do |tab|
+      - %w[settings preview diagnostics raw].each do |tab|
         = link_to tab.titleize,
           draft_view_affordance_builder_path(@draft, tab: tab),
           data: { turbo_frame: "main_content" },
@@ -25,7 +25,41 @@
       = render AlertComponent.new do
         = flash[:notice]
 
-    - if @tab == "preview"
+    - if @tab == "settings"
+      - config = @draft.body["config"].is_a?(Hash) ? @draft.body["config"] : {}
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Settings")
+            = form_with url: update_settings_draft_view_affordance_builder_path(@draft),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "space-y-4" do
+              .grid.gap-3.md:grid-cols-2
+                .space-y-1
+                  = render LabelComponent.new(text: "Title", for_id: "title")
+                  = text_field_tag :title,
+                    @draft.body["title"],
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Renderer", for_id: "renderer")
+                  = select_tag :renderer,
+                    options_for_select([["Timeline (D3)", "timeline_d3"]], @draft.body["renderer"] || "timeline_d3"),
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Timeline schema key", for_id: "schema_key")
+                  = text_field_tag :schema_key,
+                    config["schema_key"] || @schema_wrapper.key,
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Time axis label", for_id: "relative_time_label")
+                  = text_field_tag :relative_time_label,
+                    config["relative_time_label"] || "Relative time",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              = submit_tag "Update settings",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+    - elsif @tab == "preview"
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           .space-y-4

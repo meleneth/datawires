@@ -76,6 +76,40 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("renderer must be one of: timeline_d3")
   end
 
+  it "updates timeline view settings through structured controls" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: schema.schema_wrapper, title: "Timeline", actor: current_actor)
+
+    get draft_view_affordance_builder_path(result.draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Settings")
+    expect(response.body).to include("Timeline schema key")
+
+    patch update_settings_draft_view_affordance_builder_path(result.draft), params: {
+      title: "Story Clock",
+      renderer: "timeline_d3",
+      schema_key: "timeline-event",
+      relative_time_label: "Scene beat"
+    }
+
+    expect(response).to redirect_to(draft_view_affordance_builder_path(result.draft, tab: "settings"))
+    expect(result.draft.reload.body).to include(
+      "version" => 1,
+      "renderer" => "timeline_d3",
+      "title" => "Story Clock",
+      "config" => include(
+        "schema_key" => "timeline-event",
+        "relative_time_label" => "Scene beat"
+      )
+    )
+
+    get draft_view_affordance_builder_path(result.draft, tab: "diagnostics")
+
+    expect(response.body).to include("No diagnostics.")
+  end
+
   it "links and renders a seeded D3 timeline view without edit controls" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
