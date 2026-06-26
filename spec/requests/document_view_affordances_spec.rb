@@ -136,13 +136,33 @@ RSpec.describe "Document view affordances", type: :request do
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
 
     timeline_schema = domain.documents.find_by!(key: "timeline-event")
+    person_schema = domain.documents.find_by!(key: "person")
+    person = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: person_schema,
+      key: "ada",
+      title: "Ada",
+      head_body: {
+        "name" => "Ada Lovelace"
+      }
+    )
+    DocumentIndexes::Rebuild.call(document: person)
     first_event = create_timeline_event(
       domain: domain,
       schema: timeline_schema,
       key: "arrival",
       title: "Arrival",
       relative_time: -10,
-      summary: "The party reaches the city."
+      summary: "The party reaches the city.",
+      participants: [
+        {
+          "kind" => "person",
+          "key" => "ada",
+          "role" => "witness"
+        }
+      ]
     )
     create_timeline_event(
       domain: domain,
@@ -169,6 +189,8 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("Arrival")
     expect(response.body).to include("Council")
     expect(response.body).to include("The party reaches the city.")
+    expect(response.body).to include("Ada Lovelace")
+    expect(response.body).to include("witness")
     expect(response.body).not_to include("<input")
     expect(response.body).not_to include("<textarea")
     expect(response.body).not_to include("<select")
@@ -198,7 +220,7 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include(document_view_affordance_path(event, view_affordance))
   end
 
-  def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:)
+  def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:, participants: [])
     create(
       :document,
       :with_head_revision,
@@ -210,7 +232,8 @@ RSpec.describe "Document view affordances", type: :request do
         "relative_time" => relative_time,
         "event_type" => "general",
         "title" => title,
-        "summary" => summary
+        "summary" => summary,
+        "participants" => participants
       }
     )
   end

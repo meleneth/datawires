@@ -84,8 +84,40 @@ module ViewAffordances
         {
           "kind" => kind,
           "key" => key,
+          "label" => participant_label(kind, key),
           "role" => participant["role"].to_s
         }
+      end
+    end
+
+    def participant_label(kind, key)
+      participant_labels.fetch([ kind, key ], key)
+    end
+
+    def participant_labels
+      @participant_labels ||= begin
+        pairs = timeline_documents.flat_map do |timeline_document|
+          Array(timeline_document.body["participants"]).filter_map do |participant|
+            next unless participant.is_a?(Hash)
+
+            kind = participant["kind"].to_s.strip
+            key = participant["key"].to_s.strip
+            [ kind, key ] if kind.present? && key.present?
+          end
+        end.uniq
+        schema_ids_by_key = document.domain.documents.where(key: pairs.map(&:first)).pluck(:key, :id).to_h
+
+        DocumentIndexEntry
+          .where(
+            schema_document_id: schema_ids_by_key.values,
+            index_type: DocumentIndexes::Rebuild::IDENTITY_TYPE,
+            key: "document_key",
+            value: pairs.map(&:second)
+          )
+          .each_with_object({}) do |entry, labels|
+            schema_key = schema_ids_by_key.key(entry.schema_document_id)
+            labels[[ schema_key, entry.value ]] = entry.label if schema_key.present?
+          end
       end
     end
   end

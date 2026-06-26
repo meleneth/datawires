@@ -15,3 +15,9 @@
         .text-xs.text-muted-foreground= "#{event.fetch('relative_time')} - #{event.fetch('event_type')}"
         - if event.fetch("summary").present?
           %p.mt-1= event.fetch("summary")
+        - participants = Array(event["participants"])
+        - if participants.any?
+          .mt-2.flex.flex-wrap.gap-1
+            - participants.each do |participant|
+              %span.rounded.border.border-black.bg-muted.px-2.py-1.text-xs.text-muted-foreground
+                = [participant["label"].presence || participant["key"], participant["role"].presence].compact.join(" - ")
