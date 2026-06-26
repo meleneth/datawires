@@ -32,12 +32,21 @@ document or repairing the affordance.
 - [x] Collection item screen choices are constrained to existing screen ids.
 - [x] The builder can add screens and subforms, select the active screen, and
       edit rows through subform-backed screens.
+- [x] New domains can be pre-seeded from clusters.
+- [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
+      and Timeline Event schemas with default edit affordances.
+- [x] Worldbuilding timeline events use relative integer time values, including
+      negative values, and include party join/leave event types.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
 - [x] Add affordance support for rendering base64-encoded strings as images.
+- [ ] Improve worldbuilding references beyond document-key strings once document
+      lookup and relationship affordances are clearer.
+- [ ] Add generated examples/documents for worldbuilding clusters if manual use
+      shows empty domains are too sparse.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.
 - [ ] Prefer constrained wins over broad abstractions until the missing shapes
       are obvious from use.

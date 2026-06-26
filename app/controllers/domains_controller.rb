@@ -21,6 +21,7 @@ class DomainsController < ApplicationController
   # GET /domains/new
   def new
     @domain = Domain.new
+    @cluster_options = Clusters::Catalog.options
   end
 
   # GET /domains/1/edit
@@ -30,9 +31,15 @@ class DomainsController < ApplicationController
   # POST /domains or /domains.json
   def create
     @domain = Domain.new(domain_params)
+    @cluster_options = Clusters::Catalog.options
+    unless Clusters::Catalog.include?(cluster_key_param)
+      @domain.errors.add(:base, "Cluster is not available.")
+      return render :new, status: :unprocessable_entity
+    end
 
     respond_to do |format|
       if @domain.save
+        Clusters::SeedDomain.call(domain: @domain, cluster_key: cluster_key_param, actor: current_user)
         format.html { redirect_to @domain, notice: "Domain was successfully created." }
         format.json { render :show, status: :created, location: @domain }
       else
@@ -75,5 +82,9 @@ class DomainsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def domain_params
     params.expect(domain: [ :name ])
+  end
+
+  def cluster_key_param
+    params.dig(:domain, :cluster_key).presence
   end
 end

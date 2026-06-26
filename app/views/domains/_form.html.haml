@@ -13,6 +13,13 @@
       = render InputComponent.new(name: form.field_name(:name), value: domain.name, html_options: { id: "domain_name" })
       - if domain.errors[:name].any?
         %p.text-sm.text-destructive= domain.errors[:name].to_sentence
+    - if domain.new_record?
+      .space-y-1
+        = render LabelComponent.new(text: "Cluster", for_id: "domain_cluster_key")
+        = select_tag form.field_name(:cluster_key),
+          options_for_select(@cluster_options || Clusters::Catalog.options),
+          id: "domain_cluster_key",
+          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
   .pt-2
     = render ButtonComponent.new(html_options: { type: :submit }) do
       Save domain
