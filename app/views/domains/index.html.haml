@@ -6,6 +6,10 @@
   .mb-4
     = render AlertComponent.new do
       = notice
+- if alert.present?
+  .mb-4
+    = render AlertComponent.new(variant: :destructive) do
+      = alert
 
 = render CardComponent.new(html_options: { class: "w-full" }) do
   = render CardContentComponent.new do
@@ -23,3 +27,20 @@
 
       = render ButtonComponent.new(href: new_domain_path, size: :sm) do
         New domain
+
+= render CardComponent.new(html_options: { class: "mt-6 w-full" }) do
+  = render CardContentComponent.new do
+    .space-y-4
+      = render TypographyComponent.new(as: :h3, text: "Import domain archive")
+      = form_with url: domain_archives_path, multipart: true, class: "space-y-4" do |form|
+        .space-y-1
+          = render LabelComponent.new(text: "Archive JSON", for_id: "archive_file")
+          = file_field_tag :archive_file,
+            id: "archive_file",
+            accept: "application/json,.json",
+            class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all file:mr-4 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-hidden focus-visible:shadow-md"
+        .space-y-1
+          = render LabelComponent.new(text: "Imported domain name", for_id: "archive_name")
+          = render InputComponent.new(name: :name, html_options: { id: "archive_name", placeholder: "Leave blank to use archive name" })
+        = render ButtonComponent.new(html_options: { type: :submit }, size: :sm) do
+          Import archive

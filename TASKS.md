@@ -44,6 +44,7 @@ document or repairing the affordance.
       seeds Agreement, Motion, Proceeding Event, and Meeting State schemas.
 - [x] Add service-level domain archive export/import that preserves document
       revisions, schema/edit affordance links, and domain commit parentage.
+- [x] Wire domain archive export/import into the UI.
 
 ## Next Thrash Targets
 
@@ -55,8 +56,6 @@ document or repairing the affordance.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.
-- [ ] Wire domain archive export/import into the UI once the archive format has
-      had a little more service-level use.
 - [ ] Add Robert's Rules workflow affordances for recording motions as agreement
       creation, extension, amendment, and closure.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
