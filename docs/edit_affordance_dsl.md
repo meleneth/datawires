@@ -74,6 +74,11 @@ Field cells bind an editor widget to a document path. If `span` is omitted, proj
     "compact": false,
     "readonly": false
   },
+  "reference": {
+    "schema_key": "person",
+    "index_type": "identity",
+    "placeholder": "Select person"
+  },
   "collection": {
     "behavior": "list_open",
     "presentation": "list",
@@ -99,6 +104,7 @@ Supported widgets today:
 - `base64_image`
 - `checkbox`
 - `number`
+- `reference`
 - `select`
 - `text`
 - `textarea`
@@ -106,6 +112,8 @@ Supported widgets today:
 `auto` lets schema metadata choose the editor. Arrays render through the current collection/list editor.
 
 `base64_image` renders string values as image previews and keeps the underlying value editable as text. Values may be complete `data:image/...;base64,...` URLs or raw base64 payloads; raw payloads are rendered as PNG data URLs.
+
+`reference` renders a select from `DocumentIndexEntry` rows. `reference.schema_key` scopes options to indexed documents of one schema in the current domain. `reference.index_type` defaults to `identity`.
 
 `label` controls whether the field label is shown. `help` renders short guidance beneath the field. `placeholder` is passed to text-like inputs. Required fields are marked from schema metadata during rendering.
 

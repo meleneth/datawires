@@ -298,6 +298,7 @@ class EditAffordance < ApplicationRecord
       display: cell_data["display"],
       schema_entry: inventory.entry_for(cursor)
     }
+    cell_args[:reference] = cell_data["reference"] if cell_class == EditAffordances::Cells::Field
     cell_args[:collection] = cell_data["collection"] if cell_class == EditAffordances::Cells::Array
 
     cell_class.new(**cell_args)

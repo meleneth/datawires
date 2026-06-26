@@ -4,7 +4,7 @@ module Drafts
   class ProjectedFieldComponent < ApplicationComponent
     attr_reader :draft, :projected_field, :edit_affordance_id
 
-    delegate :cursor, :label, :widget, :help, :placeholder, :display, to: :projected_field
+    delegate :cursor, :label, :widget, :help, :placeholder, :display, :reference, to: :projected_field
 
     def initialize(draft:, field:, edit_affordance_id: nil)
       @draft = draft
@@ -16,7 +16,7 @@ module Drafts
       case input_kind
       when :checkbox
         :check_box
-      when :select
+      when :select, :reference
         :select
       when :number
         :number_field
@@ -67,6 +67,10 @@ module Drafts
 
     def base64_image?
       input_kind == :base64_image
+    end
+
+    def reference?
+      input_kind == :reference
     end
 
     def wrapper_class
@@ -139,7 +143,7 @@ module Drafts
       }
 
       case input_method
-      when :select
+      when :select, :reference
         base.merge(class: input_html_class)
       when :number_field, :text_field
         base.merge(class: input_html_class, value: field_value).merge(placeholder_options)
@@ -154,7 +158,7 @@ module Drafts
 
     def input_leading_args
       case input_method
-      when :select
+      when :select, :reference
         [ input_name, select_options, {}, input_html_options ]
       when :check_box
         [ input_name, input_html_options, "true", "false" ]
@@ -165,7 +169,7 @@ module Drafts
 
     def input_action
       case input_kind
-      when :checkbox, :select
+      when :checkbox, :select, :reference
         "change->autosave#submit"
       else
         "input->autosave#queue change->autosave#submit"
@@ -173,6 +177,8 @@ module Drafts
     end
 
     def select_options
+      return options_for_select(reference_options, field_value) if reference?
+
       options_for_select(enum_values, field_value)
     end
 
@@ -184,6 +190,24 @@ module Drafts
 
     def display_option_enabled?(key)
       display.is_a?(Hash) && display[key] == true
+    end
+
+    def reference_options
+      options = reference_entries.map { |entry| [ entry.label.presence || entry.value, entry.value ] }
+      placeholder = reference["placeholder"].presence || "Select reference"
+      [ [ placeholder, "" ] ] + options
+    end
+
+    def reference_entries
+      schema_key = reference["schema_key"].presence
+      index_type = reference["index_type"].presence || "identity"
+      return DocumentIndexEntry.none unless schema_key
+
+      DocumentIndexEntry
+        .joins(:schema_document)
+        .where(schema_document: { domain_id: draft.document.domain_id, key: schema_key })
+        .where(index_type: index_type)
+        .order(:label, :value)
     end
 
     def dom_id_suffix

@@ -7,7 +7,7 @@ module Drafts
     DEFAULT_FIELD_SPAN = 3
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     WIDTHS = %w[narrow medium large full].freeze
-    WIDGETS = %w[auto text textarea number checkbox select array base64_image].freeze
+    WIDGETS = %w[auto text textarea number checkbox select array base64_image reference].freeze
 
     before_action :load_context
 
@@ -308,6 +308,7 @@ module Drafts
       cell["help"] = params[:help] if params[:help].present?
       cell["placeholder"] = params[:placeholder] if params[:placeholder].present?
       cell["collection"] = collection_config_from_params if field_entry&.array?
+      cell["reference"] = reference_config_from_params if widget == "reference"
       cell
     end
 
@@ -425,6 +426,15 @@ module Drafts
       )
       config["item_screen"] = target_screen_param(param_name: :collection_item_screen, allow_blank: true) if params[:collection_item_screen].present?
       config
+    end
+
+    def reference_config_from_params
+      {
+        "schema_key" => params[:reference_schema_key].to_s,
+        "index_type" => params[:reference_index_type].presence || "identity"
+      }.tap do |config|
+        config["placeholder"] = params[:reference_placeholder] if params[:reference_placeholder].present?
+      end
     end
 
     def collection_binding_from_params(prefix, default:)

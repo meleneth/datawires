@@ -302,7 +302,7 @@ RSpec.describe EditAffordances::BodyValidator do
     )
 
     expect(validator.errors).to include(
-      "rows/0/0/widget must be one of: array, auto, base64_image, checkbox, number, select, text, textarea"
+      "rows/0/0/widget must be one of: array, auto, base64_image, checkbox, number, reference, select, text, textarea"
     )
   end
 
@@ -323,6 +323,58 @@ RSpec.describe EditAffordances::BodyValidator do
     }
 
     expect(described_class.new(body)).to be_valid
+  end
+
+  it "accepts reference widgets with lookup configuration" do
+    body = {
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/person_key"
+            },
+            "widget" => "reference",
+            "reference" => {
+              "schema_key" => "person",
+              "index_type" => "identity",
+              "placeholder" => "Select person"
+            }
+          }
+        ]
+      ]
+    }
+
+    expect(described_class.new(body)).to be_valid
+  end
+
+  it "validates reference widget configuration" do
+    body = {
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/person_key"
+            },
+            "widget" => "reference",
+            "reference" => {
+              "schema_key" => 12,
+              "index_type" => false,
+              "placeholder" => []
+            }
+          }
+        ]
+      ]
+    }
+
+    expect(described_class.new(body).errors).to include(
+      "rows/0/0/reference/schema_key must be a string",
+      "rows/0/0/reference/index_type must be a string",
+      "rows/0/0/reference/placeholder must be a string"
+    )
   end
 
   it "rejects invalid commit modes" do

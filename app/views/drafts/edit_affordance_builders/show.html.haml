@@ -188,6 +188,26 @@
                   = text_field_tag :placeholder,
                     nil,
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .rounded.border-2.border-black.bg-muted.p-3
+                .mb-3.font-head.text-sm Reference options
+                .grid.gap-3.md:grid-cols-3
+                  .space-y-1
+                    = render LabelComponent.new(text: "Schema key", for_id: "reference_schema_key")
+                    = text_field_tag :reference_schema_key,
+                      nil,
+                      placeholder: "person",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Index type", for_id: "reference_index_type")
+                    = text_field_tag :reference_index_type,
+                      "identity",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Reference placeholder", for_id: "reference_placeholder")
+                    = text_field_tag :reference_placeholder,
+                      nil,
+                      placeholder: "Select reference",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
               %label.inline-flex.items-center.gap-2.text-sm
                 = check_box_tag :label, "1", true, class: "h-4 w-4 rounded border-2 border-black"
                 %span Show label
@@ -456,6 +476,7 @@
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
             - if @cell.key?("binding")
               - current_collection = @cell["collection"].is_a?(Hash) ? @cell["collection"] : {}
+              - current_reference = @cell["reference"].is_a?(Hash) ? @cell["reference"] : {}
               = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                 method: :patch,
                 data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
@@ -492,6 +513,27 @@
                 %label.inline-flex.items-center.gap-2.text-sm
                   = check_box_tag :label, "1", @cell.fetch("label", true), class: "h-4 w-4 rounded border-2 border-black"
                   %span Show label
+
+                .rounded.border-2.border-black.bg-muted.p-3
+                  .mb-3.font-head.text-sm Reference options
+                  .grid.gap-3.md:grid-cols-3
+                    .space-y-1
+                      = render LabelComponent.new(text: "Schema key", for_id: "reference_schema_key")
+                      = text_field_tag :reference_schema_key,
+                        current_reference["schema_key"],
+                        placeholder: "person",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Index type", for_id: "reference_index_type")
+                      = text_field_tag :reference_index_type,
+                        current_reference["index_type"] || "identity",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Reference placeholder", for_id: "reference_placeholder")
+                      = text_field_tag :reference_placeholder,
+                        current_reference["placeholder"],
+                        placeholder: "Select reference",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
 
                 .rounded.border-2.border-black.bg-muted.p-3{ data: { edit_affordance_builder_target: "collection" } }
                   .mb-3.font-head.text-sm Collection options

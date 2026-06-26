@@ -37,6 +37,9 @@ document or repairing the affordance.
       and Timeline Event schemas with default edit affordances.
 - [x] Worldbuilding timeline events use relative integer time values, including
       negative values, and include party join/leave event types.
+- [x] Add Solid Queue-backed document index rebuild jobs for derived lookup
+      metadata after draft commits.
+- [x] Add a reference edit widget backed by document index entries.
 
 ## Next Thrash Targets
 
@@ -45,8 +48,13 @@ document or repairing the affordance.
 - [x] Add affordance support for rendering base64-encoded strings as images.
 - [ ] Improve worldbuilding references beyond document-key strings once document
       lookup and relationship affordances are clearer.
-- [x] Add Solid Queue-backed document index rebuild jobs for derived lookup
-      metadata after draft commits.
+- [ ] Add a general domain-as-repository mode where domain commits form a
+      parent-linked, tamper-evident history over the conceptual full domain
+      state.
+- [ ] Add domain export/import that preserves full document/domain revision
+      history and rehydrates revisions with correct parentage and heads.
+- [ ] Add a Robert's Rules cluster that opts into domain-as-repository mode and
+      models motions as agreement creation, extension, amendment, and closure.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
       shows empty domains are too sparse.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.

@@ -3,9 +3,9 @@
 module EditAffordances
   module Cells
     class Field
-      attr_reader :cursor, :span, :widget, :label, :item_rows, :help, :placeholder, :display, :schema_entry
+      attr_reader :cursor, :span, :widget, :label, :item_rows, :help, :placeholder, :display, :schema_entry, :reference
 
-      def initialize(cursor:, span:, widget:, label:, item_rows: nil, help: nil, placeholder: nil, display: {}, schema_entry: nil)
+      def initialize(cursor:, span:, widget:, label:, item_rows: nil, help: nil, placeholder: nil, display: {}, schema_entry: nil, reference: {})
         @cursor = cursor
         @span = span
         @widget = widget
@@ -15,6 +15,7 @@ module EditAffordances
         @placeholder = placeholder
         @display = display || {}
         @schema_entry = schema_entry
+        @reference = reference || {}
       end
 
       delegate :name,

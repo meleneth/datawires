@@ -2,7 +2,7 @@
 
 module EditAffordances
   class BodyValidator
-    SUPPORTED_WIDGETS = %w[array auto base64_image checkbox number select text textarea].freeze
+    SUPPORTED_WIDGETS = %w[array auto base64_image checkbox number reference select text textarea].freeze
     SCREEN_MODES = %w[page full_width].freeze
     COMMIT_MODES = %w[immediate review_screen].freeze
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
@@ -229,6 +229,7 @@ module EditAffordances
       validate_string(errors, cell, "placeholder", "#{path}/placeholder")
       validate_display(errors, cell, "#{path}/display")
       validate_collection(errors, cell, "#{path}/collection", screen_ids: screen_ids)
+      validate_reference(errors, cell, "#{path}/reference")
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 
@@ -297,6 +298,20 @@ module EditAffordances
       validate_collection_item_screen(errors, collection, "#{path}/item_screen", screen_ids: screen_ids)
       validate_collection_binding(errors, collection, "item_title", "#{path}/item_title")
       validate_collection_binding(errors, collection, "item_subtitle", "#{path}/item_subtitle")
+    end
+
+    def validate_reference(errors, cell, path)
+      return unless cell.key?("reference")
+
+      reference = cell["reference"]
+      unless reference.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      validate_string(errors, reference, "schema_key", "#{path}/schema_key")
+      validate_string(errors, reference, "index_type", "#{path}/index_type")
+      validate_string(errors, reference, "placeholder", "#{path}/placeholder")
     end
 
     def validate_collection_item_screen(errors, collection, path, screen_ids:)

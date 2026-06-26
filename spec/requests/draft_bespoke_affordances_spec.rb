@@ -516,6 +516,84 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(textarea["data-action"]).to eq("input->autosave#queue change->autosave#submit")
   end
 
+  it "renders reference widgets from document index entries" do
+    domain = create(:domain)
+    person_schema = create(:document, :with_name_schema, domain: domain, key: "person")
+    event_schema = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "timeline-event",
+      head_body: {
+        "$schema" => Document::JSON_SCHEMA_2020_12,
+        "$id" => "http://example.test/schemas/timeline-event",
+        "type" => "object",
+        "properties" => {
+          "person_key" => { "type" => "string", "title" => "Person" }
+        }
+      }
+    )
+    schema_wrapper = create(:schema_wrapper, document: event_schema)
+    person = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "ada",
+      schema_document: person_schema,
+      head_body: {
+        "name" => "Ada Lovelace"
+      }
+    )
+    DocumentIndexes::Rebuild.call(document: person)
+    event_document = create(
+      :document,
+      domain: domain,
+      schema_document: event_schema
+    )
+    draft = create(:draft, document: event_document, body: { "person_key" => "ada" })
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/person_key"
+              },
+              "widget" => "reference",
+              "reference" => {
+                "schema_key" => "person",
+                "index_type" => "identity",
+                "placeholder" => "Select person"
+              }
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    html = parsed_body
+    select = html.at_css("select#field_person_key")
+
+    expect(response).to have_http_status(:ok)
+    expect(select["data-action"]).to eq("change->autosave#submit")
+    expect(select.at_css("option[value='']")&.text).to eq("Select person")
+    expect(select.at_css("option[value='ada']")&.text).to eq("Ada Lovelace")
+    expect(select.at_css("option[value='ada']")["selected"]).to eq("selected")
+  end
+
   it "renders optional blank fields as missing and required blank fields as present blanks" do
     schema_wrapper = create(
       :schema_wrapper,

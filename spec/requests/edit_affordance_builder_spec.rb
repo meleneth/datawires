@@ -82,6 +82,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
     expect(response.body).to include("base64_image")
+    expect(response.body).to include("Reference options")
     expect(response.body).to include("Screen layout")
     expect(response.body).to include("Add row")
     expect(response.body).to include("Add a row before adding fields.")
@@ -478,6 +479,31 @@ RSpec.describe "Edit affordance builder", type: :request do
         "ptr" => "/thumbnail"
       },
       "widget" => "base64_image"
+    )
+  end
+
+  it "adds reference fields through the structured builder" do
+    draft = create_builder_draft
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "reference",
+      row_index: "0",
+      label: "1",
+      reference_schema_key: "person",
+      reference_index_type: "identity",
+      reference_placeholder: "Select person"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "widget" => "reference",
+      "reference" => {
+        "schema_key" => "person",
+        "index_type" => "identity",
+        "placeholder" => "Select person"
+      }
     )
   end
 
