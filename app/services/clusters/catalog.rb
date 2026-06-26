@@ -285,6 +285,19 @@ module Clusters
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
         ],
+        index_definitions: [
+          array_index_definition(
+            index_type: "party_member",
+            source_ptr: "/members",
+            key: literal_expression("person"),
+            value: ptr_expression("/person_key"),
+            label: ptr_expression("/role"),
+            metadata: {
+              "role" => ptr_expression("/role"),
+              "notes" => ptr_expression("/notes")
+            }
+          )
+        ],
         view_affordances: [
           timeline_view_affordance(
             key: "party-participation-timeline-view-affordance",
@@ -351,6 +364,7 @@ module Clusters
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
         ],
+        index_definitions: timeline_event_index_definitions,
         view_affordances: [
           timeline_view_affordance(
             key: "timeline-event-timeline-view-affordance",
@@ -363,7 +377,7 @@ module Clusters
       )
     end
 
-    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil, view_affordances: [])
+    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil, view_affordances: [], index_definitions: [])
       {
         key: key,
         title: title,
@@ -381,7 +395,8 @@ module Clusters
           "start_screen" => "main",
           "commit_mode" => "review_screen",
           "screens" => screens || default_screens(title:, rows:),
-          "subforms" => []
+          "subforms" => [],
+          "indexes" => index_definitions
         },
         view_affordances: view_affordances
       }
@@ -576,6 +591,110 @@ module Clusters
         "index_type" => "identity",
         "index_key" => "document_key"
       }
+    end
+
+    def timeline_event_index_definitions
+      [
+        root_index_definition(
+          index_type: "timeline_event",
+          key: literal_expression("relative_time"),
+          value: root_ptr_expression("/relative_time"),
+          label: root_ptr_expression("/title"),
+          metadata: {
+            "relative_time" => root_ptr_expression("/relative_time"),
+            "event_type" => root_ptr_expression("/event_type")
+          }
+        ),
+        root_index_definition(
+          index_type: "timeline_participant",
+          key: literal_expression("party"),
+          value: root_ptr_expression("/party_key"),
+          label: root_ptr_expression("/title"),
+          metadata: timeline_participant_metadata("party", root_ptr_expression("/party_key"), root_ptr_expression("/event_type"))
+        ),
+        root_index_definition(
+          index_type: "timeline_participant",
+          key: literal_expression("person"),
+          value: root_ptr_expression("/person_key"),
+          label: root_ptr_expression("/title"),
+          metadata: timeline_participant_metadata("person", root_ptr_expression("/person_key"), root_ptr_expression("/event_type"))
+        ),
+        array_index_definition(
+          index_type: "timeline_participant",
+          source_ptr: "/participants",
+          key: ptr_expression("/kind"),
+          value: ptr_expression("/key"),
+          label: root_ptr_expression("/title"),
+          metadata: {
+            "kind" => ptr_expression("/kind"),
+            "role" => ptr_expression("/role"),
+            "notes" => ptr_expression("/notes"),
+            "relative_time" => root_ptr_expression("/relative_time"),
+            "event_type" => root_ptr_expression("/event_type")
+          }
+        ),
+        root_index_definition(
+          index_type: "party_membership",
+          key: root_ptr_expression("/party_key"),
+          value: root_ptr_expression("/person_key"),
+          label: root_ptr_expression("/title"),
+          condition: {
+            "value" => root_ptr_expression("/event_type"),
+            "in" => %w[party_join party_leave]
+          },
+          metadata: {
+            "change" => root_ptr_expression("/event_type", transform: { "strip_prefix" => "party_" }),
+            "party_key" => root_ptr_expression("/party_key"),
+            "person_key" => root_ptr_expression("/person_key"),
+            "relative_time" => root_ptr_expression("/relative_time")
+          }
+        )
+      ]
+    end
+
+    def timeline_participant_metadata(kind, key_expression, role_expression)
+      {
+        "kind" => literal_expression(kind),
+        "key" => key_expression,
+        "role" => role_expression,
+        "relative_time" => root_ptr_expression("/relative_time"),
+        "event_type" => root_ptr_expression("/event_type")
+      }
+    end
+
+    def root_index_definition(index_type:, key:, value:, label:, metadata: {}, condition: nil)
+      {
+        "index_type" => index_type,
+        "key" => key,
+        "value" => value,
+        "label" => label,
+        "metadata" => metadata
+      }.tap do |definition|
+        definition["condition"] = condition if condition.present?
+      end
+    end
+
+    def array_index_definition(index_type:, source_ptr:, key:, value:, label:, metadata: {})
+      root_index_definition(index_type: index_type, key: key, value: value, label: label, metadata: metadata).merge(
+        "source" => {
+          "ptr" => source_ptr,
+          "each" => true
+        }
+      )
+    end
+
+    def ptr_expression(ptr)
+      { "ptr" => ptr }
+    end
+
+    def root_ptr_expression(ptr, transform: nil)
+      { "root_ptr" => ptr }.tap do |expression|
+        expression["transform"] = transform if transform.present?
+      end
+    end
+
+    def literal_expression(value)
+      { "literal" => value }
     end
 
     def commit(span:, commit_mode: "review_screen", message_mode: "inline_optional")

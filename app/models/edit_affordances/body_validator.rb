@@ -41,6 +41,7 @@ module EditAffordances
       validate_enum(errors, body, "width", WIDTHS, "width")
       validate_screen(errors)
       validate_start_screen(errors)
+      validate_indexes(errors)
       subform_ids = validate_subforms(errors)
       validate_screens(errors, subform_ids: subform_ids)
       validate_body_rows(errors) unless body.key?("screens")
@@ -325,6 +326,90 @@ module EditAffordances
         errors << "#{path} must be a string"
       elsif screen_ids && !screen_ids.include?(item_screen)
         errors << "#{path} must match a screen id"
+      end
+    end
+
+    def validate_indexes(errors)
+      return unless body.key?("indexes")
+
+      indexes = body["indexes"]
+      unless indexes.is_a?(Array)
+        errors << "indexes must be an array"
+        return
+      end
+
+      indexes.each_with_index do |definition, index|
+        validate_index_definition(errors, definition, "indexes/#{index}")
+      end
+    end
+
+    def validate_index_definition(errors, definition, path)
+      unless definition.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/index_type is required" unless definition["index_type"].is_a?(String) && definition["index_type"].present?
+      validate_index_source(errors, definition["source"], "#{path}/source") if definition.key?("source")
+      validate_index_expression(errors, definition["key"], "#{path}/key") if definition.key?("key")
+      validate_index_expression(errors, definition["value"], "#{path}/value")
+      validate_index_expression(errors, definition["label"], "#{path}/label") if definition.key?("label")
+      validate_index_condition(errors, definition["condition"], "#{path}/condition") if definition.key?("condition")
+      validate_index_metadata(errors, definition["metadata"], "#{path}/metadata") if definition.key?("metadata")
+    end
+
+    def validate_index_source(errors, source, path)
+      unless source.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/ptr must be a string" if source.key?("ptr") && !source["ptr"].is_a?(String)
+      errors << "#{path}/each must be a boolean" if source.key?("each") && !boolean?(source["each"])
+    end
+
+    def validate_index_expression(errors, expression, path)
+      unless expression.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      expression_keys = %w[ptr root_ptr literal]
+      if expression_keys.none? { |key| expression.key?(key) }
+        errors << "#{path} must include ptr, root_ptr, or literal"
+      end
+      errors << "#{path}/ptr must be a string" if expression.key?("ptr") && !expression["ptr"].is_a?(String)
+      errors << "#{path}/root_ptr must be a string" if expression.key?("root_ptr") && !expression["root_ptr"].is_a?(String)
+      validate_index_transform(errors, expression["transform"], "#{path}/transform") if expression.key?("transform")
+    end
+
+    def validate_index_transform(errors, transform, path)
+      unless transform.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      errors << "#{path}/strip_prefix must be a string" if transform.key?("strip_prefix") && !transform["strip_prefix"].is_a?(String)
+    end
+
+    def validate_index_condition(errors, condition, path)
+      unless condition.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      validate_index_expression(errors, condition["value"], "#{path}/value") if condition.key?("value")
+      errors << "#{path}/in must be an array" if condition.key?("in") && !condition["in"].is_a?(Array)
+    end
+
+    def validate_index_metadata(errors, metadata, path)
+      unless metadata.is_a?(Hash)
+        errors << "#{path} must be an object"
+        return
+      end
+
+      metadata.each_key do |key|
+        validate_index_expression(errors, metadata[key], "#{path}/#{key}")
       end
     end
 

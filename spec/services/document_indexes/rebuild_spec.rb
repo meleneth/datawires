@@ -73,6 +73,7 @@ RSpec.describe DocumentIndexes::Rebuild do
 
   it "indexes worldbuilding timeline participants and party join fields" do
     schema = create(:document, :with_schema_head_revision, key: "timeline-event")
+    attach_index_affordance(schema, Clusters::Catalog.timeline_event_schema)
     document = create(
       :document,
       :with_head_revision,
@@ -110,6 +111,7 @@ RSpec.describe DocumentIndexes::Rebuild do
 
   it "derives person timeline participants from party membership at event time" do
     schema = create(:document, :with_schema_head_revision, key: "timeline-event")
+    attach_index_affordance(schema, Clusters::Catalog.timeline_event_schema)
     domain = schema.domain
     join = create_timeline_event(
       domain: domain,
@@ -176,6 +178,7 @@ RSpec.describe DocumentIndexes::Rebuild do
 
   it "indexes worldbuilding party members" do
     schema = create(:document, :with_schema_head_revision, key: "party")
+    attach_index_affordance(schema, Clusters::Catalog.party_schema)
     document = create(
       :document,
       :with_head_revision,
@@ -215,5 +218,16 @@ RSpec.describe DocumentIndexes::Rebuild do
         "participants" => participants
       }
     )
+  end
+
+  def attach_index_affordance(schema, schema_definition)
+    wrapper = create(:schema_wrapper, document: schema)
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema.domain,
+      head_body: schema_definition.fetch(:affordance)
+    )
+    create(:edit_affordance, schema_wrapper: wrapper, edit_document: edit_document)
   end
 end

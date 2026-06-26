@@ -91,6 +91,83 @@ RSpec.describe EditAffordances::BodyValidator do
     expect(validator).to be_valid
   end
 
+  it "accepts configured index definitions" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [],
+      "indexes" => [
+        {
+          "index_type" => "timeline_participant",
+          "source" => {
+            "ptr" => "/participants",
+            "each" => true
+          },
+          "key" => {
+            "ptr" => "/kind"
+          },
+          "value" => {
+            "ptr" => "/key"
+          },
+          "label" => {
+            "root_ptr" => "/title"
+          },
+          "condition" => {
+            "value" => {
+              "root_ptr" => "/event_type"
+            },
+            "in" => %w[party_join party_leave]
+          },
+          "metadata" => {
+            "change" => {
+              "root_ptr" => "/event_type",
+              "transform" => {
+                "strip_prefix" => "party_"
+              }
+            }
+          }
+        }
+      ]
+    )
+
+    expect(validator).to be_valid
+  end
+
+  it "validates configured index definitions" do
+    validator = validator_for(
+      "version" => 1,
+      "rows" => [],
+      "indexes" => [
+        {
+          "index_type" => "",
+          "source" => {
+            "ptr" => [],
+            "each" => "yes"
+          },
+          "value" => [],
+          "label" => {},
+          "condition" => {
+            "value" => [],
+            "in" => false
+          },
+          "metadata" => {
+            "bad" => []
+          }
+        }
+      ]
+    )
+
+    expect(validator.errors).to include(
+      "indexes/0/index_type is required",
+      "indexes/0/source/ptr must be a string",
+      "indexes/0/source/each must be a boolean",
+      "indexes/0/value must be an object",
+      "indexes/0/label must include ptr, root_ptr, or literal",
+      "indexes/0/condition/value must be an object",
+      "indexes/0/condition/in must be an array",
+      "indexes/0/metadata/bad must be an object"
+    )
+  end
+
   it "accepts a multi-screen affordance DSL shape" do
     validator = validator_for(
       "version" => 1,

@@ -75,6 +75,13 @@ module Seeds
             "items" => {
               "$ref" => "#/$defs/subform"
             }
+          },
+
+          "indexes" => {
+            "type" => "array",
+            "items" => {
+              "$ref" => "#/$defs/index_definition"
+            }
           }
         },
 
@@ -289,6 +296,86 @@ module Seeds
               },
               "item_subtitle" => {
                 "$ref" => "#/$defs/collection_binding"
+              }
+            }
+          },
+
+          "index_expression" => {
+            "type" => "object",
+            "additionalProperties" => false,
+            "properties" => {
+              "ptr" => {
+                "type" => "string"
+              },
+              "root_ptr" => {
+                "type" => "string"
+              },
+              "literal" => {},
+              "transform" => {
+                "type" => "object",
+                "additionalProperties" => false,
+                "properties" => {
+                  "strip_prefix" => {
+                    "type" => "string"
+                  }
+                }
+              }
+            }
+          },
+
+          "index_definition" => {
+            "type" => "object",
+            "required" => %w[index_type value],
+            "additionalProperties" => false,
+            "properties" => {
+              "index_type" => {
+                "type" => "string",
+                "minLength" => 1
+              },
+              "source" => {
+                "type" => "object",
+                "additionalProperties" => false,
+                "properties" => {
+                  "ptr" => {
+                    "type" => "string"
+                  },
+                  "each" => {
+                    "type" => "boolean"
+                  }
+                }
+              },
+              "key" => {
+                "$ref" => "#/$defs/index_expression"
+              },
+              "value" => {
+                "$ref" => "#/$defs/index_expression"
+              },
+              "label" => {
+                "$ref" => "#/$defs/index_expression"
+              },
+              "condition" => {
+                "type" => "object",
+                "additionalProperties" => false,
+                "properties" => {
+                  "value" => {
+                    "$ref" => "#/$defs/index_expression"
+                  },
+                  "equals" => {
+                    "type" => "string"
+                  },
+                  "in" => {
+                    "type" => "array",
+                    "items" => {
+                      "type" => "string"
+                    }
+                  }
+                }
+              },
+              "metadata" => {
+                "type" => "object",
+                "additionalProperties" => {
+                  "$ref" => "#/$defs/index_expression"
+                }
               }
             }
           },

@@ -78,6 +78,7 @@ RSpec.describe Seeds::EditFormSchema do
 
       expect(properties.fetch("screens")).to include("type" => "array")
       expect(properties.fetch("subforms")).to include("type" => "array")
+      expect(properties.fetch("indexes")).to include("type" => "array")
       expect(properties.fetch("commit_mode")).to eq("$ref" => "#/$defs/commit_mode")
       expect(properties.fetch("width")).to eq("$ref" => "#/$defs/width")
       expect(definitions.dig("width", "enum")).to contain_exactly("full", "large", "medium", "narrow")
@@ -107,6 +108,33 @@ RSpec.describe Seeds::EditFormSchema do
       expect(definitions.dig("navigation_cell", "required")).to contain_exactly("kind", "target_screen")
       expect(definitions.dig("commit_cell", "properties", "commit_mode")).to eq("$ref" => "#/$defs/commit_mode")
       expect(definitions.dig("cell", "oneOf")).to include("$ref" => "#/$defs/navigation_cell")
+    end
+
+    it "allows configured index definitions" do
+      definitions = described_class.schema_body.fetch("$defs")
+
+      expect(definitions.fetch("index_definition")).to include(
+        "type" => "object",
+        "additionalProperties" => false
+      )
+      expect(definitions.dig("index_definition", "required")).to contain_exactly("index_type", "value")
+      expect(definitions.dig("index_definition", "properties", "source", "properties")).to include(
+        "ptr" => {
+          "type" => "string"
+        },
+        "each" => {
+          "type" => "boolean"
+        }
+      )
+      expect(definitions.dig("index_expression", "properties")).to include(
+        "ptr" => {
+          "type" => "string"
+        },
+        "root_ptr" => {
+          "type" => "string"
+        }
+      )
+      expect(definitions.dig("index_expression", "properties", "transform", "properties", "strip_prefix")).to eq("type" => "string")
     end
   end
 end

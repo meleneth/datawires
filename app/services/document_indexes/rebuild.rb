@@ -39,8 +39,8 @@ module DocumentIndexes
     def entries
       [
         identity_entries,
-        timeline_entries,
-        party_member_entries
+        configured_index_entries,
+        timeline_entries
       ].flatten
     end
 
@@ -81,52 +81,12 @@ module DocumentIndexes
       return [] unless schema_key == "timeline-event"
 
       [
-        base_entry(
-          index_type: TIMELINE_EVENT_TYPE,
-          key: "relative_time",
-          value: body["relative_time"].to_s,
-          label: document_label,
-          metadata: {
-            "relative_time" => body["relative_time"],
-            "event_type" => body["event_type"]
-          }
-        ),
-        party_membership_entry,
-        participant_entry("party", body["party_key"], role: body["event_type"]),
-        participant_entry("person", body["person_key"], role: body["event_type"]),
-        participant_entries,
         derived_party_participant_entries
       ].flatten.compact
     end
 
-    def party_membership_entry
-      event_type = body["event_type"].to_s
-      return nil unless %w[party_join party_leave].include?(event_type)
-
-      party_key = body["party_key"].to_s.strip
-      person_key = body["person_key"].to_s.strip
-      return nil if party_key.blank? || person_key.blank?
-
-      base_entry(
-        index_type: PARTY_MEMBERSHIP_TYPE,
-        key: party_key,
-        value: person_key,
-        label: document_label,
-        metadata: {
-          "change" => event_type.delete_prefix("party_"),
-          "party_key" => party_key,
-          "person_key" => person_key,
-          "relative_time" => body["relative_time"]
-        }.compact
-      )
-    end
-
-    def participant_entries
-      Array(body["participants"]).filter_map do |participant|
-        next unless participant.is_a?(Hash)
-
-        participant_entry(participant["kind"], participant["key"], role: participant["role"], notes: participant["notes"])
-      end
+    def configured_index_entries
+      DocumentIndexes::ConfiguredDefinitions.entries_for(document: document, revision: revision)
     end
 
     def participant_entry(kind, key, role: nil, notes: nil)
@@ -239,28 +199,6 @@ module DocumentIndexes
 
     def membership_change_order(event_type)
       event_type == "party_join" ? 0 : 1
-    end
-
-    def party_member_entries
-      return [] unless schema_key == "party"
-
-      Array(body["members"]).filter_map do |member|
-        next unless member.is_a?(Hash)
-
-        person_key = member["person_key"].to_s.strip
-        next if person_key.blank?
-
-        base_entry(
-          index_type: PARTY_MEMBER_TYPE,
-          key: "person",
-          value: person_key,
-          label: member["role"].presence || person_key,
-          metadata: {
-            "role" => member["role"],
-            "notes" => member["notes"]
-          }.compact
-        )
-      end
     end
 
     def body
