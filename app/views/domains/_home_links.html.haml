@@ -1,0 +1,19 @@
+- return if @home_link_groups.blank?
+
+= render TypographyComponent.new(as: :h2, text: "Domain Home", html_options: { class: "mb-4 mt-6" })
+
+= render CardComponent.new(html_options: { class: "w-full" }) do
+  = render CardContentComponent.new do
+    .grid.grid-cols-1.gap-4.md:grid-cols-2
+      - @home_link_groups.each do |group|
+        .space-y-2
+          = render TypographyComponent.new(as: :h3, text: group.fetch("title"))
+          %ul.space-y-2
+            - group.fetch("links").each do |link|
+              %li
+                = link_to link.fetch("href"),
+                  data: { turbo_frame: "main_content", turbo_action: "advance" },
+                  class: "block rounded border-2 border-black bg-card px-3 py-2 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+                  .font-head.font-medium= link.fetch("title")
+                  - if link["description"].present?
+                    .text-xs.text-muted-foreground= link.fetch("description")

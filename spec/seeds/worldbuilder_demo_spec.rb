@@ -50,6 +50,14 @@ RSpec.describe Seeds::WorldbuilderDemo do
       "Gandalf parts from the company in Moria",
       "Boromir parts from the company"
     )
+
+    home = domain.documents.find_by!(key: "domain-home")
+    expect(home.id).to eq(described_class::DOCUMENT_IDS.fetch("domain-home"))
+    expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Global Timeline",
+      "Aragorn Timeline",
+      "Fellowship Timeline"
+    )
   end
 
   it "is idempotent" do

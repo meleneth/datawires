@@ -31,7 +31,8 @@ module Seeds
       "gandalf-parts-moria" => "10000000-0000-4000-8000-000000000304",
       "lorien-rest" => "10000000-0000-4000-8000-000000000305",
       "boromir-parts" => "10000000-0000-4000-8000-000000000306",
-      "fellowship-breaks" => "10000000-0000-4000-8000-000000000307"
+      "fellowship-breaks" => "10000000-0000-4000-8000-000000000307",
+      "domain-home" => "10000000-0000-4000-8000-000000000901"
     }.freeze
 
     def seed!
@@ -49,6 +50,7 @@ module Seeds
       places.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "place", definition:) }
       parties.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "party", definition:) }
       timeline_events.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "timeline-event", definition:) }
+      ensure_home_document!(domain: domain)
       DocumentIndexes::RebuildTimelineDomain.call(domain: domain)
 
       domain
@@ -83,6 +85,25 @@ module Seeds
       schema_document = schema_documents.fetch(schema_key)
       document.update!(schema_document: schema_document) if document.schema_document != schema_document
       DocumentIndexes::Rebuild.call(document: document)
+      document
+    end
+
+    def ensure_home_document!(domain:)
+      document = domain.documents.find_or_initialize_by(key: "domain-home")
+      document.id = DOCUMENT_IDS.fetch("domain-home") if document.new_record?
+      document.title = "Domain Home"
+      document.save! if document.new_record? || document.changed?
+
+      body = home_body
+      if document.body != body
+        revision = document.revisions.create!(
+          body: body,
+          parent_revision: document.head_revision,
+          message: MESSAGE
+        )
+        document.update!(head_revision: revision)
+      end
+
       document
     end
 
@@ -244,6 +265,59 @@ module Seeds
           notes: "Close to the Boromir event to demonstrate tightly clustered times."
         )
       ]
+    end
+
+    def home_body
+      {
+        "title" => "Worldbuilder Demo Home",
+        "groups" => [
+          {
+            "title" => "Explore",
+            "links" => [
+              view_link("Global Timeline", "The full event sequence.", document_key: "fellowship-forms", schema_key: "timeline-event"),
+              schema_link("People", "All character documents.", schema_key: "person"),
+              schema_link("Parties", "Groups and current membership.", schema_key: "party"),
+              schema_link("Places", "Locations referenced by the demo.", schema_key: "place")
+            ]
+          },
+          {
+            "title" => "Characters",
+            "links" => [
+              view_link("Frodo Timeline", "Events Frodo is present for.", document_key: "frodo", schema_key: "person"),
+              view_link("Aragorn Timeline", "Events Aragorn is present for.", document_key: "aragorn", schema_key: "person"),
+              view_link("Gandalf Timeline", "Events Gandalf is present for.", document_key: "gandalf", schema_key: "person"),
+              view_link("Boromir Timeline", "Events Boromir is present for.", document_key: "boromir", schema_key: "person")
+            ]
+          },
+          {
+            "title" => "Parties",
+            "links" => [
+              view_link("Fellowship Timeline", "Events involving the Fellowship.", document_key: "fellowship", schema_key: "party"),
+              view_link("Hobbit Companions Timeline", "Events involving the hobbit companions.", document_key: "hobbit-party", schema_key: "party")
+            ]
+          }
+        ]
+      }
+    end
+
+    def schema_link(title, description, schema_key:)
+      {
+        "kind" => "schema",
+        "title" => title,
+        "description" => description,
+        "schema_key" => schema_key
+      }
+    end
+
+    def view_link(title, description, document_key:, schema_key:)
+      {
+        "kind" => "view",
+        "title" => title,
+        "description" => description,
+        "document_key" => document_key,
+        "schema_key" => schema_key,
+        "view_title" => "Timeline"
+      }
     end
 
     def person(key, name, summary)

@@ -75,4 +75,21 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response).to have_http_status(:unprocessable_content)
     expect(response.body).to include("Cluster is not available.")
   end
+
+  it "renders seeded domain home links for the worldbuilder demo" do
+    require Rails.root.join("db/seeds/worldbuilder_demo")
+
+    Seeds::WorldbuilderDemo.seed!
+    domain = Domain.find(Seeds::WorldbuilderDemo::DOMAIN_ID)
+
+    get domain_path(domain)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Domain Home")
+    expect(response.body).to include("Global Timeline")
+    expect(response.body).to include("Aragorn Timeline")
+    expect(response.body).to include("Fellowship Timeline")
+    expect(response.body).to include("People")
+    expect(response.body).to include("Parties")
+  end
 end

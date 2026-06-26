@@ -17,6 +17,7 @@ class DomainsController < ApplicationController
 
     @document = @domain.documents.build
     @drafts = @domain.open_drafts
+    @home_link_groups = DomainHomeLinks.for(@domain)
   end
   # GET /domains/new
   def new
