@@ -42,6 +42,8 @@ document or repairing the affordance.
 - [x] Add a reference edit widget backed by document index entries.
 - [x] Add a Robert's Rules cluster that opts into domain-as-repository mode and
       seeds Agreement, Motion, Proceeding Event, and Meeting State schemas.
+- [x] Add service-level domain archive export/import that preserves document
+      revisions, schema/edit affordance links, and domain commit parentage.
 
 ## Next Thrash Targets
 
@@ -53,8 +55,8 @@ document or repairing the affordance.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.
-- [ ] Add domain export/import that preserves full document/domain revision
-      history and rehydrates revisions with correct parentage and heads.
+- [ ] Wire domain archive export/import into the UI once the archive format has
+      had a little more service-level use.
 - [ ] Add Robert's Rules workflow affordances for recording motions as agreement
       creation, extension, amendment, and closure.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
