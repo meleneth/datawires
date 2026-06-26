@@ -9,7 +9,11 @@ module DocumentIndexes
       revision = Revision.find_by(id: revision_id)
       return unless document && revision
 
-      DocumentIndexes::Rebuild.call(document: document, revision: revision)
+      if document.schema_document&.key == "timeline-event"
+        DocumentIndexes::RebuildTimelineDomain.call(domain: document.domain)
+      else
+        DocumentIndexes::Rebuild.call(document: document, revision: revision)
+      end
     end
   end
 end

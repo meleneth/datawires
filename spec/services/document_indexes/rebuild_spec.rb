@@ -102,6 +102,76 @@ RSpec.describe DocumentIndexes::Rebuild do
       [ "person", "ada" ],
       [ "place", "london" ]
     )
+    expect(DocumentIndexEntry.where(document: document, index_type: "party_membership").sole).to have_attributes(
+      key: "expedition",
+      value: "ada"
+    )
+  end
+
+  it "derives person timeline participants from party membership at event time" do
+    schema = create(:document, :with_schema_head_revision, key: "timeline-event")
+    domain = schema.domain
+    join = create_timeline_event(
+      domain: domain,
+      schema: schema,
+      key: "ada-joins",
+      relative_time: 1,
+      event_type: "party_join",
+      title: "Ada joins",
+      party_key: "expedition",
+      person_key: "ada"
+    )
+    party_event = create_timeline_event(
+      domain: domain,
+      schema: schema,
+      key: "expedition-arrives",
+      relative_time: 2,
+      event_type: "general",
+      title: "Expedition arrives",
+      participants: [
+        { "kind" => "party", "key" => "expedition", "role" => "arrives" }
+      ]
+    )
+    leave = create_timeline_event(
+      domain: domain,
+      schema: schema,
+      key: "ada-leaves",
+      relative_time: 3,
+      event_type: "party_leave",
+      title: "Ada leaves",
+      party_key: "expedition",
+      person_key: "ada"
+    )
+    later_party_event = create_timeline_event(
+      domain: domain,
+      schema: schema,
+      key: "expedition-departs",
+      relative_time: 4,
+      event_type: "general",
+      title: "Expedition departs",
+      participants: [
+        { "kind" => "party", "key" => "expedition", "role" => "departs" }
+      ]
+    )
+
+    DocumentIndexes::RebuildTimelineDomain.call(domain: domain)
+
+    expect(DocumentIndexEntry.where(document: join, index_type: "party_membership").pluck(:key, :value)).to include(
+      [ "expedition", "ada" ]
+    )
+    expect(DocumentIndexEntry.where(document: leave, index_type: "party_membership").pluck(:metadata)).to include(
+      include("change" => "leave")
+    )
+    expect(DocumentIndexEntry.where(document: party_event, index_type: "timeline_participant").pluck(:key, :value)).to include(
+      [ "party", "expedition" ],
+      [ "person", "ada" ]
+    )
+    expect(DocumentIndexEntry.where(document: later_party_event, index_type: "timeline_participant").pluck(:key, :value)).to include(
+      [ "party", "expedition" ]
+    )
+    expect(DocumentIndexEntry.where(document: later_party_event, index_type: "timeline_participant").pluck(:key, :value)).not_to include(
+      [ "person", "ada" ]
+    )
   end
 
   it "indexes worldbuilding party members" do
@@ -125,6 +195,25 @@ RSpec.describe DocumentIndexes::Rebuild do
       key: "person",
       value: "ada",
       label: "Navigator"
+    )
+  end
+
+  def create_timeline_event(domain:, schema:, key:, relative_time:, event_type:, title:, party_key: "", person_key: "", participants: [])
+    create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: schema,
+      key: key,
+      title: title,
+      head_body: {
+        "relative_time" => relative_time,
+        "event_type" => event_type,
+        "title" => title,
+        "party_key" => party_key,
+        "person_key" => person_key,
+        "participants" => participants
+      }
     )
   end
 end

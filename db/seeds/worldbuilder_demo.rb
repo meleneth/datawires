@@ -49,6 +49,7 @@ module Seeds
       places.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "place", definition:) }
       parties.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "party", definition:) }
       timeline_events.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "timeline-event", definition:) }
+      DocumentIndexes::RebuildTimelineDomain.call(domain: domain)
 
       domain
     end

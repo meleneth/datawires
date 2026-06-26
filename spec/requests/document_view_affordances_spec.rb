@@ -297,6 +297,18 @@ RSpec.describe "Document view affordances", type: :request do
       }
     )
     [ ada, bob, party ].each { |document| DocumentIndexes::Rebuild.call(document: document) }
+    create_timeline_event(
+      domain: domain,
+      schema: timeline_schema,
+      key: "ada-joins-company",
+      title: "Ada Joins Company",
+      relative_time: 0,
+      summary: "Ada joins the company.",
+      participants: [],
+      event_type: "party_join",
+      party_key: "company",
+      person_key: "ada"
+    )
     ada_event = create_timeline_event(
       domain: domain,
       schema: timeline_schema,
@@ -305,7 +317,6 @@ RSpec.describe "Document view affordances", type: :request do
       relative_time: 1,
       summary: "Ada reaches the city.",
       participants: [
-        { "kind" => "person", "key" => "ada", "role" => "traveler" },
         { "kind" => "party", "key" => "company", "role" => "escort" }
       ]
     )
@@ -320,6 +331,7 @@ RSpec.describe "Document view affordances", type: :request do
         { "kind" => "person", "key" => "bob", "role" => "traveler" }
       ]
     )
+    DocumentIndexes::RebuildTimelineDomain.call(domain: domain)
 
     person_view = person_schema.schema_wrapper.view_affordances.sole
     party_view = party_schema.schema_wrapper.view_affordances.sole
@@ -341,7 +353,7 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).not_to include("Bob Arrival")
   end
 
-  def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:, participants: [])
+  def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:, participants: [], event_type: "general", party_key: "", person_key: "")
     create(
       :document,
       :with_head_revision,
@@ -351,10 +363,12 @@ RSpec.describe "Document view affordances", type: :request do
       title: title,
       head_body: {
         "relative_time" => relative_time,
-        "event_type" => "general",
+        "event_type" => event_type,
         "title" => title,
         "summary" => summary,
-        "participants" => participants
+        "participants" => participants,
+        "party_key" => party_key,
+        "person_key" => person_key
       }
     ).tap do |document|
       DocumentIndexes::Rebuild.call(document: document)
