@@ -21,6 +21,8 @@ module Clusters
       return domain if definition.blank?
 
       ApplicationRecord.transaction do
+        domain.update!(repository_mode: true) if definition.fetch(:repository_mode, false)
+
         definition.fetch(:schemas).each do |schema_definition|
           schema_document = ensure_document!(
             key: schema_definition.fetch(:key),
@@ -36,6 +38,7 @@ module Clusters
             cluster_name: definition.fetch(:name)
           )
         end
+        create_initial_domain_commit!(definition) if definition.fetch(:repository_mode, false)
 
         domain
       end
@@ -44,6 +47,16 @@ module Clusters
     private
 
     attr_reader :domain, :cluster_key, :actor
+
+    def create_initial_domain_commit!(definition)
+      return if domain.head_domain_commit.present?
+
+      DomainCommits::Create.call(
+        domain: domain,
+        message: "Seed #{definition.fetch(:name)} cluster",
+        actor: actor
+      )
+    end
 
     def ensure_affordance!(schema_wrapper:, schema_definition:, cluster_name:)
       affordance_document = ensure_document!(

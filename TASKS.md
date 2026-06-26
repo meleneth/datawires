@@ -40,6 +40,8 @@ document or repairing the affordance.
 - [x] Add Solid Queue-backed document index rebuild jobs for derived lookup
       metadata after draft commits.
 - [x] Add a reference edit widget backed by document index entries.
+- [x] Add a Robert's Rules cluster that opts into domain-as-repository mode and
+      seeds Agreement, Motion, Proceeding Event, and Meeting State schemas.
 
 ## Next Thrash Targets
 
@@ -53,8 +55,8 @@ document or repairing the affordance.
       state.
 - [ ] Add domain export/import that preserves full document/domain revision
       history and rehydrates revisions with correct parentage and heads.
-- [ ] Add a Robert's Rules cluster that opts into domain-as-repository mode and
-      models motions as agreement creation, extension, amendment, and closure.
+- [ ] Add Robert's Rules workflow affordances for recording motions as agreement
+      creation, extension, amendment, and closure.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
       shows empty domains are too sparse.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.

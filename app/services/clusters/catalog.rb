@@ -5,21 +5,24 @@ module Clusters
     module_function
 
     WORLD_BUILDING = "worldbuilding"
+    ROBERTS_RULES = "roberts-rules"
 
     def options
       [
         [ "Blank", "" ],
-        [ "Worldbuilding tools", WORLD_BUILDING ]
+        [ "Worldbuilding tools", WORLD_BUILDING ],
+        [ "Robert's Rules of Order", ROBERTS_RULES ]
       ]
     end
 
     def include?(key)
-      key.blank? || key == WORLD_BUILDING
+      key.blank? || key == WORLD_BUILDING || key == ROBERTS_RULES
     end
 
     def definition_for(key)
       return nil if key.blank?
       return worldbuilding if key == WORLD_BUILDING
+      return roberts_rules if key == ROBERTS_RULES
 
       raise ArgumentError, "unknown cluster: #{key}"
     end
@@ -28,6 +31,7 @@ module Clusters
       {
         key: WORLD_BUILDING,
         name: "Worldbuilding tools",
+        repository_mode: false,
         schemas: [
           person_schema,
           place_schema,
@@ -36,6 +40,130 @@ module Clusters
           timeline_event_schema
         ]
       }
+    end
+
+    def roberts_rules
+      {
+        key: ROBERTS_RULES,
+        name: "Robert's Rules of Order",
+        repository_mode: true,
+        schemas: [
+          agreement_schema,
+          motion_schema,
+          proceeding_event_schema,
+          meeting_state_schema
+        ]
+      }
+    end
+
+    def agreement_schema
+      schema(
+        cluster_key: ROBERTS_RULES,
+        key: "agreement",
+        title: "Agreement",
+        required: %w[title status body],
+        properties: {
+          "title" => string("Title"),
+          "status" => enum_string("Status", %w[proposed active amended adopted rejected withdrawn superseded closed]),
+          "body" => string("Agreement text"),
+          "relative_time" => integer("Relative time"),
+          "supersedes_agreement_key" => string("Supersedes agreement key"),
+          "extends_agreement_key" => string("Extends agreement key"),
+          "notes" => string("Notes")
+        },
+        rows: [
+          [ field("/title", span: 6), field("/status", span: 3), field("/relative_time", span: 3, widget: "number") ],
+          [ field("/body", span: 12, widget: "textarea") ],
+          [
+            reference_field("/supersedes_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select superseded agreement"),
+            reference_field("/extends_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select extended agreement")
+          ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12) ]
+        ]
+      )
+    end
+
+    def motion_schema
+      schema(
+        cluster_key: ROBERTS_RULES,
+        key: "motion",
+        title: "Motion",
+        required: %w[title motion_type status relative_time],
+        properties: {
+          "title" => string("Title"),
+          "motion_type" => enum_string("Motion type", %w[main amend postpone table call_question reconsider point_of_order appeal withdraw close]),
+          "status" => enum_string("Status", %w[pending seconded open adopted rejected withdrawn expired]),
+          "relative_time" => integer("Relative time"),
+          "target_agreement_key" => string("Target agreement key"),
+          "proposed_text" => string("Proposed text"),
+          "mover_key" => string("Mover key"),
+          "seconder_key" => string("Seconder key"),
+          "result" => string("Result"),
+          "notes" => string("Notes")
+        },
+        rows: [
+          [ field("/relative_time", span: 3, widget: "number"), field("/motion_type", span: 3), field("/status", span: 3), field("/title", span: 3) ],
+          [ reference_field("/target_agreement_key", span: 12, schema_key: "agreement", placeholder: "Select target agreement") ],
+          [ field("/proposed_text", span: 12, widget: "textarea") ],
+          [ field("/mover_key", span: 6), field("/seconder_key", span: 6) ],
+          [ field("/result", span: 6), field("/notes", span: 6, widget: "textarea") ],
+          [ commit(span: 12) ]
+        ]
+      )
+    end
+
+    def proceeding_event_schema
+      schema(
+        cluster_key: ROBERTS_RULES,
+        key: "proceeding-event",
+        title: "Proceeding Event",
+        required: %w[relative_time event_type title],
+        properties: {
+          "relative_time" => integer("Relative time"),
+          "event_type" => enum_string("Event type", %w[start_meeting introduce_motion second_motion open_debate amend_motion vote rule adjourn note]),
+          "title" => string("Title"),
+          "motion_key" => string("Motion key"),
+          "agreement_key" => string("Agreement key"),
+          "summary" => string("Summary"),
+          "notes" => string("Notes")
+        },
+        rows: [
+          [ field("/relative_time", span: 3, widget: "number"), field("/event_type", span: 3), field("/title", span: 6) ],
+          [
+            reference_field("/motion_key", span: 6, schema_key: "motion", placeholder: "Select motion"),
+            reference_field("/agreement_key", span: 6, schema_key: "agreement", placeholder: "Select agreement")
+          ],
+          [ field("/summary", span: 12, widget: "textarea") ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12) ]
+        ]
+      )
+    end
+
+    def meeting_state_schema
+      schema(
+        cluster_key: ROBERTS_RULES,
+        key: "meeting-state",
+        title: "Meeting State",
+        required: %w[name phase],
+        properties: {
+          "name" => string("Name"),
+          "phase" => enum_string("Phase", %w[not_started in_session recessed adjourned]),
+          "current_motion_key" => string("Current motion key"),
+          "current_agreement_key" => string("Current agreement key"),
+          "notes" => string("Notes")
+        },
+        rows: [
+          [ field("/name", span: 6), field("/phase", span: 6) ],
+          [
+            reference_field("/current_motion_key", span: 6, schema_key: "motion", placeholder: "Select current motion"),
+            reference_field("/current_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select current agreement")
+          ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12) ]
+        ]
+      )
     end
 
     def person_schema
@@ -185,13 +313,13 @@ module Clusters
       )
     end
 
-    def schema(key:, title:, required:, properties:, rows:)
+    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING)
       {
         key: key,
         title: title,
         body: {
           "$schema" => Document::JSON_SCHEMA_2020_12,
-          "$id" => "datawires:clusters/worldbuilding/#{key}",
+          "$id" => "datawires:clusters/#{cluster_key}/#{key}",
           "title" => title,
           "type" => "object",
           "required" => required,
@@ -242,7 +370,19 @@ module Clusters
       }
     end
 
-    def field(ptr, span:, widget: "auto", help: nil)
+    def integer(title)
+      {
+        "type" => "integer",
+        "title" => title,
+        "description" => "Relative integer values are allowed to be negative."
+      }
+    end
+
+    def enum_string(title, values)
+      string(title).merge("enum" => values)
+    end
+
+    def field(ptr, span:, widget: "auto", help: nil, reference: nil)
       {
         "binding" => {
           "kind" => "document_ptr",
@@ -252,7 +392,22 @@ module Clusters
         "widget" => widget
       }.tap do |cell|
         cell["help"] = help if help.present?
+        cell["reference"] = reference if reference.present?
       end
+    end
+
+    def reference_field(ptr, span:, schema_key:, index_type: "identity", placeholder: nil)
+      field(
+        ptr,
+        span: span,
+        widget: "reference",
+        reference: {
+          "schema_key" => schema_key,
+          "index_type" => index_type
+        }.tap do |config|
+          config["placeholder"] = placeholder if placeholder.present?
+        end
+      )
     end
 
     def array_field(ptr, span:, item_title:, item_subtitle:)
