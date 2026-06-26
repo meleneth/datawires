@@ -100,10 +100,16 @@
               class: "block transition-colors hover:underline" do
               .font-head.font-medium= document.title.presence || document.key
               .text-xs.text-muted-foreground= document.key
-            - if @view_affordances.any?
+            - if @edit_affordances.any? || @view_affordances.any?
               .mt-2.flex.flex-wrap.gap-2
+                - @edit_affordances.each do |edit_affordance|
+                  = button_to "Edit: #{edit_affordance.title}",
+                    document_draft_path(document, edit_affordance_id: edit_affordance.id),
+                    method: :post,
+                    form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+                    class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
                 - @view_affordances.each do |view_affordance|
-                  = link_to view_affordance.title,
+                  = link_to "View: #{view_affordance.title}",
                     document_view_affordance_path(document, view_affordance),
                     data: { turbo_frame: "main_content", turbo_action: "advance" },
                     class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"

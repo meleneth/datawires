@@ -255,6 +255,36 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include(document_view_affordance_path(event, view_affordance))
   end
 
+  it "starts document edits with a selected edit affordance from the schema page" do
+    domain = create(:domain)
+    schema = create_person_schema(domain: domain)
+    edit_affordance = create(:edit_affordance, schema_wrapper: schema.schema_wrapper, title: "Profile")
+    person = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: schema,
+      key: "ada",
+      title: "Ada",
+      head_body: {
+        "name" => "Ada Lovelace"
+      }
+    )
+
+    get schema_path(schema.schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Edit: Profile")
+
+    expect {
+      post document_draft_path(person, edit_affordance_id: edit_affordance.id)
+    }.to change(Draft, :count).by(1)
+
+    draft = Draft.order(:created_at).last
+    expect(response).to redirect_to(draft_path(draft, edit_affordance_id: edit_affordance.id))
+    expect(draft.document).to eq(person)
+  end
+
   it "renders seeded person and party timelines filtered by participation" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
