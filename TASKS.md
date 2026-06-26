@@ -52,14 +52,16 @@ document or repairing the affordance.
       target agreement references.
 - [x] Split the default Robert's Rules Motion edit affordance into workflow
       screens for details, agreement effect, and result.
+- [x] Use reference widgets for Worldbuilding Timeline Event top-level party and
+      person links.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
 - [x] Add affordance support for rendering base64-encoded strings as images.
-- [ ] Improve worldbuilding references beyond document-key strings once document
-      lookup and relationship affordances are clearer.
+- [ ] Improve nested worldbuilding references inside Party members and Timeline
+      participants once array item reference editing is clearer.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.

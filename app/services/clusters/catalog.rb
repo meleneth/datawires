@@ -301,7 +301,10 @@ module Clusters
               item_subtitle: property_binding("kind")
             )
           ],
-          [ field("/party_key", span: 6, help: "For party_join and party_leave events."), field("/person_key", span: 6, help: "For party_join and party_leave events.") ],
+          [
+            reference_field("/party_key", span: 6, schema_key: "party", placeholder: "Select party", help: "For party_join and party_leave events."),
+            reference_field("/person_key", span: 6, schema_key: "person", placeholder: "Select person", help: "For party_join and party_leave events.")
+          ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
         ]
@@ -439,11 +442,12 @@ module Clusters
       end
     end
 
-    def reference_field(ptr, span:, schema_key:, index_type: "identity", placeholder: nil)
+    def reference_field(ptr, span:, schema_key:, index_type: "identity", placeholder: nil, help: nil)
       field(
         ptr,
         span: span,
         widget: "reference",
+        help: help,
         reference: {
           "schema_key" => schema_key,
           "index_type" => index_type

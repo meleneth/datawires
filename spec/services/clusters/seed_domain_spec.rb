@@ -22,6 +22,15 @@ RSpec.describe Clusters::SeedDomain do
     expect(timeline_body.dig("properties", "event_type", "enum")).to include("party_join", "party_leave")
     expect(timeline_body.dig("properties", "party_key")).to include("type" => "string")
     expect(timeline_body.dig("properties", "person_key")).to include("type" => "string")
+    timeline_cells = timeline_schema.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten
+    expect(reference_cell_for(timeline_cells, "/party_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "party", "index_type" => "identity")
+    )
+    expect(reference_cell_for(timeline_cells, "/person_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "person", "index_type" => "identity")
+    )
 
     party_schema = domain.documents.find_by!(key: "party")
     expect(party_schema.body.dig("properties", "members", "items", "properties", "person_key")).to include(
@@ -108,5 +117,9 @@ RSpec.describe Clusters::SeedDomain do
     expect {
       described_class.call(domain: domain, cluster_key: "", actor: nil)
     }.not_to change(Document, :count)
+  end
+
+  def reference_cell_for(cells, ptr)
+    cells.find { |cell| cell.dig("binding", "ptr") == ptr }
   end
 end
