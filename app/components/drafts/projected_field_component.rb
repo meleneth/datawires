@@ -20,7 +20,7 @@ module Drafts
         :select
       when :number
         :number_field
-      when :textarea
+      when :textarea, :base64_image
         :text_area
       else
         :text_field
@@ -65,6 +65,10 @@ module Drafts
       display_option_enabled?("readonly")
     end
 
+    def base64_image?
+      input_kind == :base64_image
+    end
+
     def wrapper_class
       compact? ? "space-y-0.5" : "space-y-1"
     end
@@ -73,6 +77,14 @@ module Drafts
       return "Blank" unless cursor.present?
 
       cursor.value_label
+    end
+
+    def base64_image_src
+      value = field_value.to_s.strip
+      return nil if value.blank?
+      return value if value.match?(/\Adata:image\/(?:png|jpe?g|gif|webp);base64,/i)
+
+      "data:image/png;base64,#{value.delete("\r\n\t ")}"
     end
 
     def patch_path

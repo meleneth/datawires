@@ -31,6 +31,10 @@ RSpec.describe "Edit affordance builder", type: :request do
                 "label" => { "type" => "string" }
               }
             }
+          },
+          "thumbnail" => {
+            "type" => "string",
+            "title" => "Thumbnail"
           }
         },
         "required" => [ "name" ]
@@ -77,6 +81,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("max-width: 1920px;")
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
+    expect(response.body).to include("base64_image")
     expect(response.body).to include("Screen layout")
     expect(response.body).to include("Add row")
     expect(response.body).to include("Add a row before adding fields.")
@@ -452,6 +457,27 @@ RSpec.describe "Edit affordance builder", type: :request do
       "label" => false,
       "help" => "Revised help.",
       "placeholder" => "Long form copy"
+    )
+  end
+
+  it "adds base64 image fields through the structured builder" do
+    draft = create_builder_draft
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/thumbnail",
+      widget: "base64_image",
+      row_index: "0",
+      label: "1"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/thumbnail"
+      },
+      "widget" => "base64_image"
     )
   end
 

@@ -7,8 +7,16 @@
 
   - if readonly?
     .rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm.text-muted-foreground{ id: dom_id }
-      = value_preview
+      - if base64_image? && base64_image_src.present?
+        = image_tag base64_image_src, alt: label_text, class: "max-h-80 w-auto rounded border-2 border-black bg-background object-contain"
+      - else
+        = value_preview
   - else
+    - if base64_image?
+      - if base64_image_src.present?
+        = image_tag base64_image_src, alt: label_text, class: "mb-2 max-h-80 w-auto rounded border-2 border-black bg-background object-contain"
+      - else
+        .mb-2.rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm.text-muted-foreground No image data.
     = form_with url: patch_path, method: :patch, format: :turbo_stream, data: form_data_attributes do |form|
       = form.hidden_field :ptr, value: ptr
       = form.hidden_field :path, value: path

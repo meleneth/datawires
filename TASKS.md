@@ -37,7 +37,7 @@ document or repairing the affordance.
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
-- [ ] Add affordance support for rendering base64-encoded strings as images.
+- [x] Add affordance support for rendering base64-encoded strings as images.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.
 - [ ] Prefer constrained wins over broad abstractions until the missing shapes
       are obvious from use.

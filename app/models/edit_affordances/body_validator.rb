@@ -2,7 +2,7 @@
 
 module EditAffordances
   class BodyValidator
-    SUPPORTED_WIDGETS = %w[array auto checkbox number select text textarea].freeze
+    SUPPORTED_WIDGETS = %w[array auto base64_image checkbox number select text textarea].freeze
     SCREEN_MODES = %w[page full_width].freeze
     COMMIT_MODES = %w[immediate review_screen].freeze
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze

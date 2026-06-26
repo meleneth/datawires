@@ -96,6 +96,7 @@ Supported widgets today:
 
 - `array`
 - `auto`
+- `base64_image`
 - `checkbox`
 - `number`
 - `select`
@@ -103,6 +104,8 @@ Supported widgets today:
 - `textarea`
 
 `auto` lets schema metadata choose the editor. Arrays render through the current collection/list editor.
+
+`base64_image` renders string values as image previews and keeps the underlying value editable as text. Values may be complete `data:image/...;base64,...` URLs or raw base64 payloads; raw payloads are rendered as PNG data URLs.
 
 `label` controls whether the field label is shown. `help` renders short guidance beneath the field. `placeholder` is passed to text-like inputs. Required fields are marked from schema metadata during rendering.
 

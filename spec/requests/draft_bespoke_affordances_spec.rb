@@ -452,6 +452,70 @@ RSpec.describe "Bespoke draft affordances", type: :request do
     expect(response.body).to include("Last saved")
   end
 
+  it "renders base64 image widgets as image previews with editable source text" do
+    schema_wrapper = create(
+      :schema_wrapper,
+      document: create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "http://example.test/schemas/card",
+          "type" => "object",
+          "properties" => {
+            "thumbnail" => {
+              "type" => "string",
+              "title" => "Thumbnail"
+            }
+          }
+        }
+      )
+    )
+    document = create(
+      :document,
+      domain: schema_wrapper.domain,
+      schema_document: schema_wrapper.document
+    )
+    image_payload = "iVBORw0KGgo="
+    draft = create(:draft, document:, body: { "thumbnail" => image_payload })
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema_wrapper.domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [
+          [
+            {
+              "binding" => {
+                "kind" => "document_ptr",
+                "ptr" => "/thumbnail"
+              },
+              "widget" => "base64_image"
+            }
+          ]
+        ]
+      }
+    )
+    edit_affordance = build(
+      :edit_affordance,
+      schema_wrapper:,
+      edit_document:
+    )
+    edit_affordance.save!(validate: false)
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    html = parsed_body
+    image = html.at_css("img[alt='Thumbnail']")
+    textarea = html.at_css("textarea#field_thumbnail")
+
+    expect(response).to have_http_status(:ok)
+    expect(image["src"]).to eq("data:image/png;base64,#{image_payload}")
+    expect(textarea.text).to include(image_payload)
+    expect(textarea["data-action"]).to eq("input->autosave#queue change->autosave#submit")
+  end
+
   it "renders optional blank fields as missing and required blank fields as present blanks" do
     schema_wrapper = create(
       :schema_wrapper,

@@ -7,7 +7,7 @@ module Drafts
     DEFAULT_FIELD_SPAN = 3
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     WIDTHS = %w[narrow medium large full].freeze
-    WIDGETS = %w[auto text textarea number checkbox select array].freeze
+    WIDGETS = %w[auto text textarea number checkbox select array base64_image].freeze
 
     before_action :load_context
 

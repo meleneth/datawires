@@ -302,8 +302,27 @@ RSpec.describe EditAffordances::BodyValidator do
     )
 
     expect(validator.errors).to include(
-      "rows/0/0/widget must be one of: array, auto, checkbox, number, select, text, textarea"
+      "rows/0/0/widget must be one of: array, auto, base64_image, checkbox, number, select, text, textarea"
     )
+  end
+
+  it "accepts base64 image widgets" do
+    body = {
+      "version" => 1,
+      "rows" => [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/thumbnail"
+            },
+            "widget" => "base64_image"
+          }
+        ]
+      ]
+    }
+
+    expect(described_class.new(body)).to be_valid
   end
 
   it "rejects invalid commit modes" do
