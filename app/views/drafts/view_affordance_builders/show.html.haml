@@ -75,21 +75,7 @@
                   = render AlertComponent.new do
                     No timeline events with relative_time values are available.
                 - else
-                  .rounded.border-2.border-black.bg-card.p-4.text-card-foreground.shadow-sm{
-                    data: {
-                      controller: "timeline-view",
-                      timeline_view_events_value: events.to_json,
-                      timeline_view_time_label_value: @preview_projection.data.fetch("relative_time_label")
-                    }
-                  }
-                    .min-h-96.w-full{ data: { timeline_view_target: "chart" } }
-                    %ol.mt-4.grid.gap-2.text-sm.md:grid-cols-2
-                      - events.each do |event|
-                        %li.rounded.border-2.border-black.bg-background.p-3
-                          .font-head.font-medium= event.fetch("title")
-                          .text-xs.text-muted-foreground= "#{event.fetch('relative_time')} - #{event.fetch('event_type')}"
-                          - if event.fetch("summary").present?
-                            %p.mt-1= event.fetch("summary")
+                  = render "view_affordances/timeline_d3", projection: @preview_projection
             - else
               = render AlertComponent.new(variant: :destructive) do
                 = @preview_projection.data.fetch("message")

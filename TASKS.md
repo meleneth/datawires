@@ -67,6 +67,7 @@ document or repairing the affordance.
       created, opened, diagnosed, previewed, committed, and deleted.
 - [x] Add structured settings for the first view affordance renderer while
       keeping Raw JSON as the repair path.
+- [x] Share timeline renderer markup between runtime views and builder previews.
 
 ## Next Thrash Targets
 
