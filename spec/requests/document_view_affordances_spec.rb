@@ -110,6 +110,27 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("No diagnostics.")
   end
 
+  it "previews timeline views with the runtime D3 controller" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: schema.schema_wrapper, title: "Timeline", actor: current_actor)
+    create_timeline_event(
+      domain: domain,
+      schema: schema,
+      key: "arrival",
+      title: "Arrival",
+      relative_time: -2,
+      summary: "The party arrives."
+    )
+
+    get draft_view_affordance_builder_path(result.draft, tab: "preview")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("data-controller=\"timeline-view\"")
+    expect(response.body).to include("Arrival")
+    expect(response.body).to include("The party arrives.")
+  end
+
   it "links and renders a seeded D3 timeline view without edit controls" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
