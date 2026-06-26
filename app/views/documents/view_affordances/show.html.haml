@@ -1,0 +1,30 @@
+= turbo_frame_tag "main_content" do
+  .mb-4.flex.flex-wrap.items-start.justify-between.gap-3
+    %div
+      = render TypographyComponent.new(as: :h1, text: @projection.title)
+      %p.text-sm.text-muted-foreground= "#{@domain.name} / #{@document.title.presence || @document.key}"
+    = render ButtonComponent.new(href: document_path(@document), variant: :outline, size: :sm, html_options: { data: { turbo_frame: "main_content", turbo_action: "advance" } }) do
+      Back to document
+
+  - if @projection.renderer == "timeline_d3"
+    .rounded.border-2.border-black.bg-card.p-4.text-card-foreground.shadow-sm{
+      data: {
+        controller: "timeline-view",
+        timeline_view_events_value: @projection.data.fetch("events").to_json,
+        timeline_view_time_label_value: @projection.data.fetch("relative_time_label")
+      }
+    }
+      .min-h-96.w-full{ data: { timeline_view_target: "chart" } }
+      %ol.mt-4.grid.gap-2.text-sm.md:grid-cols-2
+        - @projection.data.fetch("events").each do |event|
+          %li.rounded.border-2.border-black.bg-background.p-3
+            .font-head.font-medium= event.fetch("title")
+            .text-xs.text-muted-foreground= "#{event.fetch('relative_time')} - #{event.fetch('event_type')}"
+            - if event.fetch("summary").present?
+              %p.mt-1= event.fetch("summary")
+  - else
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      .space-y-2
+        = render TypographyComponent.new(as: :h2, text: "Unsupported View")
+        %p.text-sm.text-muted-foreground= @projection.data.fetch("message")
+        %pre.rounded.border-2.border-black.bg-muted.p-4.text-sm.text-foreground.shadow-sm= JSON.pretty_generate(@projection.data)

@@ -58,11 +58,18 @@ document or repairing the affordance.
       Party member person references.
 - [x] Support dynamic reference schemas from sibling fields and use them for
       polymorphic Timeline participant references.
+- [x] Add runtime view affordances that can render schema-backed documents with
+      bespoke read-only presentations.
+- [x] Add seeded D3 timeline-style view affordances for Worldbuilding Timeline
+      Event and Robert's Rules Proceeding Event documents.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
+- [ ] Add validation and diagnostics for the view affordance DSL.
+- [ ] Add a structured view affordance builder once the seeded renderer shape
+      has been used enough to expose the right controls.
 - [x] Add affordance support for rendering base64-encoded strings as images.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain

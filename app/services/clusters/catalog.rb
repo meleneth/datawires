@@ -132,6 +132,15 @@ module Clusters
           [ field("/summary", span: 12, widget: "textarea") ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          timeline_view_affordance(
+            key: "proceeding-event-sequence-view-affordance",
+            title: "Proceeding Event sequence view affordance",
+            affordance_title: "Proceeding Sequence",
+            schema_key: "proceeding-event",
+            relative_time_label: "Meeting-relative time"
+          )
         ]
       )
     end
@@ -321,11 +330,20 @@ module Clusters
           ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          timeline_view_affordance(
+            key: "timeline-event-timeline-view-affordance",
+            title: "Timeline Event timeline view affordance",
+            affordance_title: "Timeline",
+            schema_key: "timeline-event",
+            relative_time_label: "Relative time"
+          )
         ]
       )
     end
 
-    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil)
+    def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil, view_affordances: [])
       {
         key: key,
         title: title,
@@ -344,6 +362,24 @@ module Clusters
           "commit_mode" => "review_screen",
           "screens" => screens || default_screens(title:, rows:),
           "subforms" => []
+        },
+        view_affordances: view_affordances
+      }
+    end
+
+    def timeline_view_affordance(key:, title:, affordance_title:, schema_key:, relative_time_label:)
+      {
+        key: key,
+        title: title,
+        affordance_title: affordance_title,
+        body: {
+          "version" => 1,
+          "renderer" => "timeline_d3",
+          "title" => affordance_title,
+          "config" => {
+            "schema_key" => schema_key,
+            "relative_time_label" => relative_time_label
+          }
         }
       }
     end

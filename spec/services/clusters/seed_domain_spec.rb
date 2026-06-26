@@ -36,6 +36,12 @@ RSpec.describe Clusters::SeedDomain do
       "widget" => "reference",
       "reference" => include("schema_key_from" => "/kind", "index_type" => "identity")
     )
+    timeline_view = timeline_schema.schema_wrapper.view_affordances.sole
+    expect(timeline_view.title).to eq("Timeline")
+    expect(timeline_view.body).to include(
+      "renderer" => "timeline_d3",
+      "config" => include("schema_key" => "timeline-event")
+    )
 
     party_schema = domain.documents.find_by!(key: "party")
     expect(party_schema.body.dig("properties", "members", "items", "properties", "person_key")).to include(
@@ -69,7 +75,7 @@ RSpec.describe Clusters::SeedDomain do
     expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state]).count).to eq(4)
     expect(domain.head_domain_commit).to be_present
     expect(domain.head_domain_commit.message).to eq("Seed Robert's Rules of Order cluster")
-    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(8)
+    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(9)
 
     agreement_schema = domain.documents.find_by!(key: "agreement")
     expect(agreement_schema.body.dig("properties", "relative_time")).to include(
@@ -114,6 +120,14 @@ RSpec.describe Clusters::SeedDomain do
       "people_result",
       "main",
       "agreement_effect"
+    )
+
+    proceeding_schema = domain.documents.find_by!(key: "proceeding-event")
+    proceeding_view = proceeding_schema.schema_wrapper.view_affordances.sole
+    expect(proceeding_view.title).to eq("Proceeding Sequence")
+    expect(proceeding_view.body).to include(
+      "renderer" => "timeline_d3",
+      "config" => include("schema_key" => "proceeding-event")
     )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).find_each do |wrapper|

@@ -23,6 +23,7 @@ RSpec.describe "Domain clusters", type: :request do
     }.to change(Domain, :count).by(1)
       .and change(SchemaWrapper, :count).by(5)
       .and change(EditAffordance, :count).by(5)
+      .and change(ViewAffordance, :count).by(1)
 
     domain = Domain.find_by!(name: "Novel")
 
@@ -46,6 +47,7 @@ RSpec.describe "Domain clusters", type: :request do
     }.to change(Domain, :count).by(1)
       .and change(SchemaWrapper, :count).by(4)
       .and change(EditAffordance, :count).by(4)
+      .and change(ViewAffordance, :count).by(1)
       .and change(DomainCommit, :count).by(1)
 
     domain = Domain.find_by!(name: "Board Meeting")

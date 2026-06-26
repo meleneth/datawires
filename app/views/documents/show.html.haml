@@ -58,9 +58,12 @@
 
       %ul.mt-2.space-y-2
         - @view_affordances.each do |view_affordance|
-          %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
-            .font-head.font-medium= view_affordance.title
-            .text-xs.text-muted-foreground= view_affordance.view_document.key
+          %li
+            = link_to document_view_affordance_path(@document, view_affordance),
+              data: { turbo_frame: "main_content", turbo_action: "advance" },
+              class: "block w-full rounded border-2 border-black bg-card px-3 py-2 text-left text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              .font-head.font-medium= view_affordance.title
+              .text-xs.text-muted-foreground= view_affordance.view_document.key
 
   .mt-6
     %pre.rounded.border-2.border-black.bg-muted.p-4.text-sm.text-foreground.shadow-sm

@@ -37,6 +37,11 @@ module Clusters
             schema_definition: schema_definition,
             cluster_name: definition.fetch(:name)
           )
+          ensure_view_affordances!(
+            schema_wrapper: schema_wrapper,
+            schema_definition: schema_definition,
+            cluster_name: definition.fetch(:name)
+          )
         end
         create_initial_domain_commit!(definition) if definition.fetch(:repository_mode, false)
 
@@ -72,6 +77,24 @@ module Clusters
       )
       affordance.title = DEFAULT_AFFORDANCE_TITLE
       affordance.save!
+    end
+
+    def ensure_view_affordances!(schema_wrapper:, schema_definition:, cluster_name:)
+      schema_definition.fetch(:view_affordances, []).each do |view_definition|
+        affordance_document = ensure_document!(
+          key: view_definition.fetch(:key),
+          title: view_definition.fetch(:title),
+          body: view_definition.fetch(:body),
+          schema_document: nil,
+          message: "Seed #{cluster_name} #{schema_definition.fetch(:title)} view affordance"
+        )
+
+        affordance = schema_wrapper.view_affordances.find_or_initialize_by(
+          view_document: affordance_document
+        )
+        affordance.title = view_definition.fetch(:affordance_title)
+        affordance.save!
+      end
     end
 
     def ensure_document!(key:, title:, body:, schema_document:, message:)

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   resources :documents, only: %i[show] do
     resource :draft, only: %i[create], module: :documents
     resource :motion_application, only: %i[create], module: :documents
+    resources :view_affordances, only: %i[show], module: :documents
   end
 
   resources :drafts, only: %i[show destroy] do
