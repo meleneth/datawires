@@ -131,6 +131,40 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("The party arrives.")
   end
 
+  it "previews documents from the configured timeline schema key" do
+    domain = create(:domain)
+    timeline_schema = create_timeline_schema(domain: domain)
+    person_schema = create_person_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: person_schema.schema_wrapper, title: "Timeline", actor: current_actor)
+    create_timeline_event(
+      domain: domain,
+      schema: timeline_schema,
+      key: "arrival",
+      title: "Arrival",
+      relative_time: -2,
+      summary: "The party arrives."
+    )
+
+    get draft_view_affordance_builder_path(result.draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Timeline Event")
+
+    patch update_settings_draft_view_affordance_builder_path(result.draft), params: {
+      title: "Story Clock",
+      renderer: "timeline_d3",
+      schema_key: "timeline-event",
+      relative_time_label: "Relative time"
+    }
+
+    get draft_view_affordance_builder_path(result.draft, tab: "preview")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Preview document: Arrival")
+    expect(response.body).to include("data-controller=\"timeline-view\"")
+    expect(response.body).to include("The party arrives.")
+  end
+
   it "links and renders a seeded D3 timeline view without edit controls" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
@@ -255,6 +289,27 @@ RSpec.describe "Document view affordances", type: :request do
           "title" => { "type" => "string" },
           "event_type" => { "type" => "string" },
           "summary" => { "type" => "string" }
+        }
+      }
+    )
+    create(:schema_wrapper, document: schema)
+    schema
+  end
+
+  def create_person_schema(domain:)
+    schema = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "person",
+      title: "Person",
+      head_body: {
+        "$schema" => Document::JSON_SCHEMA_2020_12,
+        "$id" => "datawires:test/person",
+        "type" => "object",
+        "required" => %w[name],
+        "properties" => {
+          "name" => { "type" => "string" }
         }
       }
     )

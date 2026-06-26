@@ -56,8 +56,9 @@ module Drafts
       @schema_wrapper = @view_affordance.schema_wrapper
       @schema_document = @schema_wrapper.document
       @domain = @schema_wrapper.domain
+      @schema_options = schema_options
       @diagnostics = ViewAffordances::BodyValidator.new(@draft.body).errors
-      @preview_document = @schema_wrapper.conforming_documents.first
+      @preview_document = preview_document
       @preview_projection = preview_projection
     end
 
@@ -95,13 +96,40 @@ module Drafts
 
     def config_from_params
       {
-        "schema_key" => params[:schema_key].to_s,
+        "schema_key" => params[:schema_key].presence_in(schema_options.map(&:last)) || @schema_wrapper.key,
         "relative_time_label" => params[:relative_time_label].presence || "Relative time"
       }
     end
 
     def deep_dup_json(value)
       Marshal.load(Marshal.dump(value))
+    end
+
+    def preview_document
+      preview_schema_wrapper&.conforming_documents&.first
+    end
+
+    def preview_schema_wrapper
+      schema_key = view_config["schema_key"].presence || @schema_wrapper.key
+      Document
+        .includes(:schema_wrapper)
+        .joins(:head_revision)
+        .where(domain: @domain, key: schema_key)
+        .find_by("revisions.body ->> '$schema' = ?", Document::JSON_SCHEMA_2020_12)
+        &.schema_wrapper
+    end
+
+    def view_config
+      @draft.body["config"].is_a?(Hash) ? @draft.body["config"] : {}
+    end
+
+    def schema_options
+      @schema_options ||= SchemaWrapper
+        .includes(:document)
+        .joins(document: :head_revision)
+        .where(documents: { domain_id: @domain.id })
+        .order("documents.key")
+        .map { |wrapper| [ wrapper.document.title.presence || wrapper.key, wrapper.key ] }
     end
   end
 end

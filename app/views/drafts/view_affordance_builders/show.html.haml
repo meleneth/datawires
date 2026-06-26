@@ -48,8 +48,8 @@
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Timeline schema key", for_id: "schema_key")
-                  = text_field_tag :schema_key,
-                    config["schema_key"] || @schema_wrapper.key,
+                  = select_tag :schema_key,
+                    options_for_select(@schema_options, config["schema_key"] || @schema_wrapper.key),
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Time axis label", for_id: "relative_time_label")

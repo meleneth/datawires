@@ -70,6 +70,8 @@ document or repairing the affordance.
 - [x] Share timeline renderer markup between runtime views and builder previews.
 - [x] Resolve timeline participant labels from document identity indexes when
       rendering timeline view affordances.
+- [x] Constrain timeline view builder schema selection to domain schemas and
+      preview against the configured schema key.
 
 ## Next Thrash Targets
 
