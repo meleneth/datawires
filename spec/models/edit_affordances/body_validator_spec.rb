@@ -56,6 +56,28 @@ RSpec.describe EditAffordances::BodyValidator do
             "span" => 6,
             "commit_mode" => "immediate",
             "message_mode" => "inline_optional"
+          },
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/members"
+            },
+            "widget" => "array",
+            "item_rows" => [
+              [
+                {
+                  "binding" => {
+                    "kind" => "document_ptr",
+                    "ptr" => "/person_key"
+                  },
+                  "widget" => "reference",
+                  "reference" => {
+                    "schema_key" => "person",
+                    "index_type" => "identity"
+                  }
+                }
+              ]
+            ]
           }
         ]
       ]

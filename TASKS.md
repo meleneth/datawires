@@ -54,14 +54,16 @@ document or repairing the affordance.
       screens for details, agreement effect, and result.
 - [x] Use reference widgets for Worldbuilding Timeline Event top-level party and
       person links.
+- [x] Support custom inline array item fields and use them for Worldbuilding
+      Party member person references.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
 - [x] Add affordance support for rendering base64-encoded strings as images.
-- [ ] Improve nested worldbuilding references inside Party members and Timeline
-      participants once array item reference editing is clearer.
+- [ ] Improve polymorphic Timeline participant references once reference widgets
+      can vary lookup schema by another field.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.

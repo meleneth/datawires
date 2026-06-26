@@ -230,6 +230,7 @@ module EditAffordances
       validate_display(errors, cell, "#{path}/display")
       validate_collection(errors, cell, "#{path}/collection", screen_ids: screen_ids)
       validate_reference(errors, cell, "#{path}/reference")
+      validate_rows(errors, key: "item_rows", path: "#{path}/item_rows", object: cell, screen_ids: screen_ids) if cell.key?("item_rows")
 
       return unless cell.key?("label") && !boolean?(cell["label"])
 

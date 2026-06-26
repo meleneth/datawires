@@ -320,6 +320,48 @@ RSpec.describe "Draft array items", type: :request do
     expect(response.body).not_to include("Add item")
   end
 
+  it "renders custom inline item rows with reference widgets" do
+    person_schema = create(
+      :document,
+      :with_name_schema,
+      domain: domain,
+      key: "person"
+    )
+    person = create(:document, domain: domain, key: "ada", title: "Ada", schema_document: person_schema)
+    revision = person.revisions.create!(body: { "name" => "Ada" }, message: "Create Ada")
+    person.update!(head_revision: revision)
+    DocumentIndexes::Rebuild.call(document: person)
+    edit_affordance = create_collection_affordance(
+      presentation: "list",
+      creation: "inline_blank_form",
+      item_rows: [
+        [
+          {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => "/name"
+            },
+            "widget" => "reference",
+            "reference" => {
+              "schema_key" => "person",
+              "index_type" => "identity",
+              "placeholder" => "Select person"
+            }
+          }
+        ]
+      ]
+    )
+
+    get draft_path(draft, edit_affordance_id: edit_affordance.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("New item")
+    expect(response.body).to include('value="/items/0/name"')
+    expect(response.body).to include("Select person")
+    expect(response.body).to include("Ada")
+    expect(response.body).not_to include('value="/items/0/quantity"')
+  end
+
   it "renders delete controls only when collection delete policy is enabled" do
     draft.update!(
       body: {
@@ -420,7 +462,33 @@ RSpec.describe "Draft array items", type: :request do
     )
   end
 
-  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled", reorder: "disabled", item_screen: nil)
+  def create_collection_affordance(presentation:, creation: "new_screen", delete: "disabled", reorder: "disabled", item_screen: nil, item_rows: nil)
+    array_cell = {
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/items"
+      },
+      "widget" => "array",
+      "collection" => {
+        "behavior" => "list_open",
+        "presentation" => presentation,
+        "creation" => creation,
+        "navigation" => "open_item",
+        "delete" => delete,
+        "reorder" => reorder,
+        "item_screen" => item_screen,
+        "item_title" => {
+          "kind" => "property",
+          "name" => "name"
+        },
+        "item_subtitle" => {
+          "kind" => "property",
+          "name" => "quantity"
+        }
+      }
+    }
+    array_cell["item_rows"] = item_rows if item_rows.present?
+
     edit_document = create(
       :document,
       :with_head_revision,
@@ -429,30 +497,7 @@ RSpec.describe "Draft array items", type: :request do
         "version" => 1,
         "rows" => [
           [
-            {
-              "binding" => {
-                "kind" => "document_ptr",
-                "ptr" => "/items"
-              },
-              "widget" => "array",
-              "collection" => {
-                "behavior" => "list_open",
-                "presentation" => presentation,
-                "creation" => creation,
-                "navigation" => "open_item",
-                "delete" => delete,
-                "reorder" => reorder,
-                "item_screen" => item_screen,
-                "item_title" => {
-                  "kind" => "property",
-                  "name" => "name"
-                },
-                "item_subtitle" => {
-                  "kind" => "property",
-                  "name" => "quantity"
-                }
-              }
-            }
+            array_cell
           ]
         ]
       }

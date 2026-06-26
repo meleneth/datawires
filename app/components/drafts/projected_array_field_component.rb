@@ -5,7 +5,7 @@ module Drafts
     attr_reader :page, :projected_field
 
     delegate :draft, :edit_affordance, to: :page
-    delegate :cursor, :label, :help, :display, :collection, to: :projected_field
+    delegate :cursor, :label, :help, :display, :collection, :item_rows, to: :projected_field
 
     def initialize(page:, field:)
       @page = page
@@ -91,15 +91,7 @@ module Drafts
     end
 
     def new_item_fields
-      @new_item_fields ||= new_item_cursors.map do |field_cursor|
-        EditAffordances::Cells::Field.new(
-          cursor: field_cursor,
-          span: 12,
-          widget: "auto",
-          label: true,
-          schema_entry: SchemaPaths::Inventory.new(root_cursor: cursor).entry_for(field_cursor)
-        )
-      end
+      @new_item_fields ||= custom_new_item_fields.presence || generated_new_item_fields
     end
 
     def item_links
@@ -128,6 +120,59 @@ module Drafts
       return item_cursor.children.select(&:scalar?) if item_cursor.object?
 
       [ item_cursor ].select(&:scalar?)
+    end
+
+    def generated_new_item_fields
+      new_item_cursors.map do |field_cursor|
+        EditAffordances::Cells::Field.new(
+          cursor: field_cursor,
+          span: 12,
+          widget: "auto",
+          label: true,
+          schema_entry: schema_inventory.entry_for(field_cursor)
+        )
+      end
+    end
+
+    def custom_new_item_fields
+      Array(item_rows).flatten.filter_map do |cell_data|
+        next unless cell_data.is_a?(Hash) && cell_data["binding"].is_a?(Hash)
+
+        field_cursor = cursor_for_item_cell(cell_data)
+        next unless field_cursor&.scalar?
+
+        EditAffordances::Cells::Field.new(
+          cursor: field_cursor,
+          span: cell_data["span"] || 12,
+          widget: cell_data["widget"] || "auto",
+          label: cell_data.key?("label") ? cell_data["label"] : true,
+          help: cell_data["help"],
+          placeholder: cell_data["placeholder"],
+          display: cell_data["display"],
+          reference: cell_data["reference"],
+          schema_entry: schema_inventory.entry_for(field_cursor)
+        )
+      end
+    end
+
+    def cursor_for_item_cell(cell_data)
+      binding = cell_data.fetch("binding")
+      return nil unless binding["kind"] == "document_ptr"
+
+      relative_path = Documents::Path.new(binding.fetch("ptr"))
+      relative_path.tokens.reduce(new_item_cursor) do |memo, token|
+        memo.child(token)
+      end
+    rescue KeyError, Documents::Path::InvalidPathError
+      nil
+    end
+
+    def new_item_cursor
+      @new_item_cursor ||= cursor.child(Array(cursor.value).length.to_s)
+    end
+
+    def schema_inventory
+      @schema_inventory ||= SchemaPaths::Inventory.new(root_cursor: cursor)
     end
 
     def item_title(item_cursor, index)

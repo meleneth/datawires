@@ -253,7 +253,14 @@ module Clusters
               "/members",
               span: 12,
               item_title: property_binding("person_key"),
-              item_subtitle: property_binding("role")
+              item_subtitle: property_binding("role"),
+              item_rows: [
+                [
+                  reference_field("/person_key", span: 6, schema_key: "person", placeholder: "Select person"),
+                  field("/role", span: 6)
+                ],
+                [ field("/notes", span: 12, widget: "textarea") ]
+              ]
             )
           ],
           [ field("/notes", span: 12, widget: "textarea") ],
@@ -457,7 +464,7 @@ module Clusters
       )
     end
 
-    def array_field(ptr, span:, item_title:, item_subtitle:)
+    def array_field(ptr, span:, item_title:, item_subtitle:, item_rows: nil)
       field(ptr, span: span, widget: "array").merge(
         "collection" => {
           "behavior" => "list_open",
@@ -469,7 +476,9 @@ module Clusters
           "item_title" => item_title,
           "item_subtitle" => item_subtitle
         }
-      )
+      ).tap do |cell|
+        cell["item_rows"] = item_rows if item_rows.present?
+      end
     end
 
     def property_binding(name)

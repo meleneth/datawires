@@ -36,6 +36,13 @@ RSpec.describe Clusters::SeedDomain do
     expect(party_schema.body.dig("properties", "members", "items", "properties", "person_key")).to include(
       "type" => "string"
     )
+    party_members_cell = party_schema.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten.find do |cell|
+      cell.dig("binding", "ptr") == "/members"
+    end
+    expect(reference_cell_for(party_members_cell.fetch("item_rows").flatten, "/person_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "person", "index_type" => "identity")
+    )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[person place thing party timeline-event])).find_each do |wrapper|
       affordance = wrapper.edit_affordances.sole
