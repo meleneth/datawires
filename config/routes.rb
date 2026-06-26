@@ -34,6 +34,8 @@ Rails.application.routes.draw do
     resource :commit, only: %i[new create], module: :drafts
     resource :edit_affordance_builder, only: %i[show], module: :drafts do
       patch :add_field
+      patch :add_navigation
+      patch :add_commit
       patch :add_row
       patch :update_screen
       patch :update_raw
@@ -42,6 +44,7 @@ Rails.application.routes.draw do
       delete "rows/:row_index", action: :delete_row
       patch "rows/:row_index/move", action: :move_row, as: :move_row
       get "rows/:row_index/cells/:cell_index", action: :cell, as: :cell
+      patch "rows/:row_index/cells/:cell_index", action: :update_cell
       delete "rows/:row_index/cells/:cell_index", action: :delete_cell
       patch "rows/:row_index/cells/:cell_index/move", action: :move_cell, as: :move_cell
     end

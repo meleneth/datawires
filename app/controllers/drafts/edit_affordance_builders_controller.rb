@@ -3,8 +3,11 @@
 module Drafts
   class EditAffordanceBuildersController < ApplicationController
     BUILDER_SPAN_RANGE = (1..12).freeze
+    COMMIT_MODES = %w[review_screen immediate].freeze
     DEFAULT_FIELD_SPAN = 3
+    MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     WIDTHS = %w[narrow medium large full].freeze
+    WIDGETS = %w[auto text textarea number checkbox select array].freeze
 
     before_action :load_context
 
@@ -42,6 +45,26 @@ module Drafts
 
       redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
         notice: "Field added."
+    rescue ArgumentError => e
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        alert: e.message
+    end
+
+    def add_navigation
+      @draft.update!(body: body_with_added_navigation)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Navigation added."
+    rescue ArgumentError => e
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        alert: e.message
+    end
+
+    def add_commit
+      @draft.update!(body: body_with_added_commit)
+
+      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        notice: "Commit added."
     rescue ArgumentError => e
       redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
         alert: e.message
@@ -148,6 +171,23 @@ module Drafts
         notice: "Field moved."
     end
 
+    def update_cell
+      body = deep_dup_json(@draft.body)
+      rows = main_rows_for(body)
+      row_index = row_index_param
+      cell_index = cell_index_param
+      row = row_at!(row_index, rows: rows)
+      cell = cell_at!(row, cell_index)
+      row[cell_index] = updated_cell_from_params(cell)
+      @draft.update!(body: body)
+
+      redirect_to cell_draft_edit_affordance_builder_path(@draft, row_index: row_index, cell_index: cell_index),
+        notice: "Cell updated."
+    rescue ArgumentError => e
+      redirect_to cell_draft_edit_affordance_builder_path(@draft, row_index: params[:row_index], cell_index: params[:cell_index]),
+        alert: e.message
+    end
+
     private
 
     def load_context
@@ -163,6 +203,7 @@ module Drafts
       @preview_projection = preview_projection
       @main_screen = current_main_screen
       @rows = Array(@main_screen&.fetch("rows", []))
+      @screen_ids = screen_ids
       @builder_width_class = width_class_for(@main_screen&.fetch("width", "large"))
     end
 
@@ -174,6 +215,20 @@ module Drafts
       body = deep_dup_json(@draft.body)
       main_screen = ensure_main_screen(body)
       target_row(main_screen) << field_cell_from_params
+      body
+    end
+
+    def body_with_added_navigation
+      body = deep_dup_json(@draft.body)
+      main_screen = ensure_main_screen(body)
+      target_row(main_screen) << navigation_cell_from_params
+      body
+    end
+
+    def body_with_added_commit
+      body = deep_dup_json(@draft.body)
+      main_screen = ensure_main_screen(body)
+      target_row(main_screen) << commit_cell_from_params
       body
     end
 
@@ -199,7 +254,7 @@ module Drafts
 
     def field_cell_from_params
       ptr = params.require(:ptr)
-      widget = params[:widget].presence || "auto"
+      widget = params[:widget].presence_in(WIDGETS) || "auto"
       field_entry = @field_entries.find { |entry| entry.ptr == ptr }
       cell = {
         "binding" => {
@@ -207,12 +262,44 @@ module Drafts
           "ptr" => ptr
         },
         "widget" => widget,
-        "label" => ActiveModel::Type::Boolean.new.cast(params[:label])
+        "label" => ActiveModel::Type::Boolean.new.cast(params[:label]) == true
       }
       cell["span"] = normalized_span(params[:span])
       cell["help"] = params[:help] if params[:help].present?
+      cell["placeholder"] = params[:placeholder] if params[:placeholder].present?
       cell["collection"] = collection_config_from_params if field_entry&.array?
       cell
+    end
+
+    def navigation_cell_from_params
+      target_screen = target_screen_param
+      {
+        "kind" => "navigation",
+        "target_screen" => target_screen,
+        "label" => params[:navigation_label].presence || target_screen.titleize,
+        "span" => normalized_span(params[:navigation_span] || params[:span])
+      }
+    end
+
+    def commit_cell_from_params
+      {
+        "kind" => "commit",
+        "span" => normalized_span(params[:commit_span] || params[:span]),
+        "message_mode" => params[:message_mode].presence_in(MESSAGE_MODES) || "inline_optional",
+        "commit_mode" => params[:commit_mode].presence_in(COMMIT_MODES) || "review_screen"
+      }
+    end
+
+    def updated_cell_from_params(cell)
+      if field_cell?(cell)
+        field_cell_from_params
+      elsif navigation_cell?(cell)
+        navigation_cell_from_params
+      elsif commit_cell?(cell)
+        commit_cell_from_params
+      else
+        raise ArgumentError, "Cell type is not supported by the structured editor."
+      end
     end
 
     def target_row(main_screen)
@@ -249,7 +336,7 @@ module Drafts
         "item_title" => collection_binding_from_params("item_title", default: EditAffordances::Collection::DEFAULT_TITLE_BINDING),
         "item_subtitle" => collection_binding_from_params("item_subtitle", default: EditAffordances::Collection::DEFAULT_SUBTITLE_BINDING)
       )
-      config["item_screen"] = params[:collection_item_screen] if params[:collection_item_screen].present?
+      config["item_screen"] = target_screen_param(param_name: :collection_item_screen, allow_blank: true) if params[:collection_item_screen].present?
       config
     end
 
@@ -299,6 +386,12 @@ module Drafts
       Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
     end
 
+    def screen_ids
+      Array(@draft.body["screens"]).filter_map do |screen|
+        screen["id"] if screen.is_a?(Hash) && screen["id"].is_a?(String) && screen["id"].present?
+      end
+    end
+
     def main_rows_for(body)
       Array(ensure_main_screen(body)["rows"])
     end
@@ -321,6 +414,27 @@ module Drafts
       return row[index] if index >= 0 && index < row.length && row[index].is_a?(Hash)
 
       raise ActiveRecord::RecordNotFound, "field not found"
+    end
+
+    def target_screen_param(param_name: :target_screen, allow_blank: false)
+      value = params[param_name].presence
+      return nil if value.blank? && allow_blank
+      raise ArgumentError, "Select an existing screen." if value.blank?
+      return value if screen_ids.include?(value)
+
+      raise ArgumentError, "Select an existing screen."
+    end
+
+    def field_cell?(cell)
+      cell.is_a?(Hash) && cell.key?("binding")
+    end
+
+    def navigation_cell?(cell)
+      cell.is_a?(Hash) && cell["kind"] == "navigation"
+    end
+
+    def commit_cell?(cell)
+      cell.is_a?(Hash) && cell["kind"] == "commit"
     end
 
     def target_row_index(row_index, direction)

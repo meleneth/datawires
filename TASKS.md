@@ -26,11 +26,17 @@ document or repairing the affordance.
 - [x] The builder supports visiting row/field nodes, reordering rows and fields,
       deleting rows/fields, continuing existing drafts, deleting affordances, and
       requiring a row before fields can be added.
+- [x] Existing builder cells can be revised through structured forms for fields,
+      navigation cells, and commit cells.
+- [x] The builder can add navigation and commit cells to existing rows.
+- [x] Collection item screen choices are constrained to existing screen ids.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
+- [ ] Add structured screen/subform authoring once navigation and collection item
+      workflows need screens that do not already exist.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.
 - [ ] Prefer constrained wins over broad abstractions until the missing shapes
       are obvious from use.

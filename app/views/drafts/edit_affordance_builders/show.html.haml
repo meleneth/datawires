@@ -26,6 +26,7 @@
         = flash[:notice]
 
     - if @tab == "builder"
+      - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] }
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           .space-y-4
@@ -81,7 +82,6 @@
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Row", for_id: "row_index")
-                  - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] }
                   = select_tag :row_index,
                     options_for_select(row_options, @rows.empty? ? nil : @rows.length - 1),
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
@@ -95,6 +95,11 @@
                 .space-y-1
                   = render LabelComponent.new(text: "Help", for_id: "help")
                   = text_field_tag :help,
+                    nil,
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Placeholder", for_id: "placeholder")
+                  = text_field_tag :placeholder,
                     nil,
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               %label.inline-flex.items-center.gap-2.text-sm
@@ -116,9 +121,8 @@
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                   .space-y-1
                     = render LabelComponent.new(text: "Item screen", for_id: "collection_item_screen")
-                    = text_field_tag :collection_item_screen,
-                      nil,
-                      placeholder: "item",
+                    = select_tag :collection_item_screen,
+                      options_for_select([["None", ""]] + @screen_ids.map { |screen_id| [screen_id, screen_id] }),
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
                   .space-y-1
                     = render LabelComponent.new(text: "Delete", for_id: "collection_delete")
@@ -160,6 +164,77 @@
               = submit_tag "Add field",
                 disabled: @rows.empty?,
                 class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none#{@rows.empty? ? " cursor-not-allowed opacity-50" : ""}"
+
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .grid.gap-6.lg:grid-cols-2
+            .space-y-4
+              = render TypographyComponent.new(as: :h3, text: "Add navigation")
+              = form_with url: add_navigation_draft_edit_affordance_builder_path(@draft),
+                method: :patch,
+                data: { turbo_frame: "main_content" },
+                class: "space-y-4" do
+                .grid.gap-3.md:grid-cols-2
+                  .space-y-1
+                    = render LabelComponent.new(text: "Target screen", for_id: "target_screen")
+                    = select_tag :target_screen,
+                      options_for_select(@screen_ids.map { |screen_id| [screen_id, screen_id] }),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Row", for_id: "navigation_row_index")
+                    = select_tag :row_index,
+                      options_for_select(row_options, @rows.empty? ? nil : @rows.length - 1),
+                      id: "navigation_row_index",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Label", for_id: "navigation_label")
+                    = text_field_tag :navigation_label,
+                      nil,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Span", for_id: "navigation_span")
+                    = number_field_tag :navigation_span,
+                      3,
+                      min: 1,
+                      max: 12,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                = submit_tag "Add navigation",
+                  disabled: @rows.empty? || @screen_ids.empty?,
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none#{@rows.empty? || @screen_ids.empty? ? " cursor-not-allowed opacity-50" : ""}"
+
+            .space-y-4
+              = render TypographyComponent.new(as: :h3, text: "Add commit")
+              = form_with url: add_commit_draft_edit_affordance_builder_path(@draft),
+                method: :patch,
+                data: { turbo_frame: "main_content" },
+                class: "space-y-4" do
+                .grid.gap-3.md:grid-cols-2
+                  .space-y-1
+                    = render LabelComponent.new(text: "Row", for_id: "commit_row_index")
+                    = select_tag :row_index,
+                      options_for_select(row_options, @rows.empty? ? nil : @rows.length - 1),
+                      id: "commit_row_index",
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Span", for_id: "commit_span")
+                    = number_field_tag :commit_span,
+                      3,
+                      min: 1,
+                      max: 12,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Commit mode", for_id: "commit_mode")
+                    = select_tag :commit_mode,
+                      options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Message mode", for_id: "message_mode")
+                    = select_tag :message_mode,
+                      options_for_select([["Hidden", "hidden"], ["Inline optional", "inline_optional"], ["Inline required", "inline_required"]], "inline_optional"),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                = submit_tag "Add commit",
+                  disabled: @rows.empty?,
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none#{@rows.empty? ? " cursor-not-allowed opacity-50" : ""}"
 
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
@@ -293,19 +368,154 @@
                   method: :delete,
                   form: { data: { turbo_frame: "main_content" } },
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
-            .grid.gap-3.md:grid-cols-2
-              .rounded.border-2.border-black.bg-background.p-3
-                .font-head.text-sm Binding
-                .mt-2.font-mono.text-xs.text-muted-foreground= @cell.dig("binding", "ptr") || @cell["kind"]
-              .rounded.border-2.border-black.bg-background.p-3
-                .font-head.text-sm Span
-                .mt-2.text-sm= @cell["span"] || @main_screen&.fetch("default_span", 3)
-              .rounded.border-2.border-black.bg-background.p-3
-                .font-head.text-sm Widget
-                .mt-2.text-sm= @cell["widget"] || "auto"
-              .rounded.border-2.border-black.bg-background.p-3
-                .font-head.text-sm Help
-                .mt-2.text-sm.text-muted-foreground= @cell["help"].presence || "No help text."
+            - if @cell.key?("binding")
+              - current_collection = @cell["collection"].is_a?(Hash) ? @cell["collection"] : {}
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+                method: :patch,
+                data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
+                class: "space-y-4" do
+                .grid.gap-3.md:grid-cols-3
+                  .space-y-1
+                    = render LabelComponent.new(text: "Schema path", for_id: "ptr")
+                    = select_tag :ptr,
+                      options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget, "data-array": entry.array? ? "true" : "false" }] }, @cell.dig("binding", "ptr")),
+                      data: { edit_affordance_builder_target: "path", action: "edit-affordance-builder#sync" },
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Widget", for_id: "widget")
+                    = select_tag :widget,
+                      options_for_select(%w[auto text textarea number checkbox select array], @cell["widget"] || "auto"),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Span", for_id: "span")
+                    = number_field_tag :span,
+                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      min: 1,
+                      max: 12,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Help", for_id: "help")
+                    = text_field_tag :help,
+                      @cell["help"],
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Placeholder", for_id: "placeholder")
+                    = text_field_tag :placeholder,
+                      @cell["placeholder"],
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                %label.inline-flex.items-center.gap-2.text-sm
+                  = check_box_tag :label, "1", @cell.fetch("label", true), class: "h-4 w-4 rounded border-2 border-black"
+                  %span Show label
+
+                .rounded.border-2.border-black.bg-muted.p-3{ data: { edit_affordance_builder_target: "collection" } }
+                  .mb-3.font-head.text-sm Collection options
+                  .grid.gap-3.md:grid-cols-3
+                    .space-y-1
+                      = render LabelComponent.new(text: "Presentation", for_id: "collection_presentation")
+                      = select_tag :collection_presentation,
+                        options_for_select(%w[list table cards], current_collection["presentation"]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Creation", for_id: "collection_creation")
+                      = select_tag :collection_creation,
+                        options_for_select(%w[new_screen inline_blank_form], current_collection["creation"]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Item screen", for_id: "collection_item_screen")
+                      = select_tag :collection_item_screen,
+                        options_for_select([["None", ""]] + @screen_ids.map { |screen_id| [screen_id, screen_id] }, current_collection["item_screen"]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Delete", for_id: "collection_delete")
+                      = select_tag :collection_delete,
+                        options_for_select(%w[disabled enabled], current_collection["delete"]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Reorder", for_id: "collection_reorder")
+                      = select_tag :collection_reorder,
+                        options_for_select(%w[disabled enabled], current_collection["reorder"]),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .mt-3.grid.gap-3.md:grid-cols-2
+                    .grid.gap-2.md:grid-cols-2
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title binding", for_id: "item_title_kind")
+                        = select_tag :item_title_kind,
+                          options_for_select([["Property", "property"], ["Value label", "value_label"], ["None", "none"]], current_collection.dig("item_title", "kind") || "property"),
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title property", for_id: "item_title_name")
+                        = text_field_tag :item_title_name,
+                          current_collection.dig("item_title", "name") || "name",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .grid.gap-2.md:grid-cols-2
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle binding", for_id: "item_subtitle_kind")
+                        = select_tag :item_subtitle_kind,
+                          options_for_select([["Value label", "value_label"], ["Property", "property"], ["None", "none"]], current_collection.dig("item_subtitle", "kind") || "value_label"),
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle property", for_id: "item_subtitle_name")
+                        = text_field_tag :item_subtitle_name,
+                          current_collection.dig("item_subtitle", "name"),
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .rounded.border-2.border-black.bg-muted.p-3.text-sm.text-muted-foreground{ data: { edit_affordance_builder_target: "collectionNote" } }
+                  Collection policy: array fields only.
+
+                = submit_tag "Update field",
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            - elsif @cell["kind"] == "navigation"
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+                method: :patch,
+                data: { turbo_frame: "main_content" },
+                class: "space-y-4" do
+                .grid.gap-3.md:grid-cols-3
+                  .space-y-1
+                    = render LabelComponent.new(text: "Target screen", for_id: "target_screen")
+                    = select_tag :target_screen,
+                      options_for_select(@screen_ids.map { |screen_id| [screen_id, screen_id] }, @cell["target_screen"]),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Label", for_id: "navigation_label")
+                    = text_field_tag :navigation_label,
+                      @cell["label"],
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Span", for_id: "navigation_span")
+                    = number_field_tag :navigation_span,
+                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      min: 1,
+                      max: 12,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                = submit_tag "Update navigation",
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            - elsif @cell["kind"] == "commit"
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+                method: :patch,
+                data: { turbo_frame: "main_content" },
+                class: "space-y-4" do
+                .grid.gap-3.md:grid-cols-3
+                  .space-y-1
+                    = render LabelComponent.new(text: "Span", for_id: "commit_span")
+                    = number_field_tag :commit_span,
+                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      min: 1,
+                      max: 12,
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Commit mode", for_id: "commit_mode")
+                    = select_tag :commit_mode,
+                      options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]], @cell["commit_mode"] || "review_screen"),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  .space-y-1
+                    = render LabelComponent.new(text: "Message mode", for_id: "message_mode")
+                    = select_tag :message_mode,
+                      options_for_select([["Hidden", "hidden"], ["Inline optional", "inline_optional"], ["Inline required", "inline_required"]], @cell["message_mode"] || "inline_optional"),
+                      class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                = submit_tag "Update commit",
+                  class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+            - else
+              = render AlertComponent.new(variant: :destructive) do
+                This cell can be repaired from the Raw tab.
 
     - elsif @tab == "preview"
       %div{ class: @builder_width_class }

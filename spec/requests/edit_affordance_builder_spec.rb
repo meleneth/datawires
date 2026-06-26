@@ -349,6 +349,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Item screen")
     expect(response.body).to include("Title binding")
     expect(response.body).to include("data-array=\"true\"")
+    expect(response.body).to include("Add navigation")
+    expect(response.body).to include("Add commit")
 
     patch add_row_draft_edit_affordance_builder_path(draft)
     patch add_field_draft_edit_affordance_builder_path(draft), params: {
@@ -361,7 +363,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       collection_creation: "inline_blank_form",
       collection_delete: "enabled",
       collection_reorder: "enabled",
-      collection_item_screen: "item",
+      collection_item_screen: "main",
       item_title_kind: "property",
       item_title_name: "label",
       item_subtitle_kind: "value_label"
@@ -377,7 +379,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       "navigation" => "open_item",
       "delete" => "enabled",
       "reorder" => "enabled",
-      "item_screen" => "item",
+      "item_screen" => "main",
       "item_title" => {
         "kind" => "property",
         "name" => "label"
@@ -390,7 +392,148 @@ RSpec.describe "Edit affordance builder", type: :request do
     get draft_edit_affordance_builder_path(draft, tab: "diagnostics")
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("item_screen must match a screen id")
+    expect(response.body).to include("No diagnostics.")
+  end
+
+  it "rejects collection item screens that do not exist" do
+    draft = create_builder_draft
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+
+    expect {
+      patch add_field_draft_edit_affordance_builder_path(draft), params: {
+        ptr: "/items",
+        widget: "array",
+        row_index: "0",
+        label: "1",
+        collection_item_screen: "missing"
+      }
+    }.not_to change { draft.reload.body.dig("screens", 0, "rows", 0) }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    follow_redirect!
+    expect(response.body).to include("Select an existing screen.")
+  end
+
+  it "updates existing field cells through structured controls" do
+    draft = create_builder_draft
+
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Update field")
+    expect(response.body).to include("Placeholder")
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      span: "8",
+      help: "Revised help.",
+      placeholder: "Long form copy"
+    }
+
+    expect(response).to redirect_to(cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0))
+    cell = draft.reload.body.dig("screens", 0, "rows", 0, 0)
+    expect(cell).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/bio"
+      },
+      "widget" => "textarea",
+      "span" => 8,
+      "label" => false,
+      "help" => "Revised help.",
+      "placeholder" => "Long form copy"
+    )
+  end
+
+  it "adds and updates navigation and commit cells" do
+    draft = create_builder_draft
+
+    patch update_raw_draft_edit_affordance_builder_path(draft), params: {
+      body_json: JSON.pretty_generate(
+        draft.body.merge(
+          "screens" => [
+            draft.body.fetch("screens").first,
+            {
+              "id" => "details",
+              "title" => "Details",
+              "columns" => 12,
+              "default_span" => 3,
+              "rows" => []
+            }
+          ]
+        )
+      )
+    }
+    patch add_row_draft_edit_affordance_builder_path(draft)
+
+    patch add_navigation_draft_edit_affordance_builder_path(draft), params: {
+      row_index: "0",
+      target_screen: "details",
+      navigation_label: "Open details",
+      navigation_span: "4"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "kind" => "navigation",
+      "target_screen" => "details",
+      "label" => "Open details",
+      "span" => 4
+    )
+
+    patch add_commit_draft_edit_affordance_builder_path(draft), params: {
+      row_index: "0",
+      commit_span: "8",
+      commit_mode: "immediate",
+      message_mode: "inline_required"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 1)).to include(
+      "kind" => "commit",
+      "span" => 8,
+      "commit_mode" => "immediate",
+      "message_mode" => "inline_required"
+    )
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0)
+    expect(response.body).to include("Update navigation")
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      target_screen: "main",
+      navigation_label: "Back",
+      navigation_span: "6"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "target_screen" => "main",
+      "label" => "Back",
+      "span" => 6
+    )
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 1)
+    expect(response.body).to include("Update commit")
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 1), params: {
+      commit_span: "12",
+      commit_mode: "review_screen",
+      message_mode: "hidden"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 1)).to include(
+      "span" => 12,
+      "commit_mode" => "review_screen",
+      "message_mode" => "hidden"
+    )
   end
 
   it "updates raw JSON and reports diagnostics" do
