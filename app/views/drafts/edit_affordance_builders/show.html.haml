@@ -1,4 +1,6 @@
 = turbo_frame_tag "main_content" do
+  - builder_screen_params = @screen_id == "main" ? {} : { screen_id: @screen_id }
+  - builder_path_params = ->(extra = {}) { builder_screen_params.merge(extra) }
   %section{ class: "mx-auto w-full space-y-6", style: "max-width: 1920px;" }
     %header.space-y-2
       = render TypographyComponent.new(as: :h1, text: "Edit affordance builder")
@@ -7,7 +9,7 @@
     .flex.flex-wrap.items-center.gap-2
       - %w[builder preview diagnostics raw].each do |tab|
         = link_to tab.titleize,
-          draft_edit_affordance_builder_path(@draft, tab: tab),
+          draft_edit_affordance_builder_path(@draft, builder_path_params.call(tab: tab)),
           data: { turbo_frame: "main_content" },
           class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black px-3 text-sm font-medium shadow-sm transition-all hover:translate-y-1 hover:shadow-none #{@tab == tab ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}"
       = render ButtonComponent.new(href: new_draft_commit_path(@draft), size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
@@ -30,20 +32,104 @@
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Screens")
+            .flex.flex-wrap.gap-2
+              - @screen_ids.each do |screen_id|
+                = link_to screen_id,
+                  draft_edit_affordance_builder_path(@draft, screen_id == "main" ? { tab: "builder" } : { tab: "builder", screen_id: screen_id }),
+                  data: { turbo_frame: "main_content" },
+                  class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black px-3 text-xs font-medium shadow-sm transition-all hover:translate-y-1 hover:shadow-none #{screen_id == @screen_id ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}"
+            .grid.gap-6.lg:grid-cols-2
+              .space-y-3
+                = render TypographyComponent.new(as: :h3, text: "Add screen")
+                = form_with url: add_screen_draft_edit_affordance_builder_path(@draft, builder_screen_params),
+                  method: :patch,
+                  data: { turbo_frame: "main_content" },
+                  class: "space-y-3" do
+                  .grid.gap-3.md:grid-cols-2
+                    .space-y-1
+                      = render LabelComponent.new(text: "Screen id", for_id: "new_screen_id")
+                      = text_field_tag :new_screen_id,
+                        nil,
+                        placeholder: "details",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title", for_id: "new_screen_title")
+                      = text_field_tag :new_screen_title,
+                        nil,
+                        placeholder: "Details",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Root pointer", for_id: "new_screen_root_ptr")
+                      = text_field_tag :new_screen_root_ptr,
+                        nil,
+                        placeholder: "/profile",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subform", for_id: "new_screen_subform")
+                      = select_tag :new_screen_subform,
+                        options_for_select([["None", ""]] + @subform_ids.map { |subform_id| [subform_id, subform_id] }),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Width", for_id: "new_screen_width")
+                      = select_tag :new_screen_width,
+                        options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], "large"),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Default span", for_id: "new_screen_default_span")
+                      = number_field_tag :new_screen_default_span,
+                        3,
+                        min: 1,
+                        max: 12,
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                  = submit_tag "Add screen",
+                    class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+              .space-y-3
+                = render TypographyComponent.new(as: :h3, text: "Add subform")
+                = form_with url: add_subform_draft_edit_affordance_builder_path(@draft, builder_screen_params),
+                  method: :patch,
+                  data: { turbo_frame: "main_content" },
+                  class: "space-y-3" do
+                  .grid.gap-3.md:grid-cols-2
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subform id", for_id: "new_subform_id")
+                      = text_field_tag :new_subform_id,
+                        nil,
+                        placeholder: "profile_fields",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Root pointer", for_id: "new_subform_root_ptr")
+                      = text_field_tag :new_subform_root_ptr,
+                        nil,
+                        placeholder: "/profile",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                  = submit_tag "Add subform",
+                    class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
             = render TypographyComponent.new(as: :h3, text: "Screen layout")
-            = form_with url: update_screen_draft_edit_affordance_builder_path(@draft),
+            - if @active_subform
+              = render TypographyComponent.new(as: :muted, text: "Rows edit subform #{@active_subform.fetch('id')}.")
+            = form_with url: update_screen_draft_edit_affordance_builder_path(@draft, builder_screen_params),
               method: :patch,
               data: { turbo_frame: "main_content" },
               class: "grid gap-3 md:grid-cols-3" do
               .space-y-1
+                = render LabelComponent.new(text: "Title", for_id: "title")
+                = text_field_tag :title,
+                  @selected_screen&.fetch("title", nil),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
                 = render LabelComponent.new(text: "Width", for_id: "width")
                 = select_tag :width,
-                  options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], @main_screen&.fetch("width", "large")),
+                  options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], @selected_screen&.fetch("width", "large")),
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
                 = render LabelComponent.new(text: "Default span", for_id: "default_span")
                 = number_field_tag :default_span,
-                  @main_screen&.fetch("default_span", 3),
+                  @selected_screen&.fetch("default_span", 3),
                   min: 1,
                   max: 12,
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
@@ -52,7 +138,7 @@
                   class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
             = button_to "Add row",
-              add_row_draft_edit_affordance_builder_path(@draft),
+              add_row_draft_edit_affordance_builder_path(@draft, builder_screen_params),
               method: :patch,
               form: { data: { turbo_frame: "main_content" } },
               class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
@@ -64,7 +150,7 @@
             - if @rows.empty?
               = render AlertComponent.new do
                 Add a row before adding fields.
-            = form_with url: add_field_draft_edit_affordance_builder_path(@draft),
+            = form_with url: add_field_draft_edit_affordance_builder_path(@draft, builder_screen_params),
               method: :patch,
               data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
               class: "space-y-4" do
@@ -170,7 +256,7 @@
           .grid.gap-6.lg:grid-cols-2
             .space-y-4
               = render TypographyComponent.new(as: :h3, text: "Add navigation")
-              = form_with url: add_navigation_draft_edit_affordance_builder_path(@draft),
+              = form_with url: add_navigation_draft_edit_affordance_builder_path(@draft, builder_screen_params),
                 method: :patch,
                 data: { turbo_frame: "main_content" },
                 class: "space-y-4" do
@@ -204,7 +290,7 @@
 
             .space-y-4
               = render TypographyComponent.new(as: :h3, text: "Add commit")
-              = form_with url: add_commit_draft_edit_affordance_builder_path(@draft),
+              = form_with url: add_commit_draft_edit_affordance_builder_path(@draft, builder_screen_params),
                 method: :patch,
                 data: { turbo_frame: "main_content" },
                 class: "space-y-4" do
@@ -248,20 +334,20 @@
                 %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
                   .flex.items-center.justify-between.gap-3
                     = link_to "Row #{row_index + 1}",
-                      row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                      row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
                       data: { turbo_frame: "main_content" },
                       class: "font-head underline decoration-2 underline-offset-4"
                     .flex.flex-wrap.items-center.justify-end.gap-2
                       - if row_index.positive?
                         = button_to "Up",
-                          move_row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                          move_row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
                           method: :patch,
                           params: { direction: "up" },
                           form: { data: { turbo_frame: "main_content" } },
                           class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                       - if row_index < @rows.length - 1
                         = button_to "Down",
-                          move_row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+                          move_row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
                           method: :patch,
                           params: { direction: "down" },
                           form: { data: { turbo_frame: "main_content" } },
@@ -277,7 +363,7 @@
                             .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
                             .mt-1
                               %span.font-head Span
-                              = cell["span"] || @main_screen&.fetch("default_span", 3)
+                              = cell["span"] || @selected_screen&.fetch("default_span", 3)
                             - if cell["collection"].is_a?(Hash)
                               .mt-2.text-xs.text-muted-foreground
                                 Collection:
@@ -289,7 +375,7 @@
                               No help text.
                             .mt-3
                               = link_to "Open field",
-                                cell_draft_edit_affordance_builder_path(@draft, row_index: row_index, cell_index: cell_index),
+                                cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index, cell_index: cell_index)),
                                 data: { turbo_frame: "main_content" },
                                 class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
 
@@ -303,11 +389,11 @@
                 = render TypographyComponent.new(as: :muted, text: pluralize(@row.length, "field"))
               .flex.flex-wrap.gap-2
                 = link_to "Back to builder",
-                  draft_edit_affordance_builder_path(@draft, tab: "builder"),
+                  draft_edit_affordance_builder_path(@draft, builder_path_params.call(tab: "builder")),
                   data: { turbo_frame: "main_content" },
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                 = button_to "Delete row",
-                  row_draft_edit_affordance_builder_path(@draft, row_index: @row_index),
+                  row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index)),
                   method: :delete,
                   form: { data: { turbo_frame: "main_content" } },
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
@@ -324,28 +410,28 @@
                         .font-head Field #{cell_index + 1}
                         .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
                         .text-xs.text-muted-foreground
-                          Span #{cell["span"] || @main_screen&.fetch("default_span", 3)}
+                          Span #{cell["span"] || @selected_screen&.fetch("default_span", 3)}
                       .flex.flex-wrap.gap-2
                         - if cell_index.positive?
                           = button_to "Left",
-                            move_cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                            move_cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: cell_index)),
                             method: :patch,
                             params: { direction: "left" },
                             form: { data: { turbo_frame: "main_content" } },
                             class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                         - if cell_index < @row.length - 1
                           = button_to "Right",
-                            move_cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                            move_cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: cell_index)),
                             method: :patch,
                             params: { direction: "right" },
                             form: { data: { turbo_frame: "main_content" } },
                             class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                         = link_to "Open",
-                          cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                          cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: cell_index)),
                           data: { turbo_frame: "main_content" },
                           class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                         = button_to "Delete",
-                          cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: cell_index),
+                          cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: cell_index)),
                           method: :delete,
                           form: { data: { turbo_frame: "main_content" } },
                           class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-xs font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
@@ -360,17 +446,17 @@
                 = render TypographyComponent.new(as: :muted, text: "Row #{@row_index + 1}")
               .flex.flex-wrap.gap-2
                 = link_to "Back to row",
-                  row_draft_edit_affordance_builder_path(@draft, row_index: @row_index),
+                  row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index)),
                   data: { turbo_frame: "main_content" },
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
                 = button_to "Delete field",
-                  cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+                  cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                   method: :delete,
                   form: { data: { turbo_frame: "main_content" } },
                   class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
             - if @cell.key?("binding")
               - current_collection = @cell["collection"].is_a?(Hash) ? @cell["collection"] : {}
-              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                 method: :patch,
                 data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
                 class: "space-y-4" do
@@ -389,7 +475,7 @@
                   .space-y-1
                     = render LabelComponent.new(text: "Span", for_id: "span")
                     = number_field_tag :span,
-                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      @cell["span"] || @selected_screen&.fetch("default_span", 3),
                       min: 1,
                       max: 12,
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
@@ -464,7 +550,7 @@
                 = submit_tag "Update field",
                   class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
             - elsif @cell["kind"] == "navigation"
-              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                 method: :patch,
                 data: { turbo_frame: "main_content" },
                 class: "space-y-4" do
@@ -482,14 +568,14 @@
                   .space-y-1
                     = render LabelComponent.new(text: "Span", for_id: "navigation_span")
                     = number_field_tag :navigation_span,
-                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      @cell["span"] || @selected_screen&.fetch("default_span", 3),
                       min: 1,
                       max: 12,
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 = submit_tag "Update navigation",
                   class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
             - elsif @cell["kind"] == "commit"
-              = form_with url: cell_draft_edit_affordance_builder_path(@draft, row_index: @row_index, cell_index: @cell_index),
+              = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                 method: :patch,
                 data: { turbo_frame: "main_content" },
                 class: "space-y-4" do
@@ -497,7 +583,7 @@
                   .space-y-1
                     = render LabelComponent.new(text: "Span", for_id: "commit_span")
                     = number_field_tag :commit_span,
-                      @cell["span"] || @main_screen&.fetch("default_span", 3),
+                      @cell["span"] || @selected_screen&.fetch("default_span", 3),
                       min: 1,
                       max: 12,
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"

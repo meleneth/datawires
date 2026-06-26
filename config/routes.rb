@@ -36,6 +36,8 @@ Rails.application.routes.draw do
       patch :add_field
       patch :add_navigation
       patch :add_commit
+      patch :add_screen
+      patch :add_subform
       patch :add_row
       patch :update_screen
       patch :update_raw

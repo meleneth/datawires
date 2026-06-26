@@ -33,51 +33,82 @@ module Drafts
 
     def add_row
       body = deep_dup_json(@draft.body)
-      ensure_main_screen(body)["rows"] << []
+      builder_rows_for(body) << []
       @draft.update!(body: body)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Row added."
     end
 
     def add_field
       @draft.update!(body: body_with_added_field)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Field added."
     rescue ArgumentError => e
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         alert: e.message
     end
 
     def add_navigation
       @draft.update!(body: body_with_added_navigation)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Navigation added."
     rescue ArgumentError => e
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         alert: e.message
     end
 
     def add_commit
       @draft.update!(body: body_with_added_commit)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Commit added."
     rescue ArgumentError => e
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
+        alert: e.message
+    end
+
+    def add_screen
+      body = deep_dup_json(@draft.body)
+      screen = screen_from_params(body)
+      ensure_screens(body) << screen
+      @draft.update!(body: body)
+
+      redirect_to builder_path(screen_id: screen.fetch("id")),
+        notice: "Screen added."
+    rescue ArgumentError => e
+      redirect_to builder_path,
+        alert: e.message
+    end
+
+    def add_subform
+      body = deep_dup_json(@draft.body)
+      subform = subform_from_params(body)
+      ensure_subforms(body) << subform
+      @draft.update!(body: body)
+
+      redirect_to builder_path,
+        notice: "Subform added."
+    rescue ArgumentError => e
+      redirect_to builder_path,
         alert: e.message
     end
 
     def update_screen
       body = deep_dup_json(@draft.body)
-      main_screen = ensure_main_screen(body)
-      main_screen["width"] = params[:width].presence_in(WIDTHS) || "large"
-      main_screen["default_span"] = normalized_span(params[:default_span])
+      screen = builder_screen_for(body)
+      if params.key?(:title)
+        title = params[:title].presence
+        title ? screen["title"] = title : screen.delete("title")
+      end
+      screen["width"] = params[:width].presence_in(WIDTHS) || "large"
+      screen["default_span"] = normalized_span(params[:default_span])
+      screen["columns"] = 12
       @draft.update!(body: body)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Screen layout updated."
     end
 
@@ -109,37 +140,37 @@ module Drafts
 
     def delete_row
       body = deep_dup_json(@draft.body)
-      rows = main_rows_for(body)
+      rows = builder_rows_for(body)
       index = row_index_param
       row_at!(index, rows: rows)
       rows.delete_at(index)
       @draft.update!(body: body)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Row deleted."
     end
 
     def move_row
       body = deep_dup_json(@draft.body)
-      rows = main_rows_for(body)
+      rows = builder_rows_for(body)
       row_index = row_index_param
       row_at!(row_index, rows: rows)
       target_index = target_row_index(row_index, params[:direction])
       unless target_index >= 0 && target_index < rows.length
-        return redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+        return redirect_to builder_path,
           alert: "Row cannot be moved #{params[:direction]}."
       end
 
       rows[row_index], rows[target_index] = rows[target_index], rows[row_index]
       @draft.update!(body: body)
 
-      redirect_to draft_edit_affordance_builder_path(@draft, tab: "builder"),
+      redirect_to builder_path,
         notice: "Row moved."
     end
 
     def delete_cell
       body = deep_dup_json(@draft.body)
-      rows = main_rows_for(body)
+      rows = builder_rows_for(body)
       row_index = row_index_param
       cell_index = cell_index_param
       row = row_at!(row_index, rows: rows)
@@ -147,33 +178,33 @@ module Drafts
       row.delete_at(cell_index)
       @draft.update!(body: body)
 
-      redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+      redirect_to row_path(row_index),
         notice: "Field deleted."
     end
 
     def move_cell
       body = deep_dup_json(@draft.body)
-      rows = main_rows_for(body)
+      rows = builder_rows_for(body)
       row_index = row_index_param
       cell_index = cell_index_param
       row = row_at!(row_index, rows: rows)
       cell_at!(row, cell_index)
       target_index = target_cell_index(cell_index, params[:direction])
       unless target_index >= 0 && target_index < row.length
-        return redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+        return redirect_to row_path(row_index),
           alert: "Field cannot be moved #{params[:direction]}."
       end
 
       row[cell_index], row[target_index] = row[target_index], row[cell_index]
       @draft.update!(body: body)
 
-      redirect_to row_draft_edit_affordance_builder_path(@draft, row_index: row_index),
+      redirect_to row_path(row_index),
         notice: "Field moved."
     end
 
     def update_cell
       body = deep_dup_json(@draft.body)
-      rows = main_rows_for(body)
+      rows = builder_rows_for(body)
       row_index = row_index_param
       cell_index = cell_index_param
       row = row_at!(row_index, rows: rows)
@@ -181,10 +212,10 @@ module Drafts
       row[cell_index] = updated_cell_from_params(cell)
       @draft.update!(body: body)
 
-      redirect_to cell_draft_edit_affordance_builder_path(@draft, row_index: row_index, cell_index: cell_index),
+      redirect_to cell_path(row_index, cell_index),
         notice: "Cell updated."
     rescue ArgumentError => e
-      redirect_to cell_draft_edit_affordance_builder_path(@draft, row_index: params[:row_index], cell_index: params[:cell_index]),
+      redirect_to cell_path(params[:row_index], params[:cell_index]),
         alert: e.message
     end
 
@@ -201,10 +232,14 @@ module Drafts
       @field_entries = field_entries
       @diagnostics = EditAffordances::BodyValidator.new(@draft.body).errors
       @preview_projection = preview_projection
-      @main_screen = current_main_screen
-      @rows = Array(@main_screen&.fetch("rows", []))
       @screen_ids = screen_ids
-      @builder_width_class = width_class_for(@main_screen&.fetch("width", "large"))
+      @subform_ids = subform_ids
+      @selected_screen = current_builder_screen
+      @screen_id = @selected_screen&.fetch("id", nil) || "main"
+      @active_subform = current_builder_subform
+      @rows = current_builder_rows
+      @screen_ids = screen_ids
+      @builder_width_class = width_class_for(@selected_screen&.fetch("width", "large"))
     end
 
     def tab_param
@@ -213,22 +248,19 @@ module Drafts
 
     def body_with_added_field
       body = deep_dup_json(@draft.body)
-      main_screen = ensure_main_screen(body)
-      target_row(main_screen) << field_cell_from_params
+      target_row(body) << field_cell_from_params
       body
     end
 
     def body_with_added_navigation
       body = deep_dup_json(@draft.body)
-      main_screen = ensure_main_screen(body)
-      target_row(main_screen) << navigation_cell_from_params
+      target_row(body) << navigation_cell_from_params
       body
     end
 
     def body_with_added_commit
       body = deep_dup_json(@draft.body)
-      main_screen = ensure_main_screen(body)
-      target_row(main_screen) << commit_cell_from_params
+      target_row(body) << commit_cell_from_params
       body
     end
 
@@ -236,12 +268,12 @@ module Drafts
       body["version"] ||= 1
       body["start_screen"] ||= "main"
       body["commit_mode"] ||= "review_screen"
-      body["subforms"] ||= []
-      body["screens"] = Array(body["screens"])
-      main_screen = body["screens"].find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
+      ensure_subforms(body)
+      screens = ensure_screens(body)
+      main_screen = screens.find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
       return main_screen.tap { |screen| screen["rows"] = Array(screen["rows"]) } if main_screen
 
-      body["screens"] << {
+      screens << {
         "id" => "main",
         "title" => "Main",
         "columns" => 12,
@@ -249,7 +281,15 @@ module Drafts
         "width" => "large",
         "rows" => []
       }
-      body["screens"].last
+      screens.last
+    end
+
+    def ensure_screens(body)
+      body["screens"] = Array(body["screens"])
+    end
+
+    def ensure_subforms(body)
+      body["subforms"] = Array(body["subforms"])
     end
 
     def field_cell_from_params
@@ -302,8 +342,8 @@ module Drafts
       end
     end
 
-    def target_row(main_screen)
-      rows = main_screen["rows"] = Array(main_screen["rows"])
+    def target_row(body)
+      rows = builder_rows_for(body)
       raise ArgumentError, "Add a row before adding fields." if rows.empty?
 
       selected_index = params[:row_index].presence || (rows.length - 1).to_s
@@ -315,6 +355,53 @@ module Drafts
       return rows[index] if index >= 0 && index < rows.length
 
       raise ArgumentError, "Select an existing row before adding a field."
+    end
+
+    def screen_from_params(body)
+      ensure_main_screen(body)
+      id = normalized_identifier(params[:new_screen_id], label: "Screen id")
+      raise ArgumentError, "Screen id already exists." if screen_ids_for(body).include?(id)
+
+      screen = {
+        "id" => id,
+        "title" => params[:new_screen_title].presence || id.titleize,
+        "columns" => 12,
+        "default_span" => normalized_span(params[:new_screen_default_span]),
+        "width" => params[:new_screen_width].presence_in(WIDTHS) || "large"
+      }
+      root_ptr = params[:new_screen_root_ptr].presence
+      screen["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } if root_ptr
+      subform_id = params[:new_screen_subform].presence
+      if subform_id
+        raise ArgumentError, "Select an existing subform." unless subform_ids_for(body).include?(subform_id)
+
+        screen["subform"] = subform_id
+      else
+        screen["rows"] = []
+      end
+      screen
+    end
+
+    def subform_from_params(body)
+      ensure_main_screen(body)
+      id = normalized_identifier(params[:new_subform_id], label: "Subform id")
+      raise ArgumentError, "Subform id already exists." if subform_ids_for(body).include?(id)
+
+      {
+        "id" => id,
+        "rows" => []
+      }.tap do |subform|
+        root_ptr = params[:new_subform_root_ptr].presence
+        subform["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } if root_ptr
+      end
+    end
+
+    def normalized_identifier(value, label:)
+      id = value.to_s.strip
+      raise ArgumentError, "#{label} is required." if id.blank?
+      return id if id.match?(/\A[a-z][a-z0-9_-]*\z/)
+
+      raise ArgumentError, "#{label} must start with a lowercase letter and use lowercase letters, numbers, dashes, or underscores."
     end
 
     def append_row(rows)
@@ -382,18 +469,61 @@ module Drafts
       )
     end
 
-    def current_main_screen
-      Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == "main" }
+    def current_builder_screen
+      ensure_main_screen(@draft.body)
+      screens = Array(@draft.body["screens"]).select { |screen| screen.is_a?(Hash) }
+      requested_id = params[:screen_id].presence || "main"
+      screens.find { |screen| screen["id"] == requested_id } || screens.find { |screen| screen["id"] == "main" } || screens.first
+    end
+
+    def current_builder_subform
+      subform_for_screen(@selected_screen, body: @draft.body)
+    end
+
+    def current_builder_rows
+      target = @active_subform || @selected_screen
+      return [] unless target
+
+      target["rows"] = Array(target["rows"])
     end
 
     def screen_ids
-      Array(@draft.body["screens"]).filter_map do |screen|
+      screen_ids_for(@draft.body)
+    end
+
+    def subform_ids
+      subform_ids_for(@draft.body)
+    end
+
+    def screen_ids_for(body)
+      Array(body["screens"]).filter_map do |screen|
         screen["id"] if screen.is_a?(Hash) && screen["id"].is_a?(String) && screen["id"].present?
       end
     end
 
-    def main_rows_for(body)
-      Array(ensure_main_screen(body)["rows"])
+    def subform_ids_for(body)
+      Array(body["subforms"]).filter_map do |subform|
+        subform["id"] if subform.is_a?(Hash) && subform["id"].is_a?(String) && subform["id"].present?
+      end
+    end
+
+    def builder_screen_for(body)
+      ensure_main_screen(body)
+      screens = Array(body["screens"]).select { |screen| screen.is_a?(Hash) }
+      requested_id = params[:screen_id].presence || @screen_id.presence || "main"
+      screens.find { |screen| screen["id"] == requested_id } || screens.find { |screen| screen["id"] == "main" } || screens.first
+    end
+
+    def builder_rows_for(body)
+      screen = builder_screen_for(body)
+      target = subform_for_screen(screen, body: body) || screen
+      target["rows"] = Array(target["rows"])
+    end
+
+    def subform_for_screen(screen, body:)
+      return nil unless screen.is_a?(Hash) && screen["subform"].present?
+
+      Array(body["subforms"]).find { |subform| subform.is_a?(Hash) && subform["id"] == screen["subform"] }
     end
 
     def row_index_param
@@ -488,6 +618,24 @@ module Drafts
 
     def deep_dup_json(value)
       Marshal.load(Marshal.dump(value))
+    end
+
+    def builder_path(tab: "builder", screen_id: @screen_id)
+      options = { tab: tab }
+      options[:screen_id] = screen_id if screen_id.present? && screen_id != "main"
+      draft_edit_affordance_builder_path(@draft, options)
+    end
+
+    def row_path(row_index, screen_id: @screen_id)
+      options = { row_index: row_index }
+      options[:screen_id] = screen_id if screen_id.present? && screen_id != "main"
+      row_draft_edit_affordance_builder_path(@draft, options)
+    end
+
+    def cell_path(row_index, cell_index, screen_id: @screen_id)
+      options = { row_index: row_index, cell_index: cell_index }
+      options[:screen_id] = screen_id if screen_id.present? && screen_id != "main"
+      cell_draft_edit_affordance_builder_path(@draft, options)
     end
 
     class SchemaPreviewSource

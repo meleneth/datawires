@@ -536,6 +536,137 @@ RSpec.describe "Edit affordance builder", type: :request do
     )
   end
 
+  it "adds screens and edits rows on the selected screen" do
+    draft = create_builder_draft
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Add screen")
+    expect(response.body).to include("Add subform")
+
+    patch add_screen_draft_edit_affordance_builder_path(draft), params: {
+      new_screen_id: "details",
+      new_screen_title: "Details",
+      new_screen_root_ptr: "/profile",
+      new_screen_width: "medium",
+      new_screen_default_span: "6"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder", screen_id: "details"))
+    details = draft.reload.body.fetch("screens").second
+    expect(details).to include(
+      "id" => "details",
+      "title" => "Details",
+      "width" => "medium",
+      "default_span" => 6,
+      "root_binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/profile"
+      },
+      "rows" => []
+    )
+
+    patch add_row_draft_edit_affordance_builder_path(draft, screen_id: "details")
+    patch add_field_draft_edit_affordance_builder_path(draft, screen_id: "details"), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "0",
+      label: "1"
+    }
+
+    expect(draft.reload.body.dig("screens", 1, "rows", 0, 0)).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/bio"
+      },
+      "widget" => "textarea"
+    )
+
+    get draft_edit_affordance_builder_path(draft, tab: "builder", screen_id: "details")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("details")
+    expect(response.body).to include("Biography")
+  end
+
+  it "adds subforms and edits subform rows through screens that reference them" do
+    draft = create_builder_draft
+
+    patch add_subform_draft_edit_affordance_builder_path(draft), params: {
+      new_subform_id: "profile_fields",
+      new_subform_root_ptr: "/profile"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.fetch("subforms").first).to include(
+      "id" => "profile_fields",
+      "root_binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/profile"
+      },
+      "rows" => []
+    )
+
+    patch add_screen_draft_edit_affordance_builder_path(draft), params: {
+      new_screen_id: "profile",
+      new_screen_title: "Profile",
+      new_screen_root_ptr: "/profile",
+      new_screen_subform: "profile_fields"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder", screen_id: "profile"))
+    expect(draft.reload.body.fetch("screens").second).to include(
+      "id" => "profile",
+      "subform" => "profile_fields"
+    )
+    expect(draft.reload.body.fetch("screens").second).not_to have_key("rows")
+
+    patch add_row_draft_edit_affordance_builder_path(draft, screen_id: "profile")
+    patch add_field_draft_edit_affordance_builder_path(draft, screen_id: "profile"), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+
+    expect(draft.reload.body.dig("subforms", 0, "rows", 0, 0)).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/name"
+      },
+      "widget" => "text"
+    )
+
+    get draft_edit_affordance_builder_path(draft, tab: "builder", screen_id: "profile")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Rows edit subform profile_fields.")
+  end
+
+  it "rejects duplicate screen and subform identifiers" do
+    draft = create_builder_draft
+
+    patch add_screen_draft_edit_affordance_builder_path(draft), params: {
+      new_screen_id: "main"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    follow_redirect!
+    expect(response.body).to include("Screen id already exists.")
+
+    patch add_subform_draft_edit_affordance_builder_path(draft), params: {
+      new_subform_id: "profile_fields"
+    }
+    patch add_subform_draft_edit_affordance_builder_path(draft), params: {
+      new_subform_id: "profile_fields"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    follow_redirect!
+    expect(response.body).to include("Subform id already exists.")
+  end
+
   it "updates raw JSON and reports diagnostics" do
     draft = create_builder_draft
 
