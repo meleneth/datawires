@@ -1,0 +1,82 @@
+= turbo_frame_tag "main_content" do
+  %section{ class: "mx-auto w-full max-w-[1920px] space-y-6" }
+    %header.space-y-2
+      = render TypographyComponent.new(as: :h1, text: "View affordance builder")
+      = render TypographyComponent.new(as: :muted, text: "#{@view_affordance.title} for #{@schema_wrapper.key}")
+
+    .flex.flex-wrap.items-center.gap-2
+      - %w[preview diagnostics raw].each do |tab|
+        = link_to tab.titleize,
+          draft_view_affordance_builder_path(@draft, tab: tab),
+          data: { turbo_frame: "main_content" },
+          class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black px-3 text-sm font-medium shadow-sm transition-all hover:translate-y-1 hover:shadow-none #{@tab == tab ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}"
+      = render ButtonComponent.new(href: new_draft_commit_path(@draft), size: :sm, html_options: { data: { turbo_frame: "main_content" } }) do
+        Commit affordance
+      = button_to "Delete affordance",
+        affordance_draft_view_affordance_builder_path(@draft),
+        method: :delete,
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance", turbo_confirm: "Delete this view affordance? This cannot be undone." } },
+        class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+
+    - if flash[:alert].present?
+      = render AlertComponent.new(variant: :destructive) do
+        = flash[:alert]
+    - if flash[:notice].present?
+      = render AlertComponent.new do
+        = flash[:notice]
+
+    - if @tab == "preview"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Preview")
+            - if @preview_document.blank?
+              = render AlertComponent.new do
+                Create a document using this schema to preview the view affordance.
+            - elsif @preview_projection.renderer == "timeline_d3"
+              .space-y-2
+                .text-sm.text-muted-foreground= "Preview document: #{@preview_document.title.presence || @preview_document.key}"
+                - events = @preview_projection.data.fetch("events")
+                - if events.empty?
+                  = render AlertComponent.new do
+                    No timeline events with relative_time values are available.
+                - else
+                  %ol.grid.gap-2.text-sm.md:grid-cols-2
+                    - events.each do |event|
+                      %li.rounded.border-2.border-black.bg-background.p-3
+                        .font-head.font-medium= event.fetch("title")
+                        .text-xs.text-muted-foreground= "#{event.fetch('relative_time')} - #{event.fetch('event_type')}"
+                        - if event.fetch("summary").present?
+                          %p.mt-1= event.fetch("summary")
+            - else
+              = render AlertComponent.new(variant: :destructive) do
+                = @preview_projection.data.fetch("message")
+
+    - elsif @tab == "diagnostics"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Diagnostics")
+            - if @diagnostics.empty?
+              = render AlertComponent.new do
+                No diagnostics.
+            - else
+              - @diagnostics.each do |message|
+                = render AlertComponent.new(variant: :destructive) do
+                  = message
+
+    - elsif @tab == "raw"
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Raw JSON")
+            = form_with url: update_raw_draft_view_affordance_builder_path(@draft),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "space-y-4" do
+              = text_area_tag :body_json,
+                JSON.pretty_generate(@draft.body),
+                rows: 24,
+                class: "w-full rounded border-2 border-black bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              = submit_tag "Update raw JSON",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"

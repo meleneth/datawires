@@ -63,6 +63,8 @@ document or repairing the affordance.
 - [x] Add seeded D3 timeline-style view affordances for Worldbuilding Timeline
       Event and Robert's Rules Proceeding Event documents.
 - [x] Add validation and diagnostics for the view affordance DSL.
+- [x] Add a raw view affordance builder so view affordance documents can be
+      created, opened, diagnosed, previewed, committed, and deleted.
 
 ## Next Thrash Targets
 

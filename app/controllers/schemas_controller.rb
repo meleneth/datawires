@@ -48,6 +48,9 @@ class SchemasController < ApplicationController
       .where(document_id: @edit_affordances.map(&:edit_document_id), created_by: current_user)
       .index_by(&:document_id)
     @view_affordances = @schema_wrapper.view_affordances.order(:title)
+    @view_affordance_drafts = Draft
+      .where(document_id: @view_affordances.map(&:view_document_id), created_by: current_user)
+      .index_by(&:document_id)
   end
 
   private

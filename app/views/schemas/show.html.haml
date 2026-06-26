@@ -60,15 +60,31 @@
       = render TypographyComponent.new(as: :muted, text: "No edit affordances exist for this schema yet.", html_options: { class: "mt-2" })
 
   .mt-6
-    = render TypographyComponent.new(as: :h2, text: "View affordances")
+    .flex.items-center.justify-between.gap-3
+      = render TypographyComponent.new(as: :h2, text: "View affordances")
+      = button_to "New view affordance",
+        schema_view_affordances_path(@schema_wrapper),
+        method: :post,
+        params: { title: "Timeline" },
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+        class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
     - if @view_affordances.any?
       %ul.mt-2.space-y-2
         - @view_affordances.each do |affordance|
-          %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
-            .font-head.font-medium= affordance.title
-            - if affordance.view_document.present?
-              .text-xs.text-muted-foreground= affordance.view_document.title.presence || affordance.view_document.key
+          %li.flex.items-center.justify-between.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+            .min-w-0
+              .font-head.font-medium= affordance.title
+              - if affordance.view_document.present?
+                .text-xs.text-muted-foreground= affordance.view_document.title.presence || affordance.view_document.key
+
+            .flex.flex-wrap.justify-end.gap-2
+              - affordance_draft = @view_affordance_drafts[affordance.view_document_id]
+              = button_to(affordance_draft ? "Continue editing" : "Edit affordance",
+                draft_schema_view_affordance_path(@schema_wrapper, affordance),
+                method: :post,
+                form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+                class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none")
     - else
       = render TypographyComponent.new(as: :muted, text: "No view affordances exist for this schema yet.", html_options: { class: "mt-2" })
 

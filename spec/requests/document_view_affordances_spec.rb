@@ -3,6 +3,79 @@
 require "rails_helper"
 
 RSpec.describe "Document view affordances", type: :request do
+  it "creates a view affordance from the schema page and opens the raw builder draft" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+
+    get schema_path(schema.schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("New view affordance")
+
+    expect {
+      post schema_view_affordances_path(schema.schema_wrapper), params: {
+        title: "Sequence"
+      }
+    }.to change(ViewAffordance, :count).by(1)
+      .and change(Document, :count).by(1)
+      .and change(Draft, :count).by(1)
+
+    view_affordance = ViewAffordance.order(:created_at).last
+    draft = view_affordance.view_document.drafts.sole
+
+    expect(response).to redirect_to(draft_view_affordance_builder_path(draft))
+    expect(draft.body).to include(
+      "version" => 1,
+      "renderer" => "timeline_d3",
+      "title" => "Sequence",
+      "config" => include("schema_key" => "timeline-event")
+    )
+  end
+
+  it "continues an uncommitted view affordance draft from the schema page" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: schema.schema_wrapper, title: "Timeline", actor: current_actor)
+
+    get schema_path(schema.schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Continue editing")
+    expect(response.body).to include(draft_schema_view_affordance_path(schema.schema_wrapper, result.view_affordance))
+
+    expect {
+      post draft_schema_view_affordance_path(schema.schema_wrapper, result.view_affordance)
+    }.not_to change(Draft, :count)
+
+    expect(response).to redirect_to(draft_view_affordance_builder_path(result.draft))
+  end
+
+  it "updates raw view affordance JSON and reports diagnostics" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: schema.schema_wrapper, title: "Timeline", actor: current_actor)
+
+    get draft_view_affordance_builder_path(result.draft, tab: "raw")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("View affordance builder")
+    expect(response.body).to include("Raw JSON")
+
+    patch update_raw_draft_view_affordance_builder_path(result.draft), params: {
+      body_json: JSON.pretty_generate(
+        "version" => 1,
+        "renderer" => "force_graph"
+      )
+    }
+
+    expect(response).to redirect_to(draft_view_affordance_builder_path(result.draft, tab: "raw"))
+    expect(result.draft.reload.body).to include("renderer" => "force_graph")
+
+    get draft_view_affordance_builder_path(result.draft, tab: "diagnostics")
+
+    expect(response.body).to include("renderer must be one of: timeline_d3")
+  end
+
   it "links and renders a seeded D3 timeline view without edit controls" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
@@ -85,5 +158,35 @@ RSpec.describe "Document view affordances", type: :request do
         "summary" => summary
       }
     )
+  end
+
+  def create_timeline_schema(domain:)
+    schema = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "timeline-event",
+      title: "Timeline Event",
+      head_body: {
+        "$schema" => Document::JSON_SCHEMA_2020_12,
+        "$id" => "datawires:test/timeline-event",
+        "type" => "object",
+        "required" => %w[relative_time title event_type],
+        "properties" => {
+          "relative_time" => { "type" => "integer" },
+          "title" => { "type" => "string" },
+          "event_type" => { "type" => "string" },
+          "summary" => { "type" => "string" }
+        }
+      }
+    )
+    create(:schema_wrapper, document: schema)
+    schema
+  end
+
+  def current_actor
+    User.find_or_create_by!(id: ApplicationController::DEV_USER_ID) do |user|
+      user.name = "devUser"
+    end
   end
 end

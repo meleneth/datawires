@@ -11,6 +11,9 @@ Rails.application.routes.draw do
     resources :edit_affordances, only: %i[create], module: :schemas do
       post :draft, on: :member
     end
+    resources :view_affordances, only: %i[create], module: :schemas do
+      post :draft, on: :member
+    end
   end
 
   resources :documents, only: %i[show] do
@@ -53,6 +56,10 @@ Rails.application.routes.draw do
       patch "rows/:row_index/cells/:cell_index", action: :update_cell
       delete "rows/:row_index/cells/:cell_index", action: :delete_cell
       patch "rows/:row_index/cells/:cell_index/move", action: :move_cell, as: :move_cell
+    end
+    resource :view_affordance_builder, only: %i[show], module: :drafts do
+      patch :update_raw
+      delete :affordance, action: :destroy_affordance
     end
   end
 
