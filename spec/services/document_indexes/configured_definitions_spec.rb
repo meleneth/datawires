@@ -115,4 +115,65 @@ RSpec.describe DocumentIndexes::ConfiguredDefinitions do
       include(index_type: "party_membership", key: "expedition", value: "ada", metadata: include("change" => "leave"))
     )
   end
+
+  it "supports compound conditions for array-sourced entries" do
+    schema = create(:document, :with_schema_head_revision, key: "timeline-event")
+    wrapper = create(:schema_wrapper, document: schema)
+    edit_document = create(
+      :document,
+      :with_head_revision,
+      domain: schema.domain,
+      head_body: {
+        "version" => 1,
+        "rows" => [],
+        "indexes" => [
+          {
+            "index_type" => "party_membership",
+            "source" => {
+              "ptr" => "/participants",
+              "each" => true
+            },
+            "key" => { "root_ptr" => "/party_key" },
+            "value" => { "ptr" => "/key" },
+            "label" => { "root_ptr" => "/title" },
+            "condition" => {
+              "all" => [
+                {
+                  "value" => { "root_ptr" => "/event_type" },
+                  "equals" => "party_join"
+                },
+                {
+                  "value" => { "ptr" => "/kind" },
+                  "equals" => "person"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    )
+    create(:edit_affordance, schema_wrapper: wrapper, edit_document: edit_document)
+    document = create(
+      :document,
+      :with_head_revision,
+      domain: schema.domain,
+      schema_document: schema,
+      head_body: {
+        "relative_time" => 4,
+        "event_type" => "party_join",
+        "title" => "Company forms",
+        "party_key" => "company",
+        "participants" => [
+          { "kind" => "party", "key" => "company" },
+          { "kind" => "person", "key" => "ada" },
+          { "kind" => "person", "key" => "bert" }
+        ]
+      }
+    )
+
+    expect(described_class.entries_for(document: document, revision: document.head_revision)).to include(
+      include(index_type: "party_membership", key: "company", value: "ada"),
+      include(index_type: "party_membership", key: "company", value: "bert")
+    )
+  end
 end

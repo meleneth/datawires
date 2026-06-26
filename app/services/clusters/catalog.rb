@@ -648,6 +648,31 @@ module Clusters
             "person_key" => root_ptr_expression("/person_key"),
             "relative_time" => root_ptr_expression("/relative_time")
           }
+        ),
+        array_index_definition(
+          index_type: "party_membership",
+          source_ptr: "/participants",
+          key: root_ptr_expression("/party_key"),
+          value: ptr_expression("/key"),
+          label: root_ptr_expression("/title"),
+          condition: {
+            "all" => [
+              {
+                "value" => root_ptr_expression("/event_type"),
+                "in" => %w[party_join party_leave]
+              },
+              {
+                "value" => ptr_expression("/kind"),
+                "equals" => "person"
+              }
+            ]
+          },
+          metadata: {
+            "change" => root_ptr_expression("/event_type", transform: { "strip_prefix" => "party_" }),
+            "party_key" => root_ptr_expression("/party_key"),
+            "person_key" => ptr_expression("/key"),
+            "relative_time" => root_ptr_expression("/relative_time")
+          }
         )
       ]
     end
@@ -674,8 +699,8 @@ module Clusters
       end
     end
 
-    def array_index_definition(index_type:, source_ptr:, key:, value:, label:, metadata: {})
-      root_index_definition(index_type: index_type, key: key, value: value, label: label, metadata: metadata).merge(
+    def array_index_definition(index_type:, source_ptr:, key:, value:, label:, metadata: {}, condition: nil)
+      root_index_definition(index_type: index_type, key: key, value: value, label: label, metadata: metadata, condition: condition).merge(
         "source" => {
           "ptr" => source_ptr,
           "each" => true

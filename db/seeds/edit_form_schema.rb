@@ -357,6 +357,12 @@ module Seeds
                 "type" => "object",
                 "additionalProperties" => false,
                 "properties" => {
+                  "all" => {
+                    "type" => "array",
+                    "items" => {
+                      "$ref" => "#/$defs/index_condition"
+                    }
+                  },
                   "value" => {
                     "$ref" => "#/$defs/index_expression"
                   },
@@ -375,6 +381,31 @@ module Seeds
                 "type" => "object",
                 "additionalProperties" => {
                   "$ref" => "#/$defs/index_expression"
+                }
+              }
+            }
+          },
+
+          "index_condition" => {
+            "type" => "object",
+            "additionalProperties" => false,
+            "properties" => {
+              "all" => {
+                "type" => "array",
+                "items" => {
+                  "$ref" => "#/$defs/index_condition"
+                }
+              },
+              "value" => {
+                "$ref" => "#/$defs/index_expression"
+              },
+              "equals" => {
+                "type" => "string"
+              },
+              "in" => {
+                "type" => "array",
+                "items" => {
+                  "type" => "string"
                 }
               }
             }

@@ -164,24 +164,37 @@ module DocumentIndexes
     end
 
     def party_membership_changes_for(party_key)
-      timeline_documents.filter_map do |timeline_document|
+      timeline_documents.flat_map do |timeline_document|
         event_body = timeline_document.body
         event_type = event_body["event_type"].to_s
         next unless %w[party_join party_leave].include?(event_type)
         next unless event_body["party_key"].to_s.strip == party_key
 
         member_relative_time = integer_or_nil(event_body["relative_time"])
-        person_key = event_body["person_key"].to_s.strip
-        next if member_relative_time.nil? || person_key.blank?
+        next [] if member_relative_time.nil?
 
-        {
-          relative_time: member_relative_time,
-          event_type: event_type,
-          person_key: person_key
-        }
-      end.sort_by do |change|
+        person_keys_for_membership_event(event_body).map do |person_key|
+          {
+            relative_time: member_relative_time,
+            event_type: event_type,
+            person_key: person_key
+          }
+        end
+      end.compact.sort_by do |change|
         [ change.fetch(:relative_time), membership_change_order(change.fetch(:event_type)), change.fetch(:person_key) ]
       end
+    end
+
+    def person_keys_for_membership_event(event_body)
+      [
+        event_body["person_key"].to_s.strip.presence,
+        *Array(event_body["participants"]).filter_map do |participant|
+          next unless participant.is_a?(Hash)
+          next unless participant["kind"].to_s == "person"
+
+          participant["key"].to_s.strip.presence
+        end
+      ].compact.uniq
     end
 
     def timeline_documents

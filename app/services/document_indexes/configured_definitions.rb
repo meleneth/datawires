@@ -12,7 +12,10 @@ module DocumentIndexes
     end
 
     def entries
-      definitions.flat_map { |definition| entries_for_definition(definition) }.compact
+      definitions
+        .flat_map { |definition| entries_for_definition(definition) }
+        .compact
+        .uniq { |entry| [ entry.fetch(:index_type), entry[:key], entry.fetch(:value), entry.fetch(:label), entry.fetch(:metadata) ] }
     end
 
     private
@@ -65,6 +68,7 @@ module DocumentIndexes
 
     def condition_matches?(condition, context)
       return true unless condition.is_a?(Hash)
+      return Array(condition["all"]).all? { |nested| condition_matches?(nested, context) } if condition.key?("all")
 
       actual = evaluate(condition["value"] || condition, context)
       if condition.key?("equals")

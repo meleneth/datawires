@@ -33,9 +33,23 @@ RSpec.describe Seeds::WorldbuilderDemo do
       [ "person", "frodo" ],
       [ "person", "sam" ]
     )
+    expect(DocumentIndexEntry.where(document: formation, index_type: "party_membership").pluck(:key, :value)).to include(
+      [ "fellowship", "frodo" ],
+      [ "fellowship", "aragorn" ],
+      [ "fellowship", "sam" ]
+    )
 
     timeline_schema = domain.documents.find_by!(key: "timeline-event")
     expect(timeline_schema.schema_wrapper.view_affordances.sole.title).to eq("Timeline")
+
+    aragorn = domain.documents.find_by!(key: "aragorn")
+    person_view = domain.documents.find_by!(key: "person").schema_wrapper.view_affordances.sole
+    aragorn_events = ViewAffordances::Projection.build(document: aragorn, view_affordance: person_view).data.fetch("events").map { |event| event.fetch("title") }
+    expect(aragorn_events).to include(
+      "Fellowship leaves Rivendell",
+      "Gandalf parts from the company in Moria",
+      "Boromir parts from the company"
+    )
   end
 
   it "is idempotent" do

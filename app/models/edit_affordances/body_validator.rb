@@ -398,6 +398,15 @@ module EditAffordances
         return
       end
 
+      if condition.key?("all")
+        if condition["all"].is_a?(Array)
+          condition["all"].each_with_index do |nested, index|
+            validate_index_condition(errors, nested, "#{path}/all/#{index}")
+          end
+        else
+          errors << "#{path}/all must be an array"
+        end
+      end
       validate_index_expression(errors, condition["value"], "#{path}/value") if condition.key?("value")
       errors << "#{path}/in must be an array" if condition.key?("in") && !condition["in"].is_a?(Array)
     end

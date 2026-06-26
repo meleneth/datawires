@@ -112,10 +112,20 @@ RSpec.describe EditAffordances::BodyValidator do
             "root_ptr" => "/title"
           },
           "condition" => {
-            "value" => {
-              "root_ptr" => "/event_type"
-            },
-            "in" => %w[party_join party_leave]
+            "all" => [
+              {
+                "value" => {
+                  "root_ptr" => "/event_type"
+                },
+                "in" => %w[party_join party_leave]
+              },
+              {
+                "value" => {
+                  "ptr" => "/kind"
+                },
+                "equals" => "person"
+              }
+            ]
           },
           "metadata" => {
             "change" => {
@@ -146,6 +156,7 @@ RSpec.describe EditAffordances::BodyValidator do
           "value" => [],
           "label" => {},
           "condition" => {
+            "all" => false,
             "value" => [],
             "in" => false
           },
@@ -162,6 +173,7 @@ RSpec.describe EditAffordances::BodyValidator do
       "indexes/0/source/each must be a boolean",
       "indexes/0/value must be an object",
       "indexes/0/label must include ptr, root_ptr, or literal",
+      "indexes/0/condition/all must be an array",
       "indexes/0/condition/value must be an object",
       "indexes/0/condition/in must be an array",
       "indexes/0/metadata/bad must be an object"
