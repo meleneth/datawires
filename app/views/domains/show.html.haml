@@ -19,6 +19,9 @@
             Back to domains
           = render ButtonComponent.new(href: domain_archive_path(@domain), variant: :outline, size: :sm) do
             Export archive
+          - if @domain.repository_mode?
+            = render ButtonComponent.new(href: domain_domain_commits_path(@domain), variant: :outline, size: :sm) do
+              Repository history
           = button_to "Destroy this domain", @domain, method: :delete, class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
         .space-y-3

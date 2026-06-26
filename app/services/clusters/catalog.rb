@@ -79,9 +79,9 @@ module Clusters
               "title" => "Repository",
               "links" => [
                 {
-                  "kind" => "domain",
-                  "title" => "Domain Overview",
-                  "description" => "Schemas, drafts, imports, exports, and current repository head."
+                  "kind" => "repository_history",
+                  "title" => "Repository History",
+                  "description" => "Global commits, parent hashes, document revisions, and current HEAD."
                 }
               ]
             }

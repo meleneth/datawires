@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe DomainHomeLinks do
-  it "resolves schema, document, and view links from the domain-home document" do
+  it "resolves domain, repository, schema, document, and view links from the domain-home document" do
     domain = create(:domain)
     schema = create(:document, :with_schema_head_revision, domain: domain, key: "person")
     wrapper = create(:schema_wrapper, document: schema)
@@ -30,6 +30,8 @@ RSpec.describe DomainHomeLinks do
             "title" => "Start",
             "links" => [
               { "kind" => "schema", "title" => "People", "schema_key" => "person" },
+              { "kind" => "domain", "title" => "Domain" },
+              { "kind" => "repository_history", "title" => "History" },
               { "kind" => "document", "title" => "Ada", "document_key" => "ada" },
               { "kind" => "view", "title" => "Ada Timeline", "document_key" => "ada", "schema_key" => "person", "view_title" => "Timeline" }
             ]
@@ -43,6 +45,8 @@ RSpec.describe DomainHomeLinks do
     expect(groups.sole).to include("title" => "Start")
     expect(groups.sole.fetch("links")).to include(
       include("title" => "People", "href" => Rails.application.routes.url_helpers.schema_path(wrapper)),
+      include("title" => "Domain", "href" => Rails.application.routes.url_helpers.domain_path(domain)),
+      include("title" => "History", "href" => Rails.application.routes.url_helpers.domain_domain_commits_path(domain)),
       include("title" => "Ada", "href" => Rails.application.routes.url_helpers.document_path(person)),
       include("title" => "Ada Timeline", "href" => Rails.application.routes.url_helpers.document_view_affordance_path(person, view))
     )

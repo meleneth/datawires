@@ -1,0 +1,30 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: "#{@domain.name} Repository History", html_options: { class: "mb-4" })
+
+  .mb-4.flex.flex-wrap.gap-2
+    = render ButtonComponent.new(href: domain_path(@domain), variant: :outline, size: :sm) do
+      Back to domain
+    = render ButtonComponent.new(href: domain_archive_path(@domain), variant: :outline, size: :sm) do
+      Export archive
+
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      - if @domain_commits.any?
+        %ul.space-y-3
+          - @domain_commits.each do |commit|
+            %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+              = link_to domain_domain_commit_path(@domain, commit),
+                data: { turbo_frame: "main_content", turbo_action: "advance" },
+                class: "block transition-colors hover:underline" do
+                .font-head.font-medium= commit.message
+                .mt-1.text-xs.text-muted-foreground
+                  = "created #{time_ago_in_words(commit.created_at)} ago"
+              .mt-2.grid.gap-2.text-xs.md:grid-cols-2
+                %div
+                  .text-muted-foreground State hash
+                  .break-all.font-mono= commit.state_hash
+                %div
+                  .text-muted-foreground Parent
+                  .break-all.font-mono= commit.parent_domain_commit&.state_hash || "Root commit"
+      - else
+        = render TypographyComponent.new(as: :muted, text: "No domain commits yet.")

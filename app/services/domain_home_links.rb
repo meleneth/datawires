@@ -52,6 +52,8 @@ class DomainHomeLinks
     case link["kind"]
     when "domain"
       domain_path(domain)
+    when "repository_history"
+      domain_domain_commits_path(domain)
     when "schema"
       schema = document_for_key(link["schema_key"])
       schema&.schema_wrapper ? schema_path(schema.schema_wrapper) : nil

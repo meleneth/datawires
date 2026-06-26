@@ -40,6 +40,7 @@ RSpec.describe "Domain archives", type: :request do
     expect(imported).to be_repository_mode
     expect(imported.head_domain_commit.state_hash).to eq(source.head_domain_commit.state_hash)
     expect(imported.documents.find_by!(key: "agreement")).to be_present
+    expect(imported.documents.find_by!(key: "domain-home").schema_document.key).to eq("domain-home-page")
   end
 
   it "redirects with an alert when the uploaded archive is invalid" do

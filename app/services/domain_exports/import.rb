@@ -18,7 +18,8 @@ module DomainExports
         domain = create_domain!
         documents = create_documents!(domain)
         revisions = create_revisions!(documents)
-        attach_document_links!(documents, revisions)
+        attach_document_heads!(documents, revisions)
+        attach_schema_documents!(documents)
         schema_wrappers = create_schema_wrappers!(documents)
         create_edit_affordances!(schema_wrappers, documents)
         create_view_affordances!(schema_wrappers, documents)
@@ -70,11 +71,18 @@ module DomainExports
       end
     end
 
-    def attach_document_links!(documents, revisions)
+    def attach_document_heads!(documents, revisions)
       archive.fetch("documents").each do |payload|
         documents.fetch(payload.fetch("ref")).update!(
-          schema_document: documents[payload["schema_document_ref"]],
           head_revision: revisions[payload["head_revision_ref"]]
+        )
+      end
+    end
+
+    def attach_schema_documents!(documents)
+      archive.fetch("documents").each do |payload|
+        documents.fetch(payload.fetch("ref")).update!(
+          schema_document: documents[payload["schema_document_ref"]]
         )
       end
     end

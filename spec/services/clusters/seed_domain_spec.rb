@@ -131,14 +131,14 @@ RSpec.describe Clusters::SeedDomain do
       "Motions",
       "Proceeding Events",
       "Meeting State",
-      "Domain Overview"
+      "Repository History"
     )
     expect(DomainHomeLinks.for(domain).flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "Agreements",
       "Motions",
       "Proceeding Events",
       "Meeting State",
-      "Domain Overview"
+      "Repository History"
     )
 
     agreement_schema = domain.documents.find_by!(key: "agreement")

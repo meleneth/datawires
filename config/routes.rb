@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resources :domains do
     resource :archive, only: %i[show], controller: :domain_archives
+    resources :domain_commits, only: %i[index show]
     resources :schemas, only: %i[index new create]
     resources :documents, only: %i[index show]
   end

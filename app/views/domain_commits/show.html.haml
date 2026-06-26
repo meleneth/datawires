@@ -1,0 +1,51 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: "Domain Commit", html_options: { class: "mb-4" })
+
+  .mb-4.flex.flex-wrap.gap-2
+    = render ButtonComponent.new(href: domain_domain_commits_path(@domain), variant: :outline, size: :sm) do
+      Back to history
+    = render ButtonComponent.new(href: domain_path(@domain), variant: :outline, size: :sm) do
+      Back to domain
+
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      %dl.grid.gap-3.text-sm.md:grid-cols-2
+        %div
+          %dt.text-muted-foreground Message
+          %dd.font-head.text-foreground= @domain_commit.message
+        %div
+          %dt.text-muted-foreground Created
+          %dd.text-foreground= l(@domain_commit.created_at, format: :long)
+        %div{ class: "md:col-span-2" }
+          %dt.text-muted-foreground State hash
+          %dd.break-all.font-mono.text-xs.text-foreground= @domain_commit.state_hash
+        %div{ class: "md:col-span-2" }
+          %dt.text-muted-foreground Parent hash
+          %dd.break-all.font-mono.text-xs.text-foreground= @domain_commit.parent_domain_commit&.state_hash || "Root commit"
+
+  .mt-6
+    = render TypographyComponent.new(as: :h2, text: "Document Revisions")
+
+    = render CardComponent.new(html_options: { class: "mt-2 w-full" }) do
+      = render CardContentComponent.new do
+        - if @commit_documents.any?
+          %ul.space-y-2
+            - @commit_documents.each do |entry|
+              %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+                .flex.flex-wrap.items-start.justify-between.gap-3
+                  .min-w-0
+                    .font-head.font-medium= entry.document_key
+                    .text-xs.text-muted-foreground= entry.document.title.presence || entry.document.key
+                  = link_to "Open document",
+                    document_path(entry.document),
+                    data: { turbo_frame: "main_content", turbo_action: "advance" },
+                    class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+                .mt-2.grid.gap-2.text-xs.md:grid-cols-2
+                  %div
+                    .text-muted-foreground Revision
+                    .break-all.font-mono= entry.revision_id
+                  %div
+                    .text-muted-foreground Revision hash
+                    .break-all.font-mono= entry.revision_hash
+        - else
+          = render TypographyComponent.new(as: :muted, text: "No document revisions were captured.")
