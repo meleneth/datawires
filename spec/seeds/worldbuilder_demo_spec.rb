@@ -53,6 +53,7 @@ RSpec.describe Seeds::WorldbuilderDemo do
 
     home = domain.documents.find_by!(key: "domain-home")
     expect(home.id).to eq(described_class::DOCUMENT_IDS.fetch("domain-home"))
+    expect(home.schema_document.key).to eq("domain-home-page")
     expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "Global Timeline",
       "Aragorn Timeline",

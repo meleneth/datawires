@@ -48,6 +48,7 @@ module Clusters
           ]
         },
         schemas: [
+          domain_home_page_schema,
           person_schema,
           place_schema,
           thing_schema,
@@ -87,6 +88,7 @@ module Clusters
           ]
         },
         schemas: [
+          domain_home_page_schema(cluster_key: ROBERTS_RULES),
           agreement_schema,
           motion_schema,
           proceeding_event_schema,
@@ -119,6 +121,76 @@ module Clusters
           ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
+        ]
+      )
+    end
+
+    def domain_home_page_schema(cluster_key: WORLD_BUILDING)
+      schema(
+        cluster_key: cluster_key,
+        key: "domain-home-page",
+        title: "Domain Home Page",
+        required: %w[title groups],
+        properties: {
+          "title" => string("Title"),
+          "groups" => {
+            "type" => "array",
+            "title" => "Groups",
+            "default" => [],
+            "items" => {
+              "type" => "object",
+              "required" => %w[title links],
+              "properties" => {
+                "title" => string("Group title"),
+                "links" => {
+                  "type" => "array",
+                  "title" => "Links",
+                  "default" => [],
+                  "items" => {
+                    "type" => "object",
+                    "required" => %w[kind title],
+                    "properties" => {
+                      "kind" => enum_string("Kind", %w[domain schema document view]),
+                      "title" => string("Title"),
+                      "description" => string("Description"),
+                      "schema_key" => string("Schema key"),
+                      "document_key" => string("Document key"),
+                      "view_title" => string("View title")
+                    },
+                    "additionalProperties" => false
+                  }
+                }
+              },
+              "additionalProperties" => false
+            }
+          }
+        },
+        rows: [
+          [ field("/title", span: 12) ],
+          [
+            array_field(
+              "/groups",
+              span: 12,
+              item_title: property_binding("title"),
+              item_subtitle: property_binding("title"),
+              item_rows: [
+                [ field("/title", span: 12) ],
+                [
+                  array_field(
+                    "/links",
+                    span: 12,
+                    item_title: property_binding("title"),
+                    item_subtitle: property_binding("kind"),
+                    item_rows: [
+                      [ field("/kind", span: 3), field("/title", span: 3), field("/schema_key", span: 3), field("/document_key", span: 3) ],
+                      [ field("/view_title", span: 4), field("/description", span: 8, widget: "textarea") ]
+                    ]
+                  )
+                ]
+              ]
+            )
+          ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
         ]
       )
     end

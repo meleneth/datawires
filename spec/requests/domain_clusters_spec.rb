@@ -21,8 +21,8 @@ RSpec.describe "Domain clusters", type: :request do
         }
       }
     }.to change(Domain, :count).by(1)
-      .and change(SchemaWrapper, :count).by(5)
-      .and change(EditAffordance, :count).by(5)
+      .and change(SchemaWrapper, :count).by(6)
+      .and change(EditAffordance, :count).by(6)
       .and change(ViewAffordance, :count).by(3)
 
     domain = Domain.find_by!(name: "Novel")
@@ -34,6 +34,11 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("thing")
     expect(response.body).to include("party")
     expect(response.body).to include("timeline-event")
+
+    home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    get document_path(home)
+    expect(response.body).to include("Edit affordances")
+    expect(response.body).to include("Default")
   end
 
   it "creates a repository-mode domain pre-seeded with the roberts rules cluster" do
@@ -45,8 +50,8 @@ RSpec.describe "Domain clusters", type: :request do
         }
       }
     }.to change(Domain, :count).by(1)
-      .and change(SchemaWrapper, :count).by(4)
-      .and change(EditAffordance, :count).by(4)
+      .and change(SchemaWrapper, :count).by(5)
+      .and change(EditAffordance, :count).by(5)
       .and change(ViewAffordance, :count).by(1)
       .and change(DomainCommit, :count).by(1)
 

@@ -57,15 +57,30 @@ module Clusters
     def ensure_home_document!(definition)
       home_body = definition[:home]
       return if home_body.blank?
-      return if domain.documents.exists?(key: DomainHomeLinks::DOCUMENT_KEY)
+      existing_home = domain.documents.find_by(key: DomainHomeLinks::DOCUMENT_KEY)
+      if existing_home
+        attach_home_schema!(existing_home)
+        return
+      end
 
       ensure_document!(
         key: DomainHomeLinks::DOCUMENT_KEY,
         title: home_body.fetch("title", "#{definition.fetch(:name)} Home"),
         body: home_body,
-        schema_document: nil,
+        schema_document: home_schema_document,
         message: "Seed #{definition.fetch(:name)} domain home"
       )
+    end
+
+    def attach_home_schema!(home_document)
+      schema_document = home_schema_document
+      return unless schema_document
+
+      home_document.update!(schema_document: schema_document) if home_document.schema_document != schema_document
+    end
+
+    def home_schema_document
+      @home_schema_document ||= domain.documents.find_by(key: "domain-home-page")
     end
 
     def create_initial_domain_commit!(definition)

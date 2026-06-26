@@ -11,6 +11,8 @@ RSpec.describe Clusters::SeedDomain do
 
     expect(domain.documents.where(key: %w[person place thing party timeline-event]).count).to eq(5)
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.schema_document.key).to eq("domain-home-page")
+    expect(home.schema_document.schema_wrapper.edit_affordances.sole.title).to eq("Default")
     expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "People",
       "Timeline Events"
@@ -119,9 +121,11 @@ RSpec.describe Clusters::SeedDomain do
     expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state]).count).to eq(4)
     expect(domain.head_domain_commit).to be_present
     expect(domain.head_domain_commit.message).to eq("Seed Robert's Rules of Order cluster")
-    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(10)
+    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(12)
 
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.schema_document.key).to eq("domain-home-page")
+    expect(home.schema_document.schema_wrapper.edit_affordances.sole.title).to eq("Default")
     expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "Agreements",
       "Motions",
