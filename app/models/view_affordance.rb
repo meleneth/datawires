@@ -23,6 +23,7 @@ class ViewAffordance < ApplicationRecord
 
   validate :schema_wrapper_must_wrap_schema_document
   validate :view_document_must_not_equal_schema_document_body
+  validate :view_document_body_must_match_affordance_dsl
 
   def body
     head_revision&.body || {}
@@ -44,5 +45,16 @@ class ViewAffordance < ApplicationRecord
     return unless view_document_id == schema_wrapper.document_id
 
     errors.add(:view_document, "must be a separate document")
+  end
+
+  def view_document_body_must_match_affordance_dsl
+    return if view_document.blank?
+
+    validator = ViewAffordances::BodyValidator.new(head_revision&.body)
+    return if validator.valid?
+
+    validator.errors.each do |message|
+      errors.add(:view_document, message)
+    end
   end
 end

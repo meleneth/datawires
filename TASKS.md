@@ -62,12 +62,12 @@ document or repairing the affordance.
       bespoke read-only presentations.
 - [x] Add seeded D3 timeline-style view affordances for Worldbuilding Timeline
       Event and Robert's Rules Proceeding Event documents.
+- [x] Add validation and diagnostics for the view affordance DSL.
 
 ## Next Thrash Targets
 
 - [ ] Use the builder to author or revise a real edit affordance and capture the
       next rough edges here.
-- [ ] Add validation and diagnostics for the view affordance DSL.
 - [ ] Add a structured view affordance builder once the seeded renderer shape
       has been used enough to expose the right controls.
 - [x] Add affordance support for rendering base64-encoded strings as images.

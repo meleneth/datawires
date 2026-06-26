@@ -54,7 +54,17 @@ RSpec.describe ViewAffordance, type: :model do
 
   describe "custom validations" do
     let(:schema_wrapper) { create(:schema_wrapper) }
-    let(:view_document) { create(:document, :with_plain_head_revision) }
+    let(:view_document) do
+      create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "renderer" => "timeline_d3",
+          "title" => "Timeline"
+        }
+      )
+    end
 
     it "is valid when schema_wrapper wraps a schema document" do
       view_affordance = build(
@@ -75,6 +85,27 @@ RSpec.describe ViewAffordance, type: :model do
 
       expect(view_affordance).not_to be_valid
       expect(view_affordance.errors[:view_document]).to include("must be a separate document")
+    end
+
+    it "rejects invalid view affordance document bodies" do
+      invalid_document = create(
+        :document,
+        :with_head_revision,
+        head_body: {
+          "version" => 1,
+          "renderer" => "force_graph"
+        }
+      )
+      view_affordance = build(
+        :view_affordance,
+        schema_wrapper: schema_wrapper,
+        view_document: invalid_document
+      )
+
+      expect(view_affordance).not_to be_valid
+      expect(view_affordance.errors[:view_document]).to include(
+        "renderer must be one of: timeline_d3"
+      )
     end
   end
 end
