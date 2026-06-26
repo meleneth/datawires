@@ -10,6 +10,7 @@ require_relative "seeds/edit_form_edit_affordance"
 require_relative "seeds/journey_item_collection_schema"
 require_relative "seeds/journey_item_collection_edit_affordance"
 require_relative "seeds/affordance_fixture_examples"
+require_relative "seeds/worldbuilder_demo"
 
 Seeds::JsonSchema202012.seed!
 Seeds::EditFormSchema.seed!
@@ -20,6 +21,7 @@ Seeds::JourneyEventEditAffordance.seed!
 Seeds::JourneyItemCollectionSchema.seed!
 Seeds::JourneyItemCollectionEditAffordance.seed!
 Seeds::AffordanceFixtureExamples.seed!
+Seeds::WorldbuilderDemo.seed!
 
 
 # This file should ensure the existence of records required to run the application in every environment (production,
