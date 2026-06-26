@@ -43,6 +43,7 @@ module Clusters
             cluster_name: definition.fetch(:name)
           )
         end
+        ensure_home_document!(definition)
         create_initial_domain_commit!(definition) if definition.fetch(:repository_mode, false)
 
         domain
@@ -52,6 +53,20 @@ module Clusters
     private
 
     attr_reader :domain, :cluster_key, :actor
+
+    def ensure_home_document!(definition)
+      home_body = definition[:home]
+      return if home_body.blank?
+      return if domain.documents.exists?(key: DomainHomeLinks::DOCUMENT_KEY)
+
+      ensure_document!(
+        key: DomainHomeLinks::DOCUMENT_KEY,
+        title: home_body.fetch("title", "#{definition.fetch(:name)} Home"),
+        body: home_body,
+        schema_document: nil,
+        message: "Seed #{definition.fetch(:name)} domain home"
+      )
+    end
 
     def create_initial_domain_commit!(definition)
       return if domain.head_domain_commit.present?

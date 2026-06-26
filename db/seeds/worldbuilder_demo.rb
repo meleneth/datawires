@@ -41,6 +41,7 @@ module Seeds
         user.avatar = "https://api.dicebear.com/7.x/pixel-art/png?seed=devUser"
       end
       domain = ensure_domain!
+      ensure_home_document!(domain: domain)
 
       Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: actor)
 
@@ -50,7 +51,6 @@ module Seeds
       places.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "place", definition:) }
       parties.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "party", definition:) }
       timeline_events.each { |definition| ensure_document!(domain:, schema_documents:, schema_key: "timeline-event", definition:) }
-      ensure_home_document!(domain: domain)
       DocumentIndexes::RebuildTimelineDomain.call(domain: domain)
 
       domain

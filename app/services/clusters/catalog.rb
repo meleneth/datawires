@@ -32,6 +32,21 @@ module Clusters
         key: WORLD_BUILDING,
         name: "Worldbuilding tools",
         repository_mode: false,
+        home: {
+          "title" => "Worldbuilding Home",
+          "groups" => [
+            {
+              "title" => "Schemas",
+              "links" => [
+                schema_home_link("People", "Characters and other people.", schema_key: "person"),
+                schema_home_link("Places", "Locations in the world.", schema_key: "place"),
+                schema_home_link("Things", "Objects, artifacts, and concepts.", schema_key: "thing"),
+                schema_home_link("Parties", "Groups and memberships.", schema_key: "party"),
+                schema_home_link("Timeline Events", "Relative-time story facts.", schema_key: "timeline-event")
+              ]
+            }
+          ]
+        },
         schemas: [
           person_schema,
           place_schema,
@@ -47,6 +62,30 @@ module Clusters
         key: ROBERTS_RULES,
         name: "Robert's Rules of Order",
         repository_mode: true,
+        home: {
+          "title" => "Robert's Rules Home",
+          "groups" => [
+            {
+              "title" => "Operate",
+              "links" => [
+                schema_home_link("Agreements", "Adopted, amended, extended, or closed agreements.", schema_key: "agreement"),
+                schema_home_link("Motions", "Proposals that create or change agreements.", schema_key: "motion"),
+                schema_home_link("Proceeding Events", "The meeting-relative sequence of actions.", schema_key: "proceeding-event"),
+                schema_home_link("Meeting State", "Current meeting phase and active references.", schema_key: "meeting-state")
+              ]
+            },
+            {
+              "title" => "Repository",
+              "links" => [
+                {
+                  "kind" => "domain",
+                  "title" => "Domain Overview",
+                  "description" => "Schemas, drafts, imports, exports, and current repository head."
+                }
+              ]
+            }
+          ]
+        },
         schemas: [
           agreement_schema,
           motion_schema,
@@ -399,6 +438,15 @@ module Clusters
           "indexes" => index_definitions
         },
         view_affordances: view_affordances
+      }
+    end
+
+    def schema_home_link(title, description, schema_key:)
+      {
+        "kind" => "schema",
+        "title" => title,
+        "description" => description,
+        "schema_key" => schema_key
       }
     end
 

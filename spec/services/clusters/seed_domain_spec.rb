@@ -10,6 +10,15 @@ RSpec.describe Clusters::SeedDomain do
     described_class.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: actor)
 
     expect(domain.documents.where(key: %w[person place thing party timeline-event]).count).to eq(5)
+    home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "People",
+      "Timeline Events"
+    )
+    expect(DomainHomeLinks.for(domain).flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "People",
+      "Timeline Events"
+    )
 
     timeline_schema = domain.documents.find_by!(key: "timeline-event")
     timeline_body = timeline_schema.body
@@ -110,7 +119,23 @@ RSpec.describe Clusters::SeedDomain do
     expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state]).count).to eq(4)
     expect(domain.head_domain_commit).to be_present
     expect(domain.head_domain_commit.message).to eq("Seed Robert's Rules of Order cluster")
-    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(9)
+    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(10)
+
+    home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Agreements",
+      "Motions",
+      "Proceeding Events",
+      "Meeting State",
+      "Domain Overview"
+    )
+    expect(DomainHomeLinks.for(domain).flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Agreements",
+      "Motions",
+      "Proceeding Events",
+      "Meeting State",
+      "Domain Overview"
+    )
 
     agreement_schema = domain.documents.find_by!(key: "agreement")
     expect(agreement_schema.body.dig("properties", "relative_time")).to include(
