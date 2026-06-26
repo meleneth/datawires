@@ -186,6 +186,16 @@ module Clusters
           [ field("/summary", span: 12, widget: "textarea") ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          timeline_view_affordance(
+            key: "person-participation-timeline-view-affordance",
+            title: "Person participation timeline view affordance",
+            affordance_title: "Timeline",
+            schema_key: "timeline-event",
+            relative_time_label: "Relative time",
+            participant_kind: "person"
+          )
         ]
       )
     end
@@ -274,6 +284,16 @@ module Clusters
           ],
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          timeline_view_affordance(
+            key: "party-participation-timeline-view-affordance",
+            title: "Party participation timeline view affordance",
+            affordance_title: "Timeline",
+            schema_key: "timeline-event",
+            relative_time_label: "Relative time",
+            participant_kind: "party"
+          )
         ]
       )
     end
@@ -367,7 +387,7 @@ module Clusters
       }
     end
 
-    def timeline_view_affordance(key:, title:, affordance_title:, schema_key:, relative_time_label:)
+    def timeline_view_affordance(key:, title:, affordance_title:, schema_key:, relative_time_label:, participant_kind: nil)
       {
         key: key,
         title: title,
@@ -379,7 +399,9 @@ module Clusters
           "config" => {
             "schema_key" => schema_key,
             "relative_time_label" => relative_time_label
-          }
+          }.tap do |config|
+            config["participant_kind"] = participant_kind if participant_kind.present?
+          end
         }
       }
     end

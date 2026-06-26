@@ -222,6 +222,7 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("data-controller=\"timeline-view\"")
     expect(response.body).to include("Arrival")
     expect(response.body).to include("Council")
+    expect(response.body).to include(document_view_affordance_path(first_event, view_affordance))
     expect(response.body).to include("The party reaches the city.")
     expect(response.body).to include("Ada Lovelace")
     expect(response.body).to include("witness")
@@ -254,6 +255,92 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include(document_view_affordance_path(event, view_affordance))
   end
 
+  it "renders seeded person and party timelines filtered by participation" do
+    domain = create(:domain)
+    Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
+
+    timeline_schema = domain.documents.find_by!(key: "timeline-event")
+    person_schema = domain.documents.find_by!(key: "person")
+    party_schema = domain.documents.find_by!(key: "party")
+    ada = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: person_schema,
+      key: "ada",
+      title: "Ada",
+      head_body: {
+        "name" => "Ada Lovelace"
+      }
+    )
+    bob = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: person_schema,
+      key: "bob",
+      title: "Bob",
+      head_body: {
+        "name" => "Bob"
+      }
+    )
+    party = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: party_schema,
+      key: "company",
+      title: "Company",
+      head_body: {
+        "name" => "Company",
+        "members" => []
+      }
+    )
+    [ ada, bob, party ].each { |document| DocumentIndexes::Rebuild.call(document: document) }
+    ada_event = create_timeline_event(
+      domain: domain,
+      schema: timeline_schema,
+      key: "ada-arrival",
+      title: "Ada Arrival",
+      relative_time: 1,
+      summary: "Ada reaches the city.",
+      participants: [
+        { "kind" => "person", "key" => "ada", "role" => "traveler" },
+        { "kind" => "party", "key" => "company", "role" => "escort" }
+      ]
+    )
+    create_timeline_event(
+      domain: domain,
+      schema: timeline_schema,
+      key: "bob-arrival",
+      title: "Bob Arrival",
+      relative_time: 2,
+      summary: "Bob reaches the city.",
+      participants: [
+        { "kind" => "person", "key" => "bob", "role" => "traveler" }
+      ]
+    )
+
+    person_view = person_schema.schema_wrapper.view_affordances.sole
+    party_view = party_schema.schema_wrapper.view_affordances.sole
+    timeline_view = timeline_schema.schema_wrapper.view_affordances.sole
+
+    get document_view_affordance_path(ada, person_view)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Timeline")
+    expect(response.body).to include("Ada Arrival")
+    expect(response.body).to include("Ada reaches the city.")
+    expect(response.body).to include(document_view_affordance_path(ada_event, timeline_view))
+    expect(response.body).not_to include("Bob Arrival")
+
+    get document_view_affordance_path(party, party_view)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Ada Arrival")
+    expect(response.body).not_to include("Bob Arrival")
+  end
+
   def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:, participants: [])
     create(
       :document,
@@ -269,7 +356,9 @@ RSpec.describe "Document view affordances", type: :request do
         "summary" => summary,
         "participants" => participants
       }
-    )
+    ).tap do |document|
+      DocumentIndexes::Rebuild.call(document: document)
+    end
   end
 
   def create_timeline_schema(domain:)

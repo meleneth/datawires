@@ -11,7 +11,13 @@
   %ol.mt-4.grid.gap-2.text-sm.md:grid-cols-2
     - events.each do |event|
       %li.rounded.border-2.border-black.bg-background.p-3
-        .font-head.font-medium= event.fetch("title")
+        - if event["url"].present?
+          = link_to event.fetch("title"),
+            event.fetch("url"),
+            data: { turbo_frame: "main_content", turbo_action: "advance" },
+            class: "font-head font-medium underline-offset-2 hover:underline"
+        - else
+          .font-head.font-medium= event.fetch("title")
         .text-xs.text-muted-foreground= "#{event.fetch('relative_time')} - #{event.fetch('event_type')}"
         - if event.fetch("summary").present?
           %p.mt-1= event.fetch("summary")

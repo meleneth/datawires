@@ -66,6 +66,8 @@ module ViewAffordances
 
       validate_string(errors, config, "schema_key", "config/schema_key")
       validate_string(errors, config, "relative_time_label", "config/relative_time_label")
+      validate_string(errors, config, "participant_kind", "config/participant_kind")
+      validate_string(errors, config, "participant_key", "config/participant_key")
     end
 
     def validate_string(errors, object, key, path)

@@ -89,27 +89,34 @@ export default class extends Controller {
       .join("g")
       .attr("transform", (event) => `translate(${x(event.relative_time)}, ${y(event.document_id)})`)
 
-    eventGroups
+    const eventLinks = eventGroups
+      .append("a")
+      .attr("href", (event) => event.url || null)
+      .attr("data-turbo-frame", (event) => (event.url ? "main_content" : null))
+      .attr("data-turbo-action", (event) => (event.url ? "advance" : null))
+      .attr("class", (event) => (event.url ? "cursor-pointer" : null))
+
+    eventLinks
       .append("line")
       .attr("y1", () => margin.top - y(events[0].document_id))
       .attr("y2", 0)
       .attr("class", "stroke-black")
       .attr("stroke-dasharray", "3 4")
 
-    eventGroups
+    eventLinks
       .append("circle")
       .attr("r", 8)
       .attr("class", "fill-primary stroke-black")
       .attr("stroke-width", 2)
 
-    eventGroups
+    eventLinks
       .append("text")
       .attr("x", 14)
       .attr("y", -6)
       .attr("class", "fill-foreground font-head text-sm")
       .text((event) => this.truncate(event.title, 42))
 
-    eventGroups
+    eventLinks
       .append("text")
       .attr("x", 14)
       .attr("y", 12)

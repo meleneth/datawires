@@ -3,6 +3,7 @@
 module ViewAffordances
   class TimelineD3Projection
     DEFAULT_SCHEMA_KEY = "timeline-event"
+    include Rails.application.routes.url_helpers
 
     def self.call(document:, view_affordance:)
       new(document:, view_affordance:).call
@@ -38,6 +39,7 @@ module ViewAffordances
           "document_id" => timeline_document.id,
           "key" => timeline_document.key,
           "title" => body["title"].presence || timeline_document.title.presence || timeline_document.key,
+          "url" => event_url_for(timeline_document),
           "relative_time" => relative_time,
           "event_type" => body["event_type"].to_s,
           "summary" => body["summary"].to_s,
@@ -49,14 +51,52 @@ module ViewAffordances
     def timeline_documents
       return Document.none unless timeline_schema
 
-      document.domain.documents
+      scope = document.domain.documents
         .includes(:head_revision)
         .with_head
         .where(schema_document: timeline_schema)
+      return scope unless participant_filter?
+
+      scope.where(id: filtered_timeline_document_ids)
     end
 
     def timeline_schema
       @timeline_schema ||= document.domain.documents.find_by(key: schema_key)
+    end
+
+    def event_url_for(timeline_document)
+      return nil unless event_view_affordance
+
+      document_view_affordance_path(timeline_document, event_view_affordance)
+    end
+
+    def event_view_affordance
+      @event_view_affordance ||= timeline_schema&.schema_wrapper&.view_affordances&.order(:title)&.first
+    end
+
+    def filtered_timeline_document_ids
+      return [] unless participant_filter?
+
+      DocumentIndexEntry
+        .where(
+          schema_document_id: timeline_schema.id,
+          index_type: DocumentIndexes::Rebuild::TIMELINE_PARTICIPANT_TYPE,
+          key: participant_kind,
+          value: participant_key
+        )
+        .pluck(:document_id)
+    end
+
+    def participant_filter?
+      participant_kind.present? && participant_key.present?
+    end
+
+    def participant_kind
+      config["participant_kind"].to_s.strip
+    end
+
+    def participant_key
+      config["participant_key"].presence || document.key.to_s.strip
     end
 
     def schema_key

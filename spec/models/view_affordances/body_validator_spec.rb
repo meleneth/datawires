@@ -14,7 +14,8 @@ RSpec.describe ViewAffordances::BodyValidator do
       "title" => "Timeline",
       "config" => {
         "schema_key" => "timeline-event",
-        "relative_time_label" => "Relative time"
+        "relative_time_label" => "Relative time",
+        "participant_kind" => "person"
       }
     )
 
@@ -52,14 +53,18 @@ RSpec.describe ViewAffordances::BodyValidator do
       "title" => [],
       "config" => {
         "schema_key" => 12,
-        "relative_time_label" => false
+        "relative_time_label" => false,
+        "participant_kind" => [],
+        "participant_key" => {}
       }
     )
 
     expect(validator.errors).to include(
       "title must be a string",
       "config/schema_key must be a string",
-      "config/relative_time_label must be a string"
+      "config/relative_time_label must be a string",
+      "config/participant_kind must be a string",
+      "config/participant_key must be a string"
     )
   end
 

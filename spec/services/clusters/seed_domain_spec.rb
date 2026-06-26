@@ -58,7 +58,27 @@ RSpec.describe Clusters::SeedDomain do
       "config" => include("schema_key" => "timeline-event")
     )
 
+    person_schema = domain.documents.find_by!(key: "person")
+    person_view = person_schema.schema_wrapper.view_affordances.sole
+    expect(person_view.title).to eq("Timeline")
+    expect(person_view.body).to include(
+      "renderer" => "timeline_d3",
+      "config" => include(
+        "schema_key" => "timeline-event",
+        "participant_kind" => "person"
+      )
+    )
+
     party_schema = domain.documents.find_by!(key: "party")
+    party_view = party_schema.schema_wrapper.view_affordances.sole
+    expect(party_view.title).to eq("Timeline")
+    expect(party_view.body).to include(
+      "renderer" => "timeline_d3",
+      "config" => include(
+        "schema_key" => "timeline-event",
+        "participant_kind" => "party"
+      )
+    )
     expect(party_schema.body.dig("properties", "members", "items", "properties", "person_key")).to include(
       "type" => "string"
     )
