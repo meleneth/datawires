@@ -92,7 +92,7 @@ module Clusters
         required: %w[title motion_type status relative_time],
         properties: {
           "title" => string("Title"),
-          "motion_type" => enum_string("Motion type", %w[main amend postpone table call_question reconsider point_of_order appeal withdraw close]),
+          "motion_type" => enum_string("Motion type", %w[main extend amend postpone table call_question reconsider point_of_order appeal withdraw close]),
           "status" => enum_string("Status", %w[pending seconded open adopted rejected withdrawn expired]),
           "relative_time" => integer("Relative time"),
           "target_agreement_key" => string("Target agreement key"),

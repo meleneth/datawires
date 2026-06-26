@@ -45,6 +45,8 @@ document or repairing the affordance.
 - [x] Add service-level domain archive export/import that preserves document
       revisions, schema/edit affordance links, and domain commit parentage.
 - [x] Wire domain archive export/import into the UI.
+- [x] Add a Robert's Rules service for applying adopted main, extend, amend, and
+      close motions to Agreements in one domain commit.
 
 ## Next Thrash Targets
 
@@ -56,8 +58,7 @@ document or repairing the affordance.
 - [x] Add a general domain-as-repository mode where domain commits form a
       parent-linked, tamper-evident history over the conceptual full domain
       state.
-- [ ] Add Robert's Rules workflow affordances for recording motions as agreement
-      creation, extension, amendment, and closure.
+- [ ] Wire Robert's Rules motion application into an edit affordance/UI flow.
 - [ ] Add generated examples/documents for worldbuilding clusters if manual use
       shows empty domains are too sparse.
 - [ ] Keep every new builder affordance reachable, reversible, and repairable.
