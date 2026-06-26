@@ -60,17 +60,37 @@
       = render TypographyComponent.new(as: :muted, text: "No edit affordances exist for this schema yet.", html_options: { class: "mt-2" })
 
   .mt-6
+    = render TypographyComponent.new(as: :h2, text: "View affordances")
+
+    - if @view_affordances.any?
+      %ul.mt-2.space-y-2
+        - @view_affordances.each do |affordance|
+          %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+            .font-head.font-medium= affordance.title
+            - if affordance.view_document.present?
+              .text-xs.text-muted-foreground= affordance.view_document.title.presence || affordance.view_document.key
+    - else
+      = render TypographyComponent.new(as: :muted, text: "No view affordances exist for this schema yet.", html_options: { class: "mt-2" })
+
+  .mt-6
     = render TypographyComponent.new(as: :h2, text: "Documents using this schema")
 
     - if @documents.any?
       %ul.mt-2.space-y-2
         - @documents.each do |document|
-          %li
+          %li.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
             = link_to document_path(document),
               data: { turbo_frame: "main_content", turbo_action: "advance" },
-              class: "block rounded border-2 border-black bg-card px-3 py-2 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
+              class: "block transition-colors hover:underline" do
               .font-head.font-medium= document.title.presence || document.key
               .text-xs.text-muted-foreground= document.key
+            - if @view_affordances.any?
+              .mt-2.flex.flex-wrap.gap-2
+                - @view_affordances.each do |view_affordance|
+                  = link_to view_affordance.title,
+                    document_view_affordance_path(document, view_affordance),
+                    data: { turbo_frame: "main_content", turbo_action: "advance" },
+                    class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
     - else
       = render TypographyComponent.new(as: :muted, text: "No documents use this schema yet.", html_options: { class: "mt-2" })
 

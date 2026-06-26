@@ -46,6 +46,30 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).not_to include("<select")
   end
 
+  it "exposes seeded view affordances from the schema page" do
+    domain = create(:domain)
+    Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))
+
+    timeline_schema = domain.documents.find_by!(key: "timeline-event")
+    event = create_timeline_event(
+      domain: domain,
+      schema: timeline_schema,
+      key: "departure",
+      title: "Departure",
+      relative_time: 1,
+      summary: "The story starts moving."
+    )
+    view_affordance = timeline_schema.schema_wrapper.view_affordances.sole
+
+    get schema_path(timeline_schema.schema_wrapper)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("View affordances")
+    expect(response.body).to include("Timeline")
+    expect(response.body).to include("Documents using this schema")
+    expect(response.body).to include(document_view_affordance_path(event, view_affordance))
+  end
+
   def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:)
     create(
       :document,
