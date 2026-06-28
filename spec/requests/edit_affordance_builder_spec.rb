@@ -731,6 +731,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Value root pointer")
     expect(response.body).to include("Key root pointer")
     expect(response.body).to include("Metadata root pointer")
+    expect(response.body).to include("Condition root pointer")
 
     patch add_index_draft_edit_affordance_builder_path(draft), params: {
       index_type: "identity",
@@ -738,7 +739,9 @@ RSpec.describe "Edit affordance builder", type: :request do
       index_value_root_ptr: "/key",
       index_label_root_ptr: "/name",
       index_metadata_key: "status",
-      index_metadata_root_ptr: "/status"
+      index_metadata_root_ptr: "/status",
+      index_condition_root_ptr: "/event_type",
+      index_condition_in: "party_join, party_leave"
     }
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
@@ -758,6 +761,12 @@ RSpec.describe "Edit affordance builder", type: :request do
           "status" => {
             "root_ptr" => "/status"
           }
+        },
+        "condition" => {
+          "value" => {
+            "root_ptr" => "/event_type"
+          },
+          "in" => %w[party_join party_leave]
         }
       }
     )

@@ -49,6 +49,8 @@ document or repairing the affordance.
       controls.
 - [x] Root document index keys can bind to root pointers through structured
       builder controls.
+- [x] Root document index conditions can be added through structured builder
+      controls.
 - [x] Edit affordance DSL docs describe inline array item row layouts.
 - [x] Field compact/read-only display flags are editable through structured
       controls.

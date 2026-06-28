@@ -212,6 +212,8 @@
                           .text-muted-foreground= "label: #{definition.dig('label', 'root_ptr') || definition.dig('label', 'ptr') || definition.dig('label', 'literal')}"
                         - if definition["metadata"].is_a?(Hash) && definition["metadata"].present?
                           .text-muted-foreground= "metadata: #{definition['metadata'].keys.join(', ')}"
+                        - if definition["condition"].present?
+                          .text-muted-foreground= "condition configured"
                       = button_to "Delete",
                         index_draft_edit_affordance_builder_path(@draft, builder_path_params.call(index_index: entry.fetch(:index))),
                         method: :delete,
@@ -263,6 +265,24 @@
                   = text_field_tag :index_metadata_root_ptr,
                     nil,
                     placeholder: "/status",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Condition root pointer", for_id: "index_condition_root_ptr")
+                  = text_field_tag :index_condition_root_ptr,
+                    nil,
+                    placeholder: "/event_type",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Condition equals", for_id: "index_condition_equals")
+                  = text_field_tag :index_condition_equals,
+                    nil,
+                    placeholder: "party_join",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Condition in", for_id: "index_condition_in")
+                  = text_field_tag :index_condition_in,
+                    nil,
+                    placeholder: "party_join, party_leave",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
               = submit_tag "Add index",
                 class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"

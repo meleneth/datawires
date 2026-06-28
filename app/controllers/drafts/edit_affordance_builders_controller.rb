@@ -487,6 +487,15 @@ module Drafts
             metadata_key => { "root_ptr" => metadata_ptr }
           }
         end
+        condition_ptr = params[:index_condition_root_ptr].to_s.strip
+        condition_equals = params[:index_condition_equals].to_s.strip
+        condition_in = params[:index_condition_in].to_s.split(",").map(&:strip).reject(&:blank?)
+        if condition_ptr.present? && (condition_equals.present? || condition_in.present?)
+          definition["condition"] = {
+            "value" => { "root_ptr" => condition_ptr }
+          }
+          condition_in.present? ? definition["condition"]["in"] = condition_in : definition["condition"]["equals"] = condition_equals
+        end
       end
     end
 
