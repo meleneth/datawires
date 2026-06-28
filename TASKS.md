@@ -40,6 +40,8 @@ document or repairing the affordance.
 - [x] Edit affordance DSL docs describe dynamic references and reference-label
       collection bindings.
 - [x] Edit affordance DSL docs describe derived document index definitions.
+- [x] Root document index definitions are addable through structured builder
+      controls.
 - [x] Field compact/read-only display flags are editable through structured
       controls.
 - [x] Screen-level commit mode is editable through structured screen controls.

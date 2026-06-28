@@ -194,6 +194,54 @@
       = render CardComponent.new(html_options: { class: "w-full" }) do
         = render CardContentComponent.new do
           .space-y-4
+            = render TypographyComponent.new(as: :h3, text: "Document indexes")
+            - if @indexes.empty?
+              = render TypographyComponent.new(as: :muted, text: "No derived indexes configured.")
+            - else
+              .grid.gap-2.md:grid-cols-2
+                - @indexes.each do |definition|
+                  .rounded.border-2.border-black.bg-muted.p-3.text-sm
+                    .font-medium= definition["index_type"].presence || "(missing type)"
+                    .text-muted-foreground= "value: #{definition.dig('value', 'root_ptr') || definition.dig('value', 'ptr') || definition.dig('value', 'literal') || '(blank)'}"
+                    - if definition["key"].present?
+                      .text-muted-foreground= "key: #{definition.dig('key', 'literal') || definition.dig('key', 'root_ptr') || definition.dig('key', 'ptr')}"
+                    - if definition["label"].present?
+                      .text-muted-foreground= "label: #{definition.dig('label', 'root_ptr') || definition.dig('label', 'ptr') || definition.dig('label', 'literal')}"
+            = form_with url: add_index_draft_edit_affordance_builder_path(@draft, builder_screen_params),
+              method: :patch,
+              data: { turbo_frame: "main_content" },
+              class: "space-y-3" do
+              .grid.gap-3.md:grid-cols-2
+                .space-y-1
+                  = render LabelComponent.new(text: "Index type", for_id: "index_type")
+                  = text_field_tag :index_type,
+                    nil,
+                    placeholder: "identity",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Key literal", for_id: "index_key_literal")
+                  = text_field_tag :index_key_literal,
+                    nil,
+                    placeholder: "document_key",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Value root pointer", for_id: "index_value_root_ptr")
+                  = text_field_tag :index_value_root_ptr,
+                    nil,
+                    placeholder: "/key",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Label root pointer", for_id: "index_label_root_ptr")
+                  = text_field_tag :index_label_root_ptr,
+                    nil,
+                    placeholder: "/name",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+              = submit_tag "Add index",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+      = render CardComponent.new(html_options: { class: "w-full" }) do
+        = render CardContentComponent.new do
+          .space-y-4
             = render TypographyComponent.new(as: :h3, text: "Add field")
             - if @rows.empty?
               = render AlertComponent.new do

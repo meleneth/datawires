@@ -104,6 +104,18 @@ module Drafts
         alert: e.message
     end
 
+    def add_index
+      body = deep_dup_json(@draft.body)
+      ensure_indexes(body) << root_index_from_params
+      @draft.update!(body: body)
+
+      redirect_to builder_path,
+        notice: "Index added."
+    rescue ArgumentError => e
+      redirect_to builder_path,
+        alert: e.message
+    end
+
     def update_screen
       body = deep_dup_json(@draft.body)
       screen = builder_screen_for(body)
@@ -270,6 +282,7 @@ module Drafts
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform
       @rows = current_builder_rows
+      @indexes = Array(@draft.body["indexes"]).select { |definition| definition.is_a?(Hash) }
       @screen_ids = screen_ids
       @builder_width_class = width_class_for(@selected_screen&.fetch("width", "large"))
     end
@@ -322,6 +335,10 @@ module Drafts
 
     def ensure_subforms(body)
       body["subforms"] = Array(body["subforms"])
+    end
+
+    def ensure_indexes(body)
+      body["indexes"] = Array(body["indexes"])
     end
 
     def field_cell_from_params
@@ -430,6 +447,21 @@ module Drafts
       }.tap do |subform|
         root_ptr = params[:new_subform_root_ptr].presence
         subform["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } if root_ptr
+      end
+    end
+
+    def root_index_from_params
+      value_ptr = params[:index_value_root_ptr].to_s.strip
+      raise ArgumentError, "Index value root pointer is required." if value_ptr.blank?
+
+      {
+        "index_type" => normalized_identifier(params[:index_type], label: "Index type"),
+        "value" => { "root_ptr" => value_ptr }
+      }.tap do |definition|
+        key_literal = params[:index_key_literal].to_s.strip
+        definition["key"] = { "literal" => key_literal } if key_literal.present?
+        label_ptr = params[:index_label_root_ptr].to_s.strip
+        definition["label"] = { "root_ptr" => label_ptr } if label_ptr.present?
       end
     end
 

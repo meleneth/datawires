@@ -721,6 +721,48 @@ RSpec.describe "Edit affordance builder", type: :request do
     )
   end
 
+  it "adds root document indexes through structured controls" do
+    draft = create_builder_draft
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Document indexes")
+    expect(response.body).to include("Value root pointer")
+
+    patch add_index_draft_edit_affordance_builder_path(draft), params: {
+      index_type: "identity",
+      index_key_literal: "document_key",
+      index_value_root_ptr: "/key",
+      index_label_root_ptr: "/name"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.fetch("indexes")).to include(
+      {
+        "index_type" => "identity",
+        "key" => {
+          "literal" => "document_key"
+        },
+        "value" => {
+          "root_ptr" => "/key"
+        },
+        "label" => {
+          "root_ptr" => "/name"
+        }
+      }
+    )
+
+    expect {
+      patch add_index_draft_edit_affordance_builder_path(draft), params: {
+        index_type: "identity",
+        index_value_root_ptr: ""
+      }
+    }.not_to change { draft.reload.body.fetch("indexes").length }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+  end
+
   it "adds screens and edits rows on the selected screen" do
     draft = create_builder_draft
 
