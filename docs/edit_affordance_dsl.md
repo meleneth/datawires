@@ -18,6 +18,7 @@ This document names the current DSL shape. The runtime path is:
   "start_screen": "main",
   "commit_mode": "review_screen",
   "subforms": [],
+  "indexes": [],
   "screens": [
     {
       "id": "main",
@@ -54,6 +55,56 @@ The earlier single-screen shape remains supported for compatibility:
 ```
 
 Legacy `screen`/`rows` documents project as a single screen with id `main`. `rows` is an array of row arrays. Each row contains cell objects. The current renderer supports field cells, navigation cells, and commit cells.
+
+## Index Definitions
+
+`indexes` declares derived `DocumentIndexEntry` rows for documents edited by this affordance's schema. Index rebuilds read every edit affordance attached to the schema wrapper and emit entries from each definition.
+
+```json
+{
+  "indexes": [
+    {
+      "index_type": "timeline_participant",
+      "source": {
+        "ptr": "/participants",
+        "each": true
+      },
+      "key": {
+        "ptr": "/kind"
+      },
+      "value": {
+        "ptr": "/key"
+      },
+      "label": {
+        "root_ptr": "/title"
+      },
+      "condition": {
+        "value": {
+          "root_ptr": "/event_type"
+        },
+        "in": ["party_join", "party_leave"]
+      },
+      "metadata": {
+        "relative_time": {
+          "root_ptr": "/relative_time"
+        }
+      }
+    }
+  ]
+}
+```
+
+An index definition needs:
+
+- `index_type`: required string naming the index namespace.
+- `key`: optional expression for the lookup key.
+- `value`: required expression for the indexed value. Blank values are skipped.
+- `label`: optional expression for display labels. When blank, indexing falls back to document `name`, document `title`, or document key.
+- `source`: optional object. With `each: true`, indexing iterates object items under `source.ptr`; otherwise expressions evaluate against the root document body.
+- `condition`: optional filter. It may use `equals`, `in`, or `all` to combine nested conditions.
+- `metadata`: optional object whose values are expressions copied onto the index entry.
+
+Expressions may use `ptr` relative to the current source context, `root_ptr` relative to the document root, or `literal`. Expressions may include `transform.strip_prefix`.
 
 ## Field Cells
 
