@@ -122,6 +122,16 @@
               data: { turbo_frame: "main_content" },
               class: "grid gap-3 md:grid-cols-3" do
               .space-y-1
+                = render LabelComponent.new(text: "Start screen", for_id: "start_screen")
+                = select_tag :start_screen,
+                  options_for_select(@screen_ids.map { |screen_id| [screen_id, screen_id] }, @draft.body["start_screen"].presence || "main"),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Default commit mode", for_id: "default_commit_mode")
+                = select_tag :default_commit_mode,
+                  options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]], @draft.body["commit_mode"].presence || "review_screen"),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
                 = render LabelComponent.new(text: "Title", for_id: "title")
                 = text_field_tag :title,
                   @selected_screen&.fetch("title", nil),

@@ -339,18 +339,31 @@ RSpec.describe "Edit affordance builder", type: :request do
   it "updates screen width, default span, and commit mode" do
     draft = create_builder_draft
 
+    patch add_screen_draft_edit_affordance_builder_path(draft), params: {
+      new_screen_id: "details",
+      new_screen_title: "Details"
+    }
+
     get draft_edit_affordance_builder_path(draft)
 
     expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Start screen")
+    expect(response.body).to include("Default commit mode")
     expect(response.body).to include("Commit mode")
 
     patch update_screen_draft_edit_affordance_builder_path(draft), params: {
+      start_screen: "details",
+      default_commit_mode: "immediate",
       width: "full",
       default_span: "5",
       screen_commit_mode: "immediate"
     }
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body).to include(
+      "start_screen" => "details",
+      "commit_mode" => "immediate"
+    )
     expect(draft.reload.body.fetch("screens").first).to include(
       "width" => "full",
       "default_span" => 5,

@@ -109,6 +109,8 @@ module Drafts
         title = params[:title].presence
         title ? screen["title"] = title : screen.delete("title")
       end
+      body["start_screen"] = params[:start_screen].presence_in(screen_ids_for(body)) || "main"
+      body["commit_mode"] = params[:default_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       screen["width"] = params[:width].presence_in(WIDTHS) || "large"
       screen["default_span"] = normalized_span(params[:default_span])
       screen["commit_mode"] = params[:screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
