@@ -190,6 +190,19 @@ module Drafts
         notice: "Row deleted."
     end
 
+    def delete_index
+      body = deep_dup_json(@draft.body)
+      indexes = ensure_indexes(body)
+      index = index_index_param
+      raise ActiveRecord::RecordNotFound, "index not found" unless indexes[index].is_a?(Hash)
+
+      indexes.delete_at(index)
+      @draft.update!(body: body)
+
+      redirect_to builder_path,
+        notice: "Index deleted."
+    end
+
     def move_row
       body = deep_dup_json(@draft.body)
       rows = builder_rows_for(body)
@@ -645,6 +658,10 @@ module Drafts
 
     def cell_index_param
       Integer(params.require(:cell_index), 10)
+    end
+
+    def index_index_param
+      Integer(params.require(:index_index), 10)
     end
 
     def row_at!(index, rows: @rows)

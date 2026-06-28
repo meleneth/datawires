@@ -199,14 +199,21 @@
               = render TypographyComponent.new(as: :muted, text: "No derived indexes configured.")
             - else
               .grid.gap-2.md:grid-cols-2
-                - @indexes.each do |definition|
+                - @indexes.each_with_index do |definition, index_index|
                   .rounded.border-2.border-black.bg-muted.p-3.text-sm
-                    .font-medium= definition["index_type"].presence || "(missing type)"
-                    .text-muted-foreground= "value: #{definition.dig('value', 'root_ptr') || definition.dig('value', 'ptr') || definition.dig('value', 'literal') || '(blank)'}"
-                    - if definition["key"].present?
-                      .text-muted-foreground= "key: #{definition.dig('key', 'literal') || definition.dig('key', 'root_ptr') || definition.dig('key', 'ptr')}"
-                    - if definition["label"].present?
-                      .text-muted-foreground= "label: #{definition.dig('label', 'root_ptr') || definition.dig('label', 'ptr') || definition.dig('label', 'literal')}"
+                    .flex.items-start.justify-between.gap-3
+                      .space-y-1
+                        .font-medium= definition["index_type"].presence || "(missing type)"
+                        .text-muted-foreground= "value: #{definition.dig('value', 'root_ptr') || definition.dig('value', 'ptr') || definition.dig('value', 'literal') || '(blank)'}"
+                        - if definition["key"].present?
+                          .text-muted-foreground= "key: #{definition.dig('key', 'literal') || definition.dig('key', 'root_ptr') || definition.dig('key', 'ptr')}"
+                        - if definition["label"].present?
+                          .text-muted-foreground= "label: #{definition.dig('label', 'root_ptr') || definition.dig('label', 'ptr') || definition.dig('label', 'literal')}"
+                      = button_to "Delete",
+                        index_draft_edit_affordance_builder_path(@draft, builder_path_params.call(index_index: index_index)),
+                        method: :delete,
+                        form: { data: { turbo_frame: "main_content", turbo_confirm: "Delete this index?" } },
+                        class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-xs font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
             = form_with url: add_index_draft_edit_affordance_builder_path(@draft, builder_screen_params),
               method: :patch,
               data: { turbo_frame: "main_content" },

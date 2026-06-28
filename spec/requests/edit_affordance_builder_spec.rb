@@ -753,6 +753,21 @@ RSpec.describe "Edit affordance builder", type: :request do
       }
     )
 
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response.body).to include(index_draft_edit_affordance_builder_path(draft, index_index: 0))
+
+    delete index_draft_edit_affordance_builder_path(draft, index_index: 0)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.fetch("indexes")).to eq([])
+
+    patch add_index_draft_edit_affordance_builder_path(draft), params: {
+      index_type: "identity",
+      index_key_literal: "document_key",
+      index_value_root_ptr: "/key"
+    }
+
     expect {
       patch add_index_draft_edit_affordance_builder_path(draft), params: {
         index_type: "identity",
