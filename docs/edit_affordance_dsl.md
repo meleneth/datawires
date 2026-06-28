@@ -144,7 +144,18 @@ Field cells bind an editor widget to a document path. If `span` is omitted, proj
     "item_subtitle": {
       "kind": "value_label"
     }
-  }
+  },
+  "item_rows": [
+    [
+      {
+        "binding": {
+          "kind": "document_ptr",
+          "ptr": "/name"
+        },
+        "widget": "text"
+      }
+    ]
+  ]
 }
 ```
 
@@ -186,6 +197,8 @@ Collection item actions currently use regenerated array index paths. After delet
 Collection bindings support `property`, `reference_label`, `value_label`, and `none`. A `property` binding needs a `name`.
 
 `reference_label` resolves an item property through `DocumentIndexEntry` labels. It needs `key_property`, plus either a fixed `schema_key` or a `schema_key_property` on the item. `index_type` defaults to `identity`, and `index_key` defaults to `document_key`.
+
+Array fields may also include `item_rows`, an inline row layout for editing a newly appended or expanded item in place. `item_rows` uses the same row and cell shape as screens and subforms, but field bindings are relative to each array item. For example, `/name` on an item row projects to `/members/0/name` for the first item.
 
 Schema path metadata is centralized through `SchemaPaths::Inventory`. Generated affordances and projected bespoke fields use inventory entries for widget inference, default labels, and required markers; the structured builder and preview/example generation should use the same inventory source.
 
