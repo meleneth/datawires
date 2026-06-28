@@ -825,6 +825,38 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Rows edit subform profile_fields.")
+    expect(response.body).to include("Subform root pointer")
+
+    patch update_screen_draft_edit_affordance_builder_path(draft, screen_id: "profile"), params: {
+      start_screen: "main",
+      default_commit_mode: "review_screen",
+      title: "Profile",
+      root_ptr: "/profile",
+      subform: "profile_fields",
+      subform_root_ptr: "/profile/details",
+      width: "large",
+      default_span: "3",
+      screen_commit_mode: "review_screen"
+    }
+
+    expect(draft.reload.body.dig("subforms", 0, "root_binding")).to eq(
+      "kind" => "document_ptr",
+      "ptr" => "/profile/details"
+    )
+
+    patch update_screen_draft_edit_affordance_builder_path(draft, screen_id: "profile"), params: {
+      start_screen: "main",
+      default_commit_mode: "review_screen",
+      title: "Profile",
+      root_ptr: "/profile",
+      subform: "profile_fields",
+      subform_root_ptr: "",
+      width: "large",
+      default_span: "3",
+      screen_commit_mode: "review_screen"
+    }
+
+    expect(draft.reload.body.dig("subforms", 0)).not_to have_key("root_binding")
   end
 
   it "rejects duplicate screen and subform identifiers" do

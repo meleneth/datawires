@@ -46,6 +46,7 @@ document or repairing the affordance.
       controls.
 - [x] Screen root pointer and subform assignment are editable through structured
       screen controls.
+- [x] Subform root pointers are editable through structured screen controls.
 - [x] New domains can be pre-seeded from clusters.
 - [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
       and Timeline Event schemas with default edit affordances.

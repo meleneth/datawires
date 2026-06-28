@@ -128,6 +128,7 @@ module Drafts
       screen["default_span"] = normalized_span(params[:default_span])
       screen["commit_mode"] = params[:screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       screen["columns"] = 12
+      update_active_subform_root!(screen, body) if params.key?(:subform_root_ptr)
       @draft.update!(body: body)
 
       redirect_to builder_path,
@@ -426,6 +427,14 @@ module Drafts
         root_ptr = params[:new_subform_root_ptr].presence
         subform["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } if root_ptr
       end
+    end
+
+    def update_active_subform_root!(screen, body)
+      subform = subform_for_screen(screen, body: body)
+      return unless subform
+
+      root_ptr = params[:subform_root_ptr].presence
+      root_ptr ? subform["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } : subform.delete("root_binding")
     end
 
     def normalized_identifier(value, label:)
