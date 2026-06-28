@@ -42,6 +42,8 @@ document or repairing the affordance.
 - [x] Screen-level commit mode is editable through structured screen controls.
 - [x] Top-level start screen and default commit mode are editable through
       structured screen controls.
+- [x] Collection append-and-open creation mode is selectable through structured
+      controls.
 - [x] New domains can be pre-seeded from clusters.
 - [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
       and Timeline Event schemas with default edit affordances.

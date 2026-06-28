@@ -4,6 +4,7 @@ module Drafts
   class EditAffordanceBuildersController < ApplicationController
     BUILDER_SPAN_RANGE = (1..12).freeze
     COMMIT_MODES = %w[review_screen immediate].freeze
+    COLLECTION_CREATIONS = %w[new_screen inline_blank_form append_and_open].freeze
     DEFAULT_FIELD_SPAN = 3
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     WIDTHS = %w[narrow medium large full].freeze
@@ -245,6 +246,7 @@ module Drafts
       @subform_ids = subform_ids
       @widget_options = WIDGETS
       @collection_binding_options = COLLECTION_BINDING_OPTIONS
+      @collection_creation_options = COLLECTION_CREATIONS
       @selected_screen = current_builder_screen
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform

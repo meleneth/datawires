@@ -261,7 +261,7 @@
                   .space-y-1
                     = render LabelComponent.new(text: "Creation", for_id: "collection_creation")
                     = select_tag :collection_creation,
-                      options_for_select(%w[new_screen inline_blank_form]),
+                      options_for_select(@collection_creation_options),
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                   .space-y-1
                     = render LabelComponent.new(text: "Item screen", for_id: "collection_item_screen")
@@ -645,7 +645,7 @@
                     .space-y-1
                       = render LabelComponent.new(text: "Creation", for_id: "collection_creation")
                       = select_tag :collection_creation,
-                        options_for_select(%w[new_screen inline_blank_form], current_collection["creation"]),
+                        options_for_select(@collection_creation_options, current_collection["creation"]),
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                     .space-y-1
                       = render LabelComponent.new(text: "Item screen", for_id: "collection_item_screen")

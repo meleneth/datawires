@@ -385,6 +385,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Collection options")
     expect(response.body).to include("Item screen")
     expect(response.body).to include("Title binding")
+    expect(response.body).to include("<option value=\"append_and_open\">append_and_open</option>")
     expect(response.body).to include("Reference label")
     expect(response.body).to include("Title reference schema property")
     expect(response.body).to include("data-array=\"true\"")
@@ -399,7 +400,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       row_index: "0",
       label: "1",
       collection_presentation: "cards",
-      collection_creation: "inline_blank_form",
+      collection_creation: "append_and_open",
       collection_delete: "enabled",
       collection_reorder: "enabled",
       collection_item_screen: "main",
@@ -419,7 +420,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(collection).to include(
       "behavior" => "list_open",
       "presentation" => "cards",
-      "creation" => "inline_blank_form",
+      "creation" => "append_and_open",
       "navigation" => "open_item",
       "delete" => "enabled",
       "reorder" => "enabled",
