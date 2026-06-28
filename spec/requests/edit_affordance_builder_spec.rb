@@ -354,6 +354,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Start screen")
     expect(response.body).to include("Default commit mode")
     expect(response.body).to include("Commit mode")
+    expect(response.body).to include("Mode")
     expect(response.body).to include("Root pointer")
     expect(response.body).to include("Subform")
 
@@ -363,6 +364,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       root_ptr: "/profile",
       subform: "profile_fields",
       width: "full",
+      screen_mode: "full_width",
       default_span: "5",
       screen_commit_mode: "immediate"
     }
@@ -374,6 +376,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     )
     expect(draft.reload.body.fetch("screens").first).to include(
       "width" => "full",
+      "mode" => "full_width",
       "default_span" => 5,
       "commit_mode" => "immediate",
       "root_binding" => {
@@ -390,6 +393,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       root_ptr: "",
       subform: "",
       width: "full",
+      screen_mode: "page",
       default_span: "5",
       screen_commit_mode: "immediate"
     }
@@ -731,6 +735,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       new_screen_title: "Details",
       new_screen_root_ptr: "/profile",
       new_screen_width: "medium",
+      new_screen_mode: "full_width",
       new_screen_default_span: "6",
       new_screen_commit_mode: "immediate"
     }
@@ -741,6 +746,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       "id" => "details",
       "title" => "Details",
       "width" => "medium",
+      "mode" => "full_width",
       "default_span" => 6,
       "commit_mode" => "immediate",
       "root_binding" => {

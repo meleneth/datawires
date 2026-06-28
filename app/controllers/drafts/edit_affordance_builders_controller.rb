@@ -7,6 +7,7 @@ module Drafts
     COLLECTION_CREATIONS = %w[new_screen inline_blank_form append_and_open].freeze
     DEFAULT_FIELD_SPAN = 3
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
+    SCREEN_MODES = %w[page full_width].freeze
     WIDTHS = %w[narrow medium large full].freeze
     WIDGETS = %w[auto text textarea number checkbox select array base64_image reference].freeze
     COLLECTION_BINDING_OPTIONS = [
@@ -125,6 +126,7 @@ module Drafts
         screen["rows"] = Array(screen["rows"])
       end
       screen["width"] = params[:width].presence_in(WIDTHS) || "large"
+      screen["mode"] = params[:screen_mode].presence_in(SCREEN_MODES) || "page"
       screen["default_span"] = normalized_span(params[:default_span])
       screen["commit_mode"] = params[:screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       screen["columns"] = 12
@@ -263,6 +265,7 @@ module Drafts
       @widget_options = WIDGETS
       @collection_binding_options = COLLECTION_BINDING_OPTIONS
       @collection_creation_options = COLLECTION_CREATIONS
+      @screen_mode_options = SCREEN_MODES
       @selected_screen = current_builder_screen
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform
@@ -399,6 +402,7 @@ module Drafts
         "title" => params[:new_screen_title].presence || id.titleize,
         "columns" => 12,
         "default_span" => normalized_span(params[:new_screen_default_span]),
+        "mode" => params[:new_screen_mode].presence_in(SCREEN_MODES) || "page",
         "width" => params[:new_screen_width].presence_in(WIDTHS) || "large",
         "commit_mode" => params[:new_screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       }

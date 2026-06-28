@@ -76,6 +76,11 @@
                         options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], "large"),
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                     .space-y-1
+                      = render LabelComponent.new(text: "Mode", for_id: "new_screen_mode")
+                      = select_tag :new_screen_mode,
+                        options_for_select(@screen_mode_options.map { |mode| [mode.humanize, mode] }, "page"),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
                       = render LabelComponent.new(text: "Default span", for_id: "new_screen_default_span")
                       = number_field_tag :new_screen_default_span,
                         3,
@@ -158,6 +163,11 @@
                 = render LabelComponent.new(text: "Width", for_id: "width")
                 = select_tag :width,
                   options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], @selected_screen&.fetch("width", "large")),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Mode", for_id: "screen_mode")
+                = select_tag :screen_mode,
+                  options_for_select(@screen_mode_options.map { |mode| [mode.humanize, mode] }, @selected_screen&.fetch("mode", "page")),
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
                 = render LabelComponent.new(text: "Default span", for_id: "default_span")
