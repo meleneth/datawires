@@ -235,6 +235,12 @@
                     placeholder: "document_key",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
+                  = render LabelComponent.new(text: "Key root pointer", for_id: "index_key_root_ptr")
+                  = text_field_tag :index_key_root_ptr,
+                    nil,
+                    placeholder: "/kind",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
                   = render LabelComponent.new(text: "Value root pointer", for_id: "index_value_root_ptr")
                   = text_field_tag :index_value_root_ptr,
                     nil,

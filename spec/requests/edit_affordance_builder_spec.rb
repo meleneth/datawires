@@ -729,6 +729,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Document indexes")
     expect(response.body).to include("Value root pointer")
+    expect(response.body).to include("Key root pointer")
     expect(response.body).to include("Metadata root pointer")
 
     patch add_index_draft_edit_affordance_builder_path(draft), params: {
@@ -772,9 +773,21 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     patch add_index_draft_edit_affordance_builder_path(draft), params: {
       index_type: "identity",
-      index_key_literal: "document_key",
+      index_key_root_ptr: "/kind",
       index_value_root_ptr: "/key"
     }
+
+    expect(draft.reload.body.fetch("indexes")).to include(
+      {
+        "index_type" => "identity",
+        "key" => {
+          "root_ptr" => "/kind"
+        },
+        "value" => {
+          "root_ptr" => "/key"
+        }
+      }
+    )
 
     expect {
       patch add_index_draft_edit_affordance_builder_path(draft), params: {

@@ -471,8 +471,13 @@ module Drafts
         "index_type" => normalized_identifier(params[:index_type], label: "Index type"),
         "value" => { "root_ptr" => value_ptr }
       }.tap do |definition|
+        key_root_ptr = params[:index_key_root_ptr].to_s.strip
         key_literal = params[:index_key_literal].to_s.strip
-        definition["key"] = { "literal" => key_literal } if key_literal.present?
+        if key_root_ptr.present?
+          definition["key"] = { "root_ptr" => key_root_ptr }
+        elsif key_literal.present?
+          definition["key"] = { "literal" => key_literal }
+        end
         label_ptr = params[:index_label_root_ptr].to_s.strip
         definition["label"] = { "root_ptr" => label_ptr } if label_ptr.present?
         metadata_key = params[:index_metadata_key].to_s.strip
