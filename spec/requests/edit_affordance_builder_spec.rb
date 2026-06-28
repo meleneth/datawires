@@ -84,6 +84,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("base64_image")
     expect(response.body).to include("<option value=\"reference\">reference</option>")
     expect(response.body).to include("Reference options")
+    expect(response.body).to include("Compact display")
+    expect(response.body).to include("Read-only display")
     expect(response.body).to include("Schema key from")
     expect(response.body).to include("Index key")
     expect(response.body).to include("Screen layout")
@@ -100,6 +102,8 @@ RSpec.describe "Edit affordance builder", type: :request do
       widget: "text",
       row_index: "0",
       label: "1",
+      display_compact: "1",
+      display_readonly: "1",
       help: "Use the public name."
     }
 
@@ -112,6 +116,10 @@ RSpec.describe "Edit affordance builder", type: :request do
       },
       "widget" => "text",
       "span" => 3,
+      "display" => {
+        "compact" => true,
+        "readonly" => true
+      },
       "help" => "Use the public name."
     )
     expect(cell).not_to have_key("collection")
@@ -462,11 +470,14 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Update field")
     expect(response.body).to include("Placeholder")
     expect(response.body).to include("<option value=\"reference\">reference</option>")
+    expect(response.body).to include("Compact display")
 
     patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
       ptr: "/bio",
       widget: "textarea",
       span: "8",
+      display_compact: "1",
+      display_readonly: "1",
       help: "Revised help.",
       placeholder: "Long form copy"
     }
@@ -481,9 +492,21 @@ RSpec.describe "Edit affordance builder", type: :request do
       "widget" => "textarea",
       "span" => 8,
       "label" => false,
+      "display" => {
+        "compact" => true,
+        "readonly" => true
+      },
       "help" => "Revised help.",
       "placeholder" => "Long form copy"
     )
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      span: "8"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).not_to have_key("display")
   end
 
   it "adds base64 image fields through the structured builder" do

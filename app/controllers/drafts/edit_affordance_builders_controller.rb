@@ -315,6 +315,8 @@ module Drafts
       cell["span"] = normalized_span(params[:span])
       cell["help"] = params[:help] if params[:help].present?
       cell["placeholder"] = params[:placeholder] if params[:placeholder].present?
+      display = display_config_from_params
+      cell["display"] = display if display.present?
       cell["collection"] = collection_config_from_params if field_entry&.array?
       cell["reference"] = reference_config_from_params if widget == "reference"
       cell
@@ -444,6 +446,13 @@ module Drafts
       }.tap do |config|
         config["schema_key_from"] = params[:reference_schema_key_from] if params[:reference_schema_key_from].present?
         config["placeholder"] = params[:reference_placeholder] if params[:reference_placeholder].present?
+      end
+    end
+
+    def display_config_from_params
+      {}.tap do |display|
+        display["compact"] = true if ActiveModel::Type::Boolean.new.cast(params[:display_compact]) == true
+        display["readonly"] = true if ActiveModel::Type::Boolean.new.cast(params[:display_readonly]) == true
       end
     end
 

@@ -222,6 +222,13 @@
               %label.inline-flex.items-center.gap-2.text-sm
                 = check_box_tag :label, "1", true, class: "h-4 w-4 rounded border-2 border-black"
                 %span Show label
+              .flex.flex-wrap.gap-4
+                %label.inline-flex.items-center.gap-2.text-sm
+                  = check_box_tag :display_compact, "1", false, class: "h-4 w-4 rounded border-2 border-black"
+                  %span Compact display
+                %label.inline-flex.items-center.gap-2.text-sm
+                  = check_box_tag :display_readonly, "1", false, class: "h-4 w-4 rounded border-2 border-black"
+                  %span Read-only display
 
               .rounded.border-2.border-black.bg-muted.p-3{ data: { edit_affordance_builder_target: "collection" } }
                 .mb-3.font-head.text-sm Collection options
@@ -530,6 +537,7 @@
             - if @cell.key?("binding")
               - current_collection = @cell["collection"].is_a?(Hash) ? @cell["collection"] : {}
               - current_reference = @cell["reference"].is_a?(Hash) ? @cell["reference"] : {}
+              - current_display = @cell["display"].is_a?(Hash) ? @cell["display"] : {}
               = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
                 method: :patch,
                 data: { turbo_frame: "main_content", controller: "edit-affordance-builder" },
@@ -566,6 +574,13 @@
                 %label.inline-flex.items-center.gap-2.text-sm
                   = check_box_tag :label, "1", @cell.fetch("label", true), class: "h-4 w-4 rounded border-2 border-black"
                   %span Show label
+                .flex.flex-wrap.gap-4
+                  %label.inline-flex.items-center.gap-2.text-sm
+                    = check_box_tag :display_compact, "1", current_display["compact"] == true, class: "h-4 w-4 rounded border-2 border-black"
+                    %span Compact display
+                  %label.inline-flex.items-center.gap-2.text-sm
+                    = check_box_tag :display_readonly, "1", current_display["readonly"] == true, class: "h-4 w-4 rounded border-2 border-black"
+                    %span Read-only display
 
                 .rounded.border-2.border-black.bg-muted.p-3
                   .mb-3.font-head.text-sm Reference options
