@@ -55,6 +55,8 @@ document or repairing the affordance.
       builder controls.
 - [x] Root document index conditions can be added through structured builder
       controls.
+- [x] Array-sourced document indexes can be added through structured builder
+      controls.
 - [x] Edit affordance DSL docs describe inline array item row layouts.
 - [x] Field compact/read-only display flags are editable through structured
       controls.

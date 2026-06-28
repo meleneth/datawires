@@ -464,10 +464,11 @@ module Drafts
     end
 
     def root_index_from_params
-      value_ptr = params[:index_value_root_ptr].to_s.strip
-      raise ArgumentError, "Index value root pointer is required." if value_ptr.blank?
+      value_item_ptr = params[:index_value_item_ptr].to_s.strip
+      value_root_ptr = params[:index_value_root_ptr].to_s.strip
+      raise ArgumentError, "Index value pointer is required." if value_item_ptr.blank? && value_root_ptr.blank?
 
-      value_expression = { "root_ptr" => value_ptr }
+      value_expression = value_item_ptr.present? ? { "ptr" => value_item_ptr } : { "root_ptr" => value_root_ptr }
       value_strip_prefix = params[:index_value_strip_prefix].to_s
       value_expression["transform"] = { "strip_prefix" => value_strip_prefix } if value_strip_prefix.present?
 
@@ -475,9 +476,14 @@ module Drafts
         "index_type" => normalized_identifier(params[:index_type], label: "Index type"),
         "value" => value_expression
       }.tap do |definition|
+        source_ptr = params[:index_source_ptr].to_s.strip
+        definition["source"] = { "ptr" => source_ptr, "each" => true } if source_ptr.present?
+        key_item_ptr = params[:index_key_item_ptr].to_s.strip
         key_root_ptr = params[:index_key_root_ptr].to_s.strip
         key_literal = params[:index_key_literal].to_s.strip
-        if key_root_ptr.present?
+        if key_item_ptr.present?
+          definition["key"] = { "ptr" => key_item_ptr }
+        elsif key_root_ptr.present?
           definition["key"] = { "root_ptr" => key_root_ptr }
         elsif key_literal.present?
           definition["key"] = { "literal" => key_literal }

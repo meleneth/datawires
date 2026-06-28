@@ -728,9 +728,12 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Document indexes")
+    expect(response.body).to include("Source array pointer")
     expect(response.body).to include("Value root pointer")
+    expect(response.body).to include("Value item pointer")
     expect(response.body).to include("Value strip prefix")
     expect(response.body).to include("Key root pointer")
+    expect(response.body).to include("Key item pointer")
     expect(response.body).to include("Metadata root pointer")
     expect(response.body).to include("Metadata strip prefix")
     expect(response.body).to include("Condition root pointer")
@@ -789,6 +792,35 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
     expect(draft.reload.body.fetch("indexes")).to eq([])
+
+    patch add_index_draft_edit_affordance_builder_path(draft), params: {
+      index_type: "timeline_participant",
+      index_source_ptr: "/participants",
+      index_key_item_ptr: "/kind",
+      index_value_item_ptr: "/key",
+      index_label_root_ptr: "/title"
+    }
+
+    expect(draft.reload.body.fetch("indexes")).to include(
+      {
+        "index_type" => "timeline_participant",
+        "source" => {
+          "ptr" => "/participants",
+          "each" => true
+        },
+        "key" => {
+          "ptr" => "/kind"
+        },
+        "value" => {
+          "ptr" => "/key"
+        },
+        "label" => {
+          "root_ptr" => "/title"
+        }
+      }
+    )
+
+    delete index_draft_edit_affordance_builder_path(draft, index_index: 0)
 
     patch add_index_draft_edit_affordance_builder_path(draft), params: {
       index_type: "identity",
