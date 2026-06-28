@@ -210,6 +210,8 @@
                           .text-muted-foreground= "key: #{definition.dig('key', 'literal') || definition.dig('key', 'root_ptr') || definition.dig('key', 'ptr')}"
                         - if definition["label"].present?
                           .text-muted-foreground= "label: #{definition.dig('label', 'root_ptr') || definition.dig('label', 'ptr') || definition.dig('label', 'literal')}"
+                        - if definition["metadata"].is_a?(Hash) && definition["metadata"].present?
+                          .text-muted-foreground= "metadata: #{definition['metadata'].keys.join(', ')}"
                       = button_to "Delete",
                         index_draft_edit_affordance_builder_path(@draft, builder_path_params.call(index_index: entry.fetch(:index))),
                         method: :delete,
@@ -243,6 +245,18 @@
                   = text_field_tag :index_label_root_ptr,
                     nil,
                     placeholder: "/name",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Metadata key", for_id: "index_metadata_key")
+                  = text_field_tag :index_metadata_key,
+                    nil,
+                    placeholder: "status",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Metadata root pointer", for_id: "index_metadata_root_ptr")
+                  = text_field_tag :index_metadata_root_ptr,
+                    nil,
+                    placeholder: "/status",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
               = submit_tag "Add index",
                 class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"

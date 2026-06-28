@@ -475,6 +475,13 @@ module Drafts
         definition["key"] = { "literal" => key_literal } if key_literal.present?
         label_ptr = params[:index_label_root_ptr].to_s.strip
         definition["label"] = { "root_ptr" => label_ptr } if label_ptr.present?
+        metadata_key = params[:index_metadata_key].to_s.strip
+        metadata_ptr = params[:index_metadata_root_ptr].to_s.strip
+        if metadata_key.present? && metadata_ptr.present?
+          definition["metadata"] = {
+            metadata_key => { "root_ptr" => metadata_ptr }
+          }
+        end
       end
     end
 
