@@ -234,6 +234,7 @@ module Drafts
       @preview_projection = preview_projection
       @screen_ids = screen_ids
       @subform_ids = subform_ids
+      @widget_options = WIDGETS
       @selected_screen = current_builder_screen
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform

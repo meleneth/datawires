@@ -82,6 +82,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
     expect(response.body).to include("base64_image")
+    expect(response.body).to include("<option value=\"reference\">reference</option>")
     expect(response.body).to include("Reference options")
     expect(response.body).to include("Screen layout")
     expect(response.body).to include("Add row")
@@ -437,6 +438,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Update field")
     expect(response.body).to include("Placeholder")
+    expect(response.body).to include("<option value=\"reference\">reference</option>")
 
     patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
       ptr: "/bio",

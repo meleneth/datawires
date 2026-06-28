@@ -32,6 +32,7 @@ document or repairing the affordance.
 - [x] Collection item screen choices are constrained to existing screen ids.
 - [x] The builder can add screens and subforms, select the active screen, and
       edit rows through subform-backed screens.
+- [x] Reference widgets are selectable from structured add/edit field controls.
 - [x] New domains can be pre-seeded from clusters.
 - [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
       and Timeline Event schemas with default edit affordances.

@@ -164,7 +164,7 @@
                 .space-y-1
                   = render LabelComponent.new(text: "Widget", for_id: "widget")
                   = select_tag :widget,
-                    options_for_select(%w[auto text textarea number checkbox select array base64_image]),
+                    options_for_select(@widget_options),
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
                   = render LabelComponent.new(text: "Row", for_id: "row_index")
@@ -491,7 +491,7 @@
                   .space-y-1
                     = render LabelComponent.new(text: "Widget", for_id: "widget")
                     = select_tag :widget,
-                      options_for_select(%w[auto text textarea number checkbox select array base64_image], @cell["widget"] || "auto"),
+                      options_for_select(@widget_options, @cell["widget"] || "auto"),
                       class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                   .space-y-1
                     = render LabelComponent.new(text: "Span", for_id: "span")
