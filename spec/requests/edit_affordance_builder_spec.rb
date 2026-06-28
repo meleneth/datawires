@@ -735,6 +735,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Key root pointer")
     expect(response.body).to include("Key item pointer")
     expect(response.body).to include("Metadata root pointer")
+    expect(response.body).to include("Metadata item pointer")
     expect(response.body).to include("Metadata strip prefix")
     expect(response.body).to include("Condition root pointer")
 
@@ -798,7 +799,9 @@ RSpec.describe "Edit affordance builder", type: :request do
       index_source_ptr: "/participants",
       index_key_item_ptr: "/kind",
       index_value_item_ptr: "/key",
-      index_label_root_ptr: "/title"
+      index_label_root_ptr: "/title",
+      index_metadata_key: "role",
+      index_metadata_item_ptr: "/role"
     }
 
     expect(draft.reload.body.fetch("indexes")).to include(
@@ -816,6 +819,11 @@ RSpec.describe "Edit affordance builder", type: :request do
         },
         "label" => {
           "root_ptr" => "/title"
+        },
+        "metadata" => {
+          "role" => {
+            "ptr" => "/role"
+          }
         }
       }
     )

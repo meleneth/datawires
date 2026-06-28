@@ -291,6 +291,12 @@
                     placeholder: "/status",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
+                  = render LabelComponent.new(text: "Metadata item pointer", for_id: "index_metadata_item_ptr")
+                  = text_field_tag :index_metadata_item_ptr,
+                    nil,
+                    placeholder: "/role",
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
                   = render LabelComponent.new(text: "Metadata strip prefix", for_id: "index_metadata_strip_prefix")
                   = text_field_tag :index_metadata_strip_prefix,
                     nil,

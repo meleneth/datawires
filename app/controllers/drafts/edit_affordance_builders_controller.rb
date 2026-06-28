@@ -491,9 +491,10 @@ module Drafts
         label_ptr = params[:index_label_root_ptr].to_s.strip
         definition["label"] = { "root_ptr" => label_ptr } if label_ptr.present?
         metadata_key = params[:index_metadata_key].to_s.strip
+        metadata_item_ptr = params[:index_metadata_item_ptr].to_s.strip
         metadata_ptr = params[:index_metadata_root_ptr].to_s.strip
-        if metadata_key.present? && metadata_ptr.present?
-          metadata_expression = { "root_ptr" => metadata_ptr }
+        if metadata_key.present? && (metadata_item_ptr.present? || metadata_ptr.present?)
+          metadata_expression = metadata_item_ptr.present? ? { "ptr" => metadata_item_ptr } : { "root_ptr" => metadata_ptr }
           metadata_strip_prefix = params[:index_metadata_strip_prefix].to_s
           metadata_expression["transform"] = { "strip_prefix" => metadata_strip_prefix } if metadata_strip_prefix.present?
           definition["metadata"] = {
