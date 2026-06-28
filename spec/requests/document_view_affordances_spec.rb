@@ -50,6 +50,35 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response).to redirect_to(draft_view_affordance_builder_path(result.draft))
   end
 
+  it "deletes a view affordance and its backing draft document from the builder" do
+    domain = create(:domain)
+    schema = create_timeline_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: schema.schema_wrapper, title: "Timeline", actor: current_actor)
+    view_document = result.document
+    view_affordance = result.view_affordance
+    revision = view_document.head_revision
+    draft = result.draft
+
+    get draft_view_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Delete affordance")
+    expect(response.body).to include(affordance_draft_view_affordance_builder_path(draft))
+
+    expect {
+      delete affordance_draft_view_affordance_builder_path(draft)
+    }.to change(ViewAffordance, :count).by(-1)
+      .and change(Draft, :count).by(-1)
+      .and change(Document, :count).by(-1)
+      .and change(Revision, :count).by(-1)
+
+    expect(ViewAffordance.exists?(view_affordance.id)).to be(false)
+    expect(Draft.exists?(draft.id)).to be(false)
+    expect(Document.exists?(view_document.id)).to be(false)
+    expect(Revision.exists?(revision.id)).to be(false)
+    expect(response).to redirect_to(schema_path(schema.schema_wrapper))
+  end
+
   it "updates raw view affordance JSON and reports diagnostics" do
     domain = create(:domain)
     schema = create_timeline_schema(domain: domain)

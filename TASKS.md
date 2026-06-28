@@ -84,6 +84,8 @@ document or repairing the affordance.
 - [x] Document the current view affordance DSL and timeline renderer config.
 - [x] Add a raw view affordance builder so view affordance documents can be
       created, opened, diagnosed, previewed, committed, and deleted.
+- [x] View affordance builder deletion removes the affordance and backing draft
+      document under request coverage.
 - [x] Add structured settings for the first view affordance renderer while
       keeping Raw JSON as the repair path.
 - [x] Add structured timeline participant filter settings for view affordance
