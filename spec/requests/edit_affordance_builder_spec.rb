@@ -729,6 +729,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Document indexes")
     expect(response.body).to include("Value root pointer")
+    expect(response.body).to include("Value strip prefix")
     expect(response.body).to include("Key root pointer")
     expect(response.body).to include("Metadata root pointer")
     expect(response.body).to include("Metadata strip prefix")
@@ -738,6 +739,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       index_type: "identity",
       index_key_literal: "document_key",
       index_value_root_ptr: "/key",
+      index_value_strip_prefix: "doc_",
       index_label_root_ptr: "/name",
       index_metadata_key: "status",
       index_metadata_root_ptr: "/status",
@@ -754,7 +756,10 @@ RSpec.describe "Edit affordance builder", type: :request do
           "literal" => "document_key"
         },
         "value" => {
-          "root_ptr" => "/key"
+          "root_ptr" => "/key",
+          "transform" => {
+            "strip_prefix" => "doc_"
+          }
         },
         "label" => {
           "root_ptr" => "/name"
