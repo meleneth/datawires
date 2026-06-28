@@ -137,6 +137,17 @@
                   @selected_screen&.fetch("title", nil),
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
+                = render LabelComponent.new(text: "Root pointer", for_id: "root_ptr")
+                = text_field_tag :root_ptr,
+                  @selected_screen&.dig("root_binding", "ptr"),
+                  placeholder: "/profile",
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Subform", for_id: "subform")
+                = select_tag :subform,
+                  options_for_select([["None", ""]] + @subform_ids.map { |subform_id| [subform_id, subform_id] }, @selected_screen&.fetch("subform", nil)),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
                 = render LabelComponent.new(text: "Width", for_id: "width")
                 = select_tag :width,
                   options_for_select([["Narrow", "narrow"], ["Medium", "medium"], ["Large", "large"], ["Full", "full"]], @selected_screen&.fetch("width", "large")),

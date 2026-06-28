@@ -339,6 +339,10 @@ RSpec.describe "Edit affordance builder", type: :request do
   it "updates screen width, default span, and commit mode" do
     draft = create_builder_draft
 
+    patch add_subform_draft_edit_affordance_builder_path(draft), params: {
+      new_subform_id: "profile_fields",
+      new_subform_root_ptr: "/profile"
+    }
     patch add_screen_draft_edit_affordance_builder_path(draft), params: {
       new_screen_id: "details",
       new_screen_title: "Details"
@@ -350,10 +354,14 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Start screen")
     expect(response.body).to include("Default commit mode")
     expect(response.body).to include("Commit mode")
+    expect(response.body).to include("Root pointer")
+    expect(response.body).to include("Subform")
 
     patch update_screen_draft_edit_affordance_builder_path(draft), params: {
       start_screen: "details",
       default_commit_mode: "immediate",
+      root_ptr: "/profile",
+      subform: "profile_fields",
       width: "full",
       default_span: "5",
       screen_commit_mode: "immediate"
@@ -367,8 +375,29 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(draft.reload.body.fetch("screens").first).to include(
       "width" => "full",
       "default_span" => 5,
-      "commit_mode" => "immediate"
+      "commit_mode" => "immediate",
+      "root_binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/profile"
+      },
+      "subform" => "profile_fields"
     )
+    expect(draft.body.fetch("screens").first).not_to have_key("rows")
+
+    patch update_screen_draft_edit_affordance_builder_path(draft), params: {
+      start_screen: "details",
+      default_commit_mode: "immediate",
+      root_ptr: "",
+      subform: "",
+      width: "full",
+      default_span: "5",
+      screen_commit_mode: "immediate"
+    }
+
+    screen = draft.reload.body.fetch("screens").first
+    expect(screen).not_to have_key("root_binding")
+    expect(screen).not_to have_key("subform")
+    expect(screen.fetch("rows")).to eq([])
 
     get draft_edit_affordance_builder_path(draft, tab: "preview")
 

@@ -112,6 +112,18 @@ module Drafts
       end
       body["start_screen"] = params[:start_screen].presence_in(screen_ids_for(body)) || "main"
       body["commit_mode"] = params[:default_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
+      root_ptr = params[:root_ptr].presence
+      root_ptr ? screen["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } : screen.delete("root_binding")
+      subform_id = params[:subform].presence
+      if subform_id
+        raise ArgumentError, "Select an existing subform." unless subform_ids_for(body).include?(subform_id)
+
+        screen["subform"] = subform_id
+        screen.delete("rows")
+      else
+        screen.delete("subform")
+        screen["rows"] = Array(screen["rows"])
+      end
       screen["width"] = params[:width].presence_in(WIDTHS) || "large"
       screen["default_span"] = normalized_span(params[:default_span])
       screen["commit_mode"] = params[:screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
@@ -120,6 +132,9 @@ module Drafts
 
       redirect_to builder_path,
         notice: "Screen layout updated."
+    rescue ArgumentError => e
+      redirect_to builder_path,
+        alert: e.message
     end
 
     def update_raw
