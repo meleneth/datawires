@@ -8,6 +8,12 @@ module Drafts
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     WIDTHS = %w[narrow medium large full].freeze
     WIDGETS = %w[auto text textarea number checkbox select array base64_image reference].freeze
+    COLLECTION_BINDING_OPTIONS = [
+      [ "Property", "property" ],
+      [ "Reference label", "reference_label" ],
+      [ "Value label", "value_label" ],
+      [ "None", "none" ]
+    ].freeze
 
     before_action :load_context
 
@@ -235,6 +241,7 @@ module Drafts
       @screen_ids = screen_ids
       @subform_ids = subform_ids
       @widget_options = WIDGETS
+      @collection_binding_options = COLLECTION_BINDING_OPTIONS
       @selected_screen = current_builder_screen
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform
@@ -445,11 +452,29 @@ module Drafts
       return default unless kind
       return { "kind" => "none" } if kind == "none"
       return { "kind" => "value_label" } if kind == "value_label"
+      return reference_label_binding_from_params(prefix) if kind == "reference_label"
 
       {
         "kind" => "property",
         "name" => params["#{prefix}_name"].presence || default["name"].presence || "name"
       }
+    end
+
+    def reference_label_binding_from_params(prefix)
+      {
+        "kind" => "reference_label",
+        "key_property" => params["#{prefix}_key_property"].presence || "key",
+        "index_type" => params["#{prefix}_index_type"].presence || "identity",
+        "index_key" => params["#{prefix}_index_key"].presence || "document_key"
+      }.tap do |binding|
+        schema_key = params["#{prefix}_schema_key"].presence
+        schema_key_property = params["#{prefix}_schema_key_property"].presence
+        if schema_key.present?
+          binding["schema_key"] = schema_key
+        else
+          binding["schema_key_property"] = schema_key_property || "kind"
+        end
+      end
     end
 
     def field_entries

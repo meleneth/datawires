@@ -35,6 +35,8 @@ document or repairing the affordance.
 - [x] Reference widgets are selectable from structured add/edit field controls.
 - [x] Reference widget schema source and index key options are editable through
       structured controls.
+- [x] Collection reference-label title/subtitle bindings are editable through
+      structured controls.
 - [x] New domains can be pre-seeded from clusters.
 - [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
       and Timeline Event schemas with default edit affordances.

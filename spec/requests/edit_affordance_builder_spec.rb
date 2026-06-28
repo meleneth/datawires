@@ -357,6 +357,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Collection options")
     expect(response.body).to include("Item screen")
     expect(response.body).to include("Title binding")
+    expect(response.body).to include("Reference label")
+    expect(response.body).to include("Title reference schema property")
     expect(response.body).to include("data-array=\"true\"")
     expect(response.body).to include("Add navigation")
     expect(response.body).to include("Add commit")
@@ -373,9 +375,14 @@ RSpec.describe "Edit affordance builder", type: :request do
       collection_delete: "enabled",
       collection_reorder: "enabled",
       collection_item_screen: "main",
-      item_title_kind: "property",
-      item_title_name: "label",
-      item_subtitle_kind: "value_label"
+      item_title_kind: "reference_label",
+      item_title_schema_key_property: "kind",
+      item_title_key_property: "key",
+      item_title_index_key: "document_key",
+      item_subtitle_kind: "reference_label",
+      item_subtitle_schema_key: "person",
+      item_subtitle_key_property: "key",
+      item_subtitle_index_key: "slug"
     }
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
@@ -390,13 +397,27 @@ RSpec.describe "Edit affordance builder", type: :request do
       "reorder" => "enabled",
       "item_screen" => "main",
       "item_title" => {
-        "kind" => "property",
-        "name" => "label"
+        "kind" => "reference_label",
+        "schema_key_property" => "kind",
+        "key_property" => "key",
+        "index_type" => "identity",
+        "index_key" => "document_key"
       },
       "item_subtitle" => {
-        "kind" => "value_label"
+        "kind" => "reference_label",
+        "schema_key" => "person",
+        "key_property" => "key",
+        "index_type" => "identity",
+        "index_key" => "slug"
       }
     )
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Title reference schema property")
+    expect(response.body).to include("value=\"kind\"")
+    expect(response.body).to include("value=\"slug\"")
 
     get draft_edit_affordance_builder_path(draft, tab: "diagnostics")
 

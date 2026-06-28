@@ -256,18 +256,39 @@
                     .space-y-1
                       = render LabelComponent.new(text: "Title binding", for_id: "item_title_kind")
                       = select_tag :item_title_kind,
-                        options_for_select([["Property", "property"], ["Value label", "value_label"], ["None", "none"]]),
+                        options_for_select(@collection_binding_options, "property"),
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                     .space-y-1
                       = render LabelComponent.new(text: "Title property", for_id: "item_title_name")
                       = text_field_tag :item_title_name,
                         "name",
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title reference schema", for_id: "item_title_schema_key")
+                      = text_field_tag :item_title_schema_key,
+                        nil,
+                        placeholder: "person",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title reference schema property", for_id: "item_title_schema_key_property")
+                      = text_field_tag :item_title_schema_key_property,
+                        "kind",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title reference key property", for_id: "item_title_key_property")
+                      = text_field_tag :item_title_key_property,
+                        "key",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Title reference index key", for_id: "item_title_index_key")
+                      = text_field_tag :item_title_index_key,
+                        "document_key",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                   .grid.gap-2.md:grid-cols-2
                     .space-y-1
                       = render LabelComponent.new(text: "Subtitle binding", for_id: "item_subtitle_kind")
                       = select_tag :item_subtitle_kind,
-                        options_for_select([["Value label", "value_label"], ["Property", "property"], ["None", "none"]]),
+                        options_for_select(@collection_binding_options, "value_label"),
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                     .space-y-1
                       = render LabelComponent.new(text: "Subtitle property", for_id: "item_subtitle_name")
@@ -275,6 +296,27 @@
                         nil,
                         placeholder: "quantity",
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle reference schema", for_id: "item_subtitle_schema_key")
+                      = text_field_tag :item_subtitle_schema_key,
+                        nil,
+                        placeholder: "person",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle reference schema property", for_id: "item_subtitle_schema_key_property")
+                      = text_field_tag :item_subtitle_schema_key_property,
+                        "kind",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle reference key property", for_id: "item_subtitle_key_property")
+                      = text_field_tag :item_subtitle_key_property,
+                        "key",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Subtitle reference index key", for_id: "item_subtitle_index_key")
+                      = text_field_tag :item_subtitle_index_key,
+                        "document_key",
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .rounded.border-2.border-black.bg-muted.p-3.text-sm.text-muted-foreground{ data: { edit_affordance_builder_target: "collectionNote" } }
                 Collection policy: array fields only.
 
@@ -590,23 +632,65 @@
                       .space-y-1
                         = render LabelComponent.new(text: "Title binding", for_id: "item_title_kind")
                         = select_tag :item_title_kind,
-                          options_for_select([["Property", "property"], ["Value label", "value_label"], ["None", "none"]], current_collection.dig("item_title", "kind") || "property"),
+                          options_for_select(@collection_binding_options, current_collection.dig("item_title", "kind") || "property"),
                           class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                       .space-y-1
                         = render LabelComponent.new(text: "Title property", for_id: "item_title_name")
                         = text_field_tag :item_title_name,
                           current_collection.dig("item_title", "name") || "name",
                           class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title reference schema", for_id: "item_title_schema_key")
+                        = text_field_tag :item_title_schema_key,
+                          current_collection.dig("item_title", "schema_key"),
+                          placeholder: "person",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title reference schema property", for_id: "item_title_schema_key_property")
+                        = text_field_tag :item_title_schema_key_property,
+                          current_collection.dig("item_title", "schema_key_property") || "kind",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title reference key property", for_id: "item_title_key_property")
+                        = text_field_tag :item_title_key_property,
+                          current_collection.dig("item_title", "key_property") || "key",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Title reference index key", for_id: "item_title_index_key")
+                        = text_field_tag :item_title_index_key,
+                          current_collection.dig("item_title", "index_key") || "document_key",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                     .grid.gap-2.md:grid-cols-2
                       .space-y-1
                         = render LabelComponent.new(text: "Subtitle binding", for_id: "item_subtitle_kind")
                         = select_tag :item_subtitle_kind,
-                          options_for_select([["Value label", "value_label"], ["Property", "property"], ["None", "none"]], current_collection.dig("item_subtitle", "kind") || "value_label"),
+                          options_for_select(@collection_binding_options, current_collection.dig("item_subtitle", "kind") || "value_label"),
                           class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                       .space-y-1
                         = render LabelComponent.new(text: "Subtitle property", for_id: "item_subtitle_name")
                         = text_field_tag :item_subtitle_name,
                           current_collection.dig("item_subtitle", "name"),
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle reference schema", for_id: "item_subtitle_schema_key")
+                        = text_field_tag :item_subtitle_schema_key,
+                          current_collection.dig("item_subtitle", "schema_key"),
+                          placeholder: "person",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle reference schema property", for_id: "item_subtitle_schema_key_property")
+                        = text_field_tag :item_subtitle_schema_key_property,
+                          current_collection.dig("item_subtitle", "schema_key_property") || "kind",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle reference key property", for_id: "item_subtitle_key_property")
+                        = text_field_tag :item_subtitle_key_property,
+                          current_collection.dig("item_subtitle", "key_property") || "key",
+                          class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                      .space-y-1
+                        = render LabelComponent.new(text: "Subtitle reference index key", for_id: "item_subtitle_index_key")
+                        = text_field_tag :item_subtitle_index_key,
+                          current_collection.dig("item_subtitle", "index_key") || "document_key",
                           class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .rounded.border-2.border-black.bg-muted.p-3.text-sm.text-muted-foreground{ data: { edit_affordance_builder_target: "collectionNote" } }
                   Collection policy: array fields only.
