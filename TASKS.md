@@ -47,6 +47,8 @@ document or repairing the affordance.
       entries.
 - [x] Root document index metadata can be added through structured builder
       controls.
+- [x] Root document index metadata strip-prefix transforms can be added through
+      structured builder controls.
 - [x] Root document index keys can bind to root pointers through structured
       builder controls.
 - [x] Root document index conditions can be added through structured builder

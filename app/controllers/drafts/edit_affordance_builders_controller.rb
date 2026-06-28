@@ -483,8 +483,11 @@ module Drafts
         metadata_key = params[:index_metadata_key].to_s.strip
         metadata_ptr = params[:index_metadata_root_ptr].to_s.strip
         if metadata_key.present? && metadata_ptr.present?
+          metadata_expression = { "root_ptr" => metadata_ptr }
+          metadata_strip_prefix = params[:index_metadata_strip_prefix].to_s
+          metadata_expression["transform"] = { "strip_prefix" => metadata_strip_prefix } if metadata_strip_prefix.present?
           definition["metadata"] = {
-            metadata_key => { "root_ptr" => metadata_ptr }
+            metadata_key => metadata_expression
           }
         end
         condition_ptr = params[:index_condition_root_ptr].to_s.strip
