@@ -432,8 +432,10 @@ module Drafts
     def reference_config_from_params
       {
         "schema_key" => params[:reference_schema_key].to_s,
-        "index_type" => params[:reference_index_type].presence || "identity"
+        "index_type" => params[:reference_index_type].presence || "identity",
+        "index_key" => params[:reference_index_key].presence || "document_key"
       }.tap do |config|
+        config["schema_key_from"] = params[:reference_schema_key_from] if params[:reference_schema_key_from].present?
         config["placeholder"] = params[:reference_placeholder] if params[:reference_placeholder].present?
       end
     end

@@ -84,6 +84,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("base64_image")
     expect(response.body).to include("<option value=\"reference\">reference</option>")
     expect(response.body).to include("Reference options")
+    expect(response.body).to include("Schema key from")
+    expect(response.body).to include("Index key")
     expect(response.body).to include("Screen layout")
     expect(response.body).to include("Add row")
     expect(response.body).to include("Add a row before adding fields.")
@@ -494,7 +496,9 @@ RSpec.describe "Edit affordance builder", type: :request do
       row_index: "0",
       label: "1",
       reference_schema_key: "person",
+      reference_schema_key_from: "/kind",
       reference_index_type: "identity",
+      reference_index_key: "slug",
       reference_placeholder: "Select person"
     }
 
@@ -503,10 +507,39 @@ RSpec.describe "Edit affordance builder", type: :request do
       "widget" => "reference",
       "reference" => {
         "schema_key" => "person",
+        "schema_key_from" => "/kind",
         "index_type" => "identity",
+        "index_key" => "slug",
         "placeholder" => "Select person"
       }
     )
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Schema key from")
+    expect(response.body).to include("value=\"/kind\"")
+    expect(response.body).to include("value=\"slug\"")
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      ptr: "/name",
+      widget: "reference",
+      reference_schema_key: "place",
+      reference_schema_key_from: "",
+      reference_index_type: "identity",
+      reference_index_key: "document_key",
+      reference_placeholder: "Select place"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "reference" => {
+        "schema_key" => "place",
+        "index_type" => "identity",
+        "index_key" => "document_key",
+        "placeholder" => "Select place"
+      }
+    )
+    expect(draft.body.dig("screens", 0, "rows", 0, 0, "reference")).not_to have_key("schema_key_from")
   end
 
   it "adds and updates navigation and commit cells" do
