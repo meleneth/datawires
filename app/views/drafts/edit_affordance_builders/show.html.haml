@@ -82,6 +82,11 @@
                         min: 1,
                         max: 12,
                         class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                    .space-y-1
+                      = render LabelComponent.new(text: "Commit mode", for_id: "new_screen_commit_mode")
+                      = select_tag :new_screen_commit_mode,
+                        options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]], "review_screen"),
+                        class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                   = submit_tag "Add screen",
                     class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
               .space-y-3
@@ -132,6 +137,11 @@
                   @selected_screen&.fetch("default_span", 3),
                   min: 1,
                   max: 12,
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Commit mode", for_id: "screen_commit_mode")
+                = select_tag :screen_commit_mode,
+                  options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]], @selected_screen&.fetch("commit_mode", "review_screen")),
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .flex.items-end
                 = submit_tag "Update layout",

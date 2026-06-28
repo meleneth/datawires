@@ -39,6 +39,7 @@ document or repairing the affordance.
       structured controls.
 - [x] Field compact/read-only display flags are editable through structured
       controls.
+- [x] Screen-level commit mode is editable through structured screen controls.
 - [x] New domains can be pre-seeded from clusters.
 - [x] The first cluster, Worldbuilding Tools, seeds Person, Place, Thing, Party,
       and Timeline Event schemas with default edit affordances.

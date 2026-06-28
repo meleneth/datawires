@@ -111,6 +111,7 @@ module Drafts
       end
       screen["width"] = params[:width].presence_in(WIDTHS) || "large"
       screen["default_span"] = normalized_span(params[:default_span])
+      screen["commit_mode"] = params[:screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       screen["columns"] = 12
       @draft.update!(body: body)
 
@@ -378,7 +379,8 @@ module Drafts
         "title" => params[:new_screen_title].presence || id.titleize,
         "columns" => 12,
         "default_span" => normalized_span(params[:new_screen_default_span]),
-        "width" => params[:new_screen_width].presence_in(WIDTHS) || "large"
+        "width" => params[:new_screen_width].presence_in(WIDTHS) || "large",
+        "commit_mode" => params[:new_screen_commit_mode].presence_in(COMMIT_MODES) || "review_screen"
       }
       root_ptr = params[:new_screen_root_ptr].presence
       screen["root_binding"] = { "kind" => "document_ptr", "ptr" => root_ptr } if root_ptr

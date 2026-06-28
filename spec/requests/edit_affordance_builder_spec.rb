@@ -336,18 +336,25 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(draft.reload.body.dig("screens", 0, "rows").map { |row| row.first.dig("binding", "ptr") }).to eq(%w[/name /bio])
   end
 
-  it "updates screen width and default span" do
+  it "updates screen width, default span, and commit mode" do
     draft = create_builder_draft
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Commit mode")
 
     patch update_screen_draft_edit_affordance_builder_path(draft), params: {
       width: "full",
-      default_span: "5"
+      default_span: "5",
+      screen_commit_mode: "immediate"
     }
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
     expect(draft.reload.body.fetch("screens").first).to include(
       "width" => "full",
-      "default_span" => 5
+      "default_span" => 5,
+      "commit_mode" => "immediate"
     )
 
     get draft_edit_affordance_builder_path(draft, tab: "preview")
@@ -681,7 +688,8 @@ RSpec.describe "Edit affordance builder", type: :request do
       new_screen_title: "Details",
       new_screen_root_ptr: "/profile",
       new_screen_width: "medium",
-      new_screen_default_span: "6"
+      new_screen_default_span: "6",
+      new_screen_commit_mode: "immediate"
     }
 
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder", screen_id: "details"))
@@ -691,6 +699,7 @@ RSpec.describe "Edit affordance builder", type: :request do
       "title" => "Details",
       "width" => "medium",
       "default_span" => 6,
+      "commit_mode" => "immediate",
       "root_binding" => {
         "kind" => "document_ptr",
         "ptr" => "/profile"
