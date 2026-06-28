@@ -56,6 +56,16 @@
                   = text_field_tag :relative_time_label,
                     config["relative_time_label"] || "Relative time",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Participant schema", for_id: "participant_kind")
+                  = select_tag :participant_kind,
+                    options_for_select([["No participant filter", ""]] + @schema_options, config["participant_kind"].to_s),
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+                .space-y-1
+                  = render LabelComponent.new(text: "Participant key override", for_id: "participant_key")
+                  = text_field_tag :participant_key,
+                    config["participant_key"].to_s,
+                    class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               = submit_tag "Update settings",
                 class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 

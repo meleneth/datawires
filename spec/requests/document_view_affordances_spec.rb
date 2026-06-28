@@ -165,6 +165,49 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).to include("The party arrives.")
   end
 
+  it "updates timeline participant filters through structured controls" do
+    domain = create(:domain)
+    timeline_schema = create_timeline_schema(domain: domain)
+    person_schema = create_person_schema(domain: domain)
+    result = CreateViewAffordance.call(schema_wrapper: person_schema.schema_wrapper, title: "Timeline", actor: current_actor)
+
+    get draft_view_affordance_builder_path(result.draft)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Participant schema")
+    expect(response.body).to include("Participant key override")
+
+    patch update_settings_draft_view_affordance_builder_path(result.draft), params: {
+      title: "Personal Timeline",
+      renderer: "timeline_d3",
+      schema_key: timeline_schema.key,
+      relative_time_label: "Scene beat",
+      participant_kind: person_schema.key,
+      participant_key: "ada"
+    }
+
+    expect(response).to redirect_to(draft_view_affordance_builder_path(result.draft, tab: "settings"))
+    expect(result.draft.reload.body).to include(
+      "config" => include(
+        "schema_key" => "timeline-event",
+        "relative_time_label" => "Scene beat",
+        "participant_kind" => "person",
+        "participant_key" => "ada"
+      )
+    )
+
+    patch update_settings_draft_view_affordance_builder_path(result.draft), params: {
+      title: "Personal Timeline",
+      renderer: "timeline_d3",
+      schema_key: timeline_schema.key,
+      relative_time_label: "Scene beat",
+      participant_kind: "",
+      participant_key: "ada"
+    }
+
+    expect(result.draft.reload.body.fetch("config")).not_to include("participant_kind", "participant_key")
+  end
+
   it "links and renders a seeded D3 timeline view without edit controls" do
     domain = create(:domain)
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: create(:user))

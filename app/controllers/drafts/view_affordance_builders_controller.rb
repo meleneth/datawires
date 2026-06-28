@@ -95,10 +95,14 @@ module Drafts
     end
 
     def config_from_params
-      {
+      config = {
         "schema_key" => params[:schema_key].presence_in(schema_options.map(&:last)) || @schema_wrapper.key,
         "relative_time_label" => params[:relative_time_label].presence || "Relative time"
       }
+      participant_kind = params[:participant_kind].presence_in(schema_options.map(&:last))
+      config["participant_kind"] = participant_kind if participant_kind.present?
+      config["participant_key"] = params[:participant_key].to_s.strip if participant_kind.present? && params[:participant_key].present?
+      config
     end
 
     def deep_dup_json(value)
