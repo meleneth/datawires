@@ -43,6 +43,8 @@ document or repairing the affordance.
 - [x] Root document index definitions are addable through structured builder
       controls.
 - [x] Structured root document indexes can be deleted from the builder.
+- [x] Structured index deletion preserves raw JSON positions around invalid
+      entries.
 - [x] Edit affordance DSL docs describe inline array item row layouts.
 - [x] Field compact/read-only display flags are editable through structured
       controls.

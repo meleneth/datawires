@@ -194,7 +194,7 @@ module Drafts
       body = deep_dup_json(@draft.body)
       indexes = ensure_indexes(body)
       index = index_index_param
-      raise ActiveRecord::RecordNotFound, "index not found" unless indexes[index].is_a?(Hash)
+      raise ActiveRecord::RecordNotFound, "index not found" unless index >= 0 && indexes[index].is_a?(Hash)
 
       indexes.delete_at(index)
       @draft.update!(body: body)
@@ -295,7 +295,7 @@ module Drafts
       @screen_id = @selected_screen&.fetch("id", nil) || "main"
       @active_subform = current_builder_subform
       @rows = current_builder_rows
-      @indexes = Array(@draft.body["indexes"]).select { |definition| definition.is_a?(Hash) }
+      @indexes = builder_index_entries
       @screen_ids = screen_ids
       @builder_width_class = width_class_for(@selected_screen&.fetch("width", "large"))
     end
@@ -611,6 +611,12 @@ module Drafts
       return [] unless target
 
       target["rows"] = Array(target["rows"])
+    end
+
+    def builder_index_entries
+      Array(@draft.body["indexes"]).each_with_index.filter_map do |definition, index|
+        { index: index, definition: definition } if definition.is_a?(Hash)
+      end
     end
 
     def screen_ids

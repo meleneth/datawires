@@ -778,6 +778,30 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
   end
 
+  it "deletes indexes by their original raw JSON position" do
+    draft = create_builder_draft
+    index_definition = {
+      "index_type" => "identity",
+      "value" => {
+        "root_ptr" => "/key"
+      }
+    }
+
+    patch update_raw_draft_edit_affordance_builder_path(draft), params: {
+      body_json: JSON.pretty_generate(draft.body.merge("indexes" => [ "invalid", index_definition ]))
+    }
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response.body).to include(index_draft_edit_affordance_builder_path(draft, index_index: 1))
+    expect(response.body).not_to include(index_draft_edit_affordance_builder_path(draft, index_index: 0))
+
+    delete index_draft_edit_affordance_builder_path(draft, index_index: 1)
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    expect(draft.reload.body.fetch("indexes")).to eq([ "invalid" ])
+  end
+
   it "adds screens and edits rows on the selected screen" do
     draft = create_builder_draft
 
