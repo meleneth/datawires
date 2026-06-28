@@ -113,7 +113,7 @@ Supported widgets today:
 
 `base64_image` renders string values as image previews and keeps the underlying value editable as text. Values may be complete `data:image/...;base64,...` URLs or raw base64 payloads; raw payloads are rendered as PNG data URLs.
 
-`reference` renders a select from `DocumentIndexEntry` rows. `reference.schema_key` scopes options to indexed documents of one schema in the current domain. `reference.index_type` defaults to `identity`.
+`reference` renders a select from `DocumentIndexEntry` rows. `reference.schema_key` scopes options to indexed documents of one schema in the current domain. `reference.schema_key_from` may point at a sibling field whose value supplies the schema key for polymorphic references. `reference.index_type` defaults to `identity`, and `reference.index_key` defaults to `document_key`.
 
 `label` controls whether the field label is shown. `help` renders short guidance beneath the field. `placeholder` is passed to text-like inputs. Required fields are marked from schema metadata during rendering.
 
@@ -132,7 +132,9 @@ Collection item actions currently use regenerated array index paths. After delet
 - `item_title`: optional item label binding, defaulting to the item object `name` property
 - `item_subtitle`: optional subtitle binding, defaulting to the item value preview
 
-Collection bindings support `property`, `value_label`, and `none`. A `property` binding needs a `name`.
+Collection bindings support `property`, `reference_label`, `value_label`, and `none`. A `property` binding needs a `name`.
+
+`reference_label` resolves an item property through `DocumentIndexEntry` labels. It needs `key_property`, plus either a fixed `schema_key` or a `schema_key_property` on the item. `index_type` defaults to `identity`, and `index_key` defaults to `document_key`.
 
 Schema path metadata is centralized through `SchemaPaths::Inventory`. Generated affordances and projected bespoke fields use inventory entries for widget inference, default labels, and required markers; the structured builder and preview/example generation should use the same inventory source.
 
