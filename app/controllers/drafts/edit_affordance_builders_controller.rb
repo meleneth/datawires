@@ -62,17 +62,29 @@ module Drafts
     end
 
     def add_navigation
-      @draft.update!(body: body_with_added_navigation)
+      result = body_with_added_navigation
+      @draft.update!(body: result.fetch(:body))
 
-      builder_update_response(notice: "Navigation added.")
+      editor_update_response(
+        notice: "Navigation added.",
+        row_index: result.fetch(:row_index),
+        cell_index: result.fetch(:cell_index),
+        html_path: builder_path
+      )
     rescue ArgumentError => e
       builder_error_response(e.message)
     end
 
     def add_commit
-      @draft.update!(body: body_with_added_commit)
+      result = body_with_added_commit
+      @draft.update!(body: result.fetch(:body))
 
-      builder_update_response(notice: "Commit added.")
+      editor_update_response(
+        notice: "Commit added.",
+        row_index: result.fetch(:row_index),
+        cell_index: result.fetch(:cell_index),
+        html_path: builder_path
+      )
     rescue ArgumentError => e
       builder_error_response(e.message)
     end
@@ -386,14 +398,24 @@ module Drafts
 
     def body_with_added_navigation
       body = deep_dup_json(@draft.body)
-      target_row(body) << navigation_cell_from_params
-      body
+      row, row_index = target_row_with_index(body)
+      row << navigation_cell_from_params
+      {
+        body: body,
+        row_index: row_index,
+        cell_index: row.length - 1
+      }
     end
 
     def body_with_added_commit
       body = deep_dup_json(@draft.body)
-      target_row(body) << commit_cell_from_params
-      body
+      row, row_index = target_row_with_index(body)
+      row << commit_cell_from_params
+      {
+        body: body,
+        row_index: row_index,
+        cell_index: row.length - 1
+      }
     end
 
     def apply_builder_suggestion!(body, suggestion_id)

@@ -416,6 +416,27 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(draft.reload.body.dig("screens", 0, "rows", 0).map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/bio])
   end
 
+  it "clears the inline editor after streamed row deletion" do
+    draft = create_builder_draft
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+
+    delete row_draft_edit_affordance_builder_path(draft, row_index: 0), headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Inline editor")
+    expect(response.body).to include("Open a row or field to refine it here.")
+    expect(draft.reload.body.dig("screens", 0, "rows")).to eq([])
+  end
+
   it "applies a three-choice room scaffold from schema suggestions" do
     choice_schema = create(
       :document,
@@ -1052,6 +1073,56 @@ RSpec.describe "Edit affordance builder", type: :request do
       "commit_mode" => "review_screen",
       "message_mode" => "hidden"
     )
+  end
+
+  it "opens newly added navigation and commit cells in the inline editor" do
+    draft = create_builder_draft
+
+    patch update_raw_draft_edit_affordance_builder_path(draft), params: {
+      body_json: JSON.pretty_generate(
+        draft.body.merge(
+          "screens" => [
+            draft.body.fetch("screens").first,
+            {
+              "id" => "details",
+              "title" => "Details",
+              "columns" => 12,
+              "default_span" => 3,
+              "rows" => []
+            }
+          ]
+        )
+      )
+    }
+    patch add_row_draft_edit_affordance_builder_path(draft)
+
+    patch add_navigation_draft_edit_affordance_builder_path(draft), params: {
+      row_index: "0",
+      target_screen: "details",
+      navigation_label: "Open details",
+      navigation_span: "4"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Field 1")
+    expect(response.body).to include("Update navigation")
+
+    patch add_commit_draft_edit_affordance_builder_path(draft), params: {
+      row_index: "0",
+      commit_span: "8",
+      commit_mode: "immediate",
+      message_mode: "inline_required"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Field 2")
+    expect(response.body).to include("Update commit")
   end
 
   it "adds root document indexes through structured controls" do
