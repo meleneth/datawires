@@ -431,6 +431,10 @@ module Drafts
         add_entries_to_rows!(body, missing_required_entries)
       when "add_scalar_fields"
         add_entries_to_rows!(body, missing_scalar_entries)
+      when "add_enum_fields"
+        add_entries_to_rows!(body, missing_enum_entries, widget: "select")
+      when "add_reference_fields"
+        add_reference_entries_to_rows!(body, missing_reference_entries)
       when "add_commit"
         append_row(builder_rows_for(body)) << default_commit_cell
       when "promote_long_text"
@@ -534,6 +538,20 @@ module Drafts
         item_rows = item_rows_for_array_entry(entry)
         cell["item_rows"] = item_rows if item_rows.present?
       end
+    end
+
+    def reference_cell_for(entry)
+      schema_key = inferred_reference_schema_key(entry)
+      raise ArgumentError, "Schema field #{entry.ptr} is not reference-like." if schema_key.blank?
+
+      field_cell_for(entry, widget: "reference").merge(
+        "reference" => {
+          "schema_key" => schema_key,
+          "index_type" => "identity",
+          "index_key" => "document_key",
+          "placeholder" => "Select #{schema_key.tr('-', ' ')}"
+        }
+      )
     end
 
     def navigation_cell_from_params
@@ -698,12 +716,21 @@ module Drafts
       rows.last
     end
 
-    def add_entries_to_rows!(body, entries)
+    def add_entries_to_rows!(body, entries, widget: nil)
       raise ArgumentError, "No matching schema fields remain to add." if entries.empty?
 
       rows = builder_rows_for(body)
       entries.each_slice(3) do |group|
-        rows << group.map { |entry| field_cell_for(entry) }
+        rows << group.map { |entry| field_cell_for(entry, widget: widget) }
+      end
+    end
+
+    def add_reference_entries_to_rows!(body, entries)
+      raise ArgumentError, "No matching reference-like schema fields remain to add." if entries.empty?
+
+      rows = builder_rows_for(body)
+      entries.each_slice(3) do |group|
+        rows << group.map { |entry| reference_cell_for(entry) }
       end
     end
 
@@ -719,6 +746,14 @@ module Drafts
     def missing_array_entries
       used_ptrs = used_field_ptrs(@draft.body)
       @field_entries.select(&:array?).reject { |entry| used_ptrs.include?(entry.ptr) }
+    end
+
+    def missing_enum_entries
+      missing_scalar_entries.select { |entry| enum_entry?(entry) }
+    end
+
+    def missing_reference_entries
+      missing_scalar_entries.select { |entry| inferred_reference_schema_key(entry).present? }
     end
 
     def used_field_ptrs(body)
@@ -737,6 +772,8 @@ module Drafts
     def builder_suggestions
       [].tap do |suggestions|
         suggestions << suggestion("add_required_fields", "Add required fields", "#{missing_required_entries.count} required field(s) not in this affordance.") if missing_required_entries.any?
+        suggestions << suggestion("add_enum_fields", "Add select fields", "#{missing_enum_entries.count} enum field(s) can become select controls.") if missing_enum_entries.any?
+        suggestions << suggestion("add_reference_fields", "Add reference pickers", "#{missing_reference_entries.count} key field(s) can become reference pickers.") if missing_reference_entries.any?
         suggestions << suggestion("add_scalar_fields", "Add scalar fields", "#{missing_scalar_entries.count} scalar field(s) can be added from the schema.") if missing_scalar_entries.any?
         missing_array_entries.each do |entry|
           suggestions << suggestion("add_collection:#{entry.ptr}", "Add #{entry.label} collection", "Create a card collection editor for #{entry.ptr}.")
@@ -824,8 +861,22 @@ module Drafts
     def suggested_widget_for(entry)
       return "textarea" if long_text_ptr?(entry.ptr)
       return "array" if entry.array?
+      return "select" if enum_entry?(entry)
 
       entry.widget.presence || "auto"
+    end
+
+    def enum_entry?(entry)
+      entry.cursor.schema_node["enum"].is_a?(Array) && entry.cursor.schema_node["enum"].any?
+    end
+
+    def inferred_reference_schema_key(entry)
+      name = entry.ptr.to_s.split("/").last.to_s
+      base = name.delete_suffix("_key")
+      base = name.delete_suffix("_id") if base == name
+      return nil if base == name || base.blank?
+
+      base.tr("_", "-")
     end
 
     def suggested_span_for(entry)

@@ -23,6 +23,15 @@ RSpec.describe "Edit affordance builder", type: :request do
             "type" => "string",
             "title" => "Biography"
           },
+          "status" => {
+            "type" => "string",
+            "title" => "Status",
+            "enum" => %w[draft active archived]
+          },
+          "person_key" => {
+            "type" => "string",
+            "title" => "Person"
+          },
           "items" => {
             "type" => "array",
             "items" => {
@@ -80,6 +89,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Raw")
     expect(response.body).to include("Schema suggestions")
     expect(response.body).to include("Add required fields")
+    expect(response.body).to include("Add select fields")
+    expect(response.body).to include("Add reference pickers")
     expect(response.body).to include("Add scalar fields")
     expect(response.body).to include("Add Items collection")
     expect(response.body).to include("max-width: 1920px;")
@@ -188,7 +199,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     }
 
     scalar_ptrs = draft.reload.body.dig("screens", 0, "rows").flatten.filter_map { |cell| cell.dig("binding", "ptr") }
-    expect(scalar_ptrs).to include("/bio", "/thumbnail")
+    expect(scalar_ptrs).to include("/bio", "/person_key", "/status", "/thumbnail")
     bio_cell = draft.body.dig("screens", 0, "rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/bio" }
     expect(bio_cell).to include(
       "widget" => "textarea",
@@ -228,6 +239,48 @@ RSpec.describe "Edit affordance builder", type: :request do
         "commit_mode" => "review_screen",
         "message_mode" => "inline_optional"
       )
+    )
+  end
+
+  it "applies enum schema suggestions as select controls" do
+    draft = create_builder_draft
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_enum_fields"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    status_cell = draft.reload.body.dig("screens", 0, "rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/status" }
+    expect(status_cell).to include(
+      "widget" => "select",
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/status"
+      }
+    )
+  end
+
+  it "applies key-like schema suggestions as reference pickers" do
+    draft = create_builder_draft
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_reference_fields"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    person_cell = draft.reload.body.dig("screens", 0, "rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/person_key" }
+    expect(person_cell).to include(
+      "widget" => "reference",
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/person_key"
+      },
+      "reference" => {
+        "schema_key" => "person",
+        "index_type" => "identity",
+        "index_key" => "document_key",
+        "placeholder" => "Select person"
+      }
     )
   end
 
