@@ -231,6 +231,21 @@ RSpec.describe "Edit affordance builder", type: :request do
     )
   end
 
+  it "streams schema suggestion updates into focused builder regions" do
+    draft = create_builder_draft
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_required_fields"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_suggestions")
+    expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("/name")
+  end
+
   it "applies a three-choice room scaffold from schema suggestions" do
     choice_schema = create(
       :document,

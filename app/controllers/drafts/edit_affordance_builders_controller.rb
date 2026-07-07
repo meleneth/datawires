@@ -121,8 +121,17 @@ module Drafts
       apply_builder_suggestion!(body, params.require(:suggestion_id))
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Suggestion applied."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "Suggestion applied."
+          load_context
+          render :apply_suggestion
+        end
+        format.html do
+          redirect_to builder_path,
+            notice: "Suggestion applied."
+        end
+      end
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message

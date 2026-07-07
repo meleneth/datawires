@@ -1,0 +1,60 @@
+- builder_screen_params = local_assigns.fetch(:builder_screen_params, {})
+- builder_path_params = ->(extra = {}) { builder_screen_params.merge(extra) }
+
+= turbo_frame_tag "edit_affordance_builder_rows" do
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      = render TypographyComponent.new(as: :h3, text: "Current main screen", html_options: { class: "mb-3" })
+      - if @rows.empty?
+        = render AlertComponent.new do
+          No fields yet.
+      - else
+        %ol.space-y-2
+          - @rows.each_with_index do |row, row_index|
+            %li.rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm
+              .flex.items-center.justify-between.gap-3
+                = link_to "Row #{row_index + 1}",
+                  row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
+                  data: { turbo_frame: "main_content" },
+                  class: "font-head underline decoration-2 underline-offset-4"
+                .flex.flex-wrap.items-center.justify-end.gap-2
+                  - if row_index.positive?
+                    = button_to "Up",
+                      move_row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
+                      method: :patch,
+                      params: { direction: "up" },
+                      form: { data: { turbo_frame: "main_content" } },
+                      class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                  - if row_index < @rows.length - 1
+                    = button_to "Down",
+                      move_row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
+                      method: :patch,
+                      params: { direction: "down" },
+                      form: { data: { turbo_frame: "main_content" } },
+                      class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+                  .text-xs.text-muted-foreground= pluralize(row.length, "cell")
+              - if row.empty?
+                .mt-2.text-muted-foreground Empty row
+              - else
+                .mt-3.space-y-2
+                  - row.each_with_index do |cell, cell_index|
+                    .grid.gap-3.rounded.border-2.border-black.bg-background.p-3.md:grid-cols-3
+                      .md:col-span-2
+                        .font-mono.text-xs.text-muted-foreground= cell.dig("binding", "ptr") || cell["kind"]
+                        .mt-1
+                          %span.font-head Span
+                          = cell["span"] || @selected_screen&.fetch("default_span", 3)
+                        - if cell["collection"].is_a?(Hash)
+                          .mt-2.text-xs.text-muted-foreground
+                            Collection:
+                            = [cell.dig("collection", "presentation"), cell.dig("collection", "creation"), "delete #{cell.dig('collection', 'delete')}", "reorder #{cell.dig('collection', 'reorder')}"].compact.join(", ")
+                      .text-sm.text-muted-foreground
+                        - if cell["help"].present?
+                          = cell["help"]
+                        - else
+                          No help text.
+                        .mt-3
+                          = link_to "Open field",
+                            cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index, cell_index: cell_index)),
+                            data: { turbo_frame: "main_content" },
+                            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"

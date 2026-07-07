@@ -1,0 +1,23 @@
+- builder_screen_params = local_assigns.fetch(:builder_screen_params, {})
+- builder_path_params = ->(extra = {}) { builder_screen_params.merge(extra) }
+
+= turbo_frame_tag "edit_affordance_builder_suggestions" do
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        = render TypographyComponent.new(as: :h3, text: "Schema suggestions")
+        - if @suggestions.empty?
+          = render TypographyComponent.new(as: :muted, text: "No schema suggestions are currently available.")
+        - else
+          .grid.gap-3.md:grid-cols-2.xl:grid-cols-3
+            - @suggestions.each do |suggestion|
+              .rounded.border-2.border-black.bg-card.p-3.text-card-foreground.shadow-sm
+                .space-y-3
+                  %div
+                    .font-head.text-sm.font-medium= suggestion.fetch(:title)
+                    .mt-1.text-xs.text-muted-foreground= suggestion.fetch(:description)
+                  = button_to "Apply",
+                    apply_suggestion_draft_edit_affordance_builder_path(@draft, builder_path_params.call(suggestion_id: suggestion.fetch(:id))),
+                    method: :patch,
+                    form: { data: { turbo_frame: "edit_affordance_builder_suggestions" } },
+                    class: "font-head inline-flex h-8 w-full items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
