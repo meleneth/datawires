@@ -48,6 +48,14 @@ Run the test suite:
 bundle exec rspec
 ```
 
+Run browser e2e tests:
+
+```sh
+npm install
+npx playwright install chromium
+npm run test:e2e
+```
+
 Known local issue: specs can pass and then exit nonzero because SimpleCov cannot overwrite `coverage/assets/0.13.2/DataTables-1.10.20/images/sort_asc.png`. The failure happens after RSpec reports examples and failures.
 
 ## Domain Model
