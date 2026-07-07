@@ -1,0 +1,8 @@
+- builder_screen_params = local_assigns.fetch(:builder_screen_params, {})
+
+- if @tab == "row" && defined?(@row) && @row
+  = render "row_editor", builder_screen_params: builder_screen_params
+- elsif @tab == "cell" && defined?(@cell) && @cell
+  = render "cell_editor", builder_screen_params: builder_screen_params
+- else
+  = render "editor_placeholder"

@@ -228,8 +228,7 @@ module Drafts
       row.delete_at(cell_index)
       @draft.update!(body: body)
 
-      redirect_to row_path(row_index),
-        notice: "Field deleted."
+      editor_update_response(notice: "Field deleted.", row_index: row_index)
     end
 
     def move_cell
@@ -241,15 +240,13 @@ module Drafts
       cell_at!(row, cell_index)
       target_index = target_cell_index(cell_index, params[:direction])
       unless target_index >= 0 && target_index < row.length
-        return redirect_to row_path(row_index),
-          alert: "Field cannot be moved #{params[:direction]}."
+        return editor_error_response("Field cannot be moved #{params[:direction]}.", row_index: row_index)
       end
 
       row[cell_index], row[target_index] = row[target_index], row[cell_index]
       @draft.update!(body: body)
 
-      redirect_to row_path(row_index),
-        notice: "Field moved."
+      editor_update_response(notice: "Field moved.", row_index: row_index)
     end
 
     def update_cell
@@ -262,22 +259,7 @@ module Drafts
       row[cell_index] = updated_cell_from_params(cell)
       @draft.update!(body: body)
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "Cell updated."
-          load_context
-          @tab = "cell"
-          @row_index = row_index
-          @cell_index = cell_index
-          @row = row_at!(@row_index)
-          @cell = cell_at!(@row, @cell_index)
-          render :builder_update
-        end
-        format.html do
-          redirect_to cell_path(row_index, cell_index),
-            notice: "Cell updated."
-        end
-      end
+      editor_update_response(notice: "Cell updated.", row_index: row_index, cell_index: cell_index)
     rescue ArgumentError => e
       redirect_to cell_path(params[:row_index], params[:cell_index]),
         alert: e.message
@@ -310,6 +292,47 @@ module Drafts
           redirect_to builder_path,
             alert: message
         end
+      end
+    end
+
+    def editor_update_response(notice:, row_index:, cell_index: nil)
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = notice
+          load_editor_context(row_index, cell_index)
+          render :builder_update
+        end
+        format.html do
+          redirect_to cell_index.nil? ? row_path(row_index) : cell_path(row_index, cell_index),
+            notice: notice
+        end
+      end
+    end
+
+    def editor_error_response(message, row_index:, cell_index: nil)
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = message
+          load_editor_context(row_index, cell_index)
+          render :builder_update, status: :unprocessable_entity
+        end
+        format.html do
+          redirect_to cell_index.nil? ? row_path(row_index) : cell_path(row_index, cell_index),
+            alert: message
+        end
+      end
+    end
+
+    def load_editor_context(row_index, cell_index)
+      load_context
+      @row_index = row_index
+      @row = row_at!(@row_index)
+      if cell_index.nil?
+        @tab = "row"
+      else
+        @tab = "cell"
+        @cell_index = cell_index
+        @cell = cell_at!(@row, @cell_index)
       end
     end
 

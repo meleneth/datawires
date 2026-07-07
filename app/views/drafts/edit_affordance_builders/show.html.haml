@@ -582,12 +582,7 @@
       .grid.gap-6.xl:grid-cols-2
         = render "rows", builder_screen_params: builder_screen_params
         = render "preview"
-      = turbo_frame_tag "edit_affordance_builder_editor" do
-        = render CardComponent.new(html_options: { class: "w-full" }) do
-          = render CardContentComponent.new do
-            .space-y-1
-              = render TypographyComponent.new(as: :h3, text: "Inline editor")
-              = render TypographyComponent.new(as: :muted, text: "Open a row or field to refine it here.")
+      = render "editor"
 
     - elsif @tab == "row"
       = turbo_frame_tag "edit_affordance_builder_editor" do

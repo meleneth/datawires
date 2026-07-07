@@ -1,0 +1,115 @@
+- builder_screen_params = local_assigns.fetch(:builder_screen_params, {})
+- builder_path_params = ->(extra = {}) { builder_screen_params.merge(extra) }
+
+= turbo_frame_tag "edit_affordance_builder_editor" do
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        .flex.flex-wrap.items-start.justify-between.gap-3
+          .space-y-1
+            = render TypographyComponent.new(as: :h3, text: "Field #{@cell_index + 1}")
+            = render TypographyComponent.new(as: :muted, text: "Row #{@row_index + 1}")
+          .flex.flex-wrap.gap-2
+            = link_to "Back to row",
+              row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index)),
+              data: { turbo_frame: "edit_affordance_builder_editor" },
+              class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+            = button_to "Delete field",
+              cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
+              method: :delete,
+              form: { data: { turbo_frame: "edit_affordance_builder_editor" } },
+              class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
+
+        - if @cell.key?("binding")
+          = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
+            method: :patch,
+            data: { turbo_frame: "edit_affordance_builder_editor", controller: "edit-affordance-builder" },
+            class: "space-y-4" do
+            .grid.gap-3.md:grid-cols-3
+              .space-y-1
+                = render LabelComponent.new(text: "Schema path", for_id: "ptr")
+                = select_tag :ptr,
+                  options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget, "data-array": entry.array? ? "true" : "false" }] }, @cell.dig("binding", "ptr")),
+                  data: { edit_affordance_builder_target: "path", action: "edit-affordance-builder#sync" },
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Widget", for_id: "widget")
+                = select_tag :widget,
+                  options_for_select(@widget_options, @cell["widget"] || "auto"),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Span", for_id: "span")
+                = number_field_tag :span,
+                  @cell["span"] || @selected_screen&.fetch("default_span", 3),
+                  min: 1,
+                  max: 12,
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Help", for_id: "help")
+                = text_field_tag :help,
+                  @cell["help"],
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Placeholder", for_id: "placeholder")
+                = text_field_tag :placeholder,
+                  @cell["placeholder"],
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+            %label.inline-flex.items-center.gap-2.text-sm
+              = check_box_tag :label, "1", @cell.fetch("label", true), class: "h-4 w-4 rounded border-2 border-black"
+              %span Show label
+            .flex.justify-end
+              = submit_tag "Update field",
+                class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+        - elsif @cell["kind"] == "navigation"
+          = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
+            method: :patch,
+            data: { turbo_frame: "edit_affordance_builder_editor" },
+            class: "space-y-4" do
+            .grid.gap-3.md:grid-cols-3
+              .space-y-1
+                = render LabelComponent.new(text: "Target screen", for_id: "target_screen")
+                = select_tag :target_screen,
+                  options_for_select(@screen_ids.map { |screen_id| [screen_id, screen_id] }, @cell["target_screen"]),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Label", for_id: "navigation_label")
+                = text_field_tag :navigation_label,
+                  @cell["label"],
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Span", for_id: "navigation_span")
+                = number_field_tag :navigation_span,
+                  @cell["span"] || @selected_screen&.fetch("default_span", 3),
+                  min: 1,
+                  max: 12,
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+            = submit_tag "Update navigation",
+              class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+        - elsif @cell["kind"] == "commit"
+          = form_with url: cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: @row_index, cell_index: @cell_index)),
+            method: :patch,
+            data: { turbo_frame: "edit_affordance_builder_editor" },
+            class: "space-y-4" do
+            .grid.gap-3.md:grid-cols-3
+              .space-y-1
+                = render LabelComponent.new(text: "Span", for_id: "commit_span")
+                = number_field_tag :commit_span,
+                  @cell["span"] || @selected_screen&.fetch("default_span", 3),
+                  min: 1,
+                  max: 12,
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Commit mode", for_id: "commit_mode")
+                = select_tag :commit_mode,
+                  options_for_select([["Review screen", "review_screen"], ["Immediate", "immediate"]], @cell["commit_mode"] || "review_screen"),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+              .space-y-1
+                = render LabelComponent.new(text: "Message mode", for_id: "message_mode")
+                = select_tag :message_mode,
+                  options_for_select([["Hidden", "hidden"], ["Inline optional", "inline_optional"], ["Inline required", "inline_required"]], @cell["message_mode"] || "inline_optional"),
+                  class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+            = submit_tag "Update commit",
+              class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+        - else
+          = render AlertComponent.new(variant: :destructive) do
+            This cell can be repaired from the Raw tab.

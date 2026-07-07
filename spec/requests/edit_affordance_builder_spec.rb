@@ -357,6 +357,62 @@ RSpec.describe "Edit affordance builder", type: :request do
     )
   end
 
+  it "streams cell movement back into the inline row editor" do
+    draft = create_builder_draft
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "0",
+      label: "1"
+    }
+
+    patch move_cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      direction: "right"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Row 1")
+    expect(response.body).to include("Field moved.")
+    expect(draft.reload.body.dig("screens", 0, "rows", 0).map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/bio /name])
+  end
+
+  it "streams cell deletion back into the inline row editor" do
+    draft = create_builder_draft
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      row_index: "0",
+      label: "1"
+    }
+
+    delete cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Row 1")
+    expect(response.body).to include("Field deleted.")
+    expect(draft.reload.body.dig("screens", 0, "rows", 0).map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/bio])
+  end
+
   it "applies a three-choice room scaffold from schema suggestions" do
     choice_schema = create(
       :document,
