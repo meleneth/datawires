@@ -116,6 +116,18 @@ module Drafts
         alert: e.message
     end
 
+    def apply_suggestion
+      body = deep_dup_json(@draft.body)
+      apply_builder_suggestion!(body, params.require(:suggestion_id))
+      @draft.update!(body: body)
+
+      redirect_to builder_path,
+        notice: "Suggestion applied."
+    rescue ArgumentError => e
+      redirect_to builder_path,
+        alert: e.message
+    end
+
     def update_screen
       body = deep_dup_json(@draft.body)
       screen = builder_screen_for(body)
@@ -296,6 +308,7 @@ module Drafts
       @active_subform = current_builder_subform
       @rows = current_builder_rows
       @indexes = builder_index_entries
+      @suggestions = builder_suggestions
       @screen_ids = screen_ids
       @builder_width_class = width_class_for(@selected_screen&.fetch("width", "large"))
     end
@@ -320,6 +333,31 @@ module Drafts
       body = deep_dup_json(@draft.body)
       target_row(body) << commit_cell_from_params
       body
+    end
+
+    def apply_builder_suggestion!(body, suggestion_id)
+      case suggestion_id
+      when "add_required_fields"
+        add_entries_to_rows!(body, missing_required_entries)
+      when "add_scalar_fields"
+        add_entries_to_rows!(body, missing_scalar_entries)
+      when "add_commit"
+        append_row(builder_rows_for(body)) << default_commit_cell
+      when "promote_long_text"
+        promote_long_text_fields!(body)
+      when "choice_room_layout"
+        apply_choice_room_layout!(body)
+      else
+        if suggestion_id.start_with?("add_collection:")
+          ptr = suggestion_id.delete_prefix("add_collection:")
+          entry = @field_entries.find { |candidate| candidate.ptr == ptr && candidate.array? }
+          raise ArgumentError, "Select an existing array field." unless entry
+
+          append_row(builder_rows_for(body)) << collection_cell_for(entry)
+        else
+          raise ArgumentError, "Unknown suggestion."
+        end
+      end
     end
 
     def ensure_main_screen(body)
@@ -374,6 +412,38 @@ module Drafts
       cell["collection"] = collection_config_from_params if field_entry&.array?
       cell["reference"] = reference_config_from_params if widget == "reference"
       cell
+    end
+
+    def field_cell_for(entry, span: nil, widget: nil)
+      cell = {
+        "binding" => {
+          "kind" => "document_ptr",
+          "ptr" => entry.ptr
+        },
+        "widget" => widget || suggested_widget_for(entry),
+        "label" => true,
+        "span" => span || suggested_span_for(entry)
+      }
+      cell["collection"] = EditAffordances::Collection.default if entry.array?
+      cell
+    end
+
+    def collection_cell_for(entry)
+      field_cell_for(entry, span: 12, widget: "array").merge(
+        "collection" => EditAffordances::Collection.default_config.merge(
+          "presentation" => "cards",
+          "creation" => "inline_blank_form",
+          "delete" => "enabled",
+          "reorder" => "enabled",
+          "item_title" => item_title_binding_for(entry),
+          "item_subtitle" => {
+            "kind" => "value_label"
+          }
+        )
+      ).tap do |cell|
+        item_rows = item_rows_for_array_entry(entry)
+        cell["item_rows"] = item_rows if item_rows.present?
+      end
     end
 
     def navigation_cell_from_params
@@ -532,6 +602,183 @@ module Drafts
     def append_row(rows)
       rows << []
       rows.last
+    end
+
+    def add_entries_to_rows!(body, entries)
+      raise ArgumentError, "No matching schema fields remain to add." if entries.empty?
+
+      rows = builder_rows_for(body)
+      entries.each_slice(3) do |group|
+        rows << group.map { |entry| field_cell_for(entry) }
+      end
+    end
+
+    def missing_required_entries
+      missing_scalar_entries.select(&:required?)
+    end
+
+    def missing_scalar_entries
+      used_ptrs = used_field_ptrs(@draft.body)
+      @field_entries.select(&:scalar?).reject { |entry| used_ptrs.include?(entry.ptr) }
+    end
+
+    def missing_array_entries
+      used_ptrs = used_field_ptrs(@draft.body)
+      @field_entries.select(&:array?).reject { |entry| used_ptrs.include?(entry.ptr) }
+    end
+
+    def used_field_ptrs(body)
+      Array(body["screens"]).flat_map { |screen| Array(screen["rows"]).flatten }
+        .concat(Array(body["subforms"]).flat_map { |subform| Array(subform["rows"]).flatten })
+        .filter_map { |cell| cell.dig("binding", "ptr") if cell.is_a?(Hash) }
+        .uniq
+    end
+
+    def existing_commit?(body)
+      Array(body["screens"]).flat_map { |screen| Array(screen["rows"]).flatten }
+        .concat(Array(body["subforms"]).flat_map { |subform| Array(subform["rows"]).flatten })
+        .any? { |cell| cell.is_a?(Hash) && cell["kind"] == "commit" }
+    end
+
+    def builder_suggestions
+      [].tap do |suggestions|
+        suggestions << suggestion("add_required_fields", "Add required fields", "#{missing_required_entries.count} required field(s) not in this affordance.") if missing_required_entries.any?
+        suggestions << suggestion("add_scalar_fields", "Add scalar fields", "#{missing_scalar_entries.count} scalar field(s) can be added from the schema.") if missing_scalar_entries.any?
+        missing_array_entries.each do |entry|
+          suggestions << suggestion("add_collection:#{entry.ptr}", "Add #{entry.label} collection", "Create a card collection editor for #{entry.ptr}.")
+        end
+        suggestions << suggestion("promote_long_text", "Make long text textareas", "Promote description, summary, notes, prompt, and body fields already in the layout.") if long_text_cells(@draft.body).any?
+        suggestions << suggestion("choice_room_layout", "Build three-choice room layout", "Realize a HyperCard-style challenge room editor.") if choice_room_schema?
+        suggestions << suggestion("add_commit", "Add commit action", "Add a publish action to the current screen.") unless existing_commit?(@draft.body)
+      end
+    end
+
+    def suggestion(id, title, description)
+      {
+        id: id,
+        title: title,
+        description: description
+      }
+    end
+
+    def promote_long_text_fields!(body)
+      changed = false
+      all_cells_for(body).each do |cell|
+        next unless field_cell?(cell)
+        next unless long_text_ptr?(cell.dig("binding", "ptr"))
+        next if cell["widget"] == "textarea"
+
+        cell["widget"] = "textarea"
+        cell["span"] = 12 if cell["span"].to_i < 12
+        changed = true
+      end
+      raise ArgumentError, "No realized long text fields are available to refine." unless changed
+    end
+
+    def long_text_cells(body)
+      all_cells_for(body).select do |cell|
+        field_cell?(cell) && long_text_ptr?(cell.dig("binding", "ptr")) && cell["widget"] != "textarea"
+      end
+    end
+
+    def all_cells_for(body)
+      Array(body["screens"]).flat_map { |screen| Array(screen["rows"]).flatten }
+        .concat(Array(body["subforms"]).flat_map { |subform| Array(subform["rows"]).flatten })
+        .select { |cell| cell.is_a?(Hash) }
+    end
+
+    def long_text_ptr?(ptr)
+      name = ptr.to_s.split("/").last.to_s
+      %w[body description notes prompt summary terminal_text bio].include?(name)
+    end
+
+    def choice_room_schema?
+      ptrs = @field_entries.map(&:ptr)
+      %w[/name /room_type /prompt /choices].all? { |ptr| ptrs.include?(ptr) }
+    end
+
+    def apply_choice_room_layout!(body)
+      screen = builder_screen_for(body)
+      screen.delete("subform")
+      screen["rows"] = [
+        [ field_cell_for(entry_for_ptr!("/name"), span: 5), field_cell_for(entry_for_ptr!("/room_type"), span: 3), optional_field_cell("/stage", span: 4) ].compact,
+        [ field_cell_for(entry_for_ptr!("/prompt"), span: 12, widget: "textarea") ],
+        [ optional_field_cell("/terminal_text", span: 12, widget: "textarea") ].compact,
+        [ collection_cell_for(entry_for_ptr!("/choices")) ],
+        [ default_commit_cell ]
+      ].reject(&:empty?)
+    end
+
+    def optional_field_cell(ptr, span:, widget: nil)
+      entry = @field_entries.find { |candidate| candidate.ptr == ptr }
+      field_cell_for(entry, span: span, widget: widget) if entry
+    end
+
+    def entry_for_ptr!(ptr)
+      @field_entries.find { |entry| entry.ptr == ptr } || raise(ArgumentError, "Schema field #{ptr} is not available.")
+    end
+
+    def default_commit_cell
+      {
+        "kind" => "commit",
+        "span" => 12,
+        "commit_mode" => "review_screen",
+        "message_mode" => "inline_optional"
+      }
+    end
+
+    def suggested_widget_for(entry)
+      return "textarea" if long_text_ptr?(entry.ptr)
+      return "array" if entry.array?
+
+      entry.widget.presence || "auto"
+    end
+
+    def suggested_span_for(entry)
+      return 12 if entry.array? || suggested_widget_for(entry) == "textarea"
+
+      entry.required? ? 6 : DEFAULT_FIELD_SPAN
+    end
+
+    def item_title_binding_for(entry)
+      item_properties = entry.cursor.schema_node.dig("items", "properties")
+      if item_properties.is_a?(Hash)
+        preferred = %w[label name title].find { |name| item_properties.key?(name) }
+        return { "kind" => "property", "name" => preferred } if preferred
+      end
+
+      { "kind" => "value_label" }
+    end
+
+    def item_rows_for_array_entry(entry)
+      item_properties = entry.cursor.schema_node.dig("items", "properties")
+      return [] unless item_properties.is_a?(Hash)
+
+      item_properties.keys.each_slice(3).map do |property_names|
+        property_names.map do |property_name|
+          ptr = "/#{property_name}"
+          widget = long_text_ptr?(ptr) ? "textarea" : "auto"
+          cell = {
+            "binding" => {
+              "kind" => "document_ptr",
+              "ptr" => ptr
+            },
+            "widget" => widget,
+            "span" => widget == "textarea" ? 12 : 4
+          }
+          if @schema_wrapper.key == "mud-choice-room" && property_name == "target_room_key"
+            cell["widget"] = "reference"
+            cell["reference"] = {
+              "schema_key" => "mud-choice-room",
+              "index_type" => "identity",
+              "index_key" => "document_key",
+              "placeholder" => "Select next room"
+            }
+            cell["span"] = 4
+          end
+          cell
+        end
+      end
     end
 
     def normalized_span(raw_span)

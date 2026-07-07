@@ -78,6 +78,10 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Preview")
     expect(response.body).to include("Diagnostics")
     expect(response.body).to include("Raw")
+    expect(response.body).to include("Schema suggestions")
+    expect(response.body).to include("Add required fields")
+    expect(response.body).to include("Add scalar fields")
+    expect(response.body).to include("Add Items collection")
     expect(response.body).to include("max-width: 1920px;")
     expect(response.body).to include("Display Name (/name)")
     expect(response.body).to include("Biography (/bio)")
@@ -160,6 +164,150 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
     follow_redirect!
     expect(response.body).to include("Add a row before adding fields.")
+  end
+
+  it "applies schema-aware suggestions into realized builder cells" do
+    draft = create_builder_draft
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_required_fields"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    rows = draft.reload.body.dig("screens", 0, "rows")
+    expect(rows.first.first).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/name"
+      },
+      "span" => 6
+    )
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_scalar_fields"
+    }
+
+    scalar_ptrs = draft.reload.body.dig("screens", 0, "rows").flatten.filter_map { |cell| cell.dig("binding", "ptr") }
+    expect(scalar_ptrs).to include("/bio", "/thumbnail")
+    bio_cell = draft.body.dig("screens", 0, "rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/bio" }
+    expect(bio_cell).to include(
+      "widget" => "textarea",
+      "span" => 12
+    )
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_collection:/items"
+    }
+
+    collection_cell = draft.reload.body.dig("screens", 0, "rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/items" }
+    expect(collection_cell).to include(
+      "widget" => "array",
+      "span" => 12,
+      "collection" => include(
+        "presentation" => "cards",
+        "creation" => "inline_blank_form",
+        "delete" => "enabled",
+        "reorder" => "enabled"
+      )
+    )
+    expect(collection_cell.fetch("item_rows").flatten.first).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/label"
+      }
+    )
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "add_commit"
+    }
+
+    expect(draft.reload.body.dig("screens", 0, "rows").flatten).to include(
+      include(
+        "kind" => "commit",
+        "span" => 12,
+        "commit_mode" => "review_screen",
+        "message_mode" => "inline_optional"
+      )
+    )
+  end
+
+  it "applies a three-choice room scaffold from schema suggestions" do
+    choice_schema = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      key: "mud-choice-room",
+      head_body: {
+        "$schema" => Document::JSON_SCHEMA_2020_12,
+        "$id" => "http://example.test/schemas/mud-choice-room",
+        "type" => "object",
+        "properties" => {
+          "name" => { "type" => "string" },
+          "room_type" => { "type" => "string", "enum" => %w[challenge death victory] },
+          "stage" => { "type" => "string" },
+          "prompt" => { "type" => "string" },
+          "terminal_text" => { "type" => "string" },
+          "choices" => {
+            "type" => "array",
+            "items" => {
+              "type" => "object",
+              "properties" => {
+                "label" => { "type" => "string" },
+                "description" => { "type" => "string" },
+                "outcome" => { "type" => "string", "enum" => %w[advance death victory] },
+                "target_room_key" => { "type" => "string" }
+              }
+            }
+          }
+        },
+        "required" => %w[name room_type prompt]
+      }
+    )
+    choice_wrapper = create(:schema_wrapper, document: choice_schema)
+    draft = CreateEditAffordance.call(
+      schema_wrapper: choice_wrapper,
+      title: "Choice Builder",
+      actor: User.find_or_create_by!(id: ApplicationController::DEV_USER_ID) { |user| user.name = "devUser" }
+    ).draft
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response.body).to include("Build three-choice room layout")
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "choice_room_layout"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    rows = draft.reload.body.dig("screens", 0, "rows")
+    expect(rows.map(&:length)).to eq([ 3, 1, 1, 1, 1 ])
+    expect(rows.first.map { |cell| cell.dig("binding", "ptr") }).to eq(%w[/name /room_type /stage])
+    expect(rows.second.first).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/prompt"
+      },
+      "widget" => "textarea",
+      "span" => 12
+    )
+    choices_cell = rows.fourth.first
+    expect(choices_cell).to include(
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/choices"
+      },
+      "widget" => "array",
+      "collection" => include("presentation" => "cards")
+    )
+    target_cell = choices_cell.fetch("item_rows").flatten.find { |cell| cell.dig("binding", "ptr") == "/target_room_key" }
+    expect(target_cell).to include(
+      "widget" => "reference",
+      "reference" => include(
+        "schema_key" => "mud-choice-room",
+        "placeholder" => "Select next room"
+      )
+    )
+    expect(rows.last.first).to include("kind" => "commit")
   end
 
   it "continues an uncommitted edit affordance draft from the schema page" do

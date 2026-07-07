@@ -48,6 +48,7 @@ Rails.application.routes.draw do
       patch :add_subform
       patch :add_index
       patch :add_row
+      patch :apply_suggestion
       patch :update_screen
       patch :update_raw
       delete :affordance, action: :destroy_affordance
