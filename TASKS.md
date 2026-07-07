@@ -116,11 +116,25 @@ document or repairing the affordance.
       rendering timeline view affordances.
 - [x] Constrain timeline view builder schema selection to domain schemas and
       preview against the configured schema key.
+- [x] Add a Playwright e2e harness that boots Rails test, seeds deterministic
+      demo data, and cleans up the Windows process tree reliably.
+- [x] Add Playwright coverage for playing the Wizard World safe path through
+      the three-choice PBX-style view affordance.
+- [x] Add Playwright coverage for the schema-suggestion edit affordance builder
+      flow: apply a schema suggestion, open the realized field, refine it, and
+      verify persistence after reload.
+- [x] Fix inline builder field editor labels/ids so Playwright and users can
+      target controls by accessible label names.
 
 ## Next Thrash Targets
 
-- [ ] Use the builder to author or revise a real edit affordance and capture the
-      next rough edges here.
+- [ ] Add Playwright coverage for authoring-side affordance creation from a
+      schema page: create an edit affordance, drive the builder, commit it, and
+      use the resulting affordance on a document.
+- [ ] Add a Wizard World death-path Playwright test that chooses a wrong option
+      and verifies the terminal failure room has no onward choices.
+- [ ] Add Playwright coverage for creating/refining a view affordance in the
+      structured view builder once the next renderer shape is clear.
 - [ ] Expand the structured view affordance builder as additional renderer
       shapes become clear from use.
 - [x] Add affordance support for rendering base64-encoded strings as images.
