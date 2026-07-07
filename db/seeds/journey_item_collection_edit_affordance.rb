@@ -41,6 +41,9 @@ module Seeds
         edit_document: edit_document
       ) do |edit_affordance|
         edit_affordance.title = EDIT_AFFORDANCE_TITLE
+        edit_affordance.public = true
+      end.tap do |edit_affordance|
+        edit_affordance.update!(public: true) unless edit_affordance.public?
       end
     end
 

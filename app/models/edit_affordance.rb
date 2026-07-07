@@ -18,6 +18,7 @@ class EditAffordance < ApplicationRecord
   def_delegators :edit_document, :head_revision
 
   scope :for_schema, ->(schema_wrapper) { where(schema_wrapper: schema_wrapper) }
+  scope :publicly_available, -> { where(public: true) }
 
   validates :title,
             presence: true,

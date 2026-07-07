@@ -16,6 +16,7 @@ class ViewAffordance < ApplicationRecord
   def_delegators :view_document, :head_revision
 
   scope :for_schema, ->(schema_wrapper) { where(schema_wrapper: schema_wrapper) }
+  scope :publicly_available, -> { where(public: true) }
 
   validates :title,
             presence: true,

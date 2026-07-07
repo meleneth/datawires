@@ -64,6 +64,7 @@ RSpec.describe Clusters::SeedDomain do
     )
     timeline_view = timeline_schema.schema_wrapper.view_affordances.sole
     expect(timeline_view.title).to eq("Timeline")
+    expect(timeline_view).to be_public
     expect(timeline_view.body).to include(
       "renderer" => "timeline_d3",
       "config" => include("schema_key" => "timeline-event")
@@ -72,6 +73,7 @@ RSpec.describe Clusters::SeedDomain do
     person_schema = domain.documents.find_by!(key: "person")
     person_view = person_schema.schema_wrapper.view_affordances.sole
     expect(person_view.title).to eq("Timeline")
+    expect(person_view).to be_public
     expect(person_view.body).to include(
       "renderer" => "timeline_d3",
       "config" => include(
@@ -83,6 +85,7 @@ RSpec.describe Clusters::SeedDomain do
     party_schema = domain.documents.find_by!(key: "party")
     party_view = party_schema.schema_wrapper.view_affordances.sole
     expect(party_view.title).to eq("Timeline")
+    expect(party_view).to be_public
     expect(party_view.body).to include(
       "renderer" => "timeline_d3",
       "config" => include(
@@ -102,7 +105,9 @@ RSpec.describe Clusters::SeedDomain do
     )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[person place thing party timeline-event])).find_each do |wrapper|
+      expect(wrapper).to be_public
       affordance = wrapper.edit_affordances.sole
+      expect(affordance).to be_public
       expect(affordance.title).to eq("Default")
       expect(affordance.body.fetch("screens").first.fetch("rows")).not_to be_empty
     end
@@ -189,13 +194,16 @@ RSpec.describe Clusters::SeedDomain do
     proceeding_schema = domain.documents.find_by!(key: "proceeding-event")
     proceeding_view = proceeding_schema.schema_wrapper.view_affordances.sole
     expect(proceeding_view.title).to eq("Proceeding Sequence")
+    expect(proceeding_view).to be_public
     expect(proceeding_view.body).to include(
       "renderer" => "timeline_d3",
       "config" => include("schema_key" => "proceeding-event")
     )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).find_each do |wrapper|
+      expect(wrapper).to be_public
       affordance = wrapper.edit_affordances.sole
+      expect(affordance).to be_public
       expect(affordance.title).to eq("Default")
       expect(affordance.body.fetch("screens").first.fetch("rows")).not_to be_empty
     end
@@ -234,6 +242,7 @@ RSpec.describe Clusters::SeedDomain do
         "item_schema_key" => "mud-item"
       )
     )
+    expect(room_schema.schema_wrapper.view_affordances.sole).to be_public
 
     character_schema = domain.documents.find_by!(key: "mud-character")
     expect(character_schema.schema_wrapper.view_affordances.sole.title).to eq("Play")
@@ -253,7 +262,9 @@ RSpec.describe Clusters::SeedDomain do
     )
 
     SchemaWrapper.where(document: domain.documents.where(key: %w[mud-room mud-character mud-item mud-world mud-choice-room])).find_each do |wrapper|
+      expect(wrapper).to be_public
       expect(wrapper.edit_affordances.sole.title).to eq("Default")
+      expect(wrapper.edit_affordances.sole).to be_public
       expect(wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows")).not_to be_empty
     end
   end

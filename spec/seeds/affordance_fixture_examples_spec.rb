@@ -44,10 +44,11 @@ RSpec.describe Seeds::AffordanceFixtureExamples do
         edit_document = Document.find_by!(domain: domain, key: fixture.fetch(:edit_key))
         affordance = schema_document.schema_wrapper.edit_affordances.sole
 
-        expect(schema_document.schema_wrapper).to be_present
+        expect(schema_document.schema_wrapper).to be_public
         expect(example_document.schema_document).to eq(schema_document)
         expect(edit_document.schema_document.key).to eq(Seeds::EditFormSchema::DOCUMENT_KEY)
         expect(affordance.title).to eq("Fixture")
+        expect(affordance).to be_public
         expect(affordance.edit_document).to eq(edit_document)
       end
     end

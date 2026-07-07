@@ -32,6 +32,7 @@ module Clusters
             message: "Seed #{definition.fetch(:name)} #{schema_definition.fetch(:title)} schema"
           )
           schema_wrapper = SyncSchemaWrapperForDocument.call(document: schema_document)
+          schema_wrapper.update!(public: true) unless schema_wrapper.public?
           ensure_affordance!(
             schema_wrapper: schema_wrapper,
             schema_definition: schema_definition,
@@ -106,6 +107,7 @@ module Clusters
         edit_document: affordance_document
       )
       affordance.title = DEFAULT_AFFORDANCE_TITLE
+      affordance.public = true
       affordance.save!
     end
 
@@ -123,6 +125,7 @@ module Clusters
           view_document: affordance_document
         )
         affordance.title = view_definition.fetch(:affordance_title)
+        affordance.public = true
         affordance.save!
       end
     end

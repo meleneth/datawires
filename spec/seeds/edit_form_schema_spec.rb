@@ -1,9 +1,22 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require Rails.root.join("db/seeds/support/document_seed_helper")
+require Rails.root.join("db/seeds/json_schema_2020_12")
 require Rails.root.join("db/seeds/edit_form_schema")
 
 RSpec.describe Seeds::EditFormSchema do
+  describe ".seed!" do
+    it "marks the seeded schema public" do
+      Seeds::JsonSchema202012.seed!
+
+      described_class.seed!
+
+      schema = Document.find_by!(key: described_class::DOCUMENT_KEY)
+      expect(schema.schema_wrapper).to be_public
+    end
+  end
+
   describe ".schema_body" do
     it "allows every currently supported field widget" do
       widget_enum = described_class

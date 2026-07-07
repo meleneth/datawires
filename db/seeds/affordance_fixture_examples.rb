@@ -30,6 +30,7 @@ module Seeds
           message: "Seed #{fixture.fetch(:schema_title)} fixture schema"
         )
         schema_wrapper = SchemaWrapper.find_or_create_by!(document: schema_document)
+        schema_wrapper.update!(public: true) unless schema_wrapper.public?
 
         DocumentSeedHelper.ensure_document_with_revision!(
           domain: domain,
@@ -54,6 +55,7 @@ module Seeds
           edit_document: edit_document
         )
         affordance.title = "Fixture"
+        affordance.public = true
         affordance.save!
       end
     end

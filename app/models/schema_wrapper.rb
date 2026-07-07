@@ -13,6 +13,8 @@ class SchemaWrapper < ApplicationRecord
 
   delegate :key, :title, :domain, :head_revision, :body, to: :document
 
+  scope :publicly_available, -> { where(public: true) }
+
   validate :document_must_be_schema
 
   def conforming_documents

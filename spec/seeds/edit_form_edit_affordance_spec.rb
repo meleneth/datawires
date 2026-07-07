@@ -28,6 +28,7 @@ RSpec.describe Seeds::EditFormEditAffordance do
       affordance = edit_form_schema.schema_wrapper.edit_affordances.sole
 
       expect(affordance.title).to eq("Default")
+      expect(affordance).to be_public
       expect(affordance.edit_document.key).to eq("edit-form-default-edit-affordance")
       expect(affordance.edit_document.schema_document).to eq(edit_form_schema)
       expect(affordance.body.fetch("screens").map { |screen| screen.fetch("id") }).to include(

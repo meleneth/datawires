@@ -25,7 +25,9 @@ module Seeds
         message: "Seed edit form schema"
       )
 
-      SchemaWrapper.find_or_create_by!(document:)
+      SchemaWrapper.find_or_create_by!(document:).tap do |schema_wrapper|
+        schema_wrapper.update!(public: true) unless schema_wrapper.public?
+      end
     end
 
     def schema_body

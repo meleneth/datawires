@@ -3,6 +3,17 @@
 require "rails_helper"
 
 RSpec.describe SchemaWrapper, type: :model do
+  it "defaults to private" do
+    expect(create(:schema_wrapper)).not_to be_public
+  end
+
+  it "scopes public schema wrappers" do
+    public_wrapper = create(:schema_wrapper, public: true)
+    create(:schema_wrapper, public: false)
+
+    expect(described_class.publicly_available).to contain_exactly(public_wrapper)
+  end
+
   it "requires the wrapped document to be a supported schema" do
     document = create(
       :document,

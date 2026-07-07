@@ -8,6 +8,17 @@ RSpec.describe EditAffordance, type: :model do
     it { is_expected.to belong_to(:edit_document).class_name("Document") }
   end
 
+  it "defaults to private" do
+    expect(create(:edit_affordance)).not_to be_public
+  end
+
+  it "scopes public edit affordances" do
+    public_affordance = create(:edit_affordance, public: true)
+    create(:edit_affordance, public: false)
+
+    expect(described_class.publicly_available).to contain_exactly(public_affordance)
+  end
+
   describe "validations" do
     subject(:edit_affordance) { build(:edit_affordance) }
 

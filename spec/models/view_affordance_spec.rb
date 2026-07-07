@@ -8,6 +8,17 @@ RSpec.describe ViewAffordance, type: :model do
     it { is_expected.to belong_to(:view_document).class_name("Document") }
   end
 
+  it "defaults to private" do
+    expect(create(:view_affordance)).not_to be_public
+  end
+
+  it "scopes public view affordances" do
+    public_affordance = create(:view_affordance, public: true)
+    create(:view_affordance, public: false)
+
+    expect(described_class.publicly_available).to contain_exactly(public_affordance)
+  end
+
   describe "validations" do
     subject(:view_affordance) { build(:view_affordance) }
 

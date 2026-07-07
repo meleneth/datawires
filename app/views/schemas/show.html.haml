@@ -25,6 +25,10 @@
           %dt.text-muted-foreground Key
           %dd.font-head.text-foreground= @schema_wrapper.key
 
+        %div
+          %dt.text-muted-foreground Visibility
+          %dd.font-head.text-foreground= @schema_wrapper.public? ? "Public" : "Private"
+
   .mt-6
     .flex.items-center.justify-between.gap-3
       = render TypographyComponent.new(as: :h2, text: "Edit affordances")
@@ -41,6 +45,7 @@
           %li.flex.items-center.justify-between.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
             .min-w-0
               .font-head.font-medium= affordance.title
+              .text-xs.text-muted-foreground= affordance.public? ? "Public edit affordance" : "Private edit affordance"
               - if affordance.edit_document.present?
                 .text-xs.text-muted-foreground= affordance.edit_document.title.presence || affordance.edit_document.key
 
@@ -75,6 +80,7 @@
           %li.flex.items-center.justify-between.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
             .min-w-0
               .font-head.font-medium= affordance.title
+              .text-xs.text-muted-foreground= affordance.public? ? "Public view affordance" : "Private view affordance"
               - if affordance.view_document.present?
                 .text-xs.text-muted-foreground= affordance.view_document.title.presence || affordance.view_document.key
 

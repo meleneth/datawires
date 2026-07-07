@@ -45,6 +45,10 @@ RSpec.describe Seeds::PrivateMudDemo do
     expect(choice_projection.data.fetch("room")).to include("title" => "Wizard's Gate")
     expect(choice_projection.data.fetch("choices").count).to eq(3)
     expect(choice_projection.data.fetch("choices").pluck("outcome")).to contain_exactly("death", "advance", "death")
+    expect(domain.documents.find_by!(key: "mud-room").schema_wrapper).to be_public
+    expect(room_view).to be_public
+    expect(character_view).to be_public
+    expect(choice_view).to be_public
 
     home = domain.documents.find_by!(key: "domain-home")
     expect(home.id).to eq(described_class::DOCUMENT_IDS.fetch("domain-home"))

@@ -39,7 +39,9 @@ module Seeds
 
       documents.each_value do |document|
         document.update!(schema_document: root_document) if document.schema_document != root_document
-        SchemaWrapper.find_or_create_by!(document:)
+        SchemaWrapper.find_or_create_by!(document:).tap do |schema_wrapper|
+          schema_wrapper.update!(public: true) unless schema_wrapper.public?
+        end
       end
     end
 
