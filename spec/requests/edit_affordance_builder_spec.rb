@@ -266,6 +266,9 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("edit_affordance_builder_suggestions")
     expect(response.body).to include("edit_affordance_builder_rows")
     expect(response.body).to include("edit_affordance_builder_preview")
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include("Field 1")
+    expect(response.body).to include("Update field")
     expect(response.body).to include("/name")
   end
 

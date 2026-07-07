@@ -48,9 +48,15 @@ module Drafts
     end
 
     def add_field
-      @draft.update!(body: body_with_added_field)
+      result = body_with_added_field
+      @draft.update!(body: result.fetch(:body))
 
-      builder_update_response(notice: "Field added.")
+      editor_update_response(
+        notice: "Field added.",
+        row_index: result.fetch(:row_index),
+        cell_index: result.fetch(:cell_index),
+        html_path: builder_path
+      )
     rescue ArgumentError => e
       builder_error_response(e.message)
     end
@@ -295,7 +301,7 @@ module Drafts
       end
     end
 
-    def editor_update_response(notice:, row_index:, cell_index: nil)
+    def editor_update_response(notice:, row_index:, cell_index: nil, html_path: nil)
       respond_to do |format|
         format.turbo_stream do
           flash.now[:notice] = notice
@@ -303,7 +309,7 @@ module Drafts
           render :builder_update
         end
         format.html do
-          redirect_to cell_index.nil? ? row_path(row_index) : cell_path(row_index, cell_index),
+          redirect_to html_path || (cell_index.nil? ? row_path(row_index) : cell_path(row_index, cell_index)),
             notice: notice
         end
       end
@@ -369,8 +375,13 @@ module Drafts
 
     def body_with_added_field
       body = deep_dup_json(@draft.body)
-      target_row(body) << field_cell_from_params
-      body
+      row, row_index = target_row_with_index(body)
+      row << field_cell_from_params
+      {
+        body: body,
+        row_index: row_index,
+        cell_index: row.length - 1
+      }
     end
 
     def body_with_added_navigation
@@ -528,6 +539,10 @@ module Drafts
     end
 
     def target_row(body)
+      target_row_with_index(body).first
+    end
+
+    def target_row_with_index(body)
       rows = builder_rows_for(body)
       raise ArgumentError, "Add a row before adding fields." if rows.empty?
 
@@ -537,7 +552,7 @@ module Drafts
       rescue ArgumentError
         raise ArgumentError, "Select an existing row before adding a field."
       end
-      return rows[index] if index >= 0 && index < rows.length
+      return [ rows[index], index ] if index >= 0 && index < rows.length
 
       raise ArgumentError, "Select an existing row before adding a field."
     end
