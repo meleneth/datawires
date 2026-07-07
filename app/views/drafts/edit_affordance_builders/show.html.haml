@@ -584,7 +584,9 @@
                   disabled: @rows.empty?,
                   class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none#{@rows.empty? ? " cursor-not-allowed opacity-50" : ""}"
 
-      = render "rows", builder_screen_params: builder_screen_params
+      .grid.gap-6.xl:grid-cols-2
+        = render "rows", builder_screen_params: builder_screen_params
+        = render "preview"
 
     - elsif @tab == "row"
       = render CardComponent.new(html_options: { class: "w-full" }) do
@@ -894,41 +896,10 @@
                 This cell can be repaired from the Raw tab.
 
     - elsif @tab == "preview"
-      %div{ class: @builder_width_class }
-        = render CardComponent.new(html_options: { class: "w-full" }) do
-          = render CardContentComponent.new do
-            .space-y-4
-              = render TypographyComponent.new(as: :h3, text: "Seeded preview")
-              - if @preview_projection.rows.empty?
-                = render AlertComponent.new do
-                  No projected rows yet.
-              - else
-                - @preview_projection.rows.each do |row|
-                  .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
-                    - row.cells.each do |cell|
-                      .rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm{ class: "col-span-#{cell.span}" }
-                        .font-head= cell.respond_to?(:default_label) ? cell.default_label : cell.class.name.demodulize
-                        - if cell.respond_to?(:cursor)
-                          .mt-1.font-mono.text-xs.text-muted-foreground= cell.cursor.path.to_s
-                        - if cell.respond_to?(:widget)
-                          .mt-1.text-xs.text-muted-foreground= cell.widget
+      = render "preview", constrain: true
 
     - elsif @tab == "diagnostics"
-      = render CardComponent.new(html_options: { class: "w-full" }) do
-        = render CardContentComponent.new do
-          .space-y-4
-            = render TypographyComponent.new(as: :h3, text: "Diagnostics")
-            - projection_diagnostics = @preview_projection.diagnostics
-            - if @diagnostics.empty? && projection_diagnostics.empty?
-              = render AlertComponent.new do
-                No diagnostics.
-            - else
-              - @diagnostics.each do |message|
-                = render AlertComponent.new(variant: :destructive) do
-                  = message
-              - projection_diagnostics.each do |diagnostic|
-                = render AlertComponent.new(variant: :destructive) do
-                  = diagnostic.message
+      = render "diagnostics"
 
     - elsif @tab == "raw"
       = render CardComponent.new(html_options: { class: "w-full" }) do

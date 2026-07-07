@@ -1,0 +1,16 @@
+= turbo_frame_tag "edit_affordance_builder_diagnostics" do
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        = render TypographyComponent.new(as: :h3, text: "Diagnostics")
+        - projection_diagnostics = @preview_projection.diagnostics
+        - if @diagnostics.empty? && projection_diagnostics.empty?
+          = render AlertComponent.new do
+            No diagnostics.
+        - else
+          - @diagnostics.each do |message|
+            = render AlertComponent.new(variant: :destructive) do
+              = message
+          - projection_diagnostics.each do |diagnostic|
+            = render AlertComponent.new(variant: :destructive) do
+              = diagnostic.message

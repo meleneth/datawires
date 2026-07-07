@@ -243,6 +243,8 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.media_type).to eq("text/vnd.turbo-stream.html")
     expect(response.body).to include("edit_affordance_builder_suggestions")
     expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
+    expect(response.body).to include("edit_affordance_builder_diagnostics")
     expect(response.body).to include("/name")
   end
 
@@ -263,6 +265,7 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.media_type).to eq("text/vnd.turbo-stream.html")
     expect(response.body).to include("edit_affordance_builder_suggestions")
     expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
     expect(response.body).to include("/name")
   end
 

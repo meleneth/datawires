@@ -5,3 +5,9 @@
 
 = turbo_stream.replace "edit_affordance_builder_rows" do
   = render "rows", builder_screen_params: builder_screen_params
+
+= turbo_stream.replace "edit_affordance_builder_preview" do
+  = render "preview"
+
+= turbo_stream.replace "edit_affordance_builder_diagnostics" do
+  = render "diagnostics"

@@ -1,0 +1,21 @@
+- constrain = local_assigns.fetch(:constrain, false)
+
+= turbo_frame_tag "edit_affordance_builder_preview" do
+  %div{ class: constrain ? @builder_width_class : nil }
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      = render CardContentComponent.new do
+        .space-y-4
+          = render TypographyComponent.new(as: :h3, text: "Seeded preview")
+          - if @preview_projection.rows.empty?
+            = render AlertComponent.new do
+              No projected rows yet.
+          - else
+            - @preview_projection.rows.each do |row|
+              .grid.gap-3{ style: "grid-template-columns: repeat(#{row.column_count}, minmax(0, 1fr));" }
+                - row.cells.each do |cell|
+                  .rounded.border-2.border-black.bg-card.p-3.text-sm.shadow-sm{ class: "col-span-#{cell.span}" }
+                    .font-head= cell.respond_to?(:default_label) ? cell.default_label : cell.class.name.demodulize
+                    - if cell.respond_to?(:cursor)
+                      .mt-1.font-mono.text-xs.text-muted-foreground= cell.cursor.path.to_s
+                    - if cell.respond_to?(:widget)
+                      .mt-1.text-xs.text-muted-foreground= cell.widget
