@@ -164,11 +164,9 @@ module Drafts
       update_active_subform_root!(screen, body) if params.key?(:subform_root_ptr)
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Screen layout updated."
+      builder_update_response(notice: "Screen layout updated.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def update_raw

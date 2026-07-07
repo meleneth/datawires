@@ -763,6 +763,35 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("w-full")
   end
 
+  it "streams screen layout updates into the builder regions" do
+    draft = create_builder_draft
+
+    patch update_screen_draft_edit_affordance_builder_path(draft), params: {
+      start_screen: "main",
+      default_commit_mode: "immediate",
+      root_ptr: "/profile",
+      subform: "",
+      width: "full",
+      screen_mode: "page",
+      default_span: "6",
+      screen_commit_mode: "immediate"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_flash")
+    expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
+    expect(response.body).to include("edit_affordance_builder_diagnostics")
+    expect(response.body).to include("Screen layout updated.")
+    expect(draft.reload.body.fetch("screens").first).to include(
+      "width" => "full",
+      "default_span" => 6,
+      "commit_mode" => "immediate"
+    )
+  end
+
   it "configures collection policy and item bindings for array fields" do
     draft = create_builder_draft
 
