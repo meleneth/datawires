@@ -10,6 +10,7 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("Cluster")
     expect(response.body).to include("Worldbuilding tools")
     expect(response.body).to include("Robert&#39;s Rules of Order")
+    expect(response.body).to include("Private MUD authoring")
   end
 
   it "creates a domain pre-seeded with the worldbuilding cluster" do
@@ -65,6 +66,30 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("motion")
     expect(response.body).to include("proceeding-event")
     expect(response.body).to include("meeting-state")
+  end
+
+  it "creates a domain pre-seeded with the private MUD cluster" do
+    expect {
+      post domains_path, params: {
+        domain: {
+          name: "Lantern House",
+          cluster_key: Clusters::Catalog::PRIVATE_MUD
+        }
+      }
+    }.to change(Domain, :count).by(1)
+      .and change(SchemaWrapper, :count).by(6)
+      .and change(EditAffordance, :count).by(6)
+      .and change(ViewAffordance, :count).by(4)
+
+    domain = Domain.find_by!(name: "Lantern House")
+
+    expect(response).to redirect_to(domain_path(domain))
+    follow_redirect!
+    expect(response.body).to include("mud-room")
+    expect(response.body).to include("mud-character")
+    expect(response.body).to include("mud-item")
+    expect(response.body).to include("mud-world")
+    expect(response.body).to include("mud-choice-room")
   end
 
   it "rejects unknown clusters without creating the domain" do

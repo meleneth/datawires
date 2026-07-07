@@ -1,0 +1,85 @@
+- room = projection.data.fetch("room")
+- exits = projection.data.fetch("exits")
+- characters = projection.data.fetch("characters")
+- items = projection.data.fetch("items")
+- player = projection.data["player"]
+
+.space-y-4
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        .space-y-1
+          = render TypographyComponent.new(as: :h2, text: room.fetch("title"))
+          .font-mono.text-xs.text-muted-foreground= room.fetch("key")
+        %p.whitespace-pre-line.text-sm.leading-6.text-foreground= room.fetch("description")
+        - if room.fetch("notes").present?
+          %p.whitespace-pre-line.text-xs.text-muted-foreground= room.fetch("notes")
+
+  .grid.gap-4.lg:grid-cols-3
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      = render CardContentComponent.new do
+        .space-y-3
+          = render TypographyComponent.new(as: :h3, text: "Exits")
+          - if exits.empty?
+            %p.text-sm.text-muted-foreground No exits.
+          - else
+            %ul.space-y-2
+              - exits.each do |exit_data|
+                %li.rounded.border-2.border-black.bg-background.p-3.shadow-sm
+                  - if exit_data["url"].present?
+                    = link_to exit_data.fetch("label").presence || exit_data.fetch("direction"),
+                      exit_data["url"],
+                      data: { turbo_frame: "main_content", turbo_action: "advance" },
+                      class: "font-head text-sm font-medium underline"
+                  - else
+                    .font-head.text-sm.font-medium= exit_data.fetch("label").presence || exit_data.fetch("direction")
+                  .text-xs.text-muted-foreground= exit_data.fetch("room_title")
+                  - if exit_data.fetch("description").present?
+                    .mt-1.text-sm= exit_data.fetch("description")
+
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      = render CardContentComponent.new do
+        .space-y-3
+          = render TypographyComponent.new(as: :h3, text: "Characters")
+          - if characters.empty?
+            %p.text-sm.text-muted-foreground No one else is here.
+          - else
+            %ul.space-y-2
+              - characters.each do |character|
+                %li.rounded.border-2.border-black.bg-background.p-3.shadow-sm
+                  .font-head.text-sm.font-medium= character.fetch("name")
+                  - if character.fetch("disposition").present?
+                    .text-xs.text-muted-foreground= character.fetch("disposition")
+                  - if character.fetch("description").present?
+                    .mt-1.text-sm= character.fetch("description")
+
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      = render CardContentComponent.new do
+        .space-y-3
+          = render TypographyComponent.new(as: :h3, text: "Items")
+          - if items.empty?
+            %p.text-sm.text-muted-foreground Nothing obvious.
+          - else
+            %ul.space-y-2
+              - items.each do |item|
+                %li.rounded.border-2.border-black.bg-background.p-3.shadow-sm
+                  .font-head.text-sm.font-medium= item.fetch("name")
+                  .text-xs.text-muted-foreground= item.fetch("portable") ? "Portable" : "Fixed"
+                  - if item.fetch("description").present?
+                    .mt-1.text-sm= item.fetch("description")
+
+  - if player.present?
+    = render CardComponent.new(html_options: { class: "w-full" }) do
+      = render CardContentComponent.new do
+        .space-y-3
+          = render TypographyComponent.new(as: :h3, text: "Inventory")
+          - inventory = player.fetch("inventory")
+          - if inventory.empty?
+            %p.text-sm.text-muted-foreground Nothing carried.
+          - else
+            %ul.grid.gap-2.md:grid-cols-2
+              - inventory.each do |item|
+                %li.rounded.border-2.border-black.bg-background.p-3.shadow-sm
+                  .font-head.text-sm.font-medium= item.fetch("name")
+                  - if item.fetch("description").present?
+                    .mt-1.text-sm= item.fetch("description")

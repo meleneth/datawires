@@ -201,6 +201,63 @@ RSpec.describe Clusters::SeedDomain do
     end
   end
 
+  it "seeds private MUD schemas with authoring and play affordances" do
+    domain = create(:domain)
+    actor = create(:user)
+
+    described_class.call(domain: domain, cluster_key: Clusters::Catalog::PRIVATE_MUD, actor: actor)
+
+    expect(domain.documents.where(key: %w[mud-room mud-character mud-item mud-world mud-choice-room]).count).to eq(5)
+    home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.schema_document.key).to eq("domain-home-page")
+    expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Rooms",
+      "Characters",
+      "Items",
+      "Worlds",
+      "Choice Rooms"
+    )
+
+    room_schema = domain.documents.find_by!(key: "mud-room")
+    room_cells = room_schema.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten
+    exits_cell = room_cells.find { |cell| cell.dig("binding", "ptr") == "/exits" }
+    expect(room_schema.body.dig("properties", "exits", "items", "properties", "room_key")).to include("type" => "string")
+    expect(reference_cell_for(exits_cell.fetch("item_rows").flatten, "/room_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "mud-room")
+    )
+    expect(room_schema.schema_wrapper.view_affordances.sole.body).to include(
+      "renderer" => "mud_player",
+      "config" => include(
+        "room_schema_key" => "mud-room",
+        "character_schema_key" => "mud-character",
+        "item_schema_key" => "mud-item"
+      )
+    )
+
+    character_schema = domain.documents.find_by!(key: "mud-character")
+    expect(character_schema.schema_wrapper.view_affordances.sole.title).to eq("Play")
+    expect(character_schema.body.dig("properties", "inventory_item_keys", "items")).to include("type" => "string")
+
+    world_schema = domain.documents.find_by!(key: "mud-world")
+    expect(world_schema.schema_wrapper.view_affordances.sole.body.dig("config", "start_room_key")).to eq("atrium")
+
+    choice_room_schema = domain.documents.find_by!(key: "mud-choice-room")
+    expect(choice_room_schema.body.dig("properties", "choices")).to include("maxItems" => 3)
+    expect(choice_room_schema.schema_wrapper.view_affordances.sole.body).to include(
+      "renderer" => "mud_choice_player",
+      "config" => include(
+        "choice_room_schema_key" => "mud-choice-room",
+        "start_room_key" => "wizard-gate"
+      )
+    )
+
+    SchemaWrapper.where(document: domain.documents.where(key: %w[mud-room mud-character mud-item mud-world mud-choice-room])).find_each do |wrapper|
+      expect(wrapper.edit_affordances.sole.title).to eq("Default")
+      expect(wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows")).not_to be_empty
+    end
+  end
+
   it "does nothing for blank clusters" do
     domain = create(:domain)
 

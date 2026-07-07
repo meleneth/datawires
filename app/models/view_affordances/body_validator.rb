@@ -3,7 +3,7 @@
 module ViewAffordances
   class BodyValidator
     SUPPORTED_VERSIONS = [ 1 ].freeze
-    SUPPORTED_RENDERERS = %w[timeline_d3].freeze
+    SUPPORTED_RENDERERS = %w[timeline_d3 mud_player mud_choice_player].freeze
 
     attr_reader :body
 
@@ -68,6 +68,11 @@ module ViewAffordances
       validate_string(errors, config, "relative_time_label", "config/relative_time_label")
       validate_string(errors, config, "participant_kind", "config/participant_kind")
       validate_string(errors, config, "participant_key", "config/participant_key")
+      validate_string(errors, config, "room_schema_key", "config/room_schema_key")
+      validate_string(errors, config, "character_schema_key", "config/character_schema_key")
+      validate_string(errors, config, "item_schema_key", "config/item_schema_key")
+      validate_string(errors, config, "start_room_key", "config/start_room_key")
+      validate_string(errors, config, "choice_room_schema_key", "config/choice_room_schema_key")
     end
 
     def validate_string(errors, object, key, path)

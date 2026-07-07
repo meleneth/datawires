@@ -104,7 +104,7 @@ RSpec.describe ViewAffordance, type: :model do
 
       expect(view_affordance).not_to be_valid
       expect(view_affordance.errors[:view_document]).to include(
-        "renderer must be one of: timeline_d3"
+        "renderer must be one of: timeline_d3, mud_player, mud_choice_player"
       )
     end
   end

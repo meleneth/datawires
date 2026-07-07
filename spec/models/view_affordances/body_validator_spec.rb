@@ -22,6 +22,36 @@ RSpec.describe ViewAffordances::BodyValidator do
     expect(validator).to be_valid
   end
 
+  it "accepts the MUD player view DSL shape" do
+    validator = validator_for(
+      "version" => 1,
+      "renderer" => "mud_player",
+      "title" => "Play",
+      "config" => {
+        "room_schema_key" => "mud-room",
+        "character_schema_key" => "mud-character",
+        "item_schema_key" => "mud-item",
+        "start_room_key" => "atrium"
+      }
+    )
+
+    expect(validator).to be_valid
+  end
+
+  it "accepts the MUD choice player view DSL shape" do
+    validator = validator_for(
+      "version" => 1,
+      "renderer" => "mud_choice_player",
+      "title" => "Choice Play",
+      "config" => {
+        "choice_room_schema_key" => "mud-choice-room",
+        "start_room_key" => "wizard-gate"
+      }
+    )
+
+    expect(validator).to be_valid
+  end
+
   it "requires a JSON object body" do
     validator = validator_for([])
 
@@ -43,7 +73,43 @@ RSpec.describe ViewAffordances::BodyValidator do
     unsupported = validator_for("version" => 1, "renderer" => "force_graph")
 
     expect(missing.errors).to include("renderer is required")
-    expect(unsupported.errors).to include("renderer must be one of: timeline_d3")
+    expect(unsupported.errors).to include("renderer must be one of: timeline_d3, mud_player, mud_choice_player")
+  end
+
+  it "validates MUD player renderer metadata" do
+    validator = validator_for(
+      "version" => 1,
+      "renderer" => "mud_player",
+      "config" => {
+        "room_schema_key" => [],
+        "character_schema_key" => 12,
+        "item_schema_key" => false,
+        "start_room_key" => {}
+      }
+    )
+
+    expect(validator.errors).to include(
+      "config/room_schema_key must be a string",
+      "config/character_schema_key must be a string",
+      "config/item_schema_key must be a string",
+      "config/start_room_key must be a string"
+    )
+  end
+
+  it "validates MUD choice player renderer metadata" do
+    validator = validator_for(
+      "version" => 1,
+      "renderer" => "mud_choice_player",
+      "config" => {
+        "choice_room_schema_key" => [],
+        "start_room_key" => false
+      }
+    )
+
+    expect(validator.errors).to include(
+      "config/choice_room_schema_key must be a string",
+      "config/start_room_key must be a string"
+    )
   end
 
   it "validates timeline renderer metadata" do

@@ -19,7 +19,7 @@ View affordances are schema-backed documents that describe read-only document pr
 ## Top-Level Fields
 
 - `version`: required integer. Version `1` is currently supported.
-- `renderer`: required string. `timeline_d3` is currently supported.
+- `renderer`: required string. `timeline_d3`, `mud_player`, and `mud_choice_player` are currently supported.
 - `title`: optional string used as the rendered view title.
 - `config`: optional renderer-specific object.
 
@@ -44,3 +44,27 @@ Timeline events are schema-backed documents whose bodies include:
 - `participants`: optional array of objects with `kind`, `key`, and optional `role`.
 
 Participant labels resolve through document identity indexes when available, falling back to the participant key.
+
+## MUD Player
+
+`mud_player` renders a read-only room play surface for private MUD-style domains. It resolves the current room from the viewed room document key, a character document's `location_room_key`, a world document's `start_room_key`, or `config.start_room_key`.
+
+Supported config fields:
+
+- `room_schema_key`: room schema document key. Defaults to `mud-room`.
+- `character_schema_key`: character schema document key. Defaults to `mud-character`.
+- `item_schema_key`: item schema document key. Defaults to `mud-item`.
+- `start_room_key`: optional fallback room key.
+
+The room documents are expected to include `name`, `description`, and an `exits` array with `direction`, `label`, `room_key`, and `description`. Character documents use `location_room_key` and optional `inventory_item_keys`. Item documents use `location_kind` and `location_key`.
+
+## MUD Choice Player
+
+`mud_choice_player` renders a read-only PBX-style choice room. It is intended for “three choices, two deaths, one progress path” games such as Wizard's World-style demos. It resolves the current room from the viewed choice-room document key or `config.start_room_key`.
+
+Supported config fields:
+
+- `choice_room_schema_key`: choice-room schema document key. Defaults to `mud-choice-room`.
+- `start_room_key`: optional fallback room key.
+
+Choice-room documents are expected to include `name`, `room_type`, `stage`, `prompt`, `terminal_text`, and a `choices` array. Challenge rooms author up to three choices with `label`, `description`, `outcome`, and `target_room_key`. Terminal rooms use `room_type` values of `death` or `victory` and display `terminal_text`.

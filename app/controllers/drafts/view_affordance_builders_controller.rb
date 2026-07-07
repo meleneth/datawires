@@ -95,6 +95,9 @@ module Drafts
     end
 
     def config_from_params
+      return mud_player_config_from_params if params[:renderer] == "mud_player"
+      return mud_choice_player_config_from_params if params[:renderer] == "mud_choice_player"
+
       config = {
         "schema_key" => params[:schema_key].presence_in(schema_options.map(&:last)) || @schema_wrapper.key,
         "relative_time_label" => params[:relative_time_label].presence || "Relative time"
@@ -103,6 +106,26 @@ module Drafts
       config["participant_kind"] = participant_kind if participant_kind.present?
       config["participant_key"] = params[:participant_key].to_s.strip if participant_kind.present? && params[:participant_key].present?
       config
+    end
+
+    def mud_player_config_from_params
+      schema_keys = schema_options.map(&:last)
+      {
+        "room_schema_key" => params[:room_schema_key].presence_in(schema_keys) || "mud-room",
+        "character_schema_key" => params[:character_schema_key].presence_in(schema_keys) || "mud-character",
+        "item_schema_key" => params[:item_schema_key].presence_in(schema_keys) || "mud-item"
+      }.tap do |config|
+        config["start_room_key"] = params[:start_room_key].to_s.strip if params[:start_room_key].present?
+      end
+    end
+
+    def mud_choice_player_config_from_params
+      schema_keys = schema_options.map(&:last)
+      {
+        "choice_room_schema_key" => params[:choice_room_schema_key].presence_in(schema_keys) || "mud-choice-room"
+      }.tap do |config|
+        config["start_room_key"] = params[:start_room_key].to_s.strip if params[:start_room_key].present?
+      end
     end
 
     def deep_dup_json(value)

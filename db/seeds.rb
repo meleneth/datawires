@@ -12,6 +12,7 @@ require_relative "seeds/journey_item_collection_edit_affordance"
 require_relative "seeds/affordance_fixture_examples"
 require_relative "seeds/worldbuilder_demo"
 require_relative "seeds/roberts_rules_demo"
+require_relative "seeds/private_mud_demo"
 
 Seeds::JsonSchema202012.seed!
 Seeds::EditFormSchema.seed!
@@ -24,6 +25,7 @@ Seeds::JourneyItemCollectionEditAffordance.seed!
 Seeds::AffordanceFixtureExamples.seed!
 Seeds::WorldbuilderDemo.seed!
 Seeds::RobertsRulesDemo.seed!
+Seeds::PrivateMudDemo.seed!
 
 
 # This file should ensure the existence of records required to run the application in every environment (production,

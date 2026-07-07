@@ -6,25 +6,59 @@ module Clusters
 
     WORLD_BUILDING = "worldbuilding"
     ROBERTS_RULES = "roberts-rules"
+    PRIVATE_MUD = "private-mud"
 
     def options
       [
         [ "Blank", "" ],
         [ "Worldbuilding tools", WORLD_BUILDING ],
-        [ "Robert's Rules of Order", ROBERTS_RULES ]
+        [ "Robert's Rules of Order", ROBERTS_RULES ],
+        [ "Private MUD authoring", PRIVATE_MUD ]
       ]
     end
 
     def include?(key)
-      key.blank? || key == WORLD_BUILDING || key == ROBERTS_RULES
+      key.blank? || key == WORLD_BUILDING || key == ROBERTS_RULES || key == PRIVATE_MUD
     end
 
     def definition_for(key)
       return nil if key.blank?
       return worldbuilding if key == WORLD_BUILDING
       return roberts_rules if key == ROBERTS_RULES
+      return private_mud if key == PRIVATE_MUD
 
       raise ArgumentError, "unknown cluster: #{key}"
+    end
+
+    def private_mud
+      {
+        key: PRIVATE_MUD,
+        name: "Private MUD authoring",
+        repository_mode: false,
+        home: {
+          "title" => "Private MUD Home",
+          "groups" => [
+            {
+              "title" => "Author",
+              "links" => [
+                schema_home_link("Rooms", "Places players can enter and connect with exits.", schema_key: "mud-room"),
+                schema_home_link("Characters", "Player and non-player characters.", schema_key: "mud-character"),
+                schema_home_link("Items", "Objects placed in rooms or carried by characters.", schema_key: "mud-item"),
+                schema_home_link("Worlds", "Entry points and play settings.", schema_key: "mud-world"),
+                schema_home_link("Choice Rooms", "Three-choice PBX-style challenge rooms.", schema_key: "mud-choice-room")
+              ]
+            }
+          ]
+        },
+        schemas: [
+          domain_home_page_schema(cluster_key: PRIVATE_MUD),
+          mud_room_schema,
+          mud_character_schema,
+          mud_item_schema,
+          mud_world_schema,
+          mud_choice_room_schema
+        ]
+      }
     end
 
     def worldbuilding
@@ -488,6 +522,232 @@ module Clusters
       )
     end
 
+    def mud_room_schema
+      schema(
+        cluster_key: PRIVATE_MUD,
+        key: "mud-room",
+        title: "MUD Room",
+        required: %w[name description],
+        properties: {
+          "name" => string("Name"),
+          "description" => string("Description"),
+          "zone" => string("Zone"),
+          "exits" => {
+            "type" => "array",
+            "title" => "Exits",
+            "default" => [],
+            "items" => {
+              "type" => "object",
+              "required" => %w[direction room_key],
+              "properties" => {
+                "direction" => enum_string("Direction", %w[north northeast east southeast south southwest west northwest up down in out]),
+                "label" => string("Label"),
+                "room_key" => string("Destination room"),
+                "description" => string("Description")
+              },
+              "additionalProperties" => false
+            }
+          },
+          "notes" => string("Author notes")
+        },
+        rows: [
+          [ field("/name", span: 6), field("/zone", span: 6) ],
+          [ field("/description", span: 12, widget: "textarea") ],
+          [
+            array_field(
+              "/exits",
+              span: 12,
+              item_title: property_binding("direction"),
+              item_subtitle: reference_label_binding(schema_key_property: nil, key_property: "room_key", fixed_schema_key: "mud-room"),
+              item_rows: [
+                [
+                  field("/direction", span: 3),
+                  field("/label", span: 3),
+                  reference_field("/room_key", span: 6, schema_key: "mud-room", placeholder: "Select room")
+                ],
+                [ field("/description", span: 12, widget: "textarea") ]
+              ]
+            )
+          ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
+        ],
+        view_affordances: [
+          mud_player_view_affordance(
+            key: "mud-room-play-view-affordance",
+            title: "MUD room play view affordance",
+            start_room_key: nil
+          )
+        ]
+      )
+    end
+
+    def mud_character_schema
+      schema(
+        cluster_key: PRIVATE_MUD,
+        key: "mud-character",
+        title: "MUD Character",
+        required: %w[name location_room_key],
+        properties: {
+          "name" => string("Name"),
+          "character_type" => enum_string("Character type", %w[player npc]),
+          "description" => string("Description"),
+          "disposition" => string("Disposition"),
+          "location_room_key" => string("Current room"),
+          "inventory_item_keys" => {
+            "type" => "array",
+            "title" => "Inventory items",
+            "default" => [],
+            "items" => string("Item key")
+          },
+          "notes" => string("Author notes")
+        },
+        rows: [
+          [ field("/name", span: 4), field("/character_type", span: 4), reference_field("/location_room_key", span: 4, schema_key: "mud-room", placeholder: "Select room") ],
+          [ field("/description", span: 12, widget: "textarea") ],
+          [ field("/disposition", span: 6), field("/notes", span: 6, widget: "textarea") ],
+          [
+            array_field(
+              "/inventory_item_keys",
+              span: 12,
+              item_title: value_label_binding,
+              item_subtitle: none_binding
+            )
+          ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
+        ],
+        view_affordances: [
+          mud_player_view_affordance(
+            key: "mud-character-play-view-affordance",
+            title: "MUD character play view affordance",
+            start_room_key: nil
+          )
+        ]
+      )
+    end
+
+    def mud_item_schema
+      schema(
+        cluster_key: PRIVATE_MUD,
+        key: "mud-item",
+        title: "MUD Item",
+        required: %w[name location_kind location_key],
+        properties: {
+          "name" => string("Name"),
+          "item_type" => string("Item type"),
+          "description" => string("Description"),
+          "portable" => {
+            "type" => "boolean",
+            "title" => "Portable",
+            "default" => true
+          },
+          "location_kind" => enum_string("Location kind", %w[room character hidden]),
+          "location_key" => string("Location key"),
+          "notes" => string("Author notes")
+        },
+        rows: [
+          [ field("/name", span: 5), field("/item_type", span: 4), field("/portable", span: 3, widget: "checkbox") ],
+          [ field("/description", span: 12, widget: "textarea") ],
+          [ field("/location_kind", span: 4), field("/location_key", span: 8) ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
+        ]
+      )
+    end
+
+    def mud_world_schema
+      schema(
+        cluster_key: PRIVATE_MUD,
+        key: "mud-world",
+        title: "MUD World",
+        required: %w[name start_room_key],
+        properties: {
+          "name" => string("Name"),
+          "summary" => string("Summary"),
+          "start_room_key" => string("Start room"),
+          "default_character_key" => string("Default character"),
+          "notes" => string("Author notes")
+        },
+        rows: [
+          [ field("/name", span: 6), reference_field("/start_room_key", span: 6, schema_key: "mud-room", placeholder: "Select room") ],
+          [ reference_field("/default_character_key", span: 6, schema_key: "mud-character", placeholder: "Select character"), field("/summary", span: 6, widget: "textarea") ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
+        ],
+        view_affordances: [
+          mud_player_view_affordance(
+            key: "mud-world-play-view-affordance",
+            title: "MUD world play view affordance",
+            start_room_key: "atrium"
+          )
+        ]
+      )
+    end
+
+    def mud_choice_room_schema
+      schema(
+        cluster_key: PRIVATE_MUD,
+        key: "mud-choice-room",
+        title: "MUD Choice Room",
+        required: %w[name room_type prompt],
+        properties: {
+          "name" => string("Name"),
+          "room_type" => enum_string("Room type", %w[challenge death victory]),
+          "stage" => string("Stage"),
+          "prompt" => string("Prompt"),
+          "terminal_text" => string("Terminal text"),
+          "choices" => {
+            "type" => "array",
+            "title" => "Choices",
+            "default" => [],
+            "maxItems" => 3,
+            "items" => {
+              "type" => "object",
+              "required" => %w[label outcome target_room_key],
+              "properties" => {
+                "label" => string("Label"),
+                "description" => string("Description"),
+                "outcome" => enum_string("Outcome", %w[advance death victory]),
+                "target_room_key" => string("Target room")
+              },
+              "additionalProperties" => false
+            }
+          },
+          "notes" => string("Author notes")
+        },
+        rows: [
+          [ field("/name", span: 5), field("/room_type", span: 3), field("/stage", span: 4) ],
+          [ field("/prompt", span: 12, widget: "textarea") ],
+          [ field("/terminal_text", span: 12, widget: "textarea", help: "Shown for death and victory rooms.") ],
+          [
+            array_field(
+              "/choices",
+              span: 12,
+              item_title: property_binding("label"),
+              item_subtitle: property_binding("outcome"),
+              item_rows: [
+                [
+                  field("/label", span: 4),
+                  field("/outcome", span: 3),
+                  reference_field("/target_room_key", span: 5, schema_key: "mud-choice-room", placeholder: "Select next room")
+                ],
+                [ field("/description", span: 12, widget: "textarea") ]
+              ]
+            )
+          ],
+          [ field("/notes", span: 12, widget: "textarea") ],
+          [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
+        ],
+        view_affordances: [
+          mud_choice_player_view_affordance(
+            key: "mud-choice-room-play-view-affordance",
+            title: "MUD choice room play view affordance",
+            start_room_key: "wizard-gate"
+          )
+        ]
+      )
+    end
+
     def schema(key:, title:, required:, properties:, rows:, cluster_key: WORLD_BUILDING, screens: nil, view_affordances: [], index_definitions: [])
       {
         key: key,
@@ -703,13 +963,68 @@ module Clusters
       }
     end
 
-    def reference_label_binding(schema_key_property:, key_property:)
+    def value_label_binding
       {
+        "kind" => "value_label"
+      }
+    end
+
+    def none_binding
+      {
+        "kind" => "none"
+      }
+    end
+
+    def reference_label_binding(schema_key_property:, key_property:, fixed_schema_key: nil)
+      binding = {
         "kind" => "reference_label",
-        "schema_key_property" => schema_key_property,
         "key_property" => key_property,
         "index_type" => "identity",
         "index_key" => "document_key"
+      }
+      if fixed_schema_key.present?
+        binding["schema_key"] = fixed_schema_key
+      else
+        binding["schema_key_property"] = schema_key_property
+      end
+      binding
+    end
+
+    def mud_player_view_affordance(key:, title:, start_room_key:)
+      {
+        key: key,
+        title: title,
+        affordance_title: "Play",
+        body: {
+          "version" => 1,
+          "renderer" => "mud_player",
+          "title" => "Play",
+          "config" => {
+            "room_schema_key" => "mud-room",
+            "character_schema_key" => "mud-character",
+            "item_schema_key" => "mud-item"
+          }.tap do |config|
+            config["start_room_key"] = start_room_key if start_room_key.present?
+          end
+        }
+      }
+    end
+
+    def mud_choice_player_view_affordance(key:, title:, start_room_key:)
+      {
+        key: key,
+        title: title,
+        affordance_title: "Choice Play",
+        body: {
+          "version" => 1,
+          "renderer" => "mud_choice_player",
+          "title" => "Choice Play",
+          "config" => {
+            "choice_room_schema_key" => "mud-choice-room"
+          }.tap do |config|
+            config["start_room_key"] = start_room_key if start_room_key.present?
+          end
+        }
       }
     end
 

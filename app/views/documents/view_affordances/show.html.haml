@@ -8,6 +8,10 @@
 
   - if @projection.renderer == "timeline_d3"
     = render "view_affordances/timeline_d3", projection: @projection
+  - elsif @projection.renderer == "mud_player"
+    = render "view_affordances/mud_player", projection: @projection
+  - elsif @projection.renderer == "mud_choice_player"
+    = render "view_affordances/mud_choice_player", projection: @projection
   - else
     = render CardComponent.new(html_options: { class: "w-full" }) do
       .space-y-2

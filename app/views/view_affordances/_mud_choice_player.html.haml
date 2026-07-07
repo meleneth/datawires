@@ -1,0 +1,37 @@
+- room = projection.data.fetch("room")
+- choices = projection.data.fetch("choices")
+- terminal = %w[death victory].include?(room.fetch("room_type"))
+
+.space-y-4
+  = render CardComponent.new(html_options: { class: "w-full" }) do
+    = render CardContentComponent.new do
+      .space-y-4
+        .space-y-1
+          = render TypographyComponent.new(as: :h2, text: room.fetch("title"))
+          .flex.flex-wrap.gap-2.text-xs.text-muted-foreground
+            .font-mono= room.fetch("key")
+            - if room.fetch("stage").present?
+              %span= room.fetch("stage")
+        %p.whitespace-pre-line.text-sm.leading-6.text-foreground= room.fetch("prompt")
+        - if terminal && room.fetch("terminal_text").present?
+          %p.rounded.border-2.border-black.bg-muted.p-3.text-sm.leading-6.text-foreground.shadow-sm= room.fetch("terminal_text")
+
+  - unless terminal
+    .grid.gap-3.md:grid-cols-3
+      - choices.each do |choice|
+        - outcome = choice.fetch("outcome")
+        = render CardComponent.new(html_options: { class: "w-full" }) do
+          = render CardContentComponent.new do
+            .space-y-3
+              .flex.items-start.justify-between.gap-2
+                .font-head.text-sm.font-medium= choice.fetch("label")
+                .rounded.border-2.border-black.bg-background.px-2.py-0.5.text-xs.shadow-sm= choice.fetch("position")
+              - if choice.fetch("description").present?
+                %p.text-sm= choice.fetch("description")
+              - if choice["url"].present?
+                = link_to outcome == "advance" ? "Enter" : "Choose",
+                  choice["url"],
+                  data: { turbo_frame: "main_content", turbo_action: "advance" },
+                  class: "font-head inline-flex h-9 w-full items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+              - else
+                %p.text-xs.text-muted-foreground= choice.fetch("target_room_title").presence || "No target room"

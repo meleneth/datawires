@@ -102,7 +102,7 @@ RSpec.describe "Document view affordances", type: :request do
 
     get draft_view_affordance_builder_path(result.draft, tab: "diagnostics")
 
-    expect(response.body).to include("renderer must be one of: timeline_d3")
+    expect(response.body).to include("renderer must be one of: timeline_d3, mud_player, mud_choice_player")
   end
 
   it "updates timeline view settings through structured controls" do
@@ -455,6 +455,133 @@ RSpec.describe "Document view affordances", type: :request do
     expect(response.body).not_to include("Bob Arrival")
   end
 
+  it "renders seeded MUD play views without edit controls" do
+    domain = create(:domain)
+    Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::PRIVATE_MUD, actor: create(:user))
+
+    room_schema = domain.documents.find_by!(key: "mud-room")
+    character_schema = domain.documents.find_by!(key: "mud-character")
+    item_schema = domain.documents.find_by!(key: "mud-item")
+    atrium = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: room_schema,
+      key: "atrium",
+      title: "Atrium",
+      head_body: {
+        "name" => "Atrium",
+        "description" => "A bright entry room.",
+        "exits" => [
+          { "direction" => "east", "label" => "Library", "room_key" => "library", "description" => "A quiet archway." }
+        ]
+      }
+    )
+    library = create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: room_schema,
+      key: "library",
+      title: "Library",
+      head_body: {
+        "name" => "Library",
+        "description" => "A room of shelves.",
+        "exits" => []
+      }
+    )
+    create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: character_schema,
+      key: "warden",
+      title: "Warden",
+      head_body: {
+        "name" => "Warden",
+        "character_type" => "npc",
+        "description" => "The room keeper.",
+        "disposition" => "watchful",
+        "location_room_key" => "atrium",
+        "inventory_item_keys" => []
+      }
+    )
+    create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: item_schema,
+      key: "ledger",
+      title: "Ledger",
+      head_body: {
+        "name" => "Ledger",
+        "description" => "A room list.",
+        "portable" => false,
+        "location_kind" => "room",
+        "location_key" => "atrium"
+      }
+    )
+    [ atrium, library ].each { |document| DocumentIndexes::Rebuild.call(document: document) }
+
+    view_affordance = room_schema.schema_wrapper.view_affordances.sole
+
+    get document_view_affordance_path(atrium, view_affordance)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Play")
+    expect(response.body).to include("Atrium")
+    expect(response.body).to include("A bright entry room.")
+    expect(response.body).to include("Library")
+    expect(response.body).to include(document_view_affordance_path(library, view_affordance))
+    expect(response.body).to include("Warden")
+    expect(response.body).to include("Ledger")
+    expect(response.body).not_to include("<input")
+    expect(response.body).not_to include("<textarea")
+    expect(response.body).not_to include("<select")
+  end
+
+  it "renders PBX-style MUD choice rooms with three choices" do
+    domain = create(:domain)
+    Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::PRIVATE_MUD, actor: create(:user))
+
+    choice_schema = domain.documents.find_by!(key: "mud-choice-room")
+    start_room = create_choice_room(
+      domain: domain,
+      schema: choice_schema,
+      key: "wizard-gate",
+      title: "Wizard Gate",
+      choices: [
+        { "label" => "Thorn", "description" => "A bad sign.", "outcome" => "death", "target_room_key" => "thorn-death" },
+        { "label" => "Moon", "description" => "The safe rune.", "outcome" => "advance", "target_room_key" => "mirror-hall" },
+        { "label" => "Ash", "description" => "Smoke gathers.", "outcome" => "death", "target_room_key" => "ash-death" }
+      ]
+    )
+    next_room = create_choice_room(
+      domain: domain,
+      schema: choice_schema,
+      key: "mirror-hall",
+      title: "Mirror Hall",
+      choices: []
+    )
+    create_choice_room(domain: domain, schema: choice_schema, key: "thorn-death", title: "Thorn Death", room_type: "death", terminal_text: "The hedge closes.")
+    create_choice_room(domain: domain, schema: choice_schema, key: "ash-death", title: "Ash Death", room_type: "death", terminal_text: "The smoke wins.")
+
+    view_affordance = choice_schema.schema_wrapper.view_affordances.sole
+
+    get document_view_affordance_path(start_room, view_affordance)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Choice Play")
+    expect(response.body).to include("Wizard Gate")
+    expect(response.body).to include("Thorn")
+    expect(response.body).to include("Moon")
+    expect(response.body).to include("Ash")
+    expect(response.body).to include(document_view_affordance_path(next_room, view_affordance))
+    expect(response.body).not_to include("<input")
+    expect(response.body).not_to include("<textarea")
+    expect(response.body).not_to include("<select")
+  end
+
   def create_timeline_event(domain:, schema:, key:, title:, relative_time:, summary:, participants: [], event_type: "general", party_key: "", person_key: "")
     create(
       :document,
@@ -471,6 +598,27 @@ RSpec.describe "Document view affordances", type: :request do
         "participants" => participants,
         "party_key" => party_key,
         "person_key" => person_key
+      }
+    ).tap do |document|
+      DocumentIndexes::Rebuild.call(document: document)
+    end
+  end
+
+  def create_choice_room(domain:, schema:, key:, title:, choices: [], room_type: "challenge", terminal_text: "")
+    create(
+      :document,
+      :with_head_revision,
+      domain: domain,
+      schema_document: schema,
+      key: key,
+      title: title,
+      head_body: {
+        "name" => title,
+        "room_type" => room_type,
+        "stage" => "Test",
+        "prompt" => "Choose carefully.",
+        "terminal_text" => terminal_text,
+        "choices" => choices
       }
     ).tap do |document|
       DocumentIndexes::Rebuild.call(document: document)

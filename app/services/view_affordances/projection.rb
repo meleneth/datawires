@@ -9,6 +9,10 @@ module ViewAffordances
       case renderer
       when "timeline_d3"
         TimelineD3Projection.call(document:, view_affordance:)
+      when "mud_player"
+        MudPlayerProjection.call(document:, view_affordance:)
+      when "mud_choice_player"
+        MudChoicePlayerProjection.call(document:, view_affordance:)
       else
         new(
           renderer: "unsupported",
