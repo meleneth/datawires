@@ -297,6 +297,24 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(draft.reload.body.dig("screens", 0, "rows").first.first.dig("binding", "ptr")).to eq("/bio")
   end
 
+  it "streams builder validation errors into the local flash frame" do
+    draft = create_builder_draft
+
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "new",
+      label: "1"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_flash")
+    expect(response.body).to include("Add a row before adding fields.")
+  end
+
   it "applies a three-choice room scaffold from schema suggestions" do
     choice_schema = create(
       :document,

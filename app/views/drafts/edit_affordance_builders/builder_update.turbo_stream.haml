@@ -1,5 +1,8 @@
 - builder_screen_params = @screen_id == "main" ? {} : { screen_id: @screen_id }
 
+= turbo_stream.replace "edit_affordance_builder_flash" do
+  = render "flash"
+
 = turbo_stream.replace "edit_affordance_builder_suggestions" do
   = render "suggestions", builder_screen_params: builder_screen_params
 

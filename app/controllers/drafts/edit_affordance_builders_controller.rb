@@ -52,8 +52,7 @@ module Drafts
 
       builder_update_response(notice: "Field added.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def add_navigation
@@ -61,8 +60,7 @@ module Drafts
 
       builder_update_response(notice: "Navigation added.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def add_commit
@@ -70,8 +68,7 @@ module Drafts
 
       builder_update_response(notice: "Commit added.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def add_screen
@@ -107,8 +104,7 @@ module Drafts
 
       builder_update_response(notice: "Index added.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def apply_suggestion
@@ -118,8 +114,7 @@ module Drafts
 
       builder_update_response(notice: "Suggestion applied.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def update_screen
@@ -214,8 +209,7 @@ module Drafts
       row_at!(row_index, rows: rows)
       target_index = target_row_index(row_index, params[:direction])
       unless target_index >= 0 && target_index < rows.length
-        return redirect_to builder_path,
-          alert: "Row cannot be moved #{params[:direction]}."
+        return builder_error_response("Row cannot be moved #{params[:direction]}.")
       end
 
       rows[row_index], rows[target_index] = rows[target_index], rows[row_index]
@@ -287,6 +281,20 @@ module Drafts
         format.html do
           redirect_to builder_path,
             notice: notice
+        end
+      end
+    end
+
+    def builder_error_response(message)
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = message
+          load_context
+          render :builder_update, status: :unprocessable_entity
+        end
+        format.html do
+          redirect_to builder_path,
+            alert: message
         end
       end
     end

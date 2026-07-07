@@ -1,0 +1,7 @@
+= turbo_frame_tag "edit_affordance_builder_flash" do
+  - if flash[:alert].present?
+    = render AlertComponent.new(variant: :destructive) do
+      = flash[:alert]
+  - if flash[:notice].present?
+    = render AlertComponent.new do
+      = flash[:notice]

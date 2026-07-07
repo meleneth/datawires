@@ -20,12 +20,7 @@
         form: { data: { turbo_frame: "main_content", turbo_action: "advance", turbo_confirm: "Delete this edit affordance? This cannot be undone." } },
         class: "font-head inline-flex h-9 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
 
-    - if flash[:alert].present?
-      = render AlertComponent.new(variant: :destructive) do
-        = flash[:alert]
-    - if flash[:notice].present?
-      = render AlertComponent.new do
-        = flash[:notice]
+    = render "flash"
 
     - if @tab == "builder"
       - row_options = @rows.each_with_index.map { |_row, index| ["Row #{index + 1}", index] }
