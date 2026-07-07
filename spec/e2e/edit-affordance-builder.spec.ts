@@ -24,11 +24,11 @@ test('builds and refines a schema-backed edit affordance', async ({ page }) => {
   await page.getByRole('link', { name: 'Open field' }).click();
 
   const editor = page.locator('#edit_affordance_builder_editor');
-  const fieldPath = editor.locator('select[name="ptr"]');
-  const widget = editor.locator('select[name="widget"]');
-  const span = editor.locator('input[name="span"]');
-  const help = editor.locator('input[name="help"]');
-  const placeholder = editor.locator('input[name="placeholder"]');
+  const fieldPath = editor.getByLabel('Schema path', { exact: true });
+  const widget = editor.getByLabel('Widget', { exact: true });
+  const span = editor.getByLabel('Span', { exact: true });
+  const help = editor.getByLabel('Help', { exact: true });
+  const placeholder = editor.getByLabel('Placeholder', { exact: true });
   await expect(editor.getByRole('heading', { name: 'Field 1' })).toBeVisible();
   await expect(fieldPath).toHaveValue('/name');
   await expect(page.locator('#edit_affordance_builder_rows').getByText('/name', { exact: true })).toBeVisible();

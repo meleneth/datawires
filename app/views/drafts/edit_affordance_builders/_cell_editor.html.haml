@@ -30,73 +30,83 @@
             class: "space-y-4" do
             .grid.gap-3.md:grid-cols-3
               .space-y-1
-                = render LabelComponent.new(text: "Schema path", for_id: "ptr")
+                = render LabelComponent.new(text: "Schema path", for_id: "cell_ptr")
                 = select_tag :ptr,
                   options_for_select(@field_entries.map { |entry| ["#{entry.label} (#{entry.ptr})", entry.ptr, { "data-widget": entry.widget, "data-array": entry.array? ? "true" : "false" }] }, @cell.dig("binding", "ptr")),
+                  id: "cell_ptr",
                   data: { edit_affordance_builder_target: "path", action: "edit-affordance-builder#sync" },
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
-                = render LabelComponent.new(text: "Widget", for_id: "widget")
+                = render LabelComponent.new(text: "Widget", for_id: "cell_widget")
                 = select_tag :widget,
                   options_for_select(@widget_options, @cell["widget"] || "auto"),
+                  id: "cell_widget",
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
-                = render LabelComponent.new(text: "Span", for_id: "span")
+                = render LabelComponent.new(text: "Span", for_id: "cell_span")
                 = number_field_tag :span,
                   @cell["span"] || @selected_screen&.fetch("default_span", 3),
+                  id: "cell_span",
                   min: 1,
                   max: 12,
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
-                = render LabelComponent.new(text: "Help", for_id: "help")
+                = render LabelComponent.new(text: "Help", for_id: "cell_help")
                 = text_field_tag :help,
                   @cell["help"],
+                  id: "cell_help",
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
               .space-y-1
-                = render LabelComponent.new(text: "Placeholder", for_id: "placeholder")
+                = render LabelComponent.new(text: "Placeholder", for_id: "cell_placeholder")
                 = text_field_tag :placeholder,
                   @cell["placeholder"],
+                  id: "cell_placeholder",
                   class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
-            %label.inline-flex.items-center.gap-2.text-sm
-              = check_box_tag :label, "1", @cell.fetch("label", true), class: "h-4 w-4 rounded border-2 border-black"
+            %label.inline-flex.items-center.gap-2.text-sm{ for: "cell_label" }
+              = check_box_tag :label, "1", @cell.fetch("label", true), id: "cell_label", class: "h-4 w-4 rounded border-2 border-black"
               %span Show label
             .flex.flex-wrap.gap-4
-              %label.inline-flex.items-center.gap-2.text-sm
-                = check_box_tag :display_compact, "1", current_display["compact"] == true, class: "h-4 w-4 rounded border-2 border-black"
+              %label.inline-flex.items-center.gap-2.text-sm{ for: "cell_display_compact" }
+                = check_box_tag :display_compact, "1", current_display["compact"] == true, id: "cell_display_compact", class: "h-4 w-4 rounded border-2 border-black"
                 %span Compact display
-              %label.inline-flex.items-center.gap-2.text-sm
-                = check_box_tag :display_readonly, "1", current_display["readonly"] == true, class: "h-4 w-4 rounded border-2 border-black"
+              %label.inline-flex.items-center.gap-2.text-sm{ for: "cell_display_readonly" }
+                = check_box_tag :display_readonly, "1", current_display["readonly"] == true, id: "cell_display_readonly", class: "h-4 w-4 rounded border-2 border-black"
                 %span Read-only display
 
             .rounded.border-2.border-black.bg-muted.p-3
               .mb-3.font-head.text-sm Reference options
               .grid.gap-3.md:grid-cols-3
                 .space-y-1
-                  = render LabelComponent.new(text: "Schema key", for_id: "reference_schema_key")
+                  = render LabelComponent.new(text: "Schema key", for_id: "cell_reference_schema_key")
                   = text_field_tag :reference_schema_key,
                     current_reference["schema_key"],
+                    id: "cell_reference_schema_key",
                     placeholder: "person",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
-                  = render LabelComponent.new(text: "Index type", for_id: "reference_index_type")
+                  = render LabelComponent.new(text: "Index type", for_id: "cell_reference_index_type")
                   = text_field_tag :reference_index_type,
                     current_reference["index_type"] || "identity",
+                    id: "cell_reference_index_type",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
-                  = render LabelComponent.new(text: "Index key", for_id: "reference_index_key")
+                  = render LabelComponent.new(text: "Index key", for_id: "cell_reference_index_key")
                   = text_field_tag :reference_index_key,
                     current_reference["index_key"] || "document_key",
+                    id: "cell_reference_index_key",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
-                  = render LabelComponent.new(text: "Schema key from", for_id: "reference_schema_key_from")
+                  = render LabelComponent.new(text: "Schema key from", for_id: "cell_reference_schema_key_from")
                   = text_field_tag :reference_schema_key_from,
                     current_reference["schema_key_from"],
+                    id: "cell_reference_schema_key_from",
                     placeholder: "/kind",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
                 .space-y-1
-                  = render LabelComponent.new(text: "Reference placeholder", for_id: "reference_placeholder")
+                  = render LabelComponent.new(text: "Reference placeholder", for_id: "cell_reference_placeholder")
                   = text_field_tag :reference_placeholder,
                     current_reference["placeholder"],
+                    id: "cell_reference_placeholder",
                     placeholder: "Select reference",
                     class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:shadow-md"
 
