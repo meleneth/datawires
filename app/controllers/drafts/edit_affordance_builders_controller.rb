@@ -95,11 +95,13 @@ module Drafts
       ensure_screens(body) << screen
       @draft.update!(body: body)
 
-      redirect_to builder_path(screen_id: screen.fetch("id")),
-        notice: "Screen added."
+      builder_update_response(
+        notice: "Screen added.",
+        screen_id: screen.fetch("id"),
+        html_path: builder_path(screen_id: screen.fetch("id"))
+      )
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def add_subform
@@ -108,11 +110,9 @@ module Drafts
       ensure_subforms(body) << subform
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Subform added."
+      builder_update_response(notice: "Subform added.")
     rescue ArgumentError => e
-      redirect_to builder_path,
-        alert: e.message
+      builder_error_response(e.message)
     end
 
     def add_index
@@ -283,15 +283,16 @@ module Drafts
 
     private
 
-    def builder_update_response(notice:)
+    def builder_update_response(notice:, screen_id: nil, html_path: nil)
       respond_to do |format|
         format.turbo_stream do
           flash.now[:notice] = notice
           load_context
+          select_builder_screen_context!(screen_id) if screen_id
           render :builder_update
         end
         format.html do
-          redirect_to builder_path,
+          redirect_to html_path || builder_path,
             notice: notice
         end
       end
@@ -350,6 +351,14 @@ module Drafts
         @cell_index = cell_index
         @cell = cell_at!(@row, @cell_index)
       end
+    end
+
+    def select_builder_screen_context!(screen_id)
+      @selected_screen = Array(@draft.body["screens"]).find { |screen| screen.is_a?(Hash) && screen["id"] == screen_id } || @selected_screen
+      @screen_id = @selected_screen&.fetch("id", nil) || "main"
+      @active_subform = current_builder_subform
+      @rows = current_builder_rows
+      @builder_width_class = width_class_for(@selected_screen&.fetch("width", "large"))
     end
 
     def load_context

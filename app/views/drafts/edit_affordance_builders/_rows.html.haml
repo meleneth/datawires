@@ -4,7 +4,7 @@
 = turbo_frame_tag "edit_affordance_builder_rows" do
   = render CardComponent.new(html_options: { class: "w-full" }) do
     = render CardContentComponent.new do
-      = render TypographyComponent.new(as: :h3, text: "Current main screen", html_options: { class: "mb-3" })
+      = render TypographyComponent.new(as: :h3, text: "Current #{@screen_id} screen", html_options: { class: "mb-3" })
       - if @rows.empty?
         = render AlertComponent.new do
           No fields yet.

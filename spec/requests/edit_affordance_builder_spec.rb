@@ -1373,6 +1373,35 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Biography")
   end
 
+  it "streams newly added screens into the selected builder context" do
+    draft = create_builder_draft
+
+    patch add_screen_draft_edit_affordance_builder_path(draft), params: {
+      new_screen_id: "details",
+      new_screen_title: "Details",
+      new_screen_root_ptr: "/profile",
+      new_screen_width: "medium",
+      new_screen_mode: "full_width",
+      new_screen_default_span: "6",
+      new_screen_commit_mode: "immediate"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_flash")
+    expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
+    expect(response.body).to include("Screen added.")
+    expect(response.body).to include("Current details screen")
+    expect(response.body).to include("No fields yet.")
+    expect(draft.reload.body.fetch("screens").second).to include(
+      "id" => "details",
+      "width" => "medium",
+      "default_span" => 6
+    )
+  end
+
   it "adds subforms and edits subform rows through screens that reference them" do
     draft = create_builder_draft
 
@@ -1457,6 +1486,30 @@ RSpec.describe "Edit affordance builder", type: :request do
     }
 
     expect(draft.reload.body.dig("subforms", 0)).not_to have_key("root_binding")
+  end
+
+  it "streams newly added subforms into the builder regions" do
+    draft = create_builder_draft
+
+    patch add_subform_draft_edit_affordance_builder_path(draft), params: {
+      new_subform_id: "profile_fields",
+      new_subform_root_ptr: "/profile"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_flash")
+    expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
+    expect(response.body).to include("Subform added.")
+    expect(draft.reload.body.fetch("subforms").first).to include(
+      "id" => "profile_fields",
+      "root_binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/profile"
+      }
+    )
   end
 
   it "rejects duplicate screen and subform identifiers" do
