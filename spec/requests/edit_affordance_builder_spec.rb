@@ -315,6 +315,48 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Add a row before adding fields.")
   end
 
+  it "opens fields in the inline editor frame and streams field updates" do
+    draft = create_builder_draft
+    patch add_row_draft_edit_affordance_builder_path(draft)
+    patch add_field_draft_edit_affordance_builder_path(draft), params: {
+      ptr: "/name",
+      widget: "text",
+      row_index: "0",
+      label: "1"
+    }
+
+    get draft_edit_affordance_builder_path(draft)
+
+    expect(response.body).to include("edit_affordance_builder_editor")
+    expect(response.body).to include('data-turbo-frame="edit_affordance_builder_editor"')
+
+    get cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0)
+
+    expect(response.body).to include('<turbo-frame id="edit_affordance_builder_editor">')
+    expect(response.body).to include("Update field")
+
+    patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
+      ptr: "/bio",
+      widget: "textarea",
+      span: "12",
+      label: "1"
+    }, headers: {
+      "ACCEPT" => "text/vnd.turbo-stream.html"
+    }
+
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(response.body).to include("edit_affordance_builder_rows")
+    expect(response.body).to include("edit_affordance_builder_preview")
+    expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
+      "widget" => "textarea",
+      "span" => 12,
+      "binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/bio"
+      }
+    )
+  end
+
   it "applies a three-choice room scaffold from schema suggestions" do
     choice_schema = create(
       :document,

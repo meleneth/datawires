@@ -15,7 +15,7 @@
               .flex.items-center.justify-between.gap-3
                 = link_to "Row #{row_index + 1}",
                   row_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index)),
-                  data: { turbo_frame: "main_content" },
+                  data: { turbo_frame: "edit_affordance_builder_editor" },
                   class: "font-head underline decoration-2 underline-offset-4"
                 .flex.flex-wrap.items-center.justify-end.gap-2
                   - if row_index.positive?
@@ -56,5 +56,5 @@
                         .mt-3
                           = link_to "Open field",
                             cell_draft_edit_affordance_builder_path(@draft, builder_path_params.call(row_index: row_index, cell_index: cell_index)),
-                            data: { turbo_frame: "main_content" },
+                            data: { turbo_frame: "edit_affordance_builder_editor" },
                             class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-background px-3 text-xs font-medium text-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"

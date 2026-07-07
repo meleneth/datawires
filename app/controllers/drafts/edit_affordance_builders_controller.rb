@@ -262,8 +262,22 @@ module Drafts
       row[cell_index] = updated_cell_from_params(cell)
       @draft.update!(body: body)
 
-      redirect_to cell_path(row_index, cell_index),
-        notice: "Cell updated."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "Cell updated."
+          load_context
+          @tab = "cell"
+          @row_index = row_index
+          @cell_index = cell_index
+          @row = row_at!(@row_index)
+          @cell = cell_at!(@row, @cell_index)
+          render :builder_update
+        end
+        format.html do
+          redirect_to cell_path(row_index, cell_index),
+            notice: "Cell updated."
+        end
+      end
     rescue ArgumentError => e
       redirect_to cell_path(params[:row_index], params[:cell_index]),
         alert: e.message
