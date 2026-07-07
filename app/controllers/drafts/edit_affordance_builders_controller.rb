@@ -44,15 +44,13 @@ module Drafts
       builder_rows_for(body) << []
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Row added."
+      builder_update_response(notice: "Row added.")
     end
 
     def add_field
       @draft.update!(body: body_with_added_field)
 
-      redirect_to builder_path,
-        notice: "Field added."
+      builder_update_response(notice: "Field added.")
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message
@@ -61,8 +59,7 @@ module Drafts
     def add_navigation
       @draft.update!(body: body_with_added_navigation)
 
-      redirect_to builder_path,
-        notice: "Navigation added."
+      builder_update_response(notice: "Navigation added.")
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message
@@ -71,8 +68,7 @@ module Drafts
     def add_commit
       @draft.update!(body: body_with_added_commit)
 
-      redirect_to builder_path,
-        notice: "Commit added."
+      builder_update_response(notice: "Commit added.")
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message
@@ -109,8 +105,7 @@ module Drafts
       ensure_indexes(body) << root_index_from_params
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Index added."
+      builder_update_response(notice: "Index added.")
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message
@@ -121,17 +116,7 @@ module Drafts
       apply_builder_suggestion!(body, params.require(:suggestion_id))
       @draft.update!(body: body)
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "Suggestion applied."
-          load_context
-          render :apply_suggestion
-        end
-        format.html do
-          redirect_to builder_path,
-            notice: "Suggestion applied."
-        end
-      end
+      builder_update_response(notice: "Suggestion applied.")
     rescue ArgumentError => e
       redirect_to builder_path,
         alert: e.message
@@ -207,8 +192,7 @@ module Drafts
       rows.delete_at(index)
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Row deleted."
+      builder_update_response(notice: "Row deleted.")
     end
 
     def delete_index
@@ -220,8 +204,7 @@ module Drafts
       indexes.delete_at(index)
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Index deleted."
+      builder_update_response(notice: "Index deleted.")
     end
 
     def move_row
@@ -238,8 +221,7 @@ module Drafts
       rows[row_index], rows[target_index] = rows[target_index], rows[row_index]
       @draft.update!(body: body)
 
-      redirect_to builder_path,
-        notice: "Row moved."
+      builder_update_response(notice: "Row moved.")
     end
 
     def delete_cell
@@ -294,6 +276,20 @@ module Drafts
     end
 
     private
+
+    def builder_update_response(notice:)
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = notice
+          load_context
+          render :builder_update
+        end
+        format.html do
+          redirect_to builder_path,
+            notice: notice
+        end
+      end
+    end
 
     def load_context
       @draft = Draft.includes(document: :edit_affordance).find(params[:draft_id])
