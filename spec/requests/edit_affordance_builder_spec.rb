@@ -337,12 +337,25 @@ RSpec.describe "Edit affordance builder", type: :request do
 
     expect(response.body).to include('<turbo-frame id="edit_affordance_builder_editor">')
     expect(response.body).to include("Update field")
+    expect(response.body).to include("Reference options")
+    expect(response.body).to include("Compact display")
+    expect(response.body).to include("Read-only display")
+    expect(response.body).to include("Collection options")
+    expect(response.body).to include("Title binding")
+    expect(response.body).to include("Subtitle binding")
 
     patch cell_draft_edit_affordance_builder_path(draft, row_index: 0, cell_index: 0), params: {
       ptr: "/bio",
-      widget: "textarea",
+      widget: "reference",
       span: "12",
-      label: "1"
+      label: "1",
+      display_compact: "1",
+      display_readonly: "1",
+      reference_schema_key: "person",
+      reference_index_type: "identity",
+      reference_index_key: "document_key",
+      reference_schema_key_from: "/kind",
+      reference_placeholder: "Select person"
     }, headers: {
       "ACCEPT" => "text/vnd.turbo-stream.html"
     }
@@ -351,11 +364,22 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("edit_affordance_builder_rows")
     expect(response.body).to include("edit_affordance_builder_preview")
     expect(draft.reload.body.dig("screens", 0, "rows", 0, 0)).to include(
-      "widget" => "textarea",
+      "widget" => "reference",
       "span" => 12,
       "binding" => {
         "kind" => "document_ptr",
         "ptr" => "/bio"
+      },
+      "display" => {
+        "compact" => true,
+        "readonly" => true
+      },
+      "reference" => {
+        "schema_key" => "person",
+        "schema_key_from" => "/kind",
+        "index_type" => "identity",
+        "index_key" => "document_key",
+        "placeholder" => "Select person"
       }
     )
   end
