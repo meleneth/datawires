@@ -27,7 +27,7 @@ module Drafts
       @tab = "row"
       @row_index = row_index_param
       @row = row_at!(@row_index)
-      render :show
+      render partial: "editor", locals: { builder_screen_params: builder_screen_params }
     end
 
     def cell
@@ -36,7 +36,7 @@ module Drafts
       @cell_index = cell_index_param
       @row = row_at!(@row_index)
       @cell = cell_at!(@row, @cell_index)
-      render :show
+      render partial: "editor", locals: { builder_screen_params: builder_screen_params }
     end
 
     def add_row
@@ -448,6 +448,12 @@ module Drafts
           raise ArgumentError, "Select an existing array field." unless entry
 
           append_row(builder_rows_for(body)) << collection_cell_for(entry)
+        elsif suggestion_id.start_with?("scaffold_object:")
+          ptr = suggestion_id.delete_prefix("scaffold_object:")
+          entry = object_scaffold_entries.find { |candidate| candidate.fetch(:ptr) == ptr }
+          raise ArgumentError, "Select an available object field." unless entry
+
+          scaffold_object_subform!(body, entry)
         else
           raise ArgumentError, "Unknown suggestion."
         end
@@ -756,6 +762,26 @@ module Drafts
       missing_scalar_entries.select { |entry| inferred_reference_schema_key(entry).present? }
     end
 
+    def object_scaffold_entries
+      existing_root_ptrs = Array(@draft.body["subforms"]).filter_map { |subform| subform.dig("root_binding", "ptr") if subform.is_a?(Hash) }
+      schema_properties = @schema_document.body.fetch("properties", {})
+      return [] unless schema_properties.is_a?(Hash)
+
+      schema_properties.filter_map do |name, node|
+        next unless node.is_a?(Hash) && node["type"] == "object" && node["properties"].is_a?(Hash)
+
+        ptr = "/#{name}"
+        next if existing_root_ptrs.include?(ptr)
+
+        {
+          ptr: ptr,
+          name: name,
+          title: node["title"].presence || name.titleize,
+          properties: node.fetch("properties")
+        }
+      end
+    end
+
     def used_field_ptrs(body)
       Array(body["screens"]).flat_map { |screen| Array(screen["rows"]).flatten }
         .concat(Array(body["subforms"]).flat_map { |subform| Array(subform["rows"]).flatten })
@@ -771,24 +797,28 @@ module Drafts
 
     def builder_suggestions
       [].tap do |suggestions|
-        suggestions << suggestion("add_required_fields", "Add required fields", "#{missing_required_entries.count} required field(s) not in this affordance.") if missing_required_entries.any?
-        suggestions << suggestion("add_enum_fields", "Add select fields", "#{missing_enum_entries.count} enum field(s) can become select controls.") if missing_enum_entries.any?
-        suggestions << suggestion("add_reference_fields", "Add reference pickers", "#{missing_reference_entries.count} key field(s) can become reference pickers.") if missing_reference_entries.any?
-        suggestions << suggestion("add_scalar_fields", "Add scalar fields", "#{missing_scalar_entries.count} scalar field(s) can be added from the schema.") if missing_scalar_entries.any?
+        suggestions << suggestion("add_required_fields", "Add required fields", "#{missing_required_entries.count} required field(s) not in this affordance.", category: "Required") if missing_required_entries.any?
+        suggestions << suggestion("add_enum_fields", "Add select fields", "#{missing_enum_entries.count} enum field(s) can become select controls.", category: "Schema controls") if missing_enum_entries.any?
+        suggestions << suggestion("add_reference_fields", "Add reference pickers", "#{missing_reference_entries.count} key field(s) can become reference pickers.", category: "Schema controls") if missing_reference_entries.any?
+        suggestions << suggestion("add_scalar_fields", "Add scalar fields", "#{missing_scalar_entries.count} scalar field(s) can be added from the schema.", category: "Schema controls") if missing_scalar_entries.any?
         missing_array_entries.each do |entry|
-          suggestions << suggestion("add_collection:#{entry.ptr}", "Add #{entry.label} collection", "Create a card collection editor for #{entry.ptr}.")
+          suggestions << suggestion("add_collection:#{entry.ptr}", "Add #{entry.label} collection", "Create a card collection editor for #{entry.ptr}.", category: "Collections")
         end
-        suggestions << suggestion("promote_long_text", "Make long text textareas", "Promote description, summary, notes, prompt, and body fields already in the layout.") if long_text_cells(@draft.body).any?
-        suggestions << suggestion("choice_room_layout", "Build three-choice room layout", "Realize a HyperCard-style challenge room editor.") if choice_room_schema?
-        suggestions << suggestion("add_commit", "Add commit action", "Add a publish action to the current screen.") unless existing_commit?(@draft.body)
+        object_scaffold_entries.each do |entry|
+          suggestions << suggestion("scaffold_object:#{entry.fetch(:ptr)}", "Build #{entry.fetch(:title)} subform", "Create a subform and screen for #{entry.fetch(:ptr)}.", category: "Objects")
+        end
+        suggestions << suggestion("promote_long_text", "Make long text textareas", "Promote description, summary, notes, prompt, and body fields already in the layout.", category: "Refinements") if long_text_cells(@draft.body).any?
+        suggestions << suggestion("choice_room_layout", "Build three-choice room layout", "Realize a HyperCard-style challenge room editor.", category: "Game scaffolds") if choice_room_schema?
+        suggestions << suggestion("add_commit", "Add commit action", "Add a publish action to the current screen.", category: "Actions") unless existing_commit?(@draft.body)
       end
     end
 
-    def suggestion(id, title, description)
+    def suggestion(id, title, description, category: "Suggestions")
       {
         id: id,
         title: title,
-        description: description
+        description: description,
+        category: category
       }
     end
 
@@ -840,6 +870,78 @@ module Drafts
       ].reject(&:empty?)
     end
 
+    def scaffold_object_subform!(body, entry)
+      ensure_main_screen(body)
+      ensure_subforms(body)
+      subform_id = "#{entry.fetch(:name).underscore}_fields"
+      screen_id = entry.fetch(:name).underscore
+      raise ArgumentError, "Subform id already exists." if subform_ids_for(body).include?(subform_id)
+      raise ArgumentError, "Screen id already exists." if screen_ids_for(body).include?(screen_id)
+
+      body["subforms"] << {
+        "id" => subform_id,
+        "root_binding" => {
+          "kind" => "document_ptr",
+          "ptr" => entry.fetch(:ptr)
+        },
+        "rows" => object_subform_rows(entry.fetch(:properties))
+      }
+      body["screens"] << {
+        "id" => screen_id,
+        "title" => entry.fetch(:title),
+        "columns" => 12,
+        "default_span" => DEFAULT_FIELD_SPAN,
+        "width" => "large",
+        "mode" => "page",
+        "commit_mode" => "review_screen",
+        "subform" => subform_id
+      }
+    end
+
+    def object_subform_rows(properties)
+      properties.filter_map do |name, node|
+        next unless node.is_a?(Hash)
+        next if node["type"] == "object"
+
+        cell = {
+          "binding" => {
+            "kind" => "document_ptr",
+            "ptr" => "/#{name}"
+          },
+          "widget" => object_property_widget(name, node),
+          "label" => true,
+          "span" => object_property_span(name, node)
+        }
+        cell["reference"] = object_property_reference(name) if cell["widget"] == "reference"
+        cell
+      end.each_slice(3).to_a
+    end
+
+    def object_property_widget(name, node)
+      return "array" if node["type"] == "array"
+      return "select" if node["enum"].is_a?(Array) && node["enum"].any?
+      return "textarea" if long_text_ptr?("/#{name}")
+      return "reference" if inferred_reference_schema_key_from_name(name).present?
+
+      "auto"
+    end
+
+    def object_property_span(name, node)
+      return 12 if node["type"] == "array" || long_text_ptr?("/#{name}")
+
+      DEFAULT_FIELD_SPAN
+    end
+
+    def object_property_reference(name)
+      schema_key = inferred_reference_schema_key_from_name(name)
+      {
+        "schema_key" => schema_key,
+        "index_type" => "identity",
+        "index_key" => "document_key",
+        "placeholder" => "Select #{schema_key.tr('-', ' ')}"
+      }
+    end
+
     def optional_field_cell(ptr, span:, widget: nil)
       entry = @field_entries.find { |candidate| candidate.ptr == ptr }
       field_cell_for(entry, span: span, widget: widget) if entry
@@ -871,7 +973,10 @@ module Drafts
     end
 
     def inferred_reference_schema_key(entry)
-      name = entry.ptr.to_s.split("/").last.to_s
+      inferred_reference_schema_key_from_name(entry.ptr.to_s.split("/").last.to_s)
+    end
+
+    def inferred_reference_schema_key_from_name(name)
       base = name.delete_suffix("_key")
       base = name.delete_suffix("_id") if base == name
       return nil if base == name || base.blank?
@@ -1187,6 +1292,10 @@ module Drafts
       options = { tab: tab }
       options[:screen_id] = screen_id if screen_id.present? && screen_id != "main"
       draft_edit_affordance_builder_path(@draft, options)
+    end
+
+    def builder_screen_params
+      @screen_id == "main" ? {} : { screen_id: @screen_id }
     end
 
     def row_path(row_index, screen_id: @screen_id)

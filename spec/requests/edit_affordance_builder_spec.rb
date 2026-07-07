@@ -32,6 +32,29 @@ RSpec.describe "Edit affordance builder", type: :request do
             "type" => "string",
             "title" => "Person"
           },
+          "profile" => {
+            "type" => "object",
+            "title" => "Profile",
+            "properties" => {
+              "nickname" => {
+                "type" => "string",
+                "title" => "Nickname"
+              },
+              "summary" => {
+                "type" => "string",
+                "title" => "Summary"
+              },
+              "status" => {
+                "type" => "string",
+                "title" => "Profile status",
+                "enum" => %w[draft active archived]
+              },
+              "person_key" => {
+                "type" => "string",
+                "title" => "Person"
+              }
+            }
+          },
           "items" => {
             "type" => "array",
             "items" => {
@@ -88,10 +111,15 @@ RSpec.describe "Edit affordance builder", type: :request do
     expect(response.body).to include("Diagnostics")
     expect(response.body).to include("Raw")
     expect(response.body).to include("Schema suggestions")
+    expect(response.body).to include("Required")
+    expect(response.body).to include("Schema controls")
+    expect(response.body).to include("Collections")
+    expect(response.body).to include("Objects")
     expect(response.body).to include("Add required fields")
     expect(response.body).to include("Add select fields")
     expect(response.body).to include("Add reference pickers")
     expect(response.body).to include("Add scalar fields")
+    expect(response.body).to include("Build Profile subform")
     expect(response.body).to include("Add Items collection")
     expect(response.body).to include("max-width: 1920px;")
     expect(response.body).to include("Display Name (/name)")
@@ -282,6 +310,67 @@ RSpec.describe "Edit affordance builder", type: :request do
         "placeholder" => "Select person"
       }
     )
+  end
+
+  it "applies object schema suggestions as subform screens" do
+    draft = create_builder_draft
+
+    patch apply_suggestion_draft_edit_affordance_builder_path(draft), params: {
+      suggestion_id: "scaffold_object:/profile"
+    }
+
+    expect(response).to redirect_to(draft_edit_affordance_builder_path(draft, tab: "builder"))
+    body = draft.reload.body
+    expect(body.fetch("subforms").first).to include(
+      "id" => "profile_fields",
+      "root_binding" => {
+        "kind" => "document_ptr",
+        "ptr" => "/profile"
+      }
+    )
+    expect(body.fetch("subforms").first.fetch("rows").flatten).to include(
+      include(
+        "binding" => {
+          "kind" => "document_ptr",
+          "ptr" => "/nickname"
+        },
+        "widget" => "auto"
+      ),
+      include(
+        "binding" => {
+          "kind" => "document_ptr",
+          "ptr" => "/summary"
+        },
+        "widget" => "textarea",
+        "span" => 12
+      ),
+      include(
+        "binding" => {
+          "kind" => "document_ptr",
+          "ptr" => "/status"
+        },
+        "widget" => "select"
+      ),
+      include(
+        "binding" => {
+          "kind" => "document_ptr",
+          "ptr" => "/person_key"
+        },
+        "widget" => "reference",
+        "reference" => {
+          "schema_key" => "person",
+          "index_type" => "identity",
+          "index_key" => "document_key",
+          "placeholder" => "Select person"
+        }
+      )
+    )
+    expect(body.fetch("screens").second).to include(
+      "id" => "profile",
+      "title" => "Profile",
+      "subform" => "profile_fields"
+    )
+    expect(body.fetch("screens").second).not_to have_key("rows")
   end
 
   it "streams schema suggestion updates into focused builder regions" do
