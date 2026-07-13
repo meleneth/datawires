@@ -75,7 +75,7 @@ gem "html2haml", "~> 2.3", group: :development
 
 gem "pry-rails", "~> 0.3.11", groups: [ :development, :test ]
 
-gem "rubocop-rails", "~> 2.34", group: :development
+gem "rubocop-rails", "~> 2.36", group: :development
 
 gem "rubocop-rspec", "~> 3.9", group: :development
 
