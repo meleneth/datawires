@@ -131,7 +131,7 @@ document or repairing the affordance.
 - [x] Add Playwright coverage for authoring-side affordance creation from a
       schema page: create an edit affordance, drive the builder, commit it, and
       use the resulting affordance on a document.
-- [ ] Add a Wizard World death-path Playwright test that chooses a wrong option
+- [x] Add a Wizard World death-path Playwright test that chooses a wrong option
       and verifies the terminal failure room has no onward choices.
 - [ ] Add Playwright coverage for creating/refining a view affordance in the
       structured view builder once the next renderer shape is clear.

@@ -21,6 +21,9 @@ File.write(
       "Touch the moon rune",
       "Step into the listening mirror",
       "Claim the white star"
-    ]
+    ],
+    "deathChoice" => "Touch the thorn rune",
+    "deathRoomTitle" => "Thorn Rune",
+    "deathRoomText" => "The hedge grows inward. The line goes silent."
   )
 )

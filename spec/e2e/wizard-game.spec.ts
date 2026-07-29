@@ -6,6 +6,9 @@ import type { Page } from '@playwright/test';
 type WizardGameState = {
   startPath: string;
   safeChoices: string[];
+  deathChoice: string;
+  deathRoomTitle: string;
+  deathRoomText: string;
 };
 
 const statePath = path.join(process.cwd(), 'tmp', 'playwright', 'wizard_game.json');
@@ -40,5 +43,16 @@ test('plays the Wizard World safe path', async ({ page }) => {
   await clickChoice(page, state.safeChoices[2], 'Choose');
   await expect(page.getByRole('heading', { name: "Wizard's World Won" })).toBeVisible();
   await expect(page.getByText('The vault opens, the gate remembers your name, and the wizard lets you pass.').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /Enter|Choose/ })).toHaveCount(0);
+});
+
+test('ends the Wizard World game after a deadly choice', async ({ page }) => {
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8')) as WizardGameState;
+
+  await page.goto(state.startPath);
+  await clickChoice(page, state.deathChoice, 'Choose');
+
+  await expect(page.getByRole('heading', { name: state.deathRoomTitle })).toBeVisible();
+  await expect(page.getByText(state.deathRoomText).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /Enter|Choose/ })).toHaveCount(0);
 });
