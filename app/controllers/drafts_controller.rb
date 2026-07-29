@@ -167,6 +167,7 @@ class DraftsController < ApplicationController
     @draft = Draft.find(params[:id])
     @document = @draft.document
     @domain = @document.domain
+    require_visible_domain!(@domain)
   end
 
   def selected_edit_affordance

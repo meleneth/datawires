@@ -4,6 +4,7 @@ module Documents
   class DraftsController < ApplicationController
     def create
       document = Document.find(params[:document_id])
+      require_visible_domain!(document.domain)
       draft = document.draft_for(actor: current_user)
 
       redirect_params = {}

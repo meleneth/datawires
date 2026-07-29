@@ -21,6 +21,6 @@ class DomainCommitsController < ApplicationController
   private
 
   def set_domain
-    @domain = Domain.find(params.expect(:domain_id))
+    @domain = find_visible_domain!(params.expect(:domain_id))
   end
 end

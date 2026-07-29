@@ -18,7 +18,7 @@ class DomainArchivesController < ApplicationController
     raise ArgumentError, "Choose a domain archive JSON file." if uploaded_file.blank?
 
     archive = JSON.parse(uploaded_file.read)
-    domain = DomainExports::Import.call(archive: archive, name: params[:name].presence)
+    domain = DomainExports::Import.call(archive: archive, name: params[:name].presence, owner: current_user)
     redirect_to domain, notice: "Domain archive was successfully imported."
   rescue ActiveRecord::RecordInvalid, ArgumentError, JSON::ParserError, KeyError => e
     redirect_to domains_path, alert: "Domain archive could not be imported: #{e.message}"
@@ -27,6 +27,6 @@ class DomainArchivesController < ApplicationController
   private
 
   def set_domain
-    @domain = Domain.find(params.expect(:domain_id))
+    @domain = find_visible_domain!(params.expect(:domain_id))
   end
 end

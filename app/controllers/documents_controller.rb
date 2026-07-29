@@ -20,6 +20,7 @@ class DocumentsController < ApplicationController
       .find(params[:id])
 
     @domain = @document.domain
+    require_visible_domain!(@domain)
     @schema_wrapper = @document.schema_document&.schema_wrapper
     @edit_affordances = @schema_wrapper ? @schema_wrapper.edit_affordances : EditAffordance.none
     @view_affordances = @schema_wrapper ? @schema_wrapper.view_affordances : ViewAffordance.none

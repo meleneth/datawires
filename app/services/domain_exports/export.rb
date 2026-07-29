@@ -53,6 +53,7 @@ module DomainExports
       {
         "name" => domain.name,
         "repository_mode" => domain.repository_mode?,
+        "public" => domain.public?,
         "head_domain_commit_ref" => domain_commit_refs[domain.head_domain_commit_id]
       }
     end

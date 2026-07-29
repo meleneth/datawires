@@ -3,7 +3,7 @@ class DomainsController < ApplicationController
 
   # GET /domains or /domains.json
   def index
-    @domains = Domain.all
+    @domains = visible_domains.includes(:owner).order(:name)
   end
 
   # GET /domains/1 or /domains/1.json
@@ -32,6 +32,7 @@ class DomainsController < ApplicationController
   # POST /domains or /domains.json
   def create
     @domain = Domain.new(domain_params)
+    @domain.owner ||= current_user
     @cluster_options = Clusters::Catalog.options
     unless Clusters::Catalog.include?(cluster_key_param)
       @domain.errors.add(:base, "Cluster is not available.")
@@ -77,12 +78,12 @@ class DomainsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_domain
-    @domain = Domain.find(params.expect(:id))
+    @domain = find_visible_domain!(params.expect(:id))
   end
 
   # Only allow a list of trusted parameters through.
   def domain_params
-    params.expect(domain: [ :name ])
+    params.expect(domain: [ :name, :public ])
   end
 
   def cluster_key_param

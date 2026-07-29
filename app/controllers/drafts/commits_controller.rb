@@ -44,6 +44,7 @@ class Drafts::CommitsController < ApplicationController
     @draft = Draft.find(params[:draft_id])
     @document = @draft.document
     @domain = @document.domain
+    require_visible_domain!(@domain)
     @path = params[:path].presence
     @screen = params[:screen].presence
     @edit_affordance_id = params[:edit_affordance_id].presence

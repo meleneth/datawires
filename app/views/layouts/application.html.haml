@@ -19,9 +19,13 @@
     - if Rails.env.development?
       .w-full.border-b-2.border-black.bg-secondary.px-3.py-1.text-center.text-sm.font-semibold.text-secondary-foreground
         DATAWIRES UNDER CONSTRUCTION
-    %header{ class: "mx-auto flex w-full max-w-[2560px] items-center justify-between px-6 py-4" }
+    %header{ class: "mx-auto flex w-full max-w-[2560px] items-center justify-between gap-4 px-6 py-4" }
       = link_to "Datawires", "/domains", class: "font-head text-xl font-medium text-foreground"
-      = link_to "Domains", "/domains", class: "font-head rounded border-2 border-black bg-primary px-3 py-1 text-sm text-primary-foreground shadow-sm hover:shadow-none"
+      %nav.flex.items-center.gap-3
+        = link_to "Domains", "/domains", class: "font-head rounded border-2 border-black bg-primary px-3 py-1 text-sm text-primary-foreground shadow-sm hover:shadow-none"
+        - if current_user.present?
+          - current_user_name = current_user.name.presence || "Profile"
+          = link_to current_user_name, current_user, class: "font-head rounded border-2 border-black bg-card px-3 py-1 text-sm text-card-foreground shadow-sm hover:shadow-none"
     %main{ class: "mx-auto w-full max-w-[2560px] px-6 pb-8" }
       = render "shared/flash"
       = yield

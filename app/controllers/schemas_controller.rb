@@ -2,7 +2,7 @@
 
 class SchemasController < ApplicationController
   def index
-    @domain = Domain.find(params[:domain_id])
+    @domain = find_visible_domain!(params[:domain_id])
     @schemas = SchemaWrapper
       .includes(document: [ :domain, :head_revision ])
       .joins(:document)
@@ -11,12 +11,12 @@ class SchemasController < ApplicationController
   end
 
   def new
-    @domain = Domain.find(params[:domain_id])
+    @domain = find_visible_domain!(params[:domain_id])
     @document = @domain.documents.build
   end
 
   def create
-    @domain = Domain.find(params[:domain_id])
+    @domain = find_visible_domain!(params[:domain_id])
 
     result = CreateSchemaDocument.call(
       domain: @domain,
@@ -42,6 +42,7 @@ class SchemasController < ApplicationController
       .find(params[:id])
 
     @domain = @schema_wrapper.domain
+    require_visible_domain!(@domain)
     @documents = @schema_wrapper.conforming_documents
     @edit_affordances = @schema_wrapper.edit_affordances.order(:title)
     @edit_affordance_drafts = Draft

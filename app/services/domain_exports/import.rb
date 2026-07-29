@@ -2,13 +2,14 @@
 
 module DomainExports
   class Import
-    def self.call(archive:, name: nil)
-      new(archive:, name:).call
+    def self.call(archive:, name: nil, owner: nil)
+      new(archive:, name:, owner:).call
     end
 
-    def initialize(archive:, name:)
+    def initialize(archive:, name:, owner: nil)
       @archive = archive
       @name = name
+      @owner = owner
     end
 
     def call
@@ -31,7 +32,7 @@ module DomainExports
 
     private
 
-    attr_reader :archive, :name
+    attr_reader :archive, :name, :owner
 
     def validate_archive!
       return if archive.is_a?(Hash) &&
@@ -45,7 +46,9 @@ module DomainExports
       payload = archive.fetch("domain")
       Domain.create!(
         name: name.presence || payload.fetch("name"),
-        repository_mode: payload.fetch("repository_mode")
+        repository_mode: payload.fetch("repository_mode"),
+        owner: owner,
+        public: payload.fetch("public", false)
       )
     end
 

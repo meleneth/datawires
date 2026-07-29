@@ -13,6 +13,11 @@
       = render InputComponent.new(name: form.field_name(:name), value: domain.name, html_options: { id: "domain_name" })
       - if domain.errors[:name].any?
         %p.text-sm.text-destructive= domain.errors[:name].to_sentence
+    .flex.items-center.gap-2
+      = form.check_box :public,
+        id: "domain_public",
+        class: "h-4 w-4 rounded border-2 border-black text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+      = render LabelComponent.new(text: "Public", for_id: "domain_public")
     - if domain.new_record?
       .space-y-1
         = render LabelComponent.new(text: "Cluster", for_id: "domain_cluster_key")

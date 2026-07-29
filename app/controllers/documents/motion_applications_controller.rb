@@ -3,6 +3,7 @@
 class Documents::MotionApplicationsController < ApplicationController
   def create
     document = Document.find(params.expect(:document_id))
+    require_visible_domain!(document.domain)
     RobertsRules::ApplyMotion.call(motion_document: document, actor: current_user)
     redirect_to document_path(document), notice: "Motion was applied."
   rescue RobertsRules::ApplyMotion::Error => e

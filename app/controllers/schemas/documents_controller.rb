@@ -4,6 +4,7 @@ module Schemas
   class DocumentsController < ApplicationController
     def create
       schema_wrapper = SchemaWrapper.find(params[:schema_id])
+      require_visible_domain!(schema_wrapper.domain)
 
       document, draft = Documents::CreateFromSchema.call(
         schema_wrapper: schema_wrapper,

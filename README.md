@@ -40,6 +40,26 @@ bin/dev
 
 `Procfile.dev` runs Rails on `0.0.0.0:3000`. The Tailwind watcher is currently commented out in `Procfile.dev`.
 
+Local Keystone identity is expected to arrive through request headers from the
+dev auth gateway at `https://keystone.deva.station`. Datawires reads:
+
+- `X-Keystone-User-Id`
+- `X-Keystone-User-Name`
+- `X-Keystone-User-Email`
+- `X-Keystone-User-Avatar`
+
+If those are absent, Datawires accepts oauth2-proxy's `X-Forwarded-User`,
+`X-Forwarded-Preferred-Username`, and `X-Forwarded-Email` headers. It also
+accepts `X-Remote-User` or Rack `REMOTE_USER` as both the external id and
+display name.
+
+Override those with `KEYSTONE_USER_ID_HEADER`, `KEYSTONE_USER_NAME_HEADER`,
+`KEYSTONE_USER_EMAIL_HEADER`, and `KEYSTONE_USER_AVATAR_HEADER`. `KEYSTONE_URL`
+defaults to `https://keystone.deva.station` for local environment wiring.
+The current user's profile links through oauth2-proxy logout and then Keycloak
+logout. Override its defaults with `OIDC_ISSUER`, `OIDC_CLIENT_ID`, and
+`LOGOUT_REDIRECT_URL`.
+
 ## Tests
 
 Run the test suite:
@@ -60,7 +80,7 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
 
 ## Domain Model
 
-- `Domain` groups documents.
+- `Domain` groups documents. Domains are owned by users and can be public or private.
 - `Document` is the stable identity for a JSON document. Its UUID is the canonical system identity.
 - `Revision` stores immutable committed JSON object bodies.
 - `Draft` stores a user's mutable full-body working copy before commit.

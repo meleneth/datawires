@@ -11,6 +11,7 @@
         .space-y-1
           = render TypographyComponent.new(as: :muted, text: "Name")
           .font-head.text-lg.font-medium.text-foreground= @domain.name
+          .text-sm.text-muted-foreground= [ @domain.public? ? "Public" : "Private", @domain.owner&.name ].compact.join(" by ")
 
         .flex.flex-wrap.items-center.gap-3
           = render ButtonComponent.new(href: edit_domain_path(@domain), variant: :secondary, size: :sm) do

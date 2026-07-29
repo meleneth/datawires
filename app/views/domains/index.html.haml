@@ -23,6 +23,7 @@
             = link_to domain, class: "flex items-center justify-between rounded border-2 border-black bg-card px-3 py-3 text-card-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none" do
               .min-w-0
                 .font-head.font-medium= domain.name
+                .text-sm.text-muted-foreground= [ domain.public? ? "Public" : "Private", domain.owner&.name ].compact.join(" by ")
               .text-sm.text-muted-foreground= "Open"
 
       = render ButtonComponent.new(href: new_domain_path, size: :sm) do

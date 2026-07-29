@@ -3,6 +3,9 @@
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build -t datawires .
+# With a local apt-cacher-ng cache on port 3142:
+# docker build --network=host --build-arg APT_PROXY=http://127.0.0.1:3142 -t datawires .
+# If Gemstash is available, also pass: --build-arg GEM_MIRROR=http://127.0.0.1:9292
 # docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name datawires datawires
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
@@ -13,6 +16,12 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
 WORKDIR /rails
+
+# Optionally route Debian package installs through a local apt proxy.
+ARG APT_PROXY=""
+RUN if [ -n "$APT_PROXY" ]; then \
+      printf 'Acquire::http::Proxy "%s";\n' "$APT_PROXY" > /etc/apt/apt.conf.d/01proxy; \
+    fi
 
 # Install base packages
 RUN apt-get update -qq && \
@@ -36,8 +45,13 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
-COPY vendor/* ./vendor/
+COPY vendor ./vendor
 COPY Gemfile Gemfile.lock ./
+
+ARG GEM_MIRROR=""
+RUN if [ -n "$GEM_MIRROR" ]; then \
+      bundle config set mirror.https://rubygems.org "$GEM_MIRROR"; \
+    fi
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \

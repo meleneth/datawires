@@ -1,0 +1,22 @@
+- profile_name = @user.name.presence || "Profile"
+- content_for :title, profile_name
+
+= render TypographyComponent.new(as: :h1, text: profile_name, html_options: { class: "mb-4" })
+
+= render CardComponent.new(html_options: { class: "w-full" }) do
+  = render CardContentComponent.new do
+    .space-y-4
+      .flex.items-center.gap-4
+        - if @user.avatar.present?
+          = image_tag @user.avatar, alt: "#{profile_name} avatar", class: "h-16 w-16 rounded border-2 border-black object-cover"
+        .min-w-0
+          .font-head.text-lg.font-medium.text-foreground= profile_name
+          - if @user.email.present?
+            .text-sm.text-muted-foreground= @user.email
+
+      .flex.flex-wrap.items-center.gap-3
+        = render ButtonComponent.new(href: domains_path, variant: :outline, size: :sm) do
+          Back to domains
+        - if @user == current_user
+          = render ButtonComponent.new(href: logout_url, variant: :destructive, size: :sm) do
+            Log out

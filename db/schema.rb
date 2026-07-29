@@ -83,10 +83,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
     t.datetime "created_at", null: false
     t.uuid "head_domain_commit_id"
     t.string "name", null: false
+    t.uuid "owner_id"
+    t.boolean "public", default: false, null: false
     t.boolean "repository_mode", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["head_domain_commit_id"], name: "index_domains_on_head_domain_commit_id"
     t.index ["name"], name: "index_domains_on_name", unique: true
+    t.index ["owner_id", "public"], name: "index_domains_on_owner_id_and_public"
+    t.index ["owner_id"], name: "index_domains_on_owner_id"
+    t.index ["public"], name: "index_domains_on_public"
   end
 
   create_table "drafts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -166,8 +171,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "avatar"
     t.datetime "created_at", null: false
+    t.string "email"
+    t.string "external_id"
     t.string "name"
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email"
+    t.index ["external_id"], name: "index_users_on_external_id", unique: true
   end
 
   create_table "view_affordances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -194,6 +203,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
   add_foreign_key "domain_commits", "domains"
   add_foreign_key "domain_commits", "users", column: "created_by_id"
   add_foreign_key "domains", "domain_commits", column: "head_domain_commit_id"
+  add_foreign_key "domains", "users", column: "owner_id"
   add_foreign_key "drafts", "documents"
   add_foreign_key "drafts", "revisions", column: "based_on_revision_id"
   add_foreign_key "drafts", "users", column: "created_by_id"

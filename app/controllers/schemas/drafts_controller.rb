@@ -4,6 +4,7 @@ class Schemas::DraftsController < ApplicationController
   def create
     @document = Document.find(params[:schema_id])
     @domain = @document.domain
+    require_visible_domain!(@domain)
 
     draft = @document.drafts.order(created_at: :desc).first
 

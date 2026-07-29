@@ -2,6 +2,11 @@ class Domain < ApplicationRecord
   has_many :documents, dependent: :restrict_with_exception
   has_many :domain_commits, dependent: :restrict_with_exception
 
+  belongs_to :owner,
+             class_name: "User",
+             optional: true,
+             inverse_of: :owned_domains
+
   belongs_to :head_domain_commit,
              class_name: "DomainCommit",
              optional: true
@@ -17,6 +22,23 @@ class Domain < ApplicationRecord
            inverse_of: :domain
 
   validates :name, presence: true, uniqueness: true
+
+  scope :publicly_visible, -> { where(public: true) }
+  scope :owned_by, ->(user) { where(owner: user) }
+  scope :visible_to, ->(user) {
+    legacy_visible = where(owner_id: nil)
+    publicly_visible = where(public: true).or(legacy_visible)
+
+    user ? publicly_visible.or(where(owner: user)) : publicly_visible
+  }
+
+  def private?
+    !public?
+  end
+
+  def visible_to?(user)
+    public? || owner.nil? || (user.present? && owner == user)
+  end
 
   def open_drafts
     Draft.joins(:document)
