@@ -83,6 +83,10 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
+The Playwright harness uses `datawires_playwright` on devastation's test
+Postgres service so its persistent browser fixtures do not contaminate the
+transactional RSpec database.
+
 Known local issue: specs can pass and then exit nonzero because SimpleCov cannot overwrite `coverage/assets/0.13.2/DataTables-1.10.20/images/sort_asc.png`. The failure happens after RSpec reports examples and failures.
 
 ## Domain Model

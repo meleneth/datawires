@@ -82,10 +82,24 @@ result.draft.update!(
 )
 
 path = Rails.application.routes.url_helpers.draft_edit_affordance_builder_path(result.draft)
+schema_path = Rails.application.routes.url_helpers.schema_path(schema_wrapper)
+new_affordance_title = begin
+  existing_titles = schema_wrapper.edit_affordances.pluck(:title)
+  if existing_titles.exclude?("Default")
+    "Default"
+  else
+    index = 2
+    index += 1 while existing_titles.include?("Default #{index}")
+    "Default #{index}"
+  end
+end
+
 FileUtils.mkdir_p(Rails.root.join("tmp", "playwright"))
 File.write(
   Rails.root.join("tmp", "playwright", "builder_flow.json"),
   JSON.pretty_generate(
-    "builderPath" => path
+    "builderPath" => path,
+    "schemaPath" => schema_path,
+    "newAffordanceTitle" => new_affordance_title
   )
 )

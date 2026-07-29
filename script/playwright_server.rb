@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] = "test"
+ENV["DATABASE_NAME"] ||= "datawires_playwright"
 ENV["PORT"] ||= "31337"
 ENV["HOST"] ||= "127.0.0.1"
 

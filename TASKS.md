@@ -128,7 +128,7 @@ document or repairing the affordance.
 
 ## Next Thrash Targets
 
-- [ ] Add Playwright coverage for authoring-side affordance creation from a
+- [x] Add Playwright coverage for authoring-side affordance creation from a
       schema page: create an edit affordance, drive the builder, commit it, and
       use the resulting affordance on a document.
 - [ ] Add a Wizard World death-path Playwright test that chooses a wrong option

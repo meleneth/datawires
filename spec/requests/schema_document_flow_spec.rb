@@ -13,7 +13,7 @@ RSpec.describe "Schema-backed document flow", type: :request do
       }
     }
 
-    schema_draft = Draft.last
+    schema_draft = drafts_for(domain).sole
     schema_document = schema_draft.document
 
     expect(response).to redirect_to(draft_path(schema_draft))
@@ -48,7 +48,7 @@ RSpec.describe "Schema-backed document flow", type: :request do
 
     post schema_documents_path(schema_document.schema_wrapper)
 
-    document_draft = Draft.last
+    document_draft = drafts_for(domain).sole
     document = document_draft.document
 
     expect(response).to redirect_to(draft_path(document_draft))
@@ -104,5 +104,9 @@ RSpec.describe "Schema-backed document flow", type: :request do
     expect(response).to redirect_to(document_path(schema_document))
     expect(schema_document.reload.schema_wrapper).to be_nil
     expect(document.reload.schema_document).to be_nil
+  end
+
+  def drafts_for(domain)
+    Draft.joins(:document).where(documents: { domain_id: domain.id })
   end
 end

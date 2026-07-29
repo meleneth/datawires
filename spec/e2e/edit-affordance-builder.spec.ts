@@ -4,6 +4,8 @@ import path from 'node:path';
 
 type BuilderFlowState = {
   builderPath: string;
+  schemaPath: string;
+  newAffordanceTitle: string;
 };
 
 const statePath = path.join(process.cwd(), 'tmp', 'playwright', 'builder_flow.json');
@@ -65,4 +67,47 @@ test('builds and refines a schema-backed edit affordance', async ({ page }) => {
   await expect(placeholder).toHaveValue('Long form copy');
   await expect(editor.getByLabel('Compact display')).toBeChecked();
   await expect(editor.getByLabel('Read-only display')).toBeChecked();
+});
+
+test('authors, commits, and uses an edit affordance from a schema page', async ({ page }) => {
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8')) as BuilderFlowState;
+
+  await page.goto(state.schemaPath);
+  await expect(page.getByRole('heading', { name: 'Schema', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'New edit affordance' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Edit affordance builder' })).toBeVisible();
+  await expect(page.getByText(`${state.newAffordanceTitle} for playwright-builder-card`)).toBeVisible();
+
+  const requiredSuggestion = page
+    .getByText('Add required fields')
+    .locator('xpath=ancestor::div[contains(@class, "space-y-3")][1]');
+  await requiredSuggestion.getByRole('button', { name: 'Apply' }).click();
+  await expect(page.locator('#edit_affordance_builder_rows').getByText('/name', { exact: true })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Commit affordance' }).click();
+  await expect(page.getByRole('heading', { name: 'Commit draft' })).toBeVisible();
+  await page.getByLabel('Log message').fill('Publish Playwright-authored affordance');
+  await page.getByRole('button', { name: 'Commit draft' }).click();
+  await expect(page.getByText('Draft committed.')).toBeVisible();
+
+  await page.goto(state.schemaPath);
+  const affordance = page
+    .getByText(state.newAffordanceTitle, { exact: true })
+    .locator('xpath=ancestor::li[1]');
+  await affordance.getByRole('button', { name: 'New with this affordance' }).click();
+
+  const name = page.getByLabel('Name', { exact: true });
+  await expect(name).toBeVisible();
+  const autosave = page.waitForResponse((response) =>
+    response.url().includes('/patch_ptr') &&
+    response.ok()
+  );
+  await name.fill('Playwright authored card');
+  await name.press('Tab');
+  await autosave;
+  await expect(name).toHaveValue('Playwright authored card');
+
+  await page.reload();
+  await expect(page.getByLabel('Name', { exact: true })).toHaveValue('Playwright authored card');
 });
