@@ -21,6 +21,13 @@ Install dependencies and prepare the database:
 bin/setup --skip-server
 ```
 
+On devastation, development uses the local Postgres service at
+`localhost:5434/datawires_development` and tests use the isolated database at
+`localhost:5433/datawires_test`. The default local credentials are
+`devastation` / `devastation`. Override the connection with `DATABASE_URL` or
+the `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USERNAME`, and
+`DATABASE_PASSWORD` environment variables.
+
 Run migrations and seeds directly when needed:
 
 ```sh
