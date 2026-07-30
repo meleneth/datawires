@@ -53,6 +53,7 @@ RSpec.describe "Keystone auth", type: :request do
     expect(response.body).to include("/oauth2/sign_out?")
     expect(response.body).to include("protocol%2Fopenid-connect%2Flogout")
     expect(response.body).to include("id_token_hint%3D%7Bid_token%7D")
+    expect(response.body).to include(%(data-turbo="false"))
   end
 
   it "does not show the logout control on another user's profile" do

@@ -18,5 +18,5 @@
         = render ButtonComponent.new(href: domains_path, variant: :outline, size: :sm) do
           Back to domains
         - if @user == current_user
-          = render ButtonComponent.new(href: logout_url, variant: :destructive, size: :sm) do
+          = render ButtonComponent.new(href: logout_url, variant: :destructive, size: :sm, html_options: { data: { turbo: false } }) do
             Log out
