@@ -87,6 +87,7 @@ module ProceduralPolicies
       when "actor_id" then command.actor.user.id
       when "command_id" then command.id
       when "derived_id" then UuidTools.derive(command.id, value.fetch("name"))
+      when "document_operation" then apply_document_operation(value)
       when "literal" then value["value"]
       when "meeting_body_id" then meeting.body_id
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
@@ -110,6 +111,16 @@ module ProceduralPolicies
       entry.fetch(binding.fetch("attribute"))
     rescue KeyError
       reject!("Required stack attribute was not found.")
+    end
+
+    def apply_document_operation(binding)
+      StructuredDocuments::ApplyOperation.call(
+        content: resolve_value(binding.fetch("document")),
+        operation: resolve_value(binding.fetch("operation")),
+        current_version: resolve_value(binding.fetch("current_version"))
+      ).content
+    rescue StructuredDocuments::ApplyOperation::Invalid => e
+      reject!(e.message)
     end
 
     def condition_failure_reason(operation)

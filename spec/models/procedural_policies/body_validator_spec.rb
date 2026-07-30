@@ -94,4 +94,22 @@ RSpec.describe ProceduralPolicies::BodyValidator do
       "commands.open_meeting.event_payload.id.attribute must be non-empty"
     )
   end
+
+  it "rejects an incomplete structured-document operation binding" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    body["commands"]["open_meeting"]["event_payload"] = {
+      "content" => {
+        "source" => "document_operation",
+        "document" => { "source" => "literal", "value" => {} }
+      }
+    }
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include(
+      "commands.open_meeting.event_payload.content.operation is required",
+      "commands.open_meeting.event_payload.content.current_version is required"
+    )
+  end
 end

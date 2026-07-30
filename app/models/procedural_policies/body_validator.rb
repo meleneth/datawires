@@ -3,7 +3,7 @@
 module ProceduralPolicies
   class BodyValidator
     STATUSES = %w[scheduled open adjourned].freeze
-    PAYLOAD_TYPES = %w[array boolean string uuid].freeze
+    PAYLOAD_TYPES = %w[array boolean object string uuid].freeze
     CONDITION_OPERATIONS = %w[
       blank
       collection_excludes
@@ -30,6 +30,7 @@ module ProceduralPolicies
       actor_id
       command_id
       derived_id
+      document_operation
       literal
       meeting_body_id
       payload
@@ -217,6 +218,7 @@ module ProceduralPolicies
           end
           validate_resource_binding(value, prefix) if value["source"] == "resource"
           validate_stack_top_binding(value, prefix) if value["source"] == "stack_top"
+          validate_document_operation_binding(value, prefix) if value["source"] == "document_operation"
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
         end
@@ -239,6 +241,13 @@ module ProceduralPolicies
         errors << "#{prefix}.field must be a registered projection field"
       end
       errors << "#{prefix}.attribute must be non-empty" if binding["attribute"].blank?
+    end
+
+    def validate_document_operation_binding(binding, prefix)
+      %w[document operation current_version].each do |key|
+        errors << "#{prefix}.#{key} is required" unless binding[key].is_a?(Hash)
+        validate_bindings(binding[key], "#{prefix}.#{key}") if binding[key].is_a?(Hash)
+      end
     end
   end
 end

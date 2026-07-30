@@ -94,6 +94,37 @@ RSpec.describe "Introducing a pending question from a Proposal" do
       "debate_opened_by_id" => chair.user.id
     )
     expect(meeting.event_stream.event_records.last.event_type).to eq("DebateOpened")
+
+    operation = {
+      "version" => 1,
+      "type" => "replace",
+      "base_version" => 1,
+      "path" => "/text",
+      "value" => "Amended text"
+    }
+    handle(meeting, member, "move_amendment", 8, { "operation" => operation })
+    main_question, amendment_question = meeting.projection.pending_question_stack
+    expect(main_question).to include(
+      "id" => question_id,
+      "kind" => "main",
+      "content" => { "text" => "Proposed text" }
+    )
+    expect(amendment_question).to include(
+      "kind" => "amendment",
+      "degree" => 1,
+      "parent_question_id" => question_id,
+      "parent_version" => 1,
+      "operation" => operation,
+      "content" => { "text" => "Amended text" }
+    )
+    expect(meeting.event_stream.event_records.last).to have_attributes(
+      event_type: "AmendmentMoved",
+      payload: include(
+        "parent_question_id" => question_id,
+        "operation" => operation,
+        "proposed_content" => { "text" => "Amended text" }
+      )
+    )
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

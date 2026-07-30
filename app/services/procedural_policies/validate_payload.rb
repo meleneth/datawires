@@ -13,6 +13,7 @@ module ProceduralPolicies
       case type
       when "array" then value.is_a?(Array)
       when "boolean" then [ true, false ].include?(value)
+      when "object" then value.is_a?(Hash)
       when "string" then value.is_a?(String)
       when "uuid" then UuidTools::FORMAT.match?(value.to_s)
       else false

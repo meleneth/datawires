@@ -5,6 +5,7 @@
     "submit_proposal": ["member", "chair", "secretary", "temporary_chair"],
     "request_recognition": ["member", "chair", "secretary", "temporary_chair"],
     "introduce_question": ["member", "chair", "secretary", "temporary_chair"],
+    "move_amendment": ["member", "chair", "secretary", "temporary_chair"],
     "second_question": ["member", "chair", "secretary", "temporary_chair"],
     "create_meeting": ["chair", "secretary"],
     "schedule_proposal": ["chair", "secretary"],
@@ -215,6 +216,7 @@
         {"op": "stack_push", "field": "pending_question_stack", "value": {
           "id": {"source": "derived_id", "name": "pending_question"},
           "motion_id": {"source": "command_id"},
+          "kind": {"source": "literal", "value": "main"},
           "version": {"source": "literal", "value": 1},
           "status": {"source": "literal", "value": "introduced"},
           "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
@@ -366,6 +368,71 @@
           "status": {"source": "literal", "value": "debate_open"},
           "debate_opened_by_id": {"source": "actor_id"},
           "debate_opened_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "move_amendment": {
+      "capability": "move_amendment",
+      "allowed_statuses": ["open"],
+      "event_type": "AmendmentMoved",
+      "event_version": 1,
+      "payload": {"operation": "object"},
+      "conditions": [
+        {
+          "op": "equals",
+          "field": "floor_holder_id",
+          "value": {"source": "actor_id"},
+          "reason": "The actor must hold the floor."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "kind",
+          "value": {"source": "literal", "value": "main"},
+          "reason": "Only the initial first-degree amendment slice is available."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "debate_open"},
+          "reason": "The immediately pending question is not open to amendment."
+        }
+      ],
+      "event_payload": {
+        "amendment_id": {"source": "command_id"},
+        "question_id": {"source": "derived_id", "name": "amendment_question"},
+        "parent_question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "parent_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+        "operation": {"source": "payload", "key": "operation"},
+        "proposed_content": {
+          "source": "document_operation",
+          "document": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+          "operation": {"source": "payload", "key": "operation"},
+          "current_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"}
+        },
+        "moved_by_id": {"source": "actor_id"},
+        "moved_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_push", "field": "pending_question_stack", "value": {
+          "id": {"source": "derived_id", "name": "amendment_question"},
+          "amendment_id": {"source": "command_id"},
+          "kind": {"source": "literal", "value": "amendment"},
+          "degree": {"source": "literal", "value": 1},
+          "version": {"source": "literal", "value": 1},
+          "status": {"source": "literal", "value": "introduced"},
+          "parent_question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+          "parent_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+          "operation": {"source": "payload", "key": "operation"},
+          "content": {
+            "source": "document_operation",
+            "document": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+            "operation": {"source": "payload", "key": "operation"},
+            "current_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"}
+          },
+          "moved_by_id": {"source": "actor_id"},
+          "moved_at": {"source": "timestamp_iso8601"}
         }}
       ]
     }

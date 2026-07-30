@@ -614,7 +614,7 @@ schema-backed documents can preserve adopted-text lineage.
 - [ ] Support typed operations for insert, strike, replace, substitute, divide,
       and structured-value modification, with schema path/document node as the
       preferred target and textual range as a validated fallback.
-- [ ] Implement the initial vertical slice with one first-degree amendment and
+- [x] Implement the initial vertical slice with one first-degree amendment and
       the minimal operation(s) needed by its fixture; keep the remaining
       operation shapes validatable or explicitly future-versioned rather than
       pretending to execute them.
