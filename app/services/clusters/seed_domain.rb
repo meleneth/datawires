@@ -33,11 +33,13 @@ module Clusters
           )
           schema_wrapper = SyncSchemaWrapperForDocument.call(document: schema_document)
           schema_wrapper.update!(public: true) unless schema_wrapper.public?
-          ensure_affordance!(
-            schema_wrapper: schema_wrapper,
-            schema_definition: schema_definition,
-            cluster_name: definition.fetch(:name)
-          )
+          if schema_definition[:affordance]
+            ensure_affordance!(
+              schema_wrapper: schema_wrapper,
+              schema_definition: schema_definition,
+              cluster_name: definition.fetch(:name)
+            )
+          end
           ensure_view_affordances!(
             schema_wrapper: schema_wrapper,
             schema_definition: schema_definition,

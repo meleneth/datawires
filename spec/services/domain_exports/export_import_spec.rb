@@ -8,36 +8,28 @@ RSpec.describe "Domain export/import" do
     domain = create(:domain, name: "Rules Archive")
     Clusters::SeedDomain.call(domain: domain, cluster_key: Clusters::Catalog::ROBERTS_RULES, actor: actor)
     first_commit = domain.reload.head_domain_commit
-    agreement_schema = domain.documents.find_by!(key: "agreement")
-    agreement = create(
+    body_schema = domain.documents.find_by!(key: Bodies::Schema::KEY)
+    body_document = create(
       :document,
       domain: domain,
-      key: "standing-rule",
-      title: "Standing Rule",
-      schema_document: agreement_schema
+      key: "assembly",
+      title: "Assembly",
+      schema_document: body_schema
     )
-    original_revision = agreement.revisions.create!(
-      body: {
-        "title" => "Standing Rule",
-        "status" => "proposed",
-        "body" => "Members may speak once."
-      },
-      message: "Draft standing rule",
+    original_revision = body_document.revisions.create!(
+      body: { "name" => "Assembly" },
+      message: "Draft assembly",
       created_by: actor
     )
-    agreement.update!(head_revision: original_revision)
-    amended_revision = agreement.revisions.create!(
+    body_document.update!(head_revision: original_revision)
+    amended_revision = body_document.revisions.create!(
       parent_revision: original_revision,
-      body: {
-        "title" => "Standing Rule",
-        "status" => "active",
-        "body" => "Members may speak twice."
-      },
-      message: "Adopt standing rule",
+      body: { "name" => "General Assembly", "description" => "Repository fixture" },
+      message: "Rename assembly",
       created_by: actor
     )
-    agreement.update!(head_revision: amended_revision)
-    second_commit = DomainCommits::Create.call(domain: domain, message: "Adopt standing rule", actor: actor)
+    body_document.update!(head_revision: amended_revision)
+    second_commit = DomainCommits::Create.call(domain: domain, message: "Rename assembly", actor: actor)
 
     archive = DomainExports::Export.call(domain: domain)
 
@@ -49,18 +41,18 @@ RSpec.describe "Domain export/import" do
       repository_mode: true
     )
     expect(imported.id).not_to eq(domain.id)
-    imported_agreement = imported.documents.find_by!(key: "standing-rule")
-    expect(imported_agreement.id).not_to eq(agreement.id)
-    expect(imported_agreement.head_revision_id).not_to eq(amended_revision.id)
-    expect(imported_agreement.head_revision.body).to eq(amended_revision.body)
-    expect(imported.documents.find_by!(key: "standing-rule").schema_document.key).to eq("agreement")
+    imported_body = imported.documents.find_by!(key: "assembly")
+    expect(imported_body.id).not_to eq(body_document.id)
+    expect(imported_body.head_revision_id).not_to eq(amended_revision.id)
+    expect(imported_body.head_revision.body).to eq(amended_revision.body)
+    expect(imported_body.schema_document.key).to eq(Bodies::Schema::KEY)
     expect(imported.domain_commits.order(:created_at).pluck(:id)).not_to eq([ first_commit.id, second_commit.id ])
     expect(imported.head_domain_commit.state_hash).to eq(second_commit.state_hash)
     expect(imported.head_domain_commit.parent_domain_commit.state_hash).to eq(first_commit.state_hash)
-    expect(imported.head_domain_commit.domain_commit_documents.find_by!(document_key: "standing-rule")).to have_attributes(
+    expect(imported.head_domain_commit.domain_commit_documents.find_by!(document_key: "assembly")).to have_attributes(
       revision_hash: a_string_matching(/\A\h{64}\z/)
     )
-    expect(imported.documents.find_by!(key: "motion").schema_wrapper.edit_affordances.sole.title).to eq("Default")
+    expect(imported.documents.find_by!(key: Meetings::Schema::KEY).schema_wrapper.edit_affordances).to be_empty
   end
 
   it "rejects unsupported archive formats" do

@@ -51,9 +51,9 @@ RSpec.describe "Domain clusters", type: :request do
         }
       }
     }.to change(Domain, :count).by(1)
-      .and change(SchemaWrapper, :count).by(5)
-      .and change(EditAffordance, :count).by(5)
-      .and change(ViewAffordance, :count).by(1)
+      .and change(SchemaWrapper, :count).by(8)
+      .and change(EditAffordance, :count).by(1)
+      .and change(ViewAffordance, :count).by(0)
       .and change(DomainCommit, :count).by(1)
 
     domain = Domain.find_by!(name: "Board Meeting")
@@ -62,10 +62,11 @@ RSpec.describe "Domain clusters", type: :request do
     expect(domain.head_domain_commit).to be_present
     expect(response).to redirect_to(domain_path(domain))
     follow_redirect!
-    expect(response.body).to include("agreement")
-    expect(response.body).to include("motion")
-    expect(response.body).to include("proceeding-event")
-    expect(response.body).to include("meeting-state")
+    expect(response.body).to include(Bodies::Schema::KEY)
+    expect(response.body).to include(Meetings::Schema::KEY)
+    expect(response.body).to include(Proposals::Schema::KEY)
+    expect(response.body).to include(Agreements::Schema::KEY)
+    expect(response.body).not_to include("proceeding-event")
   end
 
   it "creates a domain pre-seeded with the private MUD cluster" do

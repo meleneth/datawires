@@ -32,4 +32,46 @@ RSpec.describe CreateBoard do
 
     expect(schema_wrapper.reload.default_board).to eq(first)
   end
+
+  it "creates a board from an immutable data definition" do
+    schema_wrapper = create(:schema_wrapper)
+
+    result = described_class.call(
+      schema_wrapper:,
+      title: "Assembly Workspace",
+      actor: create(:user),
+      definition: Boards::Definitions.body_workspace
+    )
+
+    expect(result.board.body).to include(
+      "title" => "Assembly Workspace",
+      "sections" => include(
+        include("id" => "active-or-upcoming-meeting", "kind" => "meeting_collection"),
+        include("id" => "open-proposals", "kind" => "proposal_collection"),
+        include("id" => "recent-agreements", "kind" => "document_collection"),
+        include("id" => "completed-meetings", "kind" => "meeting_collection")
+      ),
+      "actions" => include(
+        include("id" => "create-meeting", "kind" => "invoke_command"),
+        include("id" => "submit-proposal", "kind" => "invoke_command")
+      )
+    )
+    expect(result.draft.body).to eq(result.board.body)
+    expect(Boards::Definitions.body_workspace.fetch("title")).to eq("Datawires Board")
+  end
+
+  it "rejects an invalid data definition before writing" do
+    schema_wrapper = create(:schema_wrapper)
+    count = Board.count
+
+    expect {
+      described_class.call(
+        schema_wrapper:,
+        title: "Invalid",
+        actor: create(:user),
+        definition: { "version" => 1 }
+      )
+    }.to raise_error(ArgumentError, /sections must be an array/)
+    expect(Board.count).to eq(count)
+  end
 end

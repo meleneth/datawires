@@ -98,15 +98,16 @@ module Clusters
         name: "Robert's Rules of Order",
         repository_mode: true,
         home: {
-          "title" => "Robert's Rules Home",
+          "title" => "Datawires Parliamentary Workspace",
           "groups" => [
             {
-              "title" => "Operate",
+              "title" => "Domain schemas",
               "links" => [
-                schema_home_link("Agreements", "Adopted, amended, extended, or closed agreements.", schema_key: "agreement"),
-                schema_home_link("Motions", "Proposals that create or change agreements.", schema_key: "motion"),
-                schema_home_link("Proceeding Events", "The meeting-relative sequence of actions.", schema_key: "proceeding-event"),
-                schema_home_link("Meeting State", "Current meeting phase and active references.", schema_key: "meeting-state")
+                schema_home_link("Bodies", "Organizations that conduct business.", schema_key: Bodies::Schema::KEY),
+                schema_home_link("Meetings", "Scheduled meeting documents.", schema_key: Meetings::Schema::KEY),
+                schema_home_link("Proposals", "Business submitted before or outside a meeting.", schema_key: Proposals::Schema::KEY),
+                schema_home_link("Decisions", "Durable procedural dispositions.", schema_key: Decisions::Schema::KEY),
+                schema_home_link("Agreements", "Authoritative documents produced by adoption.", schema_key: Agreements::Schema::KEY)
               ]
             },
             {
@@ -123,40 +124,15 @@ module Clusters
         },
         schemas: [
           domain_home_page_schema(cluster_key: ROBERTS_RULES),
-          agreement_schema,
-          motion_schema,
-          proceeding_event_schema,
-          meeting_state_schema
+          registered_schema(Bodies::Schema),
+          registered_schema(Meetings::Schema),
+          registered_schema(Proposals::Schema),
+          registered_schema(Decisions::Schema),
+          registered_schema(Agreements::Schema),
+          registered_schema(ProceduralPolicies::Schema),
+          registered_schema(Boards::Schema)
         ]
       }
-    end
-
-    def agreement_schema
-      schema(
-        cluster_key: ROBERTS_RULES,
-        key: "agreement",
-        title: "Agreement",
-        required: %w[title status body],
-        properties: {
-          "title" => string("Title"),
-          "status" => enum_string("Status", %w[proposed active amended adopted rejected withdrawn superseded closed]),
-          "body" => string("Agreement text"),
-          "relative_time" => integer("Relative time"),
-          "supersedes_agreement_key" => string("Supersedes agreement key"),
-          "extends_agreement_key" => string("Extends agreement key"),
-          "notes" => string("Notes")
-        },
-        rows: [
-          [ field("/title", span: 6), field("/status", span: 3), field("/relative_time", span: 3, widget: "number") ],
-          [ field("/body", span: 12, widget: "textarea") ],
-          [
-            reference_field("/supersedes_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select superseded agreement"),
-            reference_field("/extends_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select extended agreement")
-          ],
-          [ field("/notes", span: 12, widget: "textarea") ],
-          [ commit(span: 12) ]
-        ]
-      )
     end
 
     def domain_home_page_schema(cluster_key: WORLD_BUILDING)
@@ -225,92 +201,6 @@ module Clusters
             )
           ],
           [ commit(span: 12, commit_mode: "immediate", message_mode: "inline_optional") ]
-        ]
-      )
-    end
-
-    def motion_schema
-      schema(
-        cluster_key: ROBERTS_RULES,
-        key: "motion",
-        title: "Motion",
-        required: %w[title motion_type status relative_time],
-        properties: {
-          "title" => string("Title"),
-          "motion_type" => enum_string("Motion type", %w[main extend amend postpone table call_question reconsider point_of_order appeal withdraw close]),
-          "status" => enum_string("Status", %w[pending seconded open adopted rejected withdrawn expired]),
-          "relative_time" => integer("Relative time"),
-          "new_agreement_key" => string("New agreement key"),
-          "target_agreement_key" => string("Target agreement key"),
-          "proposed_text" => string("Proposed text"),
-          "mover_key" => string("Mover key"),
-          "seconder_key" => string("Seconder key"),
-          "result" => string("Result"),
-          "notes" => string("Notes")
-        },
-        rows: [],
-        screens: motion_screens
-      )
-    end
-
-    def proceeding_event_schema
-      schema(
-        cluster_key: ROBERTS_RULES,
-        key: "proceeding-event",
-        title: "Proceeding Event",
-        required: %w[relative_time event_type title],
-        properties: {
-          "relative_time" => integer("Relative time"),
-          "event_type" => enum_string("Event type", %w[start_meeting introduce_motion second_motion open_debate amend_motion vote rule adjourn note]),
-          "title" => string("Title"),
-          "motion_key" => string("Motion key"),
-          "agreement_key" => string("Agreement key"),
-          "summary" => string("Summary"),
-          "notes" => string("Notes")
-        },
-        rows: [
-          [ field("/relative_time", span: 3, widget: "number"), field("/event_type", span: 3), field("/title", span: 6) ],
-          [
-            reference_field("/motion_key", span: 6, schema_key: "motion", placeholder: "Select motion"),
-            reference_field("/agreement_key", span: 6, schema_key: "agreement", placeholder: "Select agreement")
-          ],
-          [ field("/summary", span: 12, widget: "textarea") ],
-          [ field("/notes", span: 12, widget: "textarea") ],
-          [ commit(span: 12) ]
-        ],
-        view_affordances: [
-          timeline_view_affordance(
-            key: "proceeding-event-sequence-view-affordance",
-            title: "Proceeding Event sequence view affordance",
-            affordance_title: "Proceeding Sequence",
-            schema_key: "proceeding-event",
-            relative_time_label: "Meeting-relative time"
-          )
-        ]
-      )
-    end
-
-    def meeting_state_schema
-      schema(
-        cluster_key: ROBERTS_RULES,
-        key: "meeting-state",
-        title: "Meeting State",
-        required: %w[name phase],
-        properties: {
-          "name" => string("Name"),
-          "phase" => enum_string("Phase", %w[not_started in_session recessed adjourned]),
-          "current_motion_key" => string("Current motion key"),
-          "current_agreement_key" => string("Current agreement key"),
-          "notes" => string("Notes")
-        },
-        rows: [
-          [ field("/name", span: 6), field("/phase", span: 6) ],
-          [
-            reference_field("/current_motion_key", span: 6, schema_key: "motion", placeholder: "Select current motion"),
-            reference_field("/current_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select current agreement")
-          ],
-          [ field("/notes", span: 12, widget: "textarea") ],
-          [ commit(span: 12) ]
         ]
       )
     end
@@ -773,6 +663,16 @@ module Clusters
       }
     end
 
+    def registered_schema(schema_module)
+      {
+        key: schema_module::KEY,
+        title: schema_module::BODY.fetch("title"),
+        body: schema_module::BODY,
+        affordance: nil,
+        view_affordances: []
+      }
+    end
+
     def schema_home_link(title, description, schema_key:)
       {
         "kind" => "schema",
@@ -810,50 +710,6 @@ module Clusters
           "default_span" => 6,
           "width" => "large",
           "rows" => rows
-        }
-      ]
-    end
-
-    def motion_screens
-      [
-        {
-          "id" => "main",
-          "title" => "Motion",
-          "columns" => 12,
-          "default_span" => 6,
-          "width" => "large",
-          "rows" => [
-            [ field("/relative_time", span: 3, widget: "number"), field("/motion_type", span: 3), field("/status", span: 3), field("/title", span: 3) ],
-            [ field("/proposed_text", span: 12, widget: "textarea") ],
-            [ navigation("Agreement effect", target_screen: "agreement_effect", span: 6), navigation("People and result", target_screen: "people_result", span: 6) ]
-          ]
-        },
-        {
-          "id" => "agreement_effect",
-          "title" => "Agreement Effect",
-          "columns" => 12,
-          "default_span" => 6,
-          "width" => "large",
-          "rows" => [
-            [
-              field("/new_agreement_key", span: 6, help: "For main and extend motions that create a new agreement."),
-              reference_field("/target_agreement_key", span: 6, schema_key: "agreement", placeholder: "Select target agreement")
-            ],
-            [ navigation("Motion details", target_screen: "main", span: 6), navigation("People and result", target_screen: "people_result", span: 6) ]
-          ]
-        },
-        {
-          "id" => "people_result",
-          "title" => "People and Result",
-          "columns" => 12,
-          "default_span" => 6,
-          "width" => "large",
-          "rows" => [
-            [ field("/mover_key", span: 6), field("/seconder_key", span: 6) ],
-            [ field("/result", span: 6), field("/notes", span: 6, widget: "textarea") ],
-            [ navigation("Motion details", target_screen: "main", span: 6), navigation("Agreement effect", target_screen: "agreement_effect", span: 6) ],
-            [ commit(span: 12) ]
-          ]
         }
       ]
     end

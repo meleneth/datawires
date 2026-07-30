@@ -113,7 +113,7 @@ RSpec.describe Clusters::SeedDomain do
     end
   end
 
-  it "seeds the roberts rules schemas in repository mode" do
+  it "seeds generic parliamentary engine schemas without bespoke affordances" do
     domain = create(:domain)
     actor = create(:user)
 
@@ -123,89 +123,45 @@ RSpec.describe Clusters::SeedDomain do
 
     domain.reload
     expect(domain).to be_repository_mode
-    expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state]).count).to eq(4)
+    engine_keys = [
+      Bodies::Schema::KEY,
+      Meetings::Schema::KEY,
+      Proposals::Schema::KEY,
+      Decisions::Schema::KEY,
+      Agreements::Schema::KEY,
+      ProceduralPolicies::Schema::KEY,
+      Boards::Schema::KEY
+    ]
+    expect(domain.documents.where(key: engine_keys).count).to eq(engine_keys.length)
+    expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).to be_empty
     expect(domain.head_domain_commit).to be_present
     expect(domain.head_domain_commit.message).to eq("Seed Robert's Rules of Order cluster")
-    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(12)
+    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(10)
 
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
     expect(home.schema_document.key).to eq("domain-home-page")
     expect(home.schema_document.schema_wrapper.edit_affordances.sole.title).to eq("Default")
     expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "Agreements",
-      "Motions",
-      "Proceeding Events",
-      "Meeting State",
+      "Bodies",
+      "Meetings",
+      "Proposals",
+      "Decisions",
       "Repository History"
     )
     expect(DomainHomeLinks.for(domain).flat_map { |group| group.fetch("links") }.pluck("title")).to include(
       "Agreements",
-      "Motions",
-      "Proceeding Events",
-      "Meeting State",
+      "Bodies",
+      "Meetings",
+      "Proposals",
+      "Decisions",
       "Repository History"
     )
 
-    agreement_schema = domain.documents.find_by!(key: "agreement")
-    expect(agreement_schema.body.dig("properties", "relative_time")).to include(
-      "type" => "integer",
-      "description" => "Relative integer values are allowed to be negative."
-    )
-    expect(agreement_schema.body.dig("properties", "status", "enum")).to include(
-      "active",
-      "amended",
-      "superseded",
-      "closed"
-    )
-
-    motion_schema = domain.documents.find_by!(key: "motion")
-    expect(motion_schema.body.dig("properties", "motion_type", "enum")).to include(
-      "main",
-      "extend",
-      "amend",
-      "reconsider",
-      "close"
-    )
-    expect(motion_schema.body.dig("properties", "new_agreement_key")).to include("type" => "string")
-    expect(motion_schema.body.dig("properties", "target_agreement_key")).to include("type" => "string")
-
-    motion_affordance = motion_schema.schema_wrapper.edit_affordances.sole
-    motion_screens = motion_affordance.body.fetch("screens")
-    expect(motion_screens.pluck("id")).to eq(%w[main agreement_effect people_result])
-    target_agreement_cell = motion_screens.find { |screen| screen.fetch("id") == "agreement_effect" }.fetch("rows").flatten.find do |cell|
-      cell.dig("binding", "ptr") == "/target_agreement_key"
-    end
-    expect(target_agreement_cell).to include(
-      "widget" => "reference",
-      "reference" => include(
-        "schema_key" => "agreement",
-        "index_type" => "identity"
-      )
-    )
-    expect(motion_screens.flat_map { |screen| screen.fetch("rows").flatten }.select { |cell| cell["kind"] == "navigation" }.pluck("target_screen")).to contain_exactly(
-      "agreement_effect",
-      "people_result",
-      "main",
-      "people_result",
-      "main",
-      "agreement_effect"
-    )
-
-    proceeding_schema = domain.documents.find_by!(key: "proceeding-event")
-    proceeding_view = proceeding_schema.schema_wrapper.view_affordances.sole
-    expect(proceeding_view.title).to eq("Proceeding Sequence")
-    expect(proceeding_view).to be_public
-    expect(proceeding_view.body).to include(
-      "renderer" => "timeline_d3",
-      "config" => include("schema_key" => "proceeding-event")
-    )
-
-    SchemaWrapper.where(document: domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).find_each do |wrapper|
+    SchemaWrapper.where(document: domain.documents.where(key: engine_keys)).find_each do |wrapper|
       expect(wrapper).to be_public
-      affordance = wrapper.edit_affordances.sole
-      expect(affordance).to be_public
-      expect(affordance.title).to eq("Default")
-      expect(affordance.body.fetch("screens").first.fetch("rows")).not_to be_empty
+      expect(wrapper.edit_affordances).to be_empty
+      expect(wrapper.view_affordances).to be_empty
     end
   end
 

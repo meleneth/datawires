@@ -147,7 +147,10 @@ accidental second write path. The remaining prototype documents are not the fina
 parliamentary model: in particular, the existing Motion schema currently mixes
 proposal authoring, motion state, and results, while the existing Agreement
 schema includes pre-adoption statuses. New work must preserve readable history
-and demo data while moving operational writes through the engine.
+and demo data while moving operational writes through the engine. New
+Robert's Rules cluster installations no longer seed those prototype schemas or
+their bespoke affordances; they seed only the generic engine schemas. Existing
+domains retain their stored prototype documents as compatibility data.
 
 The first end-to-end parliamentary release is the vertical slice spanning
 Phases 1–11. It must create a body and membership, submit and schedule a
@@ -758,6 +761,10 @@ active procedure.
 
 **Tasks and introduced objects/schemas:**
 
+- [x] Store the initial Body workspace layout, collection constraints, limits,
+      navigation, and action command names in a versioned Board definition
+      document loaded as data rather than constructing a Robert-specific Board
+      in Ruby.
 - [x] Add a constrained meeting-collection section that selects and orders
       Meeting documents by policy-derived projection status without embedding
       Robert's Rules event names or lifecycle transitions in Board Ruby code.

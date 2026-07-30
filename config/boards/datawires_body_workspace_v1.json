@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "title": "Datawires Board",
+  "description": "Meetings, proposed business, decisions, and durable agreements.",
+  "layout": {
+    "columns": 2
+  },
+  "sections": [
+    {
+      "id": "active-or-upcoming-meeting",
+      "kind": "meeting_collection",
+      "title": "Active or upcoming meeting",
+      "config": {
+        "statuses": ["open", "scheduled"],
+        "order": {
+          "by": "scheduled_at",
+          "direction": "asc"
+        },
+        "limit": 1,
+        "navigation": "document",
+        "empty_state": "No active or upcoming meeting."
+      }
+    },
+    {
+      "id": "open-proposals",
+      "kind": "proposal_collection",
+      "title": "Open proposals",
+      "config": {
+        "states": ["open"],
+        "order": {
+          "by": "submitted_at",
+          "direction": "desc"
+        },
+        "limit": 20,
+        "navigation": "document",
+        "empty_state": "No open proposals."
+      }
+    },
+    {
+      "id": "recent-agreements",
+      "kind": "document_collection",
+      "title": "Recent agreements",
+      "config": {
+        "schema_key": "parliamentary-agreement",
+        "order": {
+          "by": "body",
+          "path": "/adopted_at",
+          "direction": "desc"
+        },
+        "limit": 10,
+        "navigation": "document",
+        "empty_state": "No adopted agreements."
+      }
+    },
+    {
+      "id": "completed-meetings",
+      "kind": "meeting_collection",
+      "title": "Completed meetings",
+      "config": {
+        "statuses": ["adjourned"],
+        "order": {
+          "by": "scheduled_at",
+          "direction": "desc"
+        },
+        "limit": 5,
+        "navigation": "document",
+        "empty_state": "No completed meetings."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "create-meeting",
+      "kind": "invoke_command",
+      "title": "Create meeting",
+      "config": {
+        "command": "create_meeting",
+        "when_denied": "disabled"
+      }
+    },
+    {
+      "id": "submit-proposal",
+      "kind": "invoke_command",
+      "title": "Submit proposal",
+      "config": {
+        "command": "submit_proposal",
+        "when_denied": "disabled"
+      }
+    }
+  ]
+}

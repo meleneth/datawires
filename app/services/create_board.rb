@@ -3,17 +3,19 @@
 class CreateBoard
   Result = Data.define(:board, :document, :draft)
 
-  def self.call(schema_wrapper:, title:, actor:)
-    new(schema_wrapper:, title:, actor:).call
+  def self.call(schema_wrapper:, title:, actor:, definition: nil)
+    new(schema_wrapper:, title:, actor:, definition:).call
   end
 
-  def initialize(schema_wrapper:, title:, actor:)
+  def initialize(schema_wrapper:, title:, actor:, definition:)
     raise ArgumentError, "schema_wrapper must be a SchemaWrapper" unless schema_wrapper.is_a?(SchemaWrapper)
     raise ArgumentError, "actor is required" unless actor
 
     @schema_wrapper = schema_wrapper
     @title = title.presence || "Datawires Board"
     @actor = actor
+    @definition = definition&.deep_dup
+    validate_definition!
   end
 
   def call
@@ -39,7 +41,7 @@ class CreateBoard
 
   private
 
-  attr_reader :schema_wrapper, :title, :actor
+  attr_reader :schema_wrapper, :title, :actor, :definition
 
   def unique_title
     return title unless schema_wrapper.boards.exists?(title:)
@@ -59,6 +61,8 @@ class CreateBoard
   end
 
   def initial_body
+    return definition.merge("title" => title) if definition
+
     {
       "version" => 1,
       "title" => title,
@@ -67,6 +71,13 @@ class CreateBoard
       "sections" => [],
       "actions" => []
     }
+  end
+
+  def validate_definition!
+    return unless definition
+
+    errors = Boards::BodyValidator.new(definition.merge("title" => title)).errors
+    raise ArgumentError, errors.to_sentence if errors.any?
   end
 
   def board_schema_document
