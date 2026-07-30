@@ -22,4 +22,20 @@ RSpec.describe ProceduralPolicies::BodyValidator do
     expect(validator.errors).to include("commands.open_meeting.command_version must be positive")
     expect(validator.errors).to include("commands.open_meeting.payload.code must use a registered type")
   end
+
+  it "rejects malformed registered stack operations before runtime" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    body["commands"]["open_meeting"]["conditions"] = [
+      { "op" => "stack_top_equals", "value" => 1 }
+    ]
+    body["commands"]["open_meeting"]["effects"] = [
+      { "op" => "stack_push", "field" => "pending_question_stack" }
+    ]
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include("commands.open_meeting.conditions[0].field is required")
+    expect(validator.errors).to include("commands.open_meeting.effects[0].value is required")
+  end
 end

@@ -55,6 +55,9 @@ module ProceduralPolicies
       when "collection_includes" then collection_matches?(state, condition["match_field"], value)
       when "collection_excludes" then !collection_matches?(state, condition["match_field"], value)
       when "resource_equals" then resource_attribute(condition) == value
+      when "stack_empty" then Array(state).empty?
+      when "stack_present" then Array(state).any?
+      when "stack_top_equals" then stack_top_value(state, condition["match_field"]) == value
       else reject!("Policy condition is not registered.")
       end
       return if valid
@@ -68,6 +71,11 @@ module ProceduralPolicies
 
     def resource_attribute(condition)
       resources.fetch(condition.fetch("resource")).public_send(condition.fetch("attribute"))
+    end
+
+    def stack_top_value(stack, field)
+      value = Array(stack).last
+      field ? value&.fetch(field, nil) : value
     end
 
     def resolve_value(value)
@@ -98,7 +106,10 @@ module ProceduralPolicies
         "equals" => "Current state does not match the required actor or value.",
         "collection_includes" => "Required related state was not found.",
         "collection_excludes" => "The action would duplicate existing state.",
-        "resource_equals" => "The referenced resource is outside the Meeting scope."
+        "resource_equals" => "The referenced resource is outside the Meeting scope.",
+        "stack_empty" => "The stack must be empty.",
+        "stack_present" => "The stack must not be empty.",
+        "stack_top_equals" => "The immediately pending stack entry does not match."
       }.fetch(operation, "The procedural condition failed.")
     end
 

@@ -5,8 +5,26 @@ module ProceduralPolicies
     CAPABILITIES = Authorization::BodyPolicy::ROLE_CAPABILITIES.keys.map(&:to_s).freeze
     STATUSES = %w[scheduled open adjourned].freeze
     PAYLOAD_TYPES = %w[array boolean string uuid].freeze
-    CONDITION_OPERATIONS = %w[blank collection_excludes collection_includes equals resource_equals].freeze
-    EFFECT_OPERATIONS = %w[append merge_last remove_matching set].freeze
+    CONDITION_OPERATIONS = %w[
+      blank
+      collection_excludes
+      collection_includes
+      equals
+      resource_equals
+      stack_empty
+      stack_present
+      stack_top_equals
+    ].freeze
+    EFFECT_OPERATIONS = %w[
+      append
+      merge_last
+      remove_matching
+      set
+      stack_merge_top
+      stack_pop
+      stack_push
+      stack_replace_top
+    ].freeze
     EFFECT_CONDITIONS = %w[blank present].freeze
     BINDING_SOURCES = %w[
       actor_id
@@ -119,8 +137,25 @@ module ProceduralPolicies
         if operation["field"] && !PROJECTION_FIELDS.include?(operation["field"])
           errors << "#{prefix}.#{key}[#{index}].field must be a registered projection field"
         end
+        validate_operation_shape(operation, "#{prefix}.#{key}[#{index}]", key)
         validate_effect_condition(operation["when"], "#{prefix}.#{key}[#{index}].when") if key == "effects"
         validate_bindings(operation, "#{prefix}.#{key}[#{index}]")
+      end
+    end
+
+    def validate_operation_shape(operation, prefix, collection)
+      if collection == "effects"
+        errors << "#{prefix}.field is required" if operation["field"].blank?
+        if operation["op"] != "stack_pop" && !operation.key?("value")
+          errors << "#{prefix}.value is required"
+        end
+        return
+      end
+
+      field_optional = operation["op"] == "resource_equals"
+      errors << "#{prefix}.field is required" if !field_optional && operation["field"].blank?
+      if !%w[blank stack_empty stack_present].include?(operation["op"]) && !operation.key?("value")
+        errors << "#{prefix}.value is required"
       end
     end
 

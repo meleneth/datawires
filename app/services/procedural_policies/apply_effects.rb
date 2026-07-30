@@ -3,7 +3,16 @@
 module ProceduralPolicies
   class ApplyEffects
     FIELDS = Meetings::Projection.members.map(&:to_s).freeze
-    OPERATIONS = %w[append merge_last remove_matching set].freeze
+    OPERATIONS = %w[
+      append
+      merge_last
+      remove_matching
+      set
+      stack_merge_top
+      stack_pop
+      stack_push
+      stack_replace_top
+    ].freeze
 
     def self.call(state:, effects:)
       new(state:, effects:).call
@@ -43,6 +52,25 @@ module ProceduralPolicies
       when "merge_last"
         values = Array(state[field.to_sym]).deep_dup
         values.last&.merge!(compact_hash(effect.fetch("value")))
+        state[field.to_sym] = values
+      when "stack_push"
+        state[field.to_sym] = Array(state[field.to_sym]) + [ compact_hash(effect.fetch("value")) ]
+      when "stack_pop"
+        values = Array(state[field.to_sym])
+        raise ArgumentError, "cannot pop an empty stack" if values.empty?
+
+        state[field.to_sym] = values[...-1]
+      when "stack_replace_top"
+        values = Array(state[field.to_sym]).deep_dup
+        raise ArgumentError, "cannot replace the top of an empty stack" if values.empty?
+
+        values[-1] = compact_hash(effect.fetch("value"))
+        state[field.to_sym] = values
+      when "stack_merge_top"
+        values = Array(state[field.to_sym]).deep_dup
+        raise ArgumentError, "cannot merge the top of an empty stack" if values.empty?
+
+        values[-1] = values.last.merge(compact_hash(effect.fetch("value")))
         state[field.to_sym] = values
       end
     end
