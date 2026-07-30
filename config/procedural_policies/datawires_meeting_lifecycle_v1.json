@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "name": "Datawires Meeting Lifecycle",
+  "commands": {
+    "open_meeting": {
+      "capability": "open_meeting",
+      "allowed_statuses": ["scheduled"],
+      "event_type": "MeetingOpened",
+      "event_version": 1,
+      "payload": {}
+    },
+    "establish_attendance": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "AttendanceEstablished",
+      "event_version": 1,
+      "payload": {"actor_ids": "array"}
+    },
+    "establish_quorum": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "QuorumEstablished",
+      "event_version": 1,
+      "payload": {"present": "boolean"}
+    },
+    "adjourn_meeting": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MeetingAdjourned",
+      "event_version": 1,
+      "payload": {}
+    },
+    "request_recognition": {
+      "capability": "request_recognition",
+      "allowed_statuses": ["open"],
+      "event_type": "RecognitionRequested",
+      "event_version": 1,
+      "payload": {}
+    },
+    "recognize_member": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MemberRecognized",
+      "event_version": 1,
+      "payload": {"actor_id": "uuid"}
+    },
+    "relinquish_floor": {
+      "capability": "request_recognition",
+      "allowed_statuses": ["open"],
+      "event_type": "FloorRelinquished",
+      "event_version": 1,
+      "payload": {}
+    },
+    "schedule_proposal": {
+      "capability": "schedule_proposal",
+      "allowed_statuses": ["scheduled", "open"],
+      "event_type": "ProposalScheduled",
+      "event_version": 1,
+      "payload": {"proposal_id": "uuid"}
+    }
+  }
+}

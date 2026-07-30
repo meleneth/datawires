@@ -21,8 +21,8 @@ FactoryBot.define do
     procedural_policy do
       CreateProceduralPolicy.call(
         body:,
-        name: Meetings::DefaultPolicy::NAME,
-        definition: Meetings::DefaultPolicy::BODY,
+        name: ProceduralPolicies::Defaults.meeting_lifecycle.fetch("name"),
+        definition: ProceduralPolicies::Defaults.meeting_lifecycle,
         actor: create(:user)
       )
     end

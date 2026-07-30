@@ -144,6 +144,10 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
   registered capabilities, allowed lifecycle states, event effects, versions,
   and payload types. Event provenance records the exact policy document
   revision used. Policy data cannot name Ruby classes or execute code.
+- The built-in Meeting lifecycle composition is a versioned JSON policy asset
+  under `config/procedural_policies/`; Ruby does not define a parallel default
+  command table. The asset is validated and persisted as a normal
+  `ProceduralPolicy` document before use.
 
 Supported JSON Schema currently means:
 

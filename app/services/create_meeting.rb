@@ -82,8 +82,8 @@ class CreateMeeting
   def default_policy
     @default_policy ||= CreateProceduralPolicy.call(
       body:,
-      name: Meetings::DefaultPolicy::NAME,
-      definition: Meetings::DefaultPolicy::BODY,
+      name: ProceduralPolicies::Defaults.meeting_lifecycle.fetch("name"),
+      definition: ProceduralPolicies::Defaults.meeting_lifecycle,
       actor:
     )
   end

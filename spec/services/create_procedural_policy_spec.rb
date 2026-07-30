@@ -7,8 +7,8 @@ RSpec.describe CreateProceduralPolicy do
     body = create(:body)
     policy = described_class.call(
       body:,
-      name: Meetings::DefaultPolicy::NAME,
-      definition: Meetings::DefaultPolicy::BODY,
+      name: ProceduralPolicies::Defaults.meeting_lifecycle.fetch("name"),
+      definition: ProceduralPolicies::Defaults.meeting_lifecycle,
       actor: create(:user)
     )
 

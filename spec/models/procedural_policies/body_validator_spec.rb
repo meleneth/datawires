@@ -4,11 +4,11 @@ require "rails_helper"
 
 RSpec.describe ProceduralPolicies::BodyValidator do
   it "accepts the constrained default Meeting policy" do
-    expect(described_class.new(Meetings::DefaultPolicy::BODY)).to be_valid
+    expect(described_class.new(ProceduralPolicies::Defaults.meeting_lifecycle)).to be_valid
   end
 
   it "rejects unregistered capabilities, event effects, and payload types" do
-    body = Meetings::DefaultPolicy::BODY.deep_dup
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
     definition = body["commands"]["open_meeting"]
     definition["capability"] = "keycloak_admin"
     definition["event_type"] = "ExecuteRuby"
