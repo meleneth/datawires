@@ -13,7 +13,8 @@ module Meetings
     :floor_reason,
     :floor_history,
     :scheduled_proposals,
-    :pending_question_stack
+    :pending_question_stack,
+    :vote_state
   ) do
     def self.empty
       new(
@@ -28,7 +29,8 @@ module Meetings
         floor_reason: nil,
         floor_history: [],
         scheduled_proposals: [],
-        pending_question_stack: []
+        pending_question_stack: [],
+        vote_state: nil
       )
     end
 

@@ -43,4 +43,27 @@ RSpec.describe ProceduralPolicies::ApplyEffects do
       )
     }.to raise_error(ArgumentError, /empty stack/)
   end
+
+  it "appends to a typed nested projection collection immutably" do
+    state = Meetings::Projection.empty.to_h.merge(
+      vote_state: { "id" => SecureRandom.uuid, "ballots" => [] }
+    )
+    ballot = { "actor_id" => SecureRandom.uuid, "choice" => "yes" }
+
+    result = described_class.call(
+      state:,
+      effects: [
+        {
+          "op" => "append_at_path",
+          "field" => "vote_state",
+          "path" => "/ballots",
+          "value" => ballot
+        }
+      ]
+    )
+
+    expect(state.dig(:vote_state, "ballots")).to be_empty
+    expect(result.dig(:vote_state, "ballots")).to eq([ ballot ])
+    expect(result.fetch(:vote_state)).to be_frozen
+  end
 end

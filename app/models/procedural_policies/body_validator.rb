@@ -8,8 +8,13 @@ module ProceduralPolicies
       blank
       collection_excludes
       collection_includes
+      collection_includes_value
       equals
       resource_equals
+      path_collection_excludes
+      path_collection_includes_value
+      path_equals
+      payload_in
       stack_empty
       stack_present
       stack_top_equals
@@ -20,6 +25,7 @@ module ProceduralPolicies
       merge_last
       remove_matching
       set
+      append_at_path
       stack_merge_top
       stack_pop
       stack_push
@@ -36,6 +42,8 @@ module ProceduralPolicies
       payload
       payload_or_literal
       resource
+      projection
+      projection_path
       stack_top
       timestamp
       timestamp_iso8601
@@ -171,6 +179,7 @@ module ProceduralPolicies
     def validate_operation_shape(operation, prefix, collection)
       if collection == "effects"
         errors << "#{prefix}.field is required" if operation["field"].blank?
+        validate_pointer(operation["path"], "#{prefix}.path") if operation["op"] == "append_at_path"
         if operation["op"] != "stack_pop" && !operation.key?("value")
           errors << "#{prefix}.value is required"
         end
@@ -178,9 +187,11 @@ module ProceduralPolicies
       end
 
       field_optional = operation["op"] == "resource_equals"
+      field_optional ||= operation["op"] == "payload_in"
       errors << "#{prefix}.field is required" if !field_optional && operation["field"].blank?
       validate_resource_reference(operation, prefix) if operation["op"] == "resource_equals"
-      if !%w[blank stack_empty stack_present].include?(operation["op"]) && !operation.key?("value")
+      validate_pointer(operation["path"], "#{prefix}.path") if operation["op"].start_with?("path_")
+      if !%w[blank payload_in stack_empty stack_present].include?(operation["op"]) && !operation.key?("value")
         errors << "#{prefix}.value is required"
       end
     end
@@ -206,6 +217,12 @@ module ProceduralPolicies
       errors << "#{prefix}.field must be a registered projection field" unless PROJECTION_FIELDS.include?(condition["field"])
     end
 
+    def validate_pointer(pointer, prefix)
+      JsonPtr::Pointer.parse(pointer)
+    rescue ArgumentError, TypeError
+      errors << "#{prefix} must be a JSON Pointer"
+    end
+
     def validate_bindings(value, prefix)
       case value
       when Array
@@ -219,6 +236,7 @@ module ProceduralPolicies
           validate_resource_binding(value, prefix) if value["source"] == "resource"
           validate_stack_top_binding(value, prefix) if value["source"] == "stack_top"
           validate_document_operation_binding(value, prefix) if value["source"] == "document_operation"
+          validate_projection_binding(value, prefix) if value["source"].in?(%w[projection projection_path])
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
         end
@@ -248,6 +266,13 @@ module ProceduralPolicies
         errors << "#{prefix}.#{key} is required" unless binding[key].is_a?(Hash)
         validate_bindings(binding[key], "#{prefix}.#{key}") if binding[key].is_a?(Hash)
       end
+    end
+
+    def validate_projection_binding(binding, prefix)
+      unless PROJECTION_FIELDS.include?(binding["field"])
+        errors << "#{prefix}.field must be a registered projection field"
+      end
+      validate_pointer(binding["path"], "#{prefix}.path") if binding["source"] == "projection_path"
     end
   end
 end

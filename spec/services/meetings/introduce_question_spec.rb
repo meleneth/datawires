@@ -125,6 +125,53 @@ RSpec.describe "Introducing a pending question from a Proposal" do
         "proposed_content" => { "text" => "Amended text" }
       )
     )
+
+    electorate = [ chair.user.id, member.user.id, seconder.user.id ]
+    handle(meeting, chair, "establish_attendance", 9, { "actor_ids" => electorate })
+    handle(meeting, chair, "establish_quorum", 10, { "present" => true })
+    handle(meeting, seconder, "second_pending_question", 11)
+    handle(
+      meeting,
+      chair,
+      "rule_pending_question_in_order",
+      12,
+      { "rationale" => "The amendment is germane.", "authority" => "adopted authority" }
+    )
+    handle(meeting, chair, "open_debate_on_pending_question", 13)
+    vote_command_id = SecureRandom.uuid
+    handle(
+      meeting,
+      chair,
+      "open_vote_on_pending_question",
+      14,
+      {},
+      command_id: vote_command_id
+    )
+
+    vote = meeting.projection.vote_state
+    expect(vote).to include(
+      "id" => vote_command_id,
+      "status" => "open",
+      "question_id" => amendment_question.fetch("id"),
+      "question_version" => 1,
+      "electorate_actor_ids" => electorate,
+      "method" => "counted",
+      "attribution" => "attributable",
+      "threshold" => { "kind" => "majority", "basis" => "votes_cast" },
+      "ballots" => []
+    )
+
+    handle(meeting, chair, "establish_attendance", 15, { "actor_ids" => [ chair.user.id ] })
+    expect(meeting.projection.vote_state.fetch("eligible_actor_ids")).to eq(electorate)
+    handle(meeting, member, "cast_counted_ballot", 16, { "choice" => "yes" })
+    handle(meeting, chair, "cast_counted_ballot", 17, { "choice" => "no" })
+    expect(meeting.projection.vote_state.fetch("ballots")).to contain_exactly(
+      include("actor_id" => member.user.id, "choice" => "yes"),
+      include("actor_id" => chair.user.id, "choice" => "no")
+    )
+    expect {
+      handle(meeting, member, "cast_counted_ballot", 18, { "choice" => "abstain" })
+    }.to raise_error(Meetings::HandleCommand::Rejected, "The actor has already cast a ballot.")
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

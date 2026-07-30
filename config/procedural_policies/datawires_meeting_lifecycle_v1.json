@@ -417,6 +417,7 @@
       "effects": [
         {"op": "stack_push", "field": "pending_question_stack", "value": {
           "id": {"source": "derived_id", "name": "amendment_question"},
+          "motion_id": {"source": "command_id"},
           "amendment_id": {"source": "command_id"},
           "kind": {"source": "literal", "value": "amendment"},
           "degree": {"source": "literal", "value": 1},
@@ -433,6 +434,117 @@
           },
           "moved_by_id": {"source": "actor_id"},
           "moved_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "open_vote_on_pending_question": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "VoteOpened",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_present",
+          "field": "pending_question_stack",
+          "reason": "There is no pending question to vote on."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "debate_open"},
+          "reason": "The immediately pending question is not ready for a vote."
+        },
+        {
+          "op": "path_equals",
+          "field": "quorum",
+          "path": "/present",
+          "value": {"source": "literal", "value": true},
+          "reason": "A quorum finding is required before voting."
+        }
+      ],
+      "event_payload": {
+        "vote_id": {"source": "command_id"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+        "electorate_actor_ids": {"source": "projection", "field": "attendance_actor_ids"},
+        "method": {"source": "literal", "value": "counted"},
+        "attribution": {"source": "literal", "value": "attributable"},
+        "threshold": {"source": "literal", "value": {"kind": "majority", "basis": "votes_cast"}},
+        "opened_by_id": {"source": "actor_id"},
+        "opened_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "vote_open"},
+          "vote_id": {"source": "command_id"}
+        }},
+        {"op": "set", "field": "vote_state", "value": {
+          "id": {"source": "command_id"},
+          "status": {"source": "literal", "value": "open"},
+          "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+          "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+          "electorate_actor_ids": {"source": "projection", "field": "attendance_actor_ids"},
+          "eligible_actor_ids": {"source": "projection", "field": "attendance_actor_ids"},
+          "method": {"source": "literal", "value": "counted"},
+          "attribution": {"source": "literal", "value": "attributable"},
+          "choices": {"source": "literal", "value": ["yes", "no", "abstain"]},
+          "threshold": {"source": "literal", "value": {"kind": "majority", "basis": "votes_cast"}},
+          "ballots": {"source": "literal", "value": []},
+          "opened_by_id": {"source": "actor_id"},
+          "opened_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "cast_counted_ballot": {
+      "capability": "vote",
+      "allowed_statuses": ["open"],
+      "event_type": "VoteCast",
+      "event_version": 1,
+      "payload": {"choice": "string"},
+      "conditions": [
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/status",
+          "value": {"source": "literal", "value": "open"},
+          "reason": "There is no open vote."
+        },
+        {
+          "op": "path_collection_includes_value",
+          "field": "vote_state",
+          "path": "/eligible_actor_ids",
+          "value": {"source": "actor_id"},
+          "reason": "The actor is not in the electorate snapshot."
+        },
+        {
+          "op": "payload_in",
+          "key": "choice",
+          "values": ["yes", "no", "abstain"],
+          "reason": "Choice must be yes, no, or abstain."
+        },
+        {
+          "op": "path_collection_excludes",
+          "field": "vote_state",
+          "path": "/ballots",
+          "match_field": "actor_id",
+          "value": {"source": "actor_id"},
+          "reason": "The actor has already cast a ballot."
+        }
+      ],
+      "event_payload": {
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "question_id": {"source": "projection_path", "field": "vote_state", "path": "/question_id"},
+        "question_version": {"source": "projection_path", "field": "vote_state", "path": "/question_version"},
+        "actor_id": {"source": "actor_id"},
+        "choice": {"source": "payload", "key": "choice"},
+        "cast_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "append_at_path", "field": "vote_state", "path": "/ballots", "value": {
+          "actor_id": {"source": "actor_id"},
+          "choice": {"source": "payload", "key": "choice"},
+          "cast_at": {"source": "timestamp_iso8601"}
         }}
       ]
     }

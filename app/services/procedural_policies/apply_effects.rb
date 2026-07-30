@@ -5,6 +5,7 @@ module ProceduralPolicies
     FIELDS = Meetings::Projection.members.map(&:to_s).freeze
     OPERATIONS = %w[
       append
+      append_at_path
       merge_last
       remove_matching
       set
@@ -45,6 +46,16 @@ module ProceduralPolicies
         state[field.to_sym] = effect["value"]
       when "append"
         state[field.to_sym] = Array(state[field.to_sym]) + [ compact_hash(effect.fetch("value")) ]
+      when "append_at_path"
+        document = state[field.to_sym].deep_dup
+        collection = JsonPtr.fetch(document, effect.fetch("path"), default: JsonPtr::UNDEFINED)
+        raise ArgumentError, "projection path is not an array" unless collection.is_a?(Array)
+
+        state[field.to_sym] = JsonPtr.set(
+          document,
+          effect.fetch("path"),
+          collection + [ compact_hash(effect.fetch("value")) ]
+        )
       when "remove_matching"
         state[field.to_sym] = Array(state[field.to_sym]).reject do |entry|
           entry[effect.fetch("match_field")] == effect["value"]

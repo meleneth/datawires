@@ -52,7 +52,12 @@ module ProceduralPolicies
       when "blank" then state.blank?
       when "equals" then state == value
       when "collection_includes" then collection_matches?(state, condition["match_field"], value)
+      when "collection_includes_value" then Array(state).include?(value)
       when "collection_excludes" then !collection_matches?(state, condition["match_field"], value)
+      when "path_collection_excludes" then !collection_matches?(value_at(state, condition["path"]), condition["match_field"], value)
+      when "path_collection_includes_value" then Array(value_at(state, condition["path"])).include?(value)
+      when "path_equals" then value_at(state, condition["path"]) == value
+      when "payload_in" then Array(condition["values"]).include?(command.payload[condition["key"]])
       when "resource_equals" then resource_attribute(condition) == value
       when "stack_empty" then Array(state).empty?
       when "stack_present" then Array(state).any?
@@ -93,6 +98,8 @@ module ProceduralPolicies
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
       when "payload_or_literal" then command.payload[value["key"]].presence || value["value"]
       when "resource" then resources.fetch(value.fetch("resource")).fetch(value.fetch("attribute"))
+      when "projection" then projection.public_send(value.fetch("field"))
+      when "projection_path" then value_at(projection.public_send(value.fetch("field")), value.fetch("path"))
       when "stack_top" then stack_top_binding(value)
       when "timestamp" then command.timestamp
       when "timestamp_iso8601" then command.timestamp.iso8601
@@ -113,6 +120,10 @@ module ProceduralPolicies
       reject!("Required stack attribute was not found.")
     end
 
+    def value_at(document, path)
+      JsonPtr.fetch(document, path, default: JsonPtr::UNDEFINED)
+    end
+
     def apply_document_operation(binding)
       StructuredDocuments::ApplyOperation.call(
         content: resolve_value(binding.fetch("document")),
@@ -128,8 +139,13 @@ module ProceduralPolicies
         "blank" => "Required state is not blank.",
         "equals" => "Current state does not match the required actor or value.",
         "collection_includes" => "Required related state was not found.",
+        "collection_includes_value" => "Required collection value was not found.",
         "collection_excludes" => "The action would duplicate existing state.",
         "resource_equals" => "The referenced resource is outside the Meeting scope.",
+        "path_collection_excludes" => "The action would duplicate nested state.",
+        "path_collection_includes_value" => "Required nested collection value was not found.",
+        "path_equals" => "Nested state does not match.",
+        "payload_in" => "The supplied value is not permitted.",
         "stack_empty" => "The stack must be empty.",
         "stack_present" => "The stack must not be empty.",
         "stack_top_equals" => "The immediately pending stack entry does not match.",
