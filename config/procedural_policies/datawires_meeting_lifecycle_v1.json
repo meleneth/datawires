@@ -264,6 +264,110 @@
           "seconded_at": {"source": "timestamp_iso8601"}
         }}
       ]
+    },
+    "rule_pending_question_in_order": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MotionRuledInOrder",
+      "event_version": 1,
+      "payload": {"rationale": "string", "authority": "string"},
+      "conditions": [
+        {
+          "op": "stack_present",
+          "field": "pending_question_stack",
+          "reason": "There is no pending question to rule on."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "seconded"},
+          "reason": "The immediately pending question is not awaiting a ruling."
+        }
+      ],
+      "event_payload": {
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "rationale": {"source": "payload", "key": "rationale"},
+        "authority": {"source": "payload", "key": "authority"},
+        "ruled_by_id": {"source": "actor_id"},
+        "ruled_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "in_order"},
+          "ruling": {"source": "literal", "value": "in_order"},
+          "ruling_rationale": {"source": "payload", "key": "rationale"},
+          "ruling_authority": {"source": "payload", "key": "authority"},
+          "ruled_by_id": {"source": "actor_id"},
+          "ruled_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "rule_pending_question_out_of_order": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MotionRuledOutOfOrder",
+      "event_version": 1,
+      "payload": {"rationale": "string", "authority": "string"},
+      "conditions": [
+        {
+          "op": "stack_present",
+          "field": "pending_question_stack",
+          "reason": "There is no pending question to rule on."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "seconded"},
+          "reason": "The immediately pending question is not awaiting a ruling."
+        }
+      ],
+      "event_payload": {
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "rationale": {"source": "payload", "key": "rationale"},
+        "authority": {"source": "payload", "key": "authority"},
+        "ruled_by_id": {"source": "actor_id"},
+        "ruled_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_pop", "field": "pending_question_stack"}
+      ]
+    },
+    "open_debate_on_pending_question": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "DebateOpened",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_present",
+          "field": "pending_question_stack",
+          "reason": "There is no pending question for debate."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "in_order"},
+          "reason": "The immediately pending question is not ready for debate."
+        }
+      ],
+      "event_payload": {
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "opened_by_id": {"source": "actor_id"},
+        "opened_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "debate_open"},
+          "debate_opened_by_id": {"source": "actor_id"},
+          "debate_opened_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
     }
   }
 }
