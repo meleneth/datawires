@@ -65,3 +65,42 @@ falling back to a cross-domain lookup.
 Boards do not accept arbitrary queries, expressions, SQL, or executable code.
 Additional filters and ordering modes should be introduced as typed,
 versioned operations with validator and query coverage.
+
+## Actions
+
+An `open_edit_affordance` action creates a document from a schema and opens its
+draft. A named edit affordance is optional:
+
+```json
+{
+  "id": "submit-proposal",
+  "kind": "open_edit_affordance",
+  "title": "Submit proposal",
+  "config": {
+    "schema_key": "proposal",
+    "edit_affordance": "Submit",
+    "when_denied": "disabled"
+  }
+}
+```
+
+`when_denied` is either `disabled` (the default) or `hidden`. Availability is
+resolved on the server and denied actions include a human-readable reason.
+Execution resolves and authorizes the action again; a rendered action is never
+treated as proof of authorization.
+
+The version 1 shape also reserves typed command actions:
+
+```json
+{
+  "id": "open-meeting",
+  "kind": "invoke_command",
+  "title": "Open meeting",
+  "config": {
+    "command": "open_meeting"
+  }
+}
+```
+
+Command actions remain unavailable until the generic Datawires command
+registry exists. Board data cannot name controllers, services, or Ruby classes.

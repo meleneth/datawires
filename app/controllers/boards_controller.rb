@@ -13,5 +13,8 @@ class BoardsController < ApplicationController
       end
       [ section.id, result ]
     end
+    @action_resolutions = @projection.actions.map do |action|
+      Boards::ActionResolution.call(board: @board, action:, actor: current_user)
+    end
   end
 end

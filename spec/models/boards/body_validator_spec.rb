@@ -26,9 +26,25 @@ RSpec.describe Boards::BodyValidator do
         }
       ],
       "actions" => [
-        { "id" => "submit", "kind" => "open_edit_affordance", "title" => "Submit proposal" }
+        {
+          "id" => "submit",
+          "kind" => "open_edit_affordance",
+          "title" => "Submit proposal",
+          "config" => { "schema_key" => "proposal" }
+        }
       ]
     }
+  end
+
+  it "requires typed action targets" do
+    body["actions"] = [
+      { "id" => "edit", "kind" => "open_edit_affordance", "title" => "Edit", "config" => {} },
+      { "id" => "command", "kind" => "invoke_command", "title" => "Run", "config" => {} }
+    ]
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include("actions[0].config.schema_key must be a non-empty string")
+    expect(validator.errors).to include("actions[1].config.command must be a non-empty string")
   end
 
   it "accepts a constrained version 1 board" do

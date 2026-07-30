@@ -9,11 +9,18 @@
       data: { turbo_frame: "main_content", turbo_action: "advance" },
       class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
-  - if @projection.actions.any?
+  - if @action_resolutions.reject(&:hidden?).any?
     .mb-6.flex.flex-wrap.gap-2
-      - @projection.actions.each do |action|
-        %span.rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm
-          = action.title
+      - @action_resolutions.reject(&:hidden?).each do |resolution|
+        - if resolution.available?
+          = button_to resolution.action.title,
+            board_action_path(@board, resolution.action.id),
+            method: :post,
+            class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+        - else
+          %span.inline-flex.flex-col.rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm.text-muted-foreground
+            %span.font-head= resolution.action.title
+            %span.text-xs= resolution.reason
 
   - if @projection.sections.any?
     .grid.gap-4

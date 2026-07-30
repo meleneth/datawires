@@ -89,4 +89,73 @@ RSpec.describe "Boards", type: :request do
     expect(response.body).not_to include("Nothing pending.")
     expect(response.body).to include("Nothing unscheduled.")
   end
+
+  it "executes an available edit action through its server-side resolution" do
+    board = create(:board)
+    domain = board.schema_wrapper.domain
+    proposal_schema = create(:document, :with_schema_head_revision, domain:, key: "proposal")
+    proposal_wrapper = create(:schema_wrapper, document: proposal_schema)
+    affordance = create(:edit_affordance, schema_wrapper: proposal_wrapper, title: "Submit")
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "submit",
+          "kind" => "open_edit_affordance",
+          "title" => "Submit proposal",
+          "config" => { "schema_key" => "proposal", "edit_affordance" => "Submit" }
+        }
+      ]
+    )
+
+    get board_path(board)
+    expect(response.body).to include("Submit proposal")
+
+    expect {
+      post board_action_path(board, "submit")
+    }.to change(Document.where(schema_document: proposal_schema), :count).by(1)
+
+    draft = Draft.order(:created_at).last
+    expect(response).to redirect_to(draft_path(draft, edit_affordance_id: affordance.id))
+  end
+
+  it "reauthorizes a board action at execution time" do
+    board = create(:board)
+    domain = board.schema_wrapper.domain
+    proposal_schema = create(:document, :with_schema_head_revision, domain:, key: "proposal")
+    create(:schema_wrapper, document: proposal_schema)
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "submit",
+          "kind" => "open_edit_affordance",
+          "title" => "Submit proposal",
+          "config" => { "schema_key" => "proposal" }
+        }
+      ]
+    )
+    allow_any_instance_of(User).to receive(:can?).with(
+      :create_document,
+      schema_wrapper: an_instance_of(SchemaWrapper),
+      board:
+    ).and_return(false)
+
+    expect {
+      post board_action_path(board, "submit")
+    }.not_to change(Document.where(schema_document: proposal_schema), :count)
+
+    expect(response).to redirect_to(board_path(board))
+    expect(flash[:alert]).to eq("You cannot create documents with this action.")
+  end
+
+  def configure_actions(board, actions)
+    body = board.body.deep_dup
+    body["actions"] = actions
+    revision = board.board_document.revisions.create!(
+      parent_revision: board.head_revision,
+      body:
+    )
+    board.board_document.update!(head_revision: revision)
+  end
 end

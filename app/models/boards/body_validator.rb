@@ -9,6 +9,7 @@ module Boards
     ORDER_FIELDS = %w[title key created_at updated_at body].freeze
     DIRECTIONS = %w[asc desc].freeze
     NAVIGATION_KINDS = %w[document view_affordance].freeze
+    DENIED_DISPLAYS = %w[disabled hidden].freeze
     MAX_RESULT_LIMIT = 100
 
     attr_reader :errors
@@ -58,10 +59,31 @@ module Boards
         errors << "#{key}[#{index}].title must be a non-empty string" unless non_empty_string?(entry["title"])
         errors << "#{key}[#{index}].kind must be one of: #{kinds.join(", ")}" unless kinds.include?(entry["kind"])
         validate_document_collection(entry, index) if key == "sections" && entry["kind"] == "document_collection"
+        validate_action(entry, index) if key == "actions" && ACTION_KINDS.include?(entry["kind"])
       end
 
       duplicate_ids = entries.filter_map { |entry| entry["id"] if entry.is_a?(Hash) }.tally.select { |_id, count| count > 1 }.keys
       errors << "#{key} ids must be unique: #{duplicate_ids.join(", ")}" if duplicate_ids.any?
+    end
+
+    def validate_action(entry, index)
+      prefix = "actions[#{index}].config"
+      config = entry["config"]
+      unless config.is_a?(Hash)
+        errors << "#{prefix} must be an object"
+        return
+      end
+
+      denied_display = config["when_denied"] || "disabled"
+      errors << "#{prefix}.when_denied must be one of: #{DENIED_DISPLAYS.join(", ")}" unless DENIED_DISPLAYS.include?(denied_display)
+
+      case entry["kind"]
+      when "open_edit_affordance"
+        errors << "#{prefix}.schema_key must be a non-empty string" unless non_empty_string?(config["schema_key"])
+        errors << "#{prefix}.edit_affordance must be a string" unless config["edit_affordance"].nil? || config["edit_affordance"].is_a?(String)
+      when "invoke_command"
+        errors << "#{prefix}.command must be a non-empty string" unless non_empty_string?(config["command"])
+      end
     end
 
     def validate_document_collection(entry, index)

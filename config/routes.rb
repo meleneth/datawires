@@ -18,7 +18,9 @@ Rails.application.routes.draw do
     resources :boards, only: %i[create], module: :schemas
   end
 
-  resources :boards, only: %i[show]
+  resources :boards, only: %i[show] do
+    post "actions/:id", to: "boards/actions#create", as: :action
+  end
 
   resources :documents, only: %i[show] do
     resource :draft, only: %i[create], module: :documents
