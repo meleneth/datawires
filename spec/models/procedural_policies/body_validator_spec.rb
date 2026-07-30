@@ -79,4 +79,19 @@ RSpec.describe ProceduralPolicies::BodyValidator do
       "commands.open_meeting.event_payload.id.name must be non-empty"
     )
   end
+
+  it "rejects an unscoped stack-top binding" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    body["commands"]["open_meeting"]["event_payload"] = {
+      "id" => { "source" => "stack_top", "field" => "unknown", "attribute" => "" }
+    }
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include(
+      "commands.open_meeting.event_payload.id.field must be a registered projection field",
+      "commands.open_meeting.event_payload.id.attribute must be non-empty"
+    )
+  end
 end

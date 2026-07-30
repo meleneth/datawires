@@ -57,6 +57,7 @@ module ProceduralPolicies
       when "stack_empty" then Array(state).empty?
       when "stack_present" then Array(state).any?
       when "stack_top_equals" then stack_top_value(state, condition["match_field"]) == value
+      when "stack_top_not_equals" then stack_top_value(state, condition["match_field"]) != value
       else reject!("Policy condition is not registered.")
       end
       return if valid
@@ -91,6 +92,7 @@ module ProceduralPolicies
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
       when "payload_or_literal" then command.payload[value["key"]].presence || value["value"]
       when "resource" then resources.fetch(value.fetch("resource")).fetch(value.fetch("attribute"))
+      when "stack_top" then stack_top_binding(value)
       when "timestamp" then command.timestamp
       when "timestamp_iso8601" then command.timestamp.iso8601
       else reject!("Policy binding source is not registered.")
@@ -99,6 +101,15 @@ module ProceduralPolicies
 
     def binding?(value)
       value.is_a?(Hash) && value.key?("source")
+    end
+
+    def stack_top_binding(binding)
+      entry = Array(projection.public_send(binding.fetch("field"))).last
+      reject!("Required stack state was not found.") unless entry.is_a?(Hash)
+
+      entry.fetch(binding.fetch("attribute"))
+    rescue KeyError
+      reject!("Required stack attribute was not found.")
     end
 
     def condition_failure_reason(operation)
@@ -110,7 +121,8 @@ module ProceduralPolicies
         "resource_equals" => "The referenced resource is outside the Meeting scope.",
         "stack_empty" => "The stack must be empty.",
         "stack_present" => "The stack must not be empty.",
-        "stack_top_equals" => "The immediately pending stack entry does not match."
+        "stack_top_equals" => "The immediately pending stack entry does not match.",
+        "stack_top_not_equals" => "The immediately pending stack entry must differ."
       }.fetch(operation, "The procedural condition failed.")
     end
 

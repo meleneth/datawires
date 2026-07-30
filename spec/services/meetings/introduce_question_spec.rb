@@ -51,6 +51,25 @@ RSpec.describe "Introducing a pending question from a Proposal" do
       "question_id" => question_id,
       "proposal_revision_id" => proposal.submitted_revision_id
     )
+
+    expect {
+      handle(meeting, member, "second_pending_question", 5)
+    }.to raise_error(Meetings::HandleCommand::Rejected, "The maker may not second the same motion.")
+
+    seconder = actor_context(create(:user))
+    create(:membership, body: meeting.body, actor: seconder.user)
+    handle(meeting, seconder, "second_pending_question", 5)
+    seconded = meeting.projection.pending_question_stack.last
+    expect(seconded).to include(
+      "id" => question_id,
+      "motion_id" => command_id,
+      "status" => "seconded",
+      "seconded_by_id" => seconder.user.id
+    )
+    expect(meeting.event_stream.event_records.last).to have_attributes(
+      event_type: "MotionSeconded",
+      payload: include("motion_id" => command_id, "question_id" => question_id)
+    )
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

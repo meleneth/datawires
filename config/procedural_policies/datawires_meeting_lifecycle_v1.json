@@ -5,6 +5,7 @@
     "submit_proposal": ["member", "chair", "secretary", "temporary_chair"],
     "request_recognition": ["member", "chair", "secretary", "temporary_chair"],
     "introduce_question": ["member", "chair", "secretary", "temporary_chair"],
+    "second_question": ["member", "chair", "secretary", "temporary_chair"],
     "create_meeting": ["chair", "secretary"],
     "schedule_proposal": ["chair", "secretary"],
     "open_meeting": ["chair", "temporary_chair"],
@@ -221,6 +222,46 @@
           "content": {"source": "resource", "resource": "proposal", "attribute": "submitted_content"},
           "made_by_id": {"source": "actor_id"},
           "made_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "second_pending_question": {
+      "capability": "second_question",
+      "allowed_statuses": ["open"],
+      "event_type": "MotionSeconded",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_present",
+          "field": "pending_question_stack",
+          "reason": "There is no pending question to second."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "introduced"},
+          "reason": "The immediately pending question is not awaiting a second."
+        },
+        {
+          "op": "stack_top_not_equals",
+          "field": "pending_question_stack",
+          "match_field": "made_by_id",
+          "value": {"source": "actor_id"},
+          "reason": "The maker may not second the same motion."
+        }
+      ],
+      "event_payload": {
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "seconded_by_id": {"source": "actor_id"},
+        "seconded_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "seconded"},
+          "seconded_by_id": {"source": "actor_id"},
+          "seconded_at": {"source": "timestamp_iso8601"}
         }}
       ]
     }

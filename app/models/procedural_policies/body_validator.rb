@@ -13,6 +13,7 @@ module ProceduralPolicies
       stack_empty
       stack_present
       stack_top_equals
+      stack_top_not_equals
     ].freeze
     EFFECT_OPERATIONS = %w[
       append
@@ -34,6 +35,7 @@ module ProceduralPolicies
       payload
       payload_or_literal
       resource
+      stack_top
       timestamp
       timestamp_iso8601
     ].freeze
@@ -214,6 +216,7 @@ module ProceduralPolicies
             errors << "#{prefix}.name must be non-empty"
           end
           validate_resource_binding(value, prefix) if value["source"] == "resource"
+          validate_stack_top_binding(value, prefix) if value["source"] == "stack_top"
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
         end
@@ -229,6 +232,13 @@ module ProceduralPolicies
       errors << "#{prefix}.attribute must be registered" unless attributes.include?(binding["attribute"])
     rescue KeyError
       errors << "#{prefix}.attribute must be registered"
+    end
+
+    def validate_stack_top_binding(binding, prefix)
+      unless PROJECTION_FIELDS.include?(binding["field"])
+        errors << "#{prefix}.field must be a registered projection field"
+      end
+      errors << "#{prefix}.attribute must be non-empty" if binding["attribute"].blank?
     end
   end
 end
