@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "events": {
+    "MeetingOpened": {
+      "1": {
+        "effects": [
+          {"op": "set", "field": "status", "value": {"source": "literal", "value": "open"}},
+          {"op": "set", "field": "opened_at", "value": {"source": "event_timestamp"}}
+        ]
+      }
+    },
+    "AttendanceEstablished": {
+      "1": {
+        "effects": [
+          {"op": "set", "field": "attendance_actor_ids", "value": {"source": "event_payload", "key": "actor_ids"}}
+        ]
+      }
+    },
+    "QuorumEstablished": {
+      "1": {
+        "effects": [
+          {"op": "set", "field": "quorum", "value": {"source": "event_payload"}}
+        ]
+      }
+    },
+    "MeetingAdjourned": {
+      "1": {
+        "effects": [
+          {"op": "set", "field": "status", "value": {"source": "literal", "value": "adjourned"}},
+          {"op": "set", "field": "adjourned_at", "value": {"source": "event_timestamp"}},
+          {"op": "set", "field": "recognition_requests", "value": {"source": "literal", "value": []}},
+          {"op": "merge_last", "field": "floor_history", "when": {"op": "present", "field": "floor_holder_id"}, "value": {
+            "ended_at": {"source": "event_timestamp_iso8601"},
+            "end_reason": {"source": "literal", "value": "meeting_adjourned"}
+          }},
+          {"op": "set", "field": "floor_holder_id", "value": {"source": "literal", "value": null}},
+          {"op": "set", "field": "floor_reason", "value": {"source": "literal", "value": null}}
+        ]
+      }
+    },
+    "RecognitionRequested": {
+      "1": {
+        "effects": [
+          {"op": "append", "field": "recognition_requests", "value": {
+            "actor_id": {"source": "event_payload", "key": "actor_id"},
+            "reason": {"source": "event_payload", "key": "reason"},
+            "requested_at": {"source": "event_timestamp_iso8601"}
+          }}
+        ]
+      }
+    },
+    "MemberRecognized": {
+      "1": {
+        "effects": [
+          {"op": "remove_matching", "field": "recognition_requests", "match_field": "actor_id", "value": {"source": "event_payload", "key": "actor_id"}},
+          {"op": "set", "field": "floor_holder_id", "value": {"source": "event_payload", "key": "actor_id"}},
+          {"op": "set", "field": "floor_reason", "value": {"source": "event_payload", "key": "reason"}},
+          {"op": "append", "field": "floor_history", "value": {
+            "actor_id": {"source": "event_payload", "key": "actor_id"},
+            "reason": {"source": "event_payload", "key": "reason"},
+            "granted_at": {"source": "event_timestamp_iso8601"}
+          }}
+        ]
+      }
+    },
+    "FloorRelinquished": {
+      "1": {
+        "effects": [
+          {"op": "merge_last", "field": "floor_history", "value": {
+            "ended_at": {"source": "event_timestamp_iso8601"},
+            "end_reason": {"source": "event_payload_or_literal", "key": "reason", "value": "relinquished"}
+          }},
+          {"op": "set", "field": "floor_holder_id", "value": {"source": "literal", "value": null}},
+          {"op": "set", "field": "floor_reason", "value": {"source": "literal", "value": null}}
+        ]
+      }
+    },
+    "ProposalScheduled": {
+      "1": {
+        "effects": [
+          {"op": "append", "field": "scheduled_proposals", "value": {
+            "proposal_id": {"source": "event_payload", "key": "proposal_id"},
+            "proposal_revision_id": {"source": "event_payload", "key": "proposal_revision_id"},
+            "scheduled_by_id": {"source": "event_actor_id"}
+          }}
+        ]
+      }
+    }
+  }
+}
