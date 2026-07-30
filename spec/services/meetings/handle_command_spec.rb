@@ -66,6 +66,40 @@ RSpec.describe Meetings::HandleCommand do
     }.to change(EventRecord, :count).by(1)
   end
 
+  it "executes policy-defined commands and projection effects without Ruby event registration" do
+    meeting = create(:meeting)
+    actor = create(:user)
+    create(:role_assignment, scope: meeting.body, actor:, role: "chair", effective_from: 1.day.ago)
+    definition = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    definition["commands"] = {
+      "activate_workspace" => {
+        "capability" => "open_meeting",
+        "allowed_statuses" => [ "scheduled" ],
+        "event_type" => "WorkspaceActivatedByPolicy",
+        "event_version" => 1,
+        "effects" => [
+          { "op" => "set", "field" => "status", "value" => { "source" => "literal", "value" => "open" } }
+        ]
+      }
+    }
+    CreateProceduralPolicy.call(
+      body: meeting.body,
+      name: meeting.procedural_policy.name,
+      definition:,
+      actor:
+    )
+    meeting.procedural_policy.policy_document.reload
+
+    handle(meeting, actor_context(actor), "activate_workspace", 0)
+
+    record = meeting.event_stream.event_records.last
+    expect(record.event_type).to eq("WorkspaceActivatedByPolicy")
+    expect(record.provenance["projection_effects"]).to eq(
+      [ "op" => "set", "field" => "status", "value" => "open" ]
+    )
+    expect(meeting.projection.status).to eq("open")
+  end
+
   def handle(meeting, actor, type, revision, payload = {})
     command = Commands::Envelope.new(
       id: SecureRandom.uuid,

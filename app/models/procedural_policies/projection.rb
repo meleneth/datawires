@@ -2,7 +2,18 @@
 
 module ProceduralPolicies
   class Projection
-    Command = Data.define(:name, :capability, :allowed_statuses, :event_type, :event_version, :payload)
+    Command = Data.define(
+      :name,
+      :capability,
+      :allowed_statuses,
+      :event_type,
+      :event_version,
+      :payload,
+      :resources,
+      :conditions,
+      :event_payload,
+      :effects
+    )
 
     def self.build(body)
       validator = BodyValidator.new(body)
@@ -21,7 +32,11 @@ module ProceduralPolicies
             allowed_statuses: definition.fetch("allowed_statuses").freeze,
             event_type: definition.fetch("event_type"),
             event_version: definition.fetch("event_version"),
-            payload: definition.fetch("payload", {}).freeze
+            payload: definition.fetch("payload", {}).freeze,
+            resources: definition.fetch("resources", {}).freeze,
+            conditions: definition.fetch("conditions", []).freeze,
+            event_payload: definition.fetch("event_payload", {}).freeze,
+            effects: definition.fetch("effects", []).freeze
           )
         ]
       end.freeze

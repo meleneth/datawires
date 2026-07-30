@@ -140,8 +140,10 @@ auditable command/event lineage that can deterministically rebuild the meeting.
 
 This roadmap supersedes the vague Robert's Rules thrash target below without
 discarding the completed prototype work above. The existing Agreement, Motion,
-Proceeding Event, and Meeting State schemas and `RobertsRules::ApplyMotion`
-service are useful evidence and migration fixtures. They are not the final
+Proceeding Event, and Meeting State schemas and documents are useful evidence
+and migration fixtures. The prototype `RobertsRules::ApplyMotion` service and
+its hard-coded document UI action have been removed so they cannot become an
+accidental second write path. The remaining prototype documents are not the final
 parliamentary model: in particular, the existing Motion schema currently mixes
 proposal authoring, motion state, and results, while the existing Agreement
 schema includes pre-adoption statuses. New work must preserve readable history
@@ -714,11 +716,12 @@ adopted, a durable authoritative Agreement.
 - [ ] Refine the existing Agreement schema so pre-adoption Proposal states do
       not make Agreement the proposal lifecycle; migrate or compatibly render
       existing demo documents.
-- [ ] Retire `RobertsRules::ApplyMotion` after a compatibility migration. Port
-      only its still-valid semantics into schema-backed policies composed from
-      generic Datawires effects; no UI may mark a Motion adopted and directly
-      apply it, and the service must not become an adapter around the new write
-      path.
+- [x] Retire `RobertsRules::ApplyMotion` and its hard-coded document UI action;
+      existing prototype documents remain readable, but there is no direct
+      operational write path to preserve.
+- [ ] Port only its still-valid semantics into schema-backed policies composed
+      from generic Datawires effects; no UI may mark a Motion adopted and
+      directly apply it.
 - [ ] Commit coordinated Agreement, Decision, and read-model changes in
       repository mode while retaining Meeting event sequence as procedural
       truth.

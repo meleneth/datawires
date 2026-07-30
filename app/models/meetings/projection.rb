@@ -38,6 +38,14 @@ module Meetings
 
     def apply(record)
       attributes = to_h.merge(revision: record.sequence)
+      effects = record.provenance["projection_effects"]
+      if effects.is_a?(Array)
+        attributes = ProceduralPolicies::ApplyEffects.call(state: attributes, effects:)
+        return self.class.new(**attributes)
+      end
+
+      # Compatibility replay for events written before policies recorded
+      # resolved projection effects.
       case record.event_type
       when "MeetingOpened"
         attributes.merge!(status: "open", opened_at: record.occurred_at)

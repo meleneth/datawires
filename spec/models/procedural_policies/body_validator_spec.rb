@@ -18,7 +18,6 @@ RSpec.describe ProceduralPolicies::BodyValidator do
 
     expect(validator).not_to be_valid
     expect(validator.errors).to include("commands.open_meeting.capability must be registered")
-    expect(validator.errors).to include("commands.open_meeting.event_type must be registered")
     expect(validator.errors).to include("commands.open_meeting.payload.code must use a registered type")
   end
 end

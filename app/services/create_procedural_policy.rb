@@ -15,7 +15,7 @@ class CreateProceduralPolicy
   def call
     existing = body.procedural_policies.find_by(name:)
     return existing if existing&.policy_document&.body == definition
-    raise ArgumentError, "procedural policy name already exists with different content" if existing
+    return revise_existing(existing) if existing
 
     ApplicationRecord.transaction do
       document = body.domain.documents.create!(
@@ -58,5 +58,19 @@ class CreateProceduralPolicy
     document.update!(head_revision: revision)
     SchemaWrapper.create!(document:)
     document
+  end
+
+  def revise_existing(policy)
+    ApplicationRecord.transaction do
+      document = policy.policy_document
+      revision = document.revisions.create!(
+        parent_revision: document.head_revision,
+        body: definition,
+        message: "Revise procedural policy #{name}",
+        created_by: actor
+      )
+      document.update!(head_revision: revision)
+      policy
+    end
   end
 end

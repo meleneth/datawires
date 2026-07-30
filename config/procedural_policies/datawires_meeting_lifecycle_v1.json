@@ -7,56 +7,158 @@
       "allowed_statuses": ["scheduled"],
       "event_type": "MeetingOpened",
       "event_version": 1,
-      "payload": {}
+      "payload": {},
+      "effects": [
+        {"op": "set", "field": "status", "value": {"source": "literal", "value": "open"}},
+        {"op": "set", "field": "opened_at", "value": {"source": "timestamp"}}
+      ]
     },
     "establish_attendance": {
       "capability": "chair_action",
       "allowed_statuses": ["open"],
       "event_type": "AttendanceEstablished",
       "event_version": 1,
-      "payload": {"actor_ids": "array"}
+      "payload": {"actor_ids": "array"},
+      "effects": [
+        {"op": "set", "field": "attendance_actor_ids", "value": {"source": "payload", "key": "actor_ids"}}
+      ]
     },
     "establish_quorum": {
       "capability": "chair_action",
       "allowed_statuses": ["open"],
       "event_type": "QuorumEstablished",
       "event_version": 1,
-      "payload": {"present": "boolean"}
+      "payload": {"present": "boolean"},
+      "effects": [
+        {"op": "set", "field": "quorum", "value": {"source": "payload"}}
+      ]
     },
     "adjourn_meeting": {
       "capability": "chair_action",
       "allowed_statuses": ["open"],
       "event_type": "MeetingAdjourned",
       "event_version": 1,
-      "payload": {}
+      "effects": [
+        {"op": "set", "field": "status", "value": {"source": "literal", "value": "adjourned"}},
+        {"op": "set", "field": "adjourned_at", "value": {"source": "timestamp"}},
+        {"op": "set", "field": "recognition_requests", "value": {"source": "literal", "value": []}},
+        {"op": "merge_last", "field": "floor_history", "when": {"op": "present", "field": "floor_holder_id"}, "value": {
+          "ended_at": {"source": "timestamp_iso8601"},
+          "end_reason": {"source": "literal", "value": "meeting_adjourned"}
+        }},
+        {"op": "set", "field": "floor_holder_id", "value": {"source": "literal", "value": null}},
+        {"op": "set", "field": "floor_reason", "value": {"source": "literal", "value": null}}
+      ]
     },
     "request_recognition": {
       "capability": "request_recognition",
       "allowed_statuses": ["open"],
       "event_type": "RecognitionRequested",
       "event_version": 1,
-      "payload": {}
+      "conditions": [
+        {
+          "op": "collection_excludes",
+          "field": "recognition_requests",
+          "match_field": "actor_id",
+          "value": {"source": "actor_id"},
+          "reason": "The actor already has a recognition request."
+        }
+      ],
+      "event_payload": {"actor_id": {"source": "actor_id"}},
+      "effects": [
+        {"op": "append", "field": "recognition_requests", "value": {
+          "actor_id": {"source": "actor_id"},
+          "reason": {"source": "payload", "key": "reason"},
+          "requested_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
     },
     "recognize_member": {
       "capability": "chair_action",
       "allowed_statuses": ["open"],
       "event_type": "MemberRecognized",
       "event_version": 1,
-      "payload": {"actor_id": "uuid"}
+      "payload": {"actor_id": "uuid"},
+      "conditions": [
+        {"op": "blank", "field": "floor_holder_id", "reason": "Another actor already holds the floor."},
+        {
+          "op": "collection_includes",
+          "field": "recognition_requests",
+          "match_field": "actor_id",
+          "value": {"source": "payload", "key": "actor_id"},
+          "reason": "The actor has not requested recognition."
+        }
+      ],
+      "effects": [
+        {"op": "remove_matching", "field": "recognition_requests", "match_field": "actor_id", "value": {"source": "payload", "key": "actor_id"}},
+        {"op": "set", "field": "floor_holder_id", "value": {"source": "payload", "key": "actor_id"}},
+        {"op": "set", "field": "floor_reason", "value": {"source": "payload", "key": "reason"}},
+        {"op": "append", "field": "floor_history", "value": {
+          "actor_id": {"source": "payload", "key": "actor_id"},
+          "reason": {"source": "payload", "key": "reason"},
+          "granted_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
     },
     "relinquish_floor": {
       "capability": "request_recognition",
       "allowed_statuses": ["open"],
       "event_type": "FloorRelinquished",
       "event_version": 1,
-      "payload": {}
+      "conditions": [
+        {
+          "op": "equals",
+          "field": "floor_holder_id",
+          "value": {"source": "actor_id"},
+          "reason": "Only the current floor holder may relinquish the floor."
+        }
+      ],
+      "event_payload": {"actor_id": {"source": "actor_id"}},
+      "effects": [
+        {"op": "merge_last", "field": "floor_history", "value": {
+          "ended_at": {"source": "timestamp_iso8601"},
+          "end_reason": {"source": "payload_or_literal", "key": "reason", "value": "relinquished"}
+        }},
+        {"op": "set", "field": "floor_holder_id", "value": {"source": "literal", "value": null}},
+        {"op": "set", "field": "floor_reason", "value": {"source": "literal", "value": null}}
+      ]
     },
     "schedule_proposal": {
       "capability": "schedule_proposal",
       "allowed_statuses": ["scheduled", "open"],
       "event_type": "ProposalScheduled",
       "event_version": 1,
-      "payload": {"proposal_id": "uuid"}
+      "payload": {"proposal_id": "uuid"},
+      "resources": {
+        "proposal": {"type": "proposal", "id": {"source": "payload", "key": "proposal_id"}}
+      },
+      "conditions": [
+        {
+          "op": "resource_equals",
+          "resource": "proposal",
+          "attribute": "body_id",
+          "value": {"source": "meeting_body_id"},
+          "reason": "Proposal belongs to a different Body."
+        },
+        {
+          "op": "collection_excludes",
+          "field": "scheduled_proposals",
+          "match_field": "proposal_id",
+          "value": {"source": "resource", "resource": "proposal", "attribute": "id"},
+          "reason": "Proposal is already scheduled for this Meeting."
+        }
+      ],
+      "event_payload": {
+        "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
+        "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"}
+      },
+      "effects": [
+        {"op": "append", "field": "scheduled_proposals", "value": {
+          "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
+          "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"},
+          "scheduled_by_id": {"source": "actor_id"}
+        }}
+      ]
     }
   }
 }
