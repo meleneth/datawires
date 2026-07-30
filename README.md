@@ -117,6 +117,13 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
   scope will be added with the Meeting model.
 - Body capabilities are evaluated from effective Datawires relationships at an
   explicit instant. Identity-provider groups are not procedural roles.
+- `EventStream` is a domain-neutral, revisioned stream for one typed subject.
+  `Commands::Envelope` carries the authenticated actor, expected revision,
+  versioned payload, timestamp, and correlation/causation ids.
+- `EventRecord` is append-only and versioned. Atomic appends serialize on the
+  stream revision, return prior records for an idempotent command retry, reject
+  stale revisions, and retain issuer/subject provenance for deterministic
+  replay and audit.
 
 Supported JSON Schema currently means:
 

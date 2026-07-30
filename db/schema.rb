@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -135,6 +135,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000003) do
     t.datetime "updated_at", null: false
     t.index ["edit_document_id"], name: "index_edit_affordances_on_edit_document_id"
     t.index ["schema_wrapper_id", "title"], name: "index_edit_affordances_on_schema_wrapper_and_title", unique: true
+  end
+
+  create_table "event_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "actor_id"
+    t.uuid "causation_id"
+    t.uuid "command_id", null: false
+    t.string "command_type", null: false
+    t.integer "command_version", null: false
+    t.uuid "correlation_id"
+    t.datetime "created_at", null: false
+    t.uuid "event_stream_id", null: false
+    t.string "event_type", null: false
+    t.integer "event_version", null: false
+    t.datetime "occurred_at", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.jsonb "provenance", default: {}, null: false
+    t.integer "sequence", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_event_records_on_actor_id"
+    t.index ["event_stream_id", "command_id"], name: "index_event_records_on_event_stream_id_and_command_id"
+    t.index ["event_stream_id", "sequence"], name: "index_event_records_on_event_stream_id_and_sequence", unique: true
+    t.index ["event_stream_id"], name: "index_event_records_on_event_stream_id"
+    t.index ["event_type", "event_version"], name: "index_event_records_on_event_type_and_event_version"
+  end
+
+  create_table "event_streams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "domain_id", null: false
+    t.integer "revision", default: 0, null: false
+    t.string "stream_type", null: false
+    t.uuid "subject_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id"], name: "index_event_streams_on_domain_id"
+    t.index ["stream_type", "subject_id"], name: "index_event_streams_on_stream_type_and_subject_id", unique: true
   end
 
   create_table "external_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -268,6 +302,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000003) do
   add_foreign_key "drafts", "users", column: "created_by_id"
   add_foreign_key "edit_affordances", "documents", column: "edit_document_id"
   add_foreign_key "edit_affordances", "schema_wrappers"
+  add_foreign_key "event_records", "event_streams"
+  add_foreign_key "event_records", "users", column: "actor_id"
+  add_foreign_key "event_streams", "domains"
   add_foreign_key "external_documents", "documents"
   add_foreign_key "memberships", "bodies"
   add_foreign_key "memberships", "users", column: "actor_id"
