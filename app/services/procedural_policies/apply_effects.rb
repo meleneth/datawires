@@ -6,6 +6,7 @@ module ProceduralPolicies
     OPERATIONS = %w[
       append
       append_at_path
+      merge
       merge_last
       remove_matching
       set
@@ -56,6 +57,12 @@ module ProceduralPolicies
           effect.fetch("path"),
           collection + [ compact_hash(effect.fetch("value")) ]
         )
+      when "merge"
+        current = state[field.to_sym]
+        raise ArgumentError, "projection field is not an object" unless current.is_a?(Hash)
+        raise ArgumentError, "projection merge value is not an object" unless effect["value"].is_a?(Hash)
+
+        state[field.to_sym] = current.deep_merge(compact_hash(effect.fetch("value")))
       when "remove_matching"
         state[field.to_sym] = Array(state[field.to_sym]).reject do |entry|
           entry[effect.fetch("match_field")] == effect["value"]

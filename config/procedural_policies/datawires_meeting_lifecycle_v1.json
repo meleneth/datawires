@@ -470,6 +470,7 @@
         "electorate_actor_ids": {"source": "projection", "field": "attendance_actor_ids"},
         "method": {"source": "literal", "value": "counted"},
         "attribution": {"source": "literal", "value": "attributable"},
+        "chair_rule": {"source": "literal", "value": "eligible_as_member"},
         "threshold": {"source": "literal", "value": {"kind": "majority", "basis": "votes_cast"}},
         "opened_by_id": {"source": "actor_id"},
         "opened_at": {"source": "timestamp_iso8601"}
@@ -488,6 +489,7 @@
           "eligible_actor_ids": {"source": "projection", "field": "attendance_actor_ids"},
           "method": {"source": "literal", "value": "counted"},
           "attribution": {"source": "literal", "value": "attributable"},
+          "chair_rule": {"source": "literal", "value": "eligible_as_member"},
           "choices": {"source": "literal", "value": ["yes", "no", "abstain"]},
           "threshold": {"source": "literal", "value": {"kind": "majority", "basis": "votes_cast"}},
           "ballots": {"source": "literal", "value": []},
@@ -545,6 +547,73 @@
           "actor_id": {"source": "actor_id"},
           "choice": {"source": "payload", "key": "choice"},
           "cast_at": {"source": "timestamp_iso8601"}
+        }}
+      ]
+    },
+    "close_counted_vote": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "VoteClosed",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/status",
+          "value": {"source": "literal", "value": "open"},
+          "reason": "There is no open vote to close."
+        }
+      ],
+      "event_payload": {
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "question_id": {"source": "projection_path", "field": "vote_state", "path": "/question_id"},
+        "question_version": {"source": "projection_path", "field": "vote_state", "path": "/question_version"},
+        "result": {"source": "vote_result", "field": "vote_state"},
+        "closed_by_id": {"source": "actor_id"},
+        "closed_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "merge", "field": "vote_state", "value": {
+          "status": {"source": "literal", "value": "closed"},
+          "result": {"source": "vote_result", "field": "vote_state"},
+          "closed_by_id": {"source": "actor_id"},
+          "closed_at": {"source": "timestamp_iso8601"}
+        }},
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "vote_closed"}
+        }}
+      ]
+    },
+    "announce_counted_vote_result": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "VoteResultAnnounced",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/status",
+          "value": {"source": "literal", "value": "closed"},
+          "reason": "The vote is not ready to announce."
+        }
+      ],
+      "event_payload": {
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "question_id": {"source": "projection_path", "field": "vote_state", "path": "/question_id"},
+        "question_version": {"source": "projection_path", "field": "vote_state", "path": "/question_version"},
+        "result": {"source": "projection_path", "field": "vote_state", "path": "/result"},
+        "announced_by_id": {"source": "actor_id"},
+        "announced_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "merge", "field": "vote_state", "value": {
+          "status": {"source": "literal", "value": "announced"},
+          "announced_by_id": {"source": "actor_id"},
+          "announced_at": {"source": "timestamp_iso8601"}
+        }},
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "result_announced"}
         }}
       ]
     }

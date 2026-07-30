@@ -26,6 +26,7 @@ module ProceduralPolicies
       remove_matching
       set
       append_at_path
+      merge
       stack_merge_top
       stack_pop
       stack_push
@@ -47,6 +48,7 @@ module ProceduralPolicies
       stack_top
       timestamp
       timestamp_iso8601
+      vote_result
     ].freeze
     PROJECTION_FIELDS = Meetings::Projection.members.map(&:to_s).freeze
     RESOURCE_TYPES = Resources.types.freeze
@@ -237,6 +239,7 @@ module ProceduralPolicies
           validate_stack_top_binding(value, prefix) if value["source"] == "stack_top"
           validate_document_operation_binding(value, prefix) if value["source"] == "document_operation"
           validate_projection_binding(value, prefix) if value["source"].in?(%w[projection projection_path])
+          validate_vote_result_binding(value, prefix) if value["source"] == "vote_result"
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
         end
@@ -273,6 +276,12 @@ module ProceduralPolicies
         errors << "#{prefix}.field must be a registered projection field"
       end
       validate_pointer(binding["path"], "#{prefix}.path") if binding["source"] == "projection_path"
+    end
+
+    def validate_vote_result_binding(binding, prefix)
+      unless PROJECTION_FIELDS.include?(binding["field"])
+        errors << "#{prefix}.field must be a registered projection field"
+      end
     end
   end
 end

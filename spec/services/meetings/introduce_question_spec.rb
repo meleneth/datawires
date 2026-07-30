@@ -157,6 +157,7 @@ RSpec.describe "Introducing a pending question from a Proposal" do
       "electorate_actor_ids" => electorate,
       "method" => "counted",
       "attribution" => "attributable",
+      "chair_rule" => "eligible_as_member",
       "threshold" => { "kind" => "majority", "basis" => "votes_cast" },
       "ballots" => []
     )
@@ -172,6 +173,29 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     expect {
       handle(meeting, member, "cast_counted_ballot", 18, { "choice" => "abstain" })
     }.to raise_error(Meetings::HandleCommand::Rejected, "The actor has already cast a ballot.")
+
+    handle(meeting, chair, "close_counted_vote", 18)
+    closed_vote = meeting.projection.vote_state
+    expect(closed_vote).to include(
+      "status" => "closed",
+      "result" => {
+        "totals" => { "yes" => 1, "no" => 1, "abstain" => 0 },
+        "threshold" => { "kind" => "majority", "basis" => "votes_cast" },
+        "threshold_count" => 2,
+        "basis_count" => 2,
+        "adopted" => false,
+        "tie" => true
+      }
+    )
+    expect(meeting.event_stream.event_records.last.event_type).to eq("VoteClosed")
+
+    handle(meeting, chair, "announce_counted_vote_result", 19)
+    expect(meeting.projection.vote_state).to include(
+      "status" => "announced",
+      "result" => include("adopted" => false, "tie" => true)
+    )
+    expect(meeting.projection.pending_question_stack.last.fetch("status")).to eq("result_announced")
+    expect(meeting.event_stream.event_records.last.event_type).to eq("VoteResultAnnounced")
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

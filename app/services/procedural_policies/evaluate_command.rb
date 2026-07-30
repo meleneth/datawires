@@ -103,6 +103,7 @@ module ProceduralPolicies
       when "stack_top" then stack_top_binding(value)
       when "timestamp" then command.timestamp
       when "timestamp_iso8601" then command.timestamp.iso8601
+      when "vote_result" then tally_vote(value)
       else reject!("Policy binding source is not registered.")
       end
     end
@@ -131,6 +132,12 @@ module ProceduralPolicies
         current_version: resolve_value(binding.fetch("current_version"))
       ).content
     rescue StructuredDocuments::ApplyOperation::Invalid => e
+      reject!(e.message)
+    end
+
+    def tally_vote(binding)
+      Voting::TallyCountedVote.call(vote: projection.public_send(binding.fetch("field")))
+    rescue Voting::TallyCountedVote::Invalid => e
       reject!(e.message)
     end
 
