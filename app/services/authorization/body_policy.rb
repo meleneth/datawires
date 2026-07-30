@@ -12,11 +12,11 @@ module Authorization
       administer_board: %w[chair secretary]
     }.freeze
 
-    def self.call(actor:, action:, body:, at: Time.current)
+    def self.call(actor:, action:, body:, meeting: nil, at: Time.current)
       return Decision.new(allowed: false, reason: "An authenticated actor is required.") unless actor.is_a?(ActorContext)
       return Decision.new(allowed: false, reason: "Unknown Body capability.") unless ROLE_CAPABILITIES.key?(action.to_sym)
 
-      roles = effective_roles(actor.user, body, at)
+      roles = effective_roles(actor.user, body, meeting, at)
       allowed = (roles & ROLE_CAPABILITIES.fetch(action.to_sym)).any?
       Decision.new(
         allowed:,
@@ -24,8 +24,9 @@ module Authorization
       )
     end
 
-    def self.effective_roles(user, body, at)
+    def self.effective_roles(user, body, meeting, at)
       roles = body.role_assignments_at(at).where(actor: user).pluck(:role)
+      roles.concat(meeting.role_assignments.effective_at(at).where(actor: user).pluck(:role)) if meeting
       roles << "member" if body.memberships_at(at).exists?(actor: user)
       roles.uniq
     end

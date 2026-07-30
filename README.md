@@ -124,6 +124,13 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
   stream revision, return prior records for an idempotent command retry, reject
   stale revisions, and retain issuer/subject provenance for deterministic
   replay and audit.
+- `Meeting` is a schema-backed identity associated with a `Body` and one
+  matching `EventStream`. Its operational status, attendance, quorum finding,
+  and adjournment are rebuilt from ordered events rather than mutable Meeting
+  fields.
+- Initial Meeting lifecycle commands are authorized from effective Body and
+  Meeting-scoped roles, procedurally validated against the current projection,
+  and appended through the generic optimistic event store.
 
 Supported JSON Schema currently means:
 

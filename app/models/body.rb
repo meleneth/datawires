@@ -7,6 +7,7 @@ class Body < ApplicationRecord
 
   has_many :memberships, dependent: :destroy, inverse_of: :body
   has_many :role_assignments, as: :scope, dependent: :destroy
+  has_many :meetings, dependent: :destroy
 
   delegate :domain, :key, :title, :body, to: :body_document
 

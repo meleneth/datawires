@@ -58,6 +58,11 @@ class Document < ApplicationRecord
           inverse_of: :body_document,
           dependent: :restrict_with_exception
 
+  has_one :meeting,
+          class_name: "Meeting",
+          foreign_key: :meeting_document_id,
+          dependent: :restrict_with_exception
+
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
   has_one :schema_wrapper,

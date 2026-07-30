@@ -2,7 +2,7 @@
 
 class RoleAssignment < ApplicationRecord
   ROLES = %w[member chair secretary temporary_chair parliamentarian].freeze
-  SCOPE_TYPES = %w[Body].freeze
+  SCOPE_TYPES = %w[Body Meeting].freeze
 
   belongs_to :actor, class_name: "User"
   belongs_to :scope, polymorphic: true

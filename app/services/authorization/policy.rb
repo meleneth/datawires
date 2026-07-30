@@ -9,6 +9,7 @@ module Authorization
           actor:,
           action:,
           body: resource.fetch(:body),
+          meeting: resource[:meeting],
           at: resource.fetch(:at, Time.current)
         )
       end
