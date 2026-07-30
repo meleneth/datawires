@@ -165,10 +165,10 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     handle(meeting, chair, "establish_attendance", 15, { "actor_ids" => [ chair.user.id ] })
     expect(meeting.projection.vote_state.fetch("eligible_actor_ids")).to eq(electorate)
     handle(meeting, member, "cast_counted_ballot", 16, { "choice" => "yes" })
-    handle(meeting, chair, "cast_counted_ballot", 17, { "choice" => "no" })
+    handle(meeting, chair, "cast_counted_ballot", 17, { "choice" => "yes" })
     expect(meeting.projection.vote_state.fetch("ballots")).to contain_exactly(
       include("actor_id" => member.user.id, "choice" => "yes"),
-      include("actor_id" => chair.user.id, "choice" => "no")
+      include("actor_id" => chair.user.id, "choice" => "yes")
     )
     expect {
       handle(meeting, member, "cast_counted_ballot", 18, { "choice" => "abstain" })
@@ -179,12 +179,12 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     expect(closed_vote).to include(
       "status" => "closed",
       "result" => {
-        "totals" => { "yes" => 1, "no" => 1, "abstain" => 0 },
+        "totals" => { "yes" => 2, "no" => 0, "abstain" => 0 },
         "threshold" => { "kind" => "majority", "basis" => "votes_cast" },
         "threshold_count" => 2,
         "basis_count" => 2,
-        "adopted" => false,
-        "tie" => true
+        "adopted" => true,
+        "tie" => false
       }
     )
     expect(meeting.event_stream.event_records.last.event_type).to eq("VoteClosed")
@@ -192,10 +192,38 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     handle(meeting, chair, "announce_counted_vote_result", 19)
     expect(meeting.projection.vote_state).to include(
       "status" => "announced",
-      "result" => include("adopted" => false, "tie" => true)
+      "result" => include("adopted" => true, "tie" => false)
     )
     expect(meeting.projection.pending_question_stack.last.fetch("status")).to eq("result_announced")
     expect(meeting.event_stream.event_records.last.event_type).to eq("VoteResultAnnounced")
+
+    handle(meeting, chair, "dispose_adopted_amendment", 20)
+    resumed = meeting.projection.pending_question_stack
+    expect(resumed.length).to eq(1)
+    expect(resumed.last).to include(
+      "id" => question_id,
+      "kind" => "main",
+      "version" => 2,
+      "status" => "debate_open",
+      "content" => { "text" => "Amended text" },
+      "last_adopted_amendment_id" => amendment_question.fetch("amendment_id")
+    )
+    expect(resumed.last.fetch("versions")).to contain_exactly(
+      include(
+        "version" => 1,
+        "content" => { "text" => "Proposed text" },
+        "source_proposal_revision_id" => proposal.submitted_revision_id
+      ),
+      include(
+        "version" => 2,
+        "content" => { "text" => "Amended text" },
+        "amendment_id" => amendment_question.fetch("amendment_id"),
+        "operation" => operation,
+        "vote_id" => vote_command_id
+      )
+    )
+    expect(meeting.projection.vote_state).to be_nil
+    expect(meeting.event_stream.event_records.last.event_type).to eq("AmendmentAdopted")
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

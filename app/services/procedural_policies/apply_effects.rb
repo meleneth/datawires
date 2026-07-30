@@ -11,6 +11,7 @@ module ProceduralPolicies
       remove_matching
       set
       stack_merge_top
+      stack_append_top_at_path
       stack_pop
       stack_push
       stack_replace_top
@@ -89,6 +90,16 @@ module ProceduralPolicies
         raise ArgumentError, "cannot merge the top of an empty stack" if values.empty?
 
         values[-1] = values.last.merge(compact_hash(effect.fetch("value")))
+        state[field.to_sym] = values
+      when "stack_append_top_at_path"
+        values = Array(state[field.to_sym]).deep_dup
+        raise ArgumentError, "cannot append within the top of an empty stack" if values.empty?
+
+        path = effect.fetch("path")
+        collection = JsonPtr.fetch(values.last, path, default: JsonPtr::UNDEFINED)
+        raise ArgumentError, "stack top path is not an array" unless collection.is_a?(Array)
+
+        values[-1] = JsonPtr.set(values.last, path, collection + [ compact_hash(effect.fetch("value")) ])
         state[field.to_sym] = values
       end
     end

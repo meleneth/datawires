@@ -93,6 +93,7 @@ module ProceduralPolicies
       when "command_id" then command.id
       when "derived_id" then UuidTools.derive(command.id, value.fetch("name"))
       when "document_operation" then apply_document_operation(value)
+      when "increment" then increment_value(value)
       when "literal" then value["value"]
       when "meeting_body_id" then meeting.body_id
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
@@ -101,6 +102,7 @@ module ProceduralPolicies
       when "projection" then projection.public_send(value.fetch("field"))
       when "projection_path" then value_at(projection.public_send(value.fetch("field")), value.fetch("path"))
       when "stack_top" then stack_top_binding(value)
+      when "stack_entry" then stack_entry_binding(value)
       when "timestamp" then command.timestamp
       when "timestamp_iso8601" then command.timestamp.iso8601
       when "vote_result" then tally_vote(value)
@@ -113,12 +115,24 @@ module ProceduralPolicies
     end
 
     def stack_top_binding(binding)
-      entry = Array(projection.public_send(binding.fetch("field"))).last
+      stack_entry_binding(binding)
+    end
+
+    def stack_entry_binding(binding)
+      offset = binding.fetch("offset", 0)
+      entry = Array(projection.public_send(binding.fetch("field")))[-(offset + 1)]
       reject!("Required stack state was not found.") unless entry.is_a?(Hash)
 
       entry.fetch(binding.fetch("attribute"))
     rescue KeyError
       reject!("Required stack attribute was not found.")
+    end
+
+    def increment_value(binding)
+      value = resolve_value(binding.fetch("value"))
+      reject!("Increment binding requires a number.") unless value.is_a?(Numeric)
+
+      value + binding.fetch("amount", 1)
     end
 
     def value_at(document, path)

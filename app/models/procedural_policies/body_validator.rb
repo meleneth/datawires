@@ -28,6 +28,7 @@ module ProceduralPolicies
       append_at_path
       merge
       stack_merge_top
+      stack_append_top_at_path
       stack_pop
       stack_push
       stack_replace_top
@@ -38,6 +39,7 @@ module ProceduralPolicies
       command_id
       derived_id
       document_operation
+      increment
       literal
       meeting_body_id
       payload
@@ -46,6 +48,7 @@ module ProceduralPolicies
       projection
       projection_path
       stack_top
+      stack_entry
       timestamp
       timestamp_iso8601
       vote_result
@@ -181,7 +184,9 @@ module ProceduralPolicies
     def validate_operation_shape(operation, prefix, collection)
       if collection == "effects"
         errors << "#{prefix}.field is required" if operation["field"].blank?
-        validate_pointer(operation["path"], "#{prefix}.path") if operation["op"] == "append_at_path"
+        if operation["op"].in?(%w[append_at_path stack_append_top_at_path])
+          validate_pointer(operation["path"], "#{prefix}.path")
+        end
         if operation["op"] != "stack_pop" && !operation.key?("value")
           errors << "#{prefix}.value is required"
         end
@@ -237,7 +242,9 @@ module ProceduralPolicies
           end
           validate_resource_binding(value, prefix) if value["source"] == "resource"
           validate_stack_top_binding(value, prefix) if value["source"] == "stack_top"
+          validate_stack_entry_binding(value, prefix) if value["source"] == "stack_entry"
           validate_document_operation_binding(value, prefix) if value["source"] == "document_operation"
+          validate_increment_binding(value, prefix) if value["source"] == "increment"
           validate_projection_binding(value, prefix) if value["source"].in?(%w[projection projection_path])
           validate_vote_result_binding(value, prefix) if value["source"] == "vote_result"
         else
@@ -264,11 +271,22 @@ module ProceduralPolicies
       errors << "#{prefix}.attribute must be non-empty" if binding["attribute"].blank?
     end
 
+    def validate_stack_entry_binding(binding, prefix)
+      validate_stack_top_binding(binding, prefix)
+      offset = binding.fetch("offset", 0)
+      errors << "#{prefix}.offset must be non-negative" unless offset.is_a?(Integer) && offset >= 0
+    end
+
     def validate_document_operation_binding(binding, prefix)
       %w[document operation current_version].each do |key|
         errors << "#{prefix}.#{key} is required" unless binding[key].is_a?(Hash)
         validate_bindings(binding[key], "#{prefix}.#{key}") if binding[key].is_a?(Hash)
       end
+    end
+
+    def validate_increment_binding(binding, prefix)
+      errors << "#{prefix}.value is required" unless binding["value"].is_a?(Hash)
+      validate_bindings(binding["value"], "#{prefix}.value") if binding["value"].is_a?(Hash)
     end
 
     def validate_projection_binding(binding, prefix)

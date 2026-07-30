@@ -50,6 +50,63 @@ RSpec.describe ProceduralPolicies::EvaluateCommand do
     }.to raise_error(described_class::Rejected, "A stack entry is required.")
   end
 
+  it "resolves rejected-amendment disposition effects from policy data" do
+    meeting = create(:meeting)
+    actor = create(:user)
+    main = {
+      "id" => SecureRandom.uuid,
+      "kind" => "main",
+      "version" => 1,
+      "status" => "vote_closed",
+      "content" => { "text" => "Original" }
+    }
+    amendment = {
+      "id" => SecureRandom.uuid,
+      "amendment_id" => SecureRandom.uuid,
+      "motion_id" => SecureRandom.uuid,
+      "kind" => "amendment",
+      "version" => 1,
+      "status" => "result_announced"
+    }
+    vote_id = SecureRandom.uuid
+    projection = Meetings::Projection.empty.with(
+      status: "open",
+      pending_question_stack: [ main, amendment ],
+      vote_state: {
+        "id" => vote_id,
+        "result" => { "adopted" => false }
+      }
+    )
+    definition = ProceduralPolicies::Projection
+      .build(ProceduralPolicies::Defaults.meeting_lifecycle)
+      .command("dispose_rejected_amendment")
+    command = Commands::Envelope.new(
+      id: SecureRandom.uuid,
+      type: definition.name,
+      version: definition.command_version,
+      stream_id: meeting.event_stream_id,
+      expected_revision: 0,
+      actor: actor_context(actor),
+      timestamp: Time.current
+    )
+
+    evaluation = described_class.call(meeting:, command:, definition:, projection:)
+    result = ProceduralPolicies::ApplyEffects.call(
+      state: projection.to_h,
+      effects: evaluation.projection_effects
+    )
+
+    expect(evaluation.event_payload).to include(
+      "amendment_id" => amendment.fetch("amendment_id"),
+      "parent_question_id" => main.fetch("id"),
+      "vote_id" => vote_id
+    )
+    expect(result.fetch(:pending_question_stack)).to eq(
+      [ main.merge("status" => "debate_open") ]
+    )
+    expect(result.fetch(:vote_state)).to be_nil
+  end
+
   def command_definition(entry_id)
     body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
     body["commands"] = {

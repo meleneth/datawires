@@ -222,6 +222,11 @@
           "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
           "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"},
           "content": {"source": "resource", "resource": "proposal", "attribute": "submitted_content"},
+          "versions": [{
+            "version": {"source": "literal", "value": 1},
+            "content": {"source": "resource", "resource": "proposal", "attribute": "submitted_content"},
+            "source_proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"}
+          }],
           "made_by_id": {"source": "actor_id"},
           "made_at": {"source": "timestamp_iso8601"}
         }}
@@ -615,6 +620,117 @@
         {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
           "status": {"source": "literal", "value": "result_announced"}
         }}
+      ]
+    },
+    "dispose_adopted_amendment": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "AmendmentAdopted",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "kind",
+          "value": {"source": "literal", "value": "amendment"},
+          "reason": "The immediately pending question is not an amendment."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "result_announced"},
+          "reason": "The amendment result has not been announced."
+        },
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/result/adopted",
+          "value": {"source": "literal", "value": true},
+          "reason": "The announced vote did not adopt the amendment."
+        }
+      ],
+      "event_payload": {
+        "amendment_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "amendment_id"},
+        "amendment_question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "parent_question_id": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "id"},
+        "prior_parent_version": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "version"},
+        "resulting_parent_version": {
+          "source": "increment",
+          "value": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "version"}
+        },
+        "operation": {"source": "stack_top", "field": "pending_question_stack", "attribute": "operation"},
+        "adopted_content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "disposed_by_id": {"source": "actor_id"},
+        "disposed_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_pop", "field": "pending_question_stack"},
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "version": {
+            "source": "increment",
+            "value": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "version"}
+          },
+          "content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+          "status": {"source": "literal", "value": "debate_open"},
+          "last_adopted_amendment_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "amendment_id"}
+        }},
+        {"op": "stack_append_top_at_path", "field": "pending_question_stack", "path": "/versions", "value": {
+          "version": {
+            "source": "increment",
+            "value": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "version"}
+          },
+          "content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+          "amendment_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "amendment_id"},
+          "operation": {"source": "stack_top", "field": "pending_question_stack", "attribute": "operation"},
+          "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"}
+        }},
+        {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
+      ]
+    },
+    "dispose_rejected_amendment": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "AmendmentRejected",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "kind",
+          "value": {"source": "literal", "value": "amendment"},
+          "reason": "The immediately pending question is not an amendment."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "result_announced"},
+          "reason": "The amendment result has not been announced."
+        },
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/result/adopted",
+          "value": {"source": "literal", "value": false},
+          "reason": "The announced vote adopted the amendment."
+        }
+      ],
+      "event_payload": {
+        "amendment_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "amendment_id"},
+        "amendment_question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "parent_question_id": {"source": "stack_entry", "field": "pending_question_stack", "offset": 1, "attribute": "id"},
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "disposed_by_id": {"source": "actor_id"},
+        "disposed_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_pop", "field": "pending_question_stack"},
+        {"op": "stack_merge_top", "field": "pending_question_stack", "value": {
+          "status": {"source": "literal", "value": "debate_open"}
+        }},
+        {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
       ]
     }
   }

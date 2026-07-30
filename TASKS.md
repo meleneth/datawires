@@ -618,12 +618,12 @@ schema-backed documents can preserve adopted-text lineage.
       the minimal operation(s) needed by its fixture; keep the remaining
       operation shapes validatable or explicitly future-versioned rather than
       pretending to execute them.
-- [ ] Add move-amendment and rule-amendment-in/out-of-order commands/events,
+- [x] Add move-amendment and rule-amendment-in/out-of-order commands/events,
       pushing the amendment question and preserving the main question beneath.
-- [ ] Materialize deterministic intermediate text/value and retain original
+- [x] Materialize deterministic intermediate text/value and retain original
       Proposal content, each operation, pre/post versions, and vote-presented
       version.
-- [ ] On amendment disposition, resume the original or amended main question
+- [x] On amendment disposition, resume the original or amended main question
       without mutating its prior versions.
 
 **Invariants:**
