@@ -23,6 +23,23 @@
             = render TypographyComponent.new(as: :h2, text: section.title)
             - if section.description.present?
               = render TypographyComponent.new(as: :muted, text: section.description)
+            - result = @section_results[section.id]
+            - if result&.error
+              %p.mt-2.text-sm.text-destructive= result.error
+            - elsif result
+              - if result.documents.any?
+                %ul.mt-3.space-y-2
+                  - result.documents.each do |document|
+                    %li.rounded.border-2.border-black.bg-background.px-3.py-2
+                      - href = result.view_affordance ? document_view_affordance_path(document, result.view_affordance) : document_path(document)
+                      = link_to href,
+                        data: { turbo_frame: "main_content", turbo_action: "advance" },
+                        class: "block transition-colors hover:underline" do
+                        .font-head.font-medium= document.title.presence || document.key
+                        - if document.key.present?
+                          .text-xs.text-muted-foreground= document.key
+              - else
+                = render TypographyComponent.new(as: :muted, text: result.empty_state, html_options: { class: "mt-2" })
   - else
     = render CardComponent.new do
       = render CardContentComponent.new do

@@ -7,5 +7,11 @@ class BoardsController < ApplicationController
     @domain = @schema_wrapper.domain
     require_visible_domain!(@domain)
     @projection = @board.projection
+    @section_results = @projection.sections.to_h do |section|
+      result = if section.kind == "document_collection"
+        Boards::DocumentCollection.call(board: @board, section:)
+      end
+      [ section.id, result ]
+    end
   end
 end
