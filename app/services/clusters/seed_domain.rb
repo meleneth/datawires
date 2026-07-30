@@ -47,6 +47,7 @@ module Clusters
           )
         end
         ensure_home_document!(definition)
+        ensure_boards!(definition)
         create_initial_domain_commit!(definition) if definition.fetch(:repository_mode, false)
 
         domain
@@ -56,6 +57,24 @@ module Clusters
     private
 
     attr_reader :domain, :cluster_key, :actor
+
+    def ensure_boards!(definition)
+      definition.fetch(:boards, []).each do |board_definition|
+        schema_wrapper = domain.documents.find_by!(key: board_definition.fetch(:schema_key)).schema_wrapper
+        board_document = ensure_document!(
+          key: board_definition.fetch(:document_key),
+          title: board_definition.fetch(:title),
+          body: board_definition.fetch(:body),
+          schema_document: domain.documents.find_by!(key: Boards::Schema::KEY),
+          message: "Seed #{definition.fetch(:name)} #{board_definition.fetch(:title)}"
+        )
+        board = schema_wrapper.boards.find_or_initialize_by(title: board_definition.fetch(:title))
+        board.board_document = board_document
+        board.public = true
+        board.save!
+        schema_wrapper.update!(default_board: board) unless schema_wrapper.default_board == board
+      end
+    end
 
     def ensure_home_document!(definition)
       home_body = definition[:home]

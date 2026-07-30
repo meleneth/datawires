@@ -771,7 +771,7 @@ active procedure.
 - [x] Add a constrained proposal-collection section that derives open/decided
       state from durable Decision lineage without mutating Proposal documents
       or interpreting policy-specific dispositions in Board Ruby code.
-- [ ] Seed a default Robert's Rules Board titled `Datawires Board` (or a
+- [x] Seed a default Robert's Rules Board titled `Datawires Board` (or a
       domain-specific title derived from it) with active/upcoming Meeting, open
       Proposals, last 10 adopted Agreements, and last 5 completed Meetings.
 - [ ] Add capability-aware actions to create a Meeting and submit a Proposal;

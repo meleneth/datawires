@@ -136,7 +136,7 @@ RSpec.describe Clusters::SeedDomain do
     expect(domain.documents.where(key: %w[agreement motion proceeding-event meeting-state])).to be_empty
     expect(domain.head_domain_commit).to be_present
     expect(domain.head_domain_commit.message).to eq("Seed Robert's Rules of Order cluster")
-    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(10)
+    expect(domain.head_domain_commit.domain_commit_documents.count).to eq(11)
 
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
     expect(home.schema_document.key).to eq("domain-home-page")
@@ -163,6 +163,16 @@ RSpec.describe Clusters::SeedDomain do
       expect(wrapper.edit_affordances).to be_empty
       expect(wrapper.view_affordances).to be_empty
     end
+
+    body_wrapper = domain.documents.find_by!(key: Bodies::Schema::KEY).schema_wrapper
+    board = body_wrapper.default_board
+    expect(board).to have_attributes(title: "Datawires Board", public: true)
+    expect(board.board_document).to have_attributes(
+      key: "body-board",
+      schema_document: domain.documents.find_by!(key: Boards::Schema::KEY)
+    )
+    expect(board.body).to eq(Boards::Definitions.body_workspace)
+    expect(body_wrapper.boards).to contain_exactly(board)
   end
 
   it "seeds private MUD schemas with authoring and play affordances" do

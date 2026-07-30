@@ -67,6 +67,16 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include(Proposals::Schema::KEY)
     expect(response.body).to include(Agreements::Schema::KEY)
     expect(response.body).not_to include("proceeding-event")
+
+    body_wrapper = domain.documents.find_by!(key: Bodies::Schema::KEY).schema_wrapper
+    get schema_path(body_wrapper)
+    expect(response).to redirect_to(board_path(body_wrapper.default_board))
+    follow_redirect!
+    expect(response.body).to include("Datawires Board")
+    expect(response.body).to include("Active or upcoming meeting")
+    expect(response.body).to include("Open proposals")
+    expect(response.body).to include("Recent agreements")
+    expect(response.body).to include("Completed meetings")
   end
 
   it "creates a domain pre-seeded with the private MUD cluster" do

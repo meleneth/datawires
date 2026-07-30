@@ -131,6 +131,14 @@ module Clusters
           registered_schema(Agreements::Schema),
           registered_schema(ProceduralPolicies::Schema),
           registered_schema(Boards::Schema)
+        ],
+        boards: [
+          {
+            schema_key: Bodies::Schema::KEY,
+            document_key: "body-board",
+            title: "Datawires Board",
+            body: Boards::Definitions.body_workspace
+          }
         ]
       }
     end
