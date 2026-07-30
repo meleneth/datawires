@@ -8,7 +8,15 @@ RSpec.describe EventStreams::Append do
     command = build_command(stream:, expected_revision: 0)
     events = [
       Events::Data.new(type: "MeetingOpened", version: 1, payload: { "body_id" => SecureRandom.uuid }),
-      Events::Data.new(type: "QuorumEstablished", version: 2, provenance: { "rule" => "default-quorum-v1" })
+      Events::Data.new(
+        type: "QuorumEstablished",
+        version: 2,
+        provenance: {
+          "identity" => { "issuer" => "spoofed" },
+          "command" => { "payload" => { "spoofed" => true } },
+          "rule" => "default-quorum-v1"
+        }
+      )
     ]
 
     result = described_class.call(stream:, command:, events:)
@@ -17,6 +25,11 @@ RSpec.describe EventStreams::Append do
     expect(result.records.map(&:sequence)).to eq([ 1, 2 ])
     expect(result.records.map(&:event_version)).to eq([ 1, 2 ])
     expect(result.records.last.provenance).to include(
+      "command" => include(
+        "payload" => {},
+        "expected_revision" => 0,
+        "timestamp" => command.timestamp.iso8601
+      ),
       "identity" => include("issuer" => "spec"),
       "rule" => "default-quorum-v1"
     )
@@ -33,6 +46,19 @@ RSpec.describe EventStreams::Append do
 
     expect(retried).to be_idempotent
     expect(retried.records).to eq(first.records)
+    expect(stream.reload.revision).to eq(1)
+  end
+
+  it "rejects reuse of a command id with different command content" do
+    stream = create(:event_stream)
+    command = build_command(stream:, expected_revision: 0)
+    event = Events::Data.new(type: "MeetingOpened", version: 1)
+    described_class.call(stream:, command:, events: [ event ])
+    changed_command = command.with(payload: { "changed" => true })
+
+    expect {
+      described_class.call(stream: stream.reload, command: changed_command, events: [ event ])
+    }.to raise_error(EventStreams::IdempotencyConflict, /already used with different content/)
     expect(stream.reload.revision).to eq(1)
   end
 

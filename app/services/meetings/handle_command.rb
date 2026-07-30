@@ -20,6 +20,9 @@ module Meetings
     def call
       definition = meeting.procedural_policy.projection.command(command.type)
       raise Rejected, "Unsupported meeting command." unless definition
+      unless command.version == definition.command_version
+        raise Rejected, "Unsupported #{command.type.humanize(capitalize: false)} command version #{command.version}."
+      end
 
       decision = authorizer.call(
         actor: command.actor,

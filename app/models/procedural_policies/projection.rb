@@ -4,6 +4,7 @@ module ProceduralPolicies
   class Projection
     Command = Data.define(
       :name,
+      :command_version,
       :capability,
       :allowed_statuses,
       :event_type,
@@ -28,6 +29,7 @@ module ProceduralPolicies
           name,
           Command.new(
             name:,
+            command_version: definition.fetch("command_version", 1),
             capability: definition.fetch("capability").to_sym,
             allowed_statuses: definition.fetch("allowed_statuses").freeze,
             event_type: definition.fetch("event_type"),

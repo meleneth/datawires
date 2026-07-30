@@ -409,7 +409,7 @@ and immutable procedural history before adding Robert's Rules policy.
 
 **Tasks and introduced objects/schemas:**
 
-- [ ] Add a typed command envelope with command id, type/version, Meeting id,
+- [x] Add a typed command envelope with command id, type/version, Meeting id,
       expected stream revision, actor, timestamp, payload, correlation id, and
       causation id.
 - [ ] Add append-only, monotonically sequenced `MeetingEvent` records with
@@ -419,7 +419,7 @@ and immutable procedural history before adding Robert's Rules policy.
 - [ ] Add a command bus/handler boundary that authenticates, authorizes,
       loads/rebuilds state, evaluates procedure, appends events atomically, and
       returns typed success/conflict/rejection results.
-- [ ] Add schema-backed, versioned Datawires policy documents and a
+- [x] Add schema-backed, versioned Datawires policy documents and a
       fail-closed evaluator for registered conditions and procedural effects.
       Policies compose typed values; they do not name or execute Ruby classes.
 - [ ] Define the initial domain-neutral primitive registry for state
@@ -469,18 +469,18 @@ against a known stream revision.
 
 **Tasks and introduced objects/schemas:**
 
-- [ ] Add a schema-backed `Meeting` document for identity, Body, schedule,
+- [x] Add a schema-backed `Meeting` document for identity, Body, schedule,
       agenda/proposal references, and lifecycle metadata; keep derived
       procedural state out of mutable document fields.
-- [ ] Implement initial commands/events for schedule meeting, open meeting,
+- [x] Implement initial commands/events for schedule meeting, open meeting,
       establish attendance, establish quorum, and adjourn meeting.
 - [ ] Build a `MeetingProjection` containing stream revision, lifecycle,
       attendance/electorate inputs, quorum finding, roles in force, floor,
       pending-question stack, debate, and vote state.
-- [ ] Atomically compare the command's expected revision while appending;
+- [x] Atomically compare the command's expected revision while appending;
       return a conflict with the new revision/projection rather than silently
       rebasing simultaneous commands.
-- [ ] Add deterministic full replay and optional discardable checkpoints;
+- [x] Add deterministic full replay and optional discardable checkpoints;
       checkpoints must be invalidatable and never be the sole source of truth.
 
 **Invariants:**
@@ -552,7 +552,7 @@ path.
 
 **Tasks and introduced objects/schemas:**
 
-- [ ] Add a dedicated Proposal schema and submission lifecycle outside Meeting
+- [x] Add a dedicated Proposal schema and submission lifecycle outside Meeting
       procedure; record author, Body, submitted immutable Revision, title,
       structured content, and scheduling lineage.
 - [ ] Migrate/compatibly interpret existing prototype Motion documents so new

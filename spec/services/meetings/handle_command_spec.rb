@@ -56,6 +56,26 @@ RSpec.describe Meetings::HandleCommand do
     }.to raise_error(EventStreams::Conflict)
   end
 
+  it "fails closed for an unsupported command version" do
+    meeting = create(:meeting)
+    actor = create(:user)
+    create(:role_assignment, scope: meeting.body, actor:, role: "chair", effective_from: 1.day.ago)
+    command = Commands::Envelope.new(
+      id: SecureRandom.uuid,
+      type: "open_meeting",
+      version: 2,
+      stream_id: meeting.event_stream.id,
+      expected_revision: 0,
+      actor: actor_context(actor),
+      timestamp: Time.current
+    )
+
+    expect {
+      described_class.call(meeting:, command:)
+    }.to raise_error(described_class::Rejected, /unsupported open meeting command version 2/i)
+    expect(meeting.event_stream.event_records).to be_empty
+  end
+
   it "honors an effective Meeting-scoped temporary chair assignment" do
     meeting = create(:meeting)
     actor = create(:user)

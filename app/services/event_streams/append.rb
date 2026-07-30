@@ -11,6 +11,12 @@ module EventStreams
     end
   end
 
+  class IdempotencyConflict < StandardError
+    def initialize(command_id:)
+      super("command #{command_id} was already used with different content")
+    end
+  end
+
   class Append
     Result = Data.define(:records, :revision, :idempotent) do
       def idempotent?
@@ -38,7 +44,10 @@ module EventStreams
       EventStream.transaction do
         stream.lock!
         existing = stream.event_records.where(command_id: command.id).order(:sequence).to_a
-        return Result.new(records: existing, revision: stream.revision, idempotent: true) if existing.any?
+        if existing.any?
+          verify_idempotent_retry!(existing.first)
+          return Result.new(records: existing, revision: stream.revision, idempotent: true)
+        end
 
         if stream.revision != command.expected_revision
           raise Conflict.new(expected_revision: command.expected_revision, actual_revision: stream.revision)
@@ -67,17 +76,41 @@ module EventStreams
         causation_id: command.causation_id,
         actor: command.actor.user,
         occurred_at: command.timestamp,
-        provenance: base_provenance.deep_merge(event.provenance)
+        provenance: event.provenance.merge(base_provenance)
       )
     end
 
     def base_provenance
       {
+        "command" => {
+          "payload" => command.payload,
+          "expected_revision" => command.expected_revision,
+          "timestamp" => command.timestamp.iso8601
+        },
         "identity" => {
           "issuer" => command.actor.claims.issuer,
           "subject" => command.actor.claims.subject
         }
       }
+    end
+
+    def verify_idempotent_retry!(record)
+      persisted_command = record.provenance["command"]
+      same = record.command_type == command.type &&
+        record.command_version == command.version &&
+        record.actor_id == command.actor.user.id &&
+        record.correlation_id == command.correlation_id &&
+        record.causation_id == command.causation_id &&
+        same_recorded_envelope?(persisted_command)
+      raise IdempotencyConflict.new(command_id: command.id) unless same
+    end
+
+    def same_recorded_envelope?(persisted)
+      return true unless persisted.is_a?(Hash)
+
+      persisted["payload"] == command.payload &&
+        persisted["expected_revision"] == command.expected_revision &&
+        persisted["timestamp"] == command.timestamp.iso8601
     end
   end
 end

@@ -63,6 +63,8 @@ module ProceduralPolicies
       end
 
       errors << "#{prefix}.capability must be registered" unless CAPABILITIES.include?(definition["capability"])
+      command_version = definition.fetch("command_version", 1)
+      errors << "#{prefix}.command_version must be positive" unless command_version.is_a?(Integer) && command_version.positive?
       statuses = definition["allowed_statuses"]
       errors << "#{prefix}.allowed_statuses must contain known statuses" unless statuses.is_a?(Array) && statuses.present? && (statuses - STATUSES).empty?
       errors << "#{prefix}.event_type must be a non-empty string" unless definition["event_type"].is_a?(String) && definition["event_type"].present?
