@@ -36,7 +36,7 @@ module ProceduralPolicies
       timestamp_iso8601
     ].freeze
     PROJECTION_FIELDS = Meetings::Projection.members.map(&:to_s).freeze
-    RESOURCE_TYPES = %w[proposal].freeze
+    RESOURCE_TYPES = Resources.types.freeze
 
     attr_reader :errors
 
@@ -74,11 +74,13 @@ module ProceduralPolicies
 
     def validate_command(name, definition)
       prefix = "commands.#{name}"
+      @current_resources = {}
       errors << "#{prefix} name must be non-empty" if name.blank?
       unless definition.is_a?(Hash)
         errors << "#{prefix} must be an object"
         return
       end
+      @current_resources = definition.fetch("resources", {})
 
       capabilities = body.fetch("role_capabilities", {})
       errors << "#{prefix}.capability must be registered" unless capabilities.key?(definition["capability"])
@@ -93,6 +95,8 @@ module ProceduralPolicies
       validate_operations(definition["conditions"], CONDITION_OPERATIONS, prefix, "conditions")
       validate_operations(definition["effects"], EFFECT_OPERATIONS, prefix, "effects")
       validate_bindings(definition["event_payload"], "#{prefix}.event_payload")
+    ensure
+      @current_resources = {}
     end
 
     def validate_role_capabilities
@@ -170,9 +174,20 @@ module ProceduralPolicies
 
       field_optional = operation["op"] == "resource_equals"
       errors << "#{prefix}.field is required" if !field_optional && operation["field"].blank?
+      validate_resource_reference(operation, prefix) if operation["op"] == "resource_equals"
       if !%w[blank stack_empty stack_present].include?(operation["op"]) && !operation.key?("value")
         errors << "#{prefix}.value is required"
       end
+    end
+
+    def validate_resource_reference(reference, prefix)
+      descriptor = @current_resources[reference["resource"]]
+      return errors << "#{prefix}.resource must be declared" unless descriptor
+
+      attributes = Resources.attributes_for(descriptor["type"])
+      errors << "#{prefix}.attribute must be registered" unless attributes.include?(reference["attribute"])
+    rescue KeyError
+      errors << "#{prefix}.attribute must be registered"
     end
 
     def validate_effect_condition(condition, prefix)
@@ -193,10 +208,22 @@ module ProceduralPolicies
       when Hash
         if value.key?("source")
           errors << "#{prefix}.source must be registered" unless BINDING_SOURCES.include?(value["source"])
+          validate_resource_binding(value, prefix) if value["source"] == "resource"
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
         end
       end
+    end
+
+    def validate_resource_binding(binding, prefix)
+      resource_name = binding["resource"]
+      descriptor = @current_resources[resource_name]
+      return errors << "#{prefix}.resource must be declared" unless descriptor
+
+      attributes = Resources.attributes_for(descriptor["type"])
+      errors << "#{prefix}.attribute must be registered" unless attributes.include?(binding["attribute"])
+    rescue KeyError
+      errors << "#{prefix}.attribute must be registered"
     end
   end
 end

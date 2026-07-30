@@ -37,13 +37,12 @@ module ProceduralPolicies
     end
 
     def resolve_resource(descriptor)
-      case descriptor["type"]
-      when "proposal"
-        Proposal.find_by(id: resolve_value(descriptor.fetch("id"))) ||
-          reject!("Proposal was not found.")
-      else
-        reject!("Policy resource type is not registered.")
-      end
+      Resources.resolve(
+        type: descriptor.fetch("type"),
+        id: resolve_value(descriptor.fetch("id"))
+      )
+    rescue Resources::NotFound, Resources::UnknownType => e
+      reject!(e.message)
     end
 
     def evaluate_condition(condition)
@@ -70,7 +69,7 @@ module ProceduralPolicies
     end
 
     def resource_attribute(condition)
-      resources.fetch(condition.fetch("resource")).public_send(condition.fetch("attribute"))
+      resources.fetch(condition.fetch("resource")).fetch(condition.fetch("attribute"))
     end
 
     def stack_top_value(stack, field)
@@ -89,7 +88,7 @@ module ProceduralPolicies
       when "meeting_body_id" then meeting.body_id
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
       when "payload_or_literal" then command.payload[value["key"]].presence || value["value"]
-      when "resource" then resources.fetch(value.fetch("resource")).public_send(value.fetch("attribute"))
+      when "resource" then resources.fetch(value.fetch("resource")).fetch(value.fetch("attribute"))
       when "timestamp" then command.timestamp
       when "timestamp_iso8601" then command.timestamp.iso8601
       else reject!("Policy binding source is not registered.")

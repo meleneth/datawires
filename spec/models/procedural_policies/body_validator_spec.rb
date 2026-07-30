@@ -50,4 +50,19 @@ RSpec.describe ProceduralPolicies::BodyValidator do
       "role_capabilities.open_meeting must contain unique non-empty roles"
     )
   end
+
+  it "rejects undeclared resource methods in conditions and bindings" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    command = body["commands"]["schedule_proposal"]
+    command["conditions"][0]["attribute"] = "destroy!"
+    command["event_payload"]["proposal_id"]["attribute"] = "delete"
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include(
+      "commands.schedule_proposal.conditions[0].attribute must be registered",
+      "commands.schedule_proposal.event_payload.proposal_id.attribute must be registered"
+    )
+  end
 end
