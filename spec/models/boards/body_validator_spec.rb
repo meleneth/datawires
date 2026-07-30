@@ -125,9 +125,29 @@ RSpec.describe Boards::BodyValidator do
 
     expect(validator).not_to be_valid
     expect(validator.errors).to include(
-      "sections[1].kind must be one of: document_collection, meeting_collection, proposal_collection, summary"
+      "sections[1].kind must be one of: document_collection, meeting_collection, proposal_collection, " \
+      "membership_collection, role_assignment_collection, summary"
     )
     expect(validator.errors).to include("sections ids must be unique: proposals")
+  end
+
+  it "accepts constrained relationship collections" do
+    body["sections"] = [
+      {
+        "id" => "members",
+        "kind" => "membership_collection",
+        "title" => "Members",
+        "config" => { "limit" => 50, "empty_state" => "No members." }
+      },
+      {
+        "id" => "roles",
+        "kind" => "role_assignment_collection",
+        "title" => "Roles",
+        "config" => { "limit" => 50, "empty_state" => "No roles." }
+      }
+    ]
+
+    expect(validator).to be_valid
   end
 
   it "rejects unsafe collection query shapes" do

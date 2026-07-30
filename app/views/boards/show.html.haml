@@ -9,6 +9,15 @@
       data: { turbo_frame: "main_content", turbo_action: "advance" },
       class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
+  - if @sibling_boards.any?
+    .mb-4.flex.flex-wrap.items-center.gap-2
+      %span.text-sm.text-muted-foreground Workspaces:
+      - @sibling_boards.each do |board|
+        = link_to board.title,
+          board_path(board),
+          data: { turbo_frame: "main_content", turbo_action: "advance" },
+          class: "font-head inline-flex h-8 items-center rounded border-2 border-black bg-secondary px-3 text-sm shadow-sm"
+
   - if @action_resolutions.reject(&:hidden?).any?
     .mb-6.flex.flex-wrap.gap-2
       - @action_resolutions.reject(&:hidden?).each do |resolution|
@@ -40,7 +49,14 @@
             - if result&.error
               %p.mt-2.text-sm.text-destructive= result.error
             - elsif result
-              - if result.documents.any?
+              - if result.respond_to?(:rows) && result.rows.any?
+                %ul.mt-3.space-y-2
+                  - result.rows.each do |row|
+                    %li.rounded.border-2.border-black.bg-background.px-3.py-2
+                      .font-head.font-medium= row.label
+                      - row.details.each do |detail|
+                        .text-xs.text-muted-foreground= detail
+              - elsif result.respond_to?(:documents) && result.documents.any?
                 %ul.mt-3.space-y-2
                   - result.documents.each do |document|
                     %li.rounded.border-2.border-black.bg-background.px-3.py-2
@@ -51,7 +67,7 @@
                         .font-head.font-medium= document.title.presence || document.key
                         - if document.key.present?
                           .text-xs.text-muted-foreground= document.key
-              - else
+              - elsif result.respond_to?(:rows) || result.respond_to?(:documents)
                 = render TypographyComponent.new(as: :muted, text: result.empty_state, html_options: { class: "mt-2" })
   - else
     = render CardComponent.new do

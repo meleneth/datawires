@@ -8,6 +8,9 @@ module Boards
     WORLDBUILDER_WORKSPACE_PATH = Rails.root.join(
       "config/boards/worldbuilder_workspace_v1.json"
     ).freeze
+    BODY_ADMINISTRATION_PATH = Rails.root.join(
+      "config/boards/datawires_body_administration_v1.json"
+    ).freeze
 
     module_function
 
@@ -20,6 +23,12 @@ module Boards
     def worldbuilder_workspace
       @worldbuilder_workspace ||= UuidTools.deep_freeze(
         JSON.parse(WORLDBUILDER_WORKSPACE_PATH.read)
+      )
+    end
+
+    def body_administration
+      @body_administration ||= UuidTools.deep_freeze(
+        JSON.parse(BODY_ADMINISTRATION_PATH.read)
       )
     end
   end

@@ -176,6 +176,22 @@ RSpec.describe "Boards", type: :request do
     expect(body.memberships.find_by(actor: User.order(:created_at).last)).to be_present
   end
 
+  it "links sibling schema-backed boards as workspaces" do
+    board = create(:board, title: "Operations")
+    administration = CreateBoard.call(
+      schema_wrapper: board.schema_wrapper,
+      title: "Body Administration",
+      actor: create(:user)
+    ).board
+
+    get board_path(board)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Workspaces:")
+    expect(response.body).to include("Body Administration")
+    expect(response.body).to include(board_path(administration))
+  end
+
   def configure_actions(board, actions)
     body = board.body.deep_dup
     body["actions"] = actions

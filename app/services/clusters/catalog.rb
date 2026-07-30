@@ -96,6 +96,7 @@ module Clusters
             schema_key: "domain-home-page",
             document_key: "worldbuilder-board",
             title: "Worldbuilder Board",
+            default: true,
             body: Boards::Definitions.worldbuilder_workspace
           }
         ]
@@ -147,7 +148,14 @@ module Clusters
             schema_key: Bodies::Schema::KEY,
             document_key: "body-board",
             title: "Datawires Board",
+            default: true,
             body: Boards::Definitions.body_workspace
+          },
+          {
+            schema_key: Bodies::Schema::KEY,
+            document_key: "body-administration-board",
+            title: "Body Administration",
+            body: Boards::Definitions.body_administration
           }
         ]
       }

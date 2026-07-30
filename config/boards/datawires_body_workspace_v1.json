@@ -95,42 +95,6 @@
         "command": "submit_proposal",
         "when_denied": "disabled"
       }
-    },
-    {
-      "id": "add-member",
-      "kind": "invoke_command",
-      "title": "Add member",
-      "config": {
-        "command": "add_membership",
-        "when_denied": "disabled"
-      }
-    },
-    {
-      "id": "assign-role",
-      "kind": "invoke_command",
-      "title": "Assign role",
-      "config": {
-        "command": "assign_role",
-        "when_denied": "disabled"
-      }
-    },
-    {
-      "id": "end-membership",
-      "kind": "invoke_command",
-      "title": "End membership",
-      "config": {
-        "command": "end_membership",
-        "when_denied": "disabled"
-      }
-    },
-    {
-      "id": "end-role-assignment",
-      "kind": "invoke_command",
-      "title": "End role assignment",
-      "config": {
-        "command": "end_role_assignment",
-        "when_denied": "disabled"
-      }
     }
   ]
 }

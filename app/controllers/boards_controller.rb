@@ -7,6 +7,7 @@ class BoardsController < ApplicationController
     @domain = @schema_wrapper.domain
     require_visible_domain!(@domain)
     @projection = @board.projection
+    @sibling_boards = @schema_wrapper.boards.where.not(id: @board.id).order(:title)
     @section_results = @projection.sections.to_h do |section|
       result = case section.kind
       when "document_collection"
@@ -15,6 +16,10 @@ class BoardsController < ApplicationController
         Boards::MeetingCollection.call(board: @board, section:)
       when "proposal_collection"
         Boards::ProposalCollection.call(board: @board, section:)
+      when "membership_collection"
+        Boards::MembershipCollection.call(board: @board, section:, actor: current_actor)
+      when "role_assignment_collection"
+        Boards::RoleAssignmentCollection.call(board: @board, section:, actor: current_actor)
       end
       [ section.id, result ]
     end

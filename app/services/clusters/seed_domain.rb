@@ -72,7 +72,9 @@ module Clusters
         board.board_document = board_document
         board.public = true
         board.save!
-        schema_wrapper.update!(default_board: board) unless schema_wrapper.default_board == board
+        if board_definition.fetch(:default, false) && schema_wrapper.default_board != board
+          schema_wrapper.update!(default_board: board)
+        end
       end
     end
 

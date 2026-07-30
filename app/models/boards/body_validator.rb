@@ -3,7 +3,14 @@
 module Boards
   class BodyValidator
     VERSION = 1
-    SECTION_KINDS = %w[document_collection meeting_collection proposal_collection summary].freeze
+    SECTION_KINDS = %w[
+      document_collection
+      meeting_collection
+      proposal_collection
+      membership_collection
+      role_assignment_collection
+      summary
+    ].freeze
     ACTION_KINDS = %w[open_edit_affordance invoke_command].freeze
     FILTER_OPERATORS = %w[eq].freeze
     ORDER_FIELDS = %w[title key created_at updated_at body].freeze
@@ -62,6 +69,8 @@ module Boards
         validate_document_collection(entry, index) if key == "sections" && entry["kind"] == "document_collection"
         validate_meeting_collection(entry, index) if key == "sections" && entry["kind"] == "meeting_collection"
         validate_proposal_collection(entry, index) if key == "sections" && entry["kind"] == "proposal_collection"
+        validate_relationship_collection(entry, index) if key == "sections" &&
+          %w[membership_collection role_assignment_collection].include?(entry["kind"])
         validate_action(entry, index) if key == "actions" && ACTION_KINDS.include?(entry["kind"])
       end
 
@@ -140,6 +149,18 @@ module Boards
       validate_order(config["order"], prefix, fields: %w[submitted_at created_at updated_at])
       validate_limit(config["limit"], prefix)
       validate_navigation(config, prefix)
+      errors << "#{prefix}.empty_state must be a string" unless config["empty_state"].nil? || config["empty_state"].is_a?(String)
+    end
+
+    def validate_relationship_collection(entry, index)
+      prefix = "sections[#{index}].config"
+      config = entry["config"]
+      unless config.is_a?(Hash)
+        errors << "#{prefix} must be an object"
+        return
+      end
+
+      validate_limit(config["limit"], prefix)
       errors << "#{prefix}.empty_state must be a string" unless config["empty_state"].nil? || config["empty_state"].is_a?(String)
     end
 
