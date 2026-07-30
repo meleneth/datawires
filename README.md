@@ -110,6 +110,13 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
 - `SchemaWrapper` is derived application metadata around a `Document` whose committed body is a supported JSON Schema.
 - `EditAffordance` and `ViewAffordance` are persisted bespoke affordance records attached to a `SchemaWrapper`.
 - `EditAffordances::Generated` is the default runtime edit affordance for schema-backed documents.
+- `Body` identifies a schema-backed deliberative body document.
+- `Membership` is an effective-dated relationship between an actor and a Body.
+- `RoleAssignment` is an effective-dated, provenance-bearing actor relationship
+  scoped to a domain object. The initial supported scope is `Body`; Meeting
+  scope will be added with the Meeting model.
+- Body capabilities are evaluated from effective Datawires relationships at an
+  explicit instant. Identity-provider groups are not procedural roles.
 
 Supported JSON Schema currently means:
 

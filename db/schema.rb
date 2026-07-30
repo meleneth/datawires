@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -25,6 +25,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
     t.index ["board_document_id"], name: "index_boards_on_board_document_id", unique: true
     t.index ["schema_wrapper_id", "title"], name: "index_boards_on_schema_wrapper_id_and_title", unique: true
     t.index ["schema_wrapper_id"], name: "index_boards_on_schema_wrapper_id"
+  end
+
+  create_table "bodies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "body_document_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["body_document_id"], name: "index_bodies_on_body_document_id", unique: true
   end
 
   create_table "document_index_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -144,6 +151,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
     t.index ["document_id"], name: "index_external_documents_on_document_id", unique: true
   end
 
+  create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "actor_id", null: false
+    t.uuid "body_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "effective_from", null: false
+    t.datetime "effective_until"
+    t.jsonb "provenance", default: {}, null: false
+    t.uuid "recorded_by_id"
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_memberships_on_actor_id"
+    t.index ["body_id", "actor_id", "effective_from"], name: "index_memberships_on_body_actor_effective_from"
+    t.index ["body_id"], name: "index_memberships_on_body_id"
+    t.index ["recorded_by_id"], name: "index_memberships_on_recorded_by_id"
+  end
+
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "content"
     t.datetime "created_at", null: false
@@ -164,6 +187,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
     t.index ["document_id", "created_at"], name: "index_revisions_on_document_id_and_created_at"
     t.index ["document_id"], name: "index_revisions_on_document_id"
     t.index ["parent_revision_id"], name: "index_revisions_on_parent_revision_id"
+  end
+
+  create_table "role_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "effective_from", null: false
+    t.datetime "effective_until"
+    t.jsonb "provenance", default: {}, null: false
+    t.uuid "recorded_by_id"
+    t.string "role", null: false
+    t.uuid "scope_id", null: false
+    t.string "scope_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_role_assignments_on_actor_id"
+    t.index ["recorded_by_id"], name: "index_role_assignments_on_recorded_by_id"
+    t.index ["scope_type", "scope_id", "actor_id", "role", "effective_from"], name: "index_role_assignments_on_scope_actor_role_from"
   end
 
   create_table "rooms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -209,6 +248,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
 
   add_foreign_key "boards", "documents", column: "board_document_id"
   add_foreign_key "boards", "schema_wrappers"
+  add_foreign_key "bodies", "documents", column: "body_document_id"
   add_foreign_key "document_index_entries", "documents"
   add_foreign_key "document_index_entries", "documents", column: "schema_document_id"
   add_foreign_key "document_index_entries", "revisions"
@@ -229,10 +269,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000002) do
   add_foreign_key "edit_affordances", "documents", column: "edit_document_id"
   add_foreign_key "edit_affordances", "schema_wrappers"
   add_foreign_key "external_documents", "documents"
+  add_foreign_key "memberships", "bodies"
+  add_foreign_key "memberships", "users", column: "actor_id"
+  add_foreign_key "memberships", "users", column: "recorded_by_id"
   add_foreign_key "messages", "rooms"
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"
+  add_foreign_key "role_assignments", "users", column: "actor_id"
+  add_foreign_key "role_assignments", "users", column: "recorded_by_id"
   add_foreign_key "schema_wrappers", "boards", column: "default_board_id", on_delete: :nullify
   add_foreign_key "schema_wrappers", "documents"
   add_foreign_key "view_affordances", "documents", column: "view_document_id"

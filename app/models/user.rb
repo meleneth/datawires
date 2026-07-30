@@ -5,6 +5,9 @@ class User < ApplicationRecord
            inverse_of: :owner,
            dependent: :nullify
 
+  has_many :memberships, foreign_key: :actor_id, dependent: :restrict_with_exception
+  has_many :role_assignments, foreign_key: :actor_id, dependent: :restrict_with_exception
+
   validates :external_id, uniqueness: true, allow_blank: true
   validates :identity_subject,
             uniqueness: { scope: :identity_issuer },

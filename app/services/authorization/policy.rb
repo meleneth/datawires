@@ -4,6 +4,14 @@ module Authorization
   class Policy
     def self.call(actor:, action:, resource:)
       return Decision.new(allowed: false, reason: "An authenticated actor is required.") unless actor.is_a?(ActorContext)
+      if resource[:body].is_a?(Body)
+        return BodyPolicy.call(
+          actor:,
+          action:,
+          body: resource.fetch(:body),
+          at: resource.fetch(:at, Time.current)
+        )
+      end
 
       allowed = actor.user.can?(action, **resource)
       Decision.new(

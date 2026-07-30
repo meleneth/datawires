@@ -52,6 +52,12 @@ class Document < ApplicationRecord
           inverse_of: :board_document,
           dependent: :restrict_with_exception
 
+  has_one :parliamentary_body,
+          class_name: "Body",
+          foreign_key: :body_document_id,
+          inverse_of: :body_document,
+          dependent: :restrict_with_exception
+
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
   has_one :schema_wrapper,
