@@ -12,7 +12,7 @@ RSpec.describe RoleAssignment, type: :model do
     expect(described_class.exists?(assignment.id)).to be(true)
   end
 
-  it "rejects unknown roles and scope types" do
+  it "rejects roles absent from the applicable policy and unknown scope types" do
     assignment = build(:role_assignment, role: "keycloak_admin", scope_type: "Domain")
 
     expect(assignment).not_to be_valid

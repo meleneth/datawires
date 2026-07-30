@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class RoleAssignment < ApplicationRecord
-  ROLES = %w[member chair secretary temporary_chair parliamentarian].freeze
   SCOPE_TYPES = %w[Body Meeting].freeze
 
   belongs_to :actor, class_name: "User"
@@ -13,10 +12,11 @@ class RoleAssignment < ApplicationRecord
       .where("effective_until IS NULL OR effective_until > ?", time)
   }
 
-  validates :role, inclusion: { in: ROLES }
+  validates :role, presence: true
   validates :scope_type, inclusion: { in: SCOPE_TYPES }
   validates :effective_from, presence: true
   validate :effective_until_must_follow_start
+  validate :role_must_be_defined_by_applicable_policy
 
   private
 
@@ -24,5 +24,21 @@ class RoleAssignment < ApplicationRecord
     return if effective_until.blank? || effective_from.blank? || effective_until > effective_from
 
     errors.add(:effective_until, "must be after effective from")
+  end
+
+  def role_must_be_defined_by_applicable_policy
+    return if role.blank? || scope.blank?
+    return if applicable_roles.include?(role)
+
+    errors.add(:role, "is not defined by the applicable procedural policy")
+  end
+
+  def applicable_roles
+    if scope.is_a?(Meeting)
+      scope.procedural_policy.projection.roles
+    else
+      policies = scope.procedural_policies.filter_map { |policy| policy.projection.roles }
+      policies.flatten.uniq.presence || Authorization::BodyPolicy.default_capability_policy.roles
+    end
   end
 end

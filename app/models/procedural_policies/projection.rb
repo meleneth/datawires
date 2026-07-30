@@ -62,5 +62,9 @@ module ProceduralPolicies
     def roles_for(capability)
       @role_capabilities[capability.to_s]
     end
+
+    def roles
+      @role_capabilities.values.flatten.uniq.sort
+    end
   end
 end

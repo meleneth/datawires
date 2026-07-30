@@ -6,7 +6,11 @@ module Boards
       COMMANDS = {
         "create_body" => CreateBody,
         "create_meeting" => CreateMeeting,
-        "submit_proposal" => SubmitProposal
+        "submit_proposal" => SubmitProposal,
+        "add_membership" => AddMembership,
+        "assign_role" => AssignRole,
+        "end_membership" => EndMembership,
+        "end_role_assignment" => EndRoleAssignment
       }.freeze
 
       def self.fetch(name, board:, actor:)

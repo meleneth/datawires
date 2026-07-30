@@ -52,6 +52,44 @@ module Boards
           options: body_options(action)
         )
       end
+
+      def administration_decision
+        available = body_options(:administer_board).any?
+        Authorization::Decision.new(
+          allowed: available,
+          reason: available ? nil : "Create a Body, or obtain its chair or secretary role, first."
+        )
+      end
+
+      def actor_from(identifier)
+        value = identifier.to_s.strip
+        matches = User.where(email: value)
+          .or(User.where(external_id: value))
+          .or(User.where(identity_subject: value))
+          .distinct
+        raise ArgumentError, "No Datawires actor matches that identity." if matches.none?
+        raise ArgumentError, "That identity matches more than one Datawires actor." if matches.many?
+
+        matches.first
+      end
+
+      def identity_field
+        Field.new(
+          name: "actor_identity",
+          label: "Actor email or identity subject",
+          type: "text",
+          required: true,
+          options: nil
+        )
+      end
+
+      def authorize_administration!(body)
+        authorize_body!(body, :administer_board)
+      end
+
+      def effective_time
+        Time.current
+      end
     end
   end
 end
