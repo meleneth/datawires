@@ -235,6 +235,10 @@ notify_devastation normal "Waiting for rollout" "${project}: waiting for ${names
 echo "Waiting for rollout..."
 kubectl -n "$namespace" rollout status "deployment/${deployment}" --timeout=300s
 
+notify_devastation normal "Preparing database" "${project}: applying pending migrations."
+echo "Preparing database..."
+kubectl -n "$namespace" exec "deployment/${deployment}" -- bin/rails db:prepare
+
 trap - EXIT
 notify_devastation low "Build complete" "${project}: deployed ${image}."
 echo "Build complete: ${image}"
