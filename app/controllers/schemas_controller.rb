@@ -43,6 +43,10 @@ class SchemasController < ApplicationController
 
     @domain = @schema_wrapper.domain
     require_visible_domain!(@domain)
+    if params[:workshop].blank? && @schema_wrapper.default_board
+      return redirect_to board_path(@schema_wrapper.default_board)
+    end
+
     @documents = @schema_wrapper.conforming_documents
     @edit_affordances = @schema_wrapper.edit_affordances.order(:title)
     @edit_affordance_drafts = Draft
@@ -52,6 +56,7 @@ class SchemasController < ApplicationController
     @view_affordance_drafts = Draft
       .where(document_id: @view_affordances.map(&:view_document_id), created_by: current_user)
       .index_by(&:document_id)
+    @boards = @schema_wrapper.boards.order(:title)
   end
 
   private

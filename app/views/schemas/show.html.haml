@@ -31,6 +31,31 @@
 
   .mt-6
     .flex.items-center.justify-between.gap-3
+      = render TypographyComponent.new(as: :h2, text: "Boards")
+      = button_to "New board",
+        schema_boards_path(@schema_wrapper),
+        method: :post,
+        params: { title: "Datawires Board" },
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+        class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-secondary px-3 text-sm font-medium text-secondary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+
+    - if @boards.any?
+      %ul.mt-2.space-y-2
+        - @boards.each do |board|
+          %li.flex.items-center.justify-between.rounded.border-2.border-black.bg-card.px-3.py-2.text-card-foreground.shadow-sm
+            %div
+              .font-head.font-medium= board.title
+              - if board == @schema_wrapper.default_board
+                .text-xs.text-muted-foreground Default board
+            = link_to "Open board",
+              board_path(board),
+              data: { turbo_frame: "main_content", turbo_action: "advance" },
+              class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-primary px-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+    - else
+      = render TypographyComponent.new(as: :muted, text: "No boards exist for this schema yet.", html_options: { class: "mt-2" })
+
+  .mt-6
+    .flex.items-center.justify-between.gap-3
       = render TypographyComponent.new(as: :h2, text: "Edit affordances")
       = button_to "New edit affordance",
         schema_edit_affordances_path(@schema_wrapper),

@@ -15,7 +15,10 @@ Rails.application.routes.draw do
     resources :view_affordances, only: %i[create], module: :schemas do
       post :draft, on: :member
     end
+    resources :boards, only: %i[create], module: :schemas
   end
+
+  resources :boards, only: %i[show]
 
   resources :documents, only: %i[show] do
     resource :draft, only: %i[create], module: :documents

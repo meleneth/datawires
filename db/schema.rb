@@ -10,10 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "boards", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "board_document_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "public", default: false, null: false
+    t.uuid "schema_wrapper_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["board_document_id"], name: "index_boards_on_board_document_id", unique: true
+    t.index ["schema_wrapper_id", "title"], name: "index_boards_on_schema_wrapper_id_and_title", unique: true
+    t.index ["schema_wrapper_id"], name: "index_boards_on_schema_wrapper_id"
+  end
 
   create_table "document_index_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -162,9 +174,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
 
   create_table "schema_wrappers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.uuid "default_board_id"
     t.uuid "document_id", null: false
     t.boolean "public", default: false, null: false
     t.datetime "updated_at", null: false
+    t.index ["default_board_id"], name: "index_schema_wrappers_on_default_board_id"
     t.index ["document_id"], name: "index_schema_wrappers_on_document_id", unique: true
   end
 
@@ -190,6 +204,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
     t.index ["view_document_id"], name: "index_view_affordances_on_view_document_id"
   end
 
+  add_foreign_key "boards", "documents", column: "board_document_id"
+  add_foreign_key "boards", "schema_wrappers"
   add_foreign_key "document_index_entries", "documents"
   add_foreign_key "document_index_entries", "documents", column: "schema_document_id"
   add_foreign_key "document_index_entries", "revisions"
@@ -214,6 +230,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000001) do
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"
+  add_foreign_key "schema_wrappers", "boards", column: "default_board_id", on_delete: :nullify
   add_foreign_key "schema_wrappers", "documents"
   add_foreign_key "view_affordances", "documents", column: "view_document_id"
   add_foreign_key "view_affordances", "schema_wrappers"

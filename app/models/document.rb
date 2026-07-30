@@ -46,6 +46,12 @@ class Document < ApplicationRecord
           inverse_of: :edit_document,
           dependent: :restrict_with_exception
 
+  has_one :board,
+          class_name: "Board",
+          foreign_key: :board_document_id,
+          inverse_of: :board_document,
+          dependent: :restrict_with_exception
+
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
   has_one :schema_wrapper,
