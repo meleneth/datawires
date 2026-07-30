@@ -84,6 +84,8 @@ module ProceduralPolicies
 
       case value["source"]
       when "actor_id" then command.actor.user.id
+      when "command_id" then command.id
+      when "derived_id" then UuidTools.derive(command.id, value.fetch("name"))
       when "literal" then value["value"]
       when "meeting_body_id" then meeting.body_id
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload

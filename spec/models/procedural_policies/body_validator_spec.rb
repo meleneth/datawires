@@ -65,4 +65,18 @@ RSpec.describe ProceduralPolicies::BodyValidator do
       "commands.schedule_proposal.event_payload.proposal_id.attribute must be registered"
     )
   end
+
+  it "rejects a derived identity binding without a stable name" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    body["commands"]["open_meeting"]["event_payload"] = {
+      "id" => { "source" => "derived_id", "name" => "" }
+    }
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include(
+      "commands.open_meeting.event_payload.id.name must be non-empty"
+    )
+  end
 end

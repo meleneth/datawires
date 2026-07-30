@@ -4,6 +4,7 @@
   "role_capabilities": {
     "submit_proposal": ["member", "chair", "secretary", "temporary_chair"],
     "request_recognition": ["member", "chair", "secretary", "temporary_chair"],
+    "introduce_question": ["member", "chair", "secretary", "temporary_chair"],
     "create_meeting": ["chair", "secretary"],
     "schedule_proposal": ["chair", "secretary"],
     "open_meeting": ["chair", "temporary_chair"],
@@ -168,6 +169,58 @@
           "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
           "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"},
           "scheduled_by_id": {"source": "actor_id"}
+        }}
+      ]
+    },
+    "introduce_question_from_proposal": {
+      "capability": "introduce_question",
+      "allowed_statuses": ["open"],
+      "event_type": "MotionMade",
+      "event_version": 1,
+      "payload": {"proposal_id": "uuid"},
+      "resources": {
+        "proposal": {"type": "proposal", "id": {"source": "payload", "key": "proposal_id"}}
+      },
+      "conditions": [
+        {
+          "op": "equals",
+          "field": "floor_holder_id",
+          "value": {"source": "actor_id"},
+          "reason": "The actor must hold the floor."
+        },
+        {
+          "op": "collection_includes",
+          "field": "scheduled_proposals",
+          "match_field": "proposal_id",
+          "value": {"source": "resource", "resource": "proposal", "attribute": "id"},
+          "reason": "The Proposal is not scheduled for this Meeting."
+        },
+        {
+          "op": "stack_empty",
+          "field": "pending_question_stack",
+          "reason": "Another question is already pending."
+        }
+      ],
+      "event_payload": {
+        "motion_id": {"source": "command_id"},
+        "question_id": {"source": "derived_id", "name": "pending_question"},
+        "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
+        "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"},
+        "content": {"source": "resource", "resource": "proposal", "attribute": "submitted_content"},
+        "made_by_id": {"source": "actor_id"},
+        "made_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_push", "field": "pending_question_stack", "value": {
+          "id": {"source": "derived_id", "name": "pending_question"},
+          "motion_id": {"source": "command_id"},
+          "version": {"source": "literal", "value": 1},
+          "status": {"source": "literal", "value": "introduced"},
+          "proposal_id": {"source": "resource", "resource": "proposal", "attribute": "id"},
+          "proposal_revision_id": {"source": "resource", "resource": "proposal", "attribute": "submitted_revision_id"},
+          "content": {"source": "resource", "resource": "proposal", "attribute": "submitted_content"},
+          "made_by_id": {"source": "actor_id"},
+          "made_at": {"source": "timestamp_iso8601"}
         }}
       ]
     }

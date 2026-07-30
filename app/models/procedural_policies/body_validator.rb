@@ -27,6 +27,8 @@ module ProceduralPolicies
     EFFECT_CONDITIONS = %w[blank present].freeze
     BINDING_SOURCES = %w[
       actor_id
+      command_id
+      derived_id
       literal
       meeting_body_id
       payload
@@ -208,6 +210,9 @@ module ProceduralPolicies
       when Hash
         if value.key?("source")
           errors << "#{prefix}.source must be registered" unless BINDING_SOURCES.include?(value["source"])
+          if value["source"] == "derived_id" && value["name"].blank?
+            errors << "#{prefix}.name must be non-empty"
+          end
           validate_resource_binding(value, prefix) if value["source"] == "resource"
         else
           value.each { |key, entry| validate_bindings(entry, "#{prefix}.#{key}") }
