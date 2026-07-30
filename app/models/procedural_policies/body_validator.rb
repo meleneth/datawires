@@ -2,7 +2,6 @@
 
 module ProceduralPolicies
   class BodyValidator
-    CAPABILITIES = Authorization::BodyPolicy::ROLE_CAPABILITIES.keys.map(&:to_s).freeze
     STATUSES = %w[scheduled open adjourned].freeze
     PAYLOAD_TYPES = %w[array boolean string uuid].freeze
     CONDITION_OPERATIONS = %w[
@@ -63,6 +62,7 @@ module ProceduralPolicies
 
       errors << "version must be 1" unless body["version"] == 1
       errors << "name must be a non-empty string" unless body["name"].is_a?(String) && body["name"].present?
+      validate_role_capabilities
       commands = body["commands"]
       unless commands.is_a?(Hash)
         errors << "commands must be an object"
@@ -80,7 +80,8 @@ module ProceduralPolicies
         return
       end
 
-      errors << "#{prefix}.capability must be registered" unless CAPABILITIES.include?(definition["capability"])
+      capabilities = body.fetch("role_capabilities", {})
+      errors << "#{prefix}.capability must be registered" unless capabilities.key?(definition["capability"])
       command_version = definition.fetch("command_version", 1)
       errors << "#{prefix}.command_version must be positive" unless command_version.is_a?(Integer) && command_version.positive?
       statuses = definition["allowed_statuses"]
@@ -92,6 +93,21 @@ module ProceduralPolicies
       validate_operations(definition["conditions"], CONDITION_OPERATIONS, prefix, "conditions")
       validate_operations(definition["effects"], EFFECT_OPERATIONS, prefix, "effects")
       validate_bindings(definition["event_payload"], "#{prefix}.event_payload")
+    end
+
+    def validate_role_capabilities
+      capabilities = body["role_capabilities"]
+      unless capabilities.is_a?(Hash)
+        errors << "role_capabilities must be an object"
+        return
+      end
+
+      capabilities.each do |capability, roles|
+        errors << "role_capabilities names must be non-empty" if capability.blank?
+        unless roles.is_a?(Array) && roles.present? && roles.all? { |role| role.is_a?(String) && role.present? } && roles.uniq == roles
+          errors << "role_capabilities.#{capability} must contain unique non-empty roles"
+        end
+      end
     end
 
     def validate_payload(payload, prefix)

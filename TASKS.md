@@ -371,7 +371,7 @@ grants in Datawires.
 - [ ] Support actor, role, scope, effective start/end, status, and provenance;
       seed typed roles for member, chair, secretary, temporary chair, and
       parliamentarian without hard-coding their policy in views.
-- [ ] Add capability policies for submitting proposals, creating/opening
+- [x] Add capability policies for submitting proposals, creating/opening
       meetings, recording minutes, voting, chair actions, and administering
       Board definitions.
 - [ ] Define effective-at-time queries so event replay resolves the historical

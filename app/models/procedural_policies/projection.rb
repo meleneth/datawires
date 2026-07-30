@@ -24,6 +24,7 @@ module ProceduralPolicies
     end
 
     def initialize(body)
+      @role_capabilities = body.fetch("role_capabilities").transform_values(&:freeze).freeze
       @commands = body.fetch("commands").to_h do |name, definition|
         [
           name,
@@ -50,6 +51,14 @@ module ProceduralPolicies
 
     def commands
       @commands.values
+    end
+
+    def capabilities
+      @role_capabilities.keys
+    end
+
+    def roles_for(capability)
+      @role_capabilities[capability.to_s]
     end
   end
 end

@@ -1,6 +1,17 @@
 {
   "version": 1,
   "name": "Datawires Meeting Lifecycle",
+  "role_capabilities": {
+    "submit_proposal": ["member", "chair", "secretary", "temporary_chair"],
+    "request_recognition": ["member", "chair", "secretary", "temporary_chair"],
+    "create_meeting": ["chair", "secretary"],
+    "schedule_proposal": ["chair", "secretary"],
+    "open_meeting": ["chair", "temporary_chair"],
+    "record_minutes": ["secretary"],
+    "vote": ["member", "chair", "secretary", "temporary_chair"],
+    "chair_action": ["chair", "temporary_chair"],
+    "administer_board": ["chair", "secretary"]
+  },
   "commands": {
     "open_meeting": {
       "capability": "open_meeting",

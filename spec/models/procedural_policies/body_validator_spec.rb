@@ -38,4 +38,16 @@ RSpec.describe ProceduralPolicies::BodyValidator do
     expect(validator.errors).to include("commands.open_meeting.conditions[0].field is required")
     expect(validator.errors).to include("commands.open_meeting.effects[0].value is required")
   end
+
+  it "rejects malformed role-capability policy data" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    body["role_capabilities"]["open_meeting"] = [ "chair", "chair" ]
+
+    validator = described_class.new(body)
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include(
+      "role_capabilities.open_meeting must contain unique non-empty roles"
+    )
+  end
 end

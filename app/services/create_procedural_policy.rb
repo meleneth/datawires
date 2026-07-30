@@ -62,6 +62,7 @@ class CreateProceduralPolicy
 
   def revise_existing(policy)
     ApplicationRecord.transaction do
+      ensure_policy_schema_current!(policy.policy_document.schema_document)
       document = policy.policy_document
       revision = document.revisions.create!(
         parent_revision: document.head_revision,
@@ -72,5 +73,20 @@ class CreateProceduralPolicy
       document.update!(head_revision: revision)
       policy
     end
+  end
+
+  def ensure_policy_schema_current!(document)
+    return if document.body == ProceduralPolicies::Schema::BODY
+    unless document.schema? && document.body["title"] == "Procedural Policy"
+      raise ArgumentError, "procedural-policy key is not the Datawires policy schema"
+    end
+
+    revision = document.revisions.create!(
+      parent_revision: document.head_revision,
+      body: ProceduralPolicies::Schema::BODY,
+      message: "Upgrade Procedural Policy schema",
+      created_by: actor
+    )
+    document.update!(head_revision: revision)
   end
 end

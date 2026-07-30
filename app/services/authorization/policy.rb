@@ -10,7 +10,9 @@ module Authorization
           action:,
           body: resource.fetch(:body),
           meeting: resource[:meeting],
-          at: resource.fetch(:at, Time.current)
+          at: resource.fetch(:at, Time.current),
+          capability_policy: resource[:meeting]&.procedural_policy&.projection ||
+            BodyPolicy.default_capability_policy
         )
       end
 
