@@ -14,5 +14,7 @@ RSpec.describe CreateBody do
     expect(result.document.body).to eq("name" => "General Assembly")
     expect(result.draft.created_by).to eq(actor)
     expect(result.document.schema_document.schema_wrapper).to be_present
+    expect(result.body.memberships.effective_at(Time.current).find_by(actor:)).to be_present
+    expect(result.body.role_assignments.effective_at(Time.current).find_by(actor:, role: "chair")).to be_present
   end
 end

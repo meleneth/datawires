@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   end
 
   resources :boards, only: %i[show] do
+    get "actions/:id", to: "boards/actions#new", as: :action_form
     post "actions/:id", to: "boards/actions#create", as: :action
   end
 

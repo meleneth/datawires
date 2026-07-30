@@ -13,10 +13,16 @@
     .mb-6.flex.flex-wrap.gap-2
       - @action_resolutions.reject(&:hidden?).each do |resolution|
         - if resolution.available?
-          = button_to resolution.action.title,
-            board_action_path(@board, resolution.action.id),
-            method: :post,
-            class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+          - if resolution.domain_command
+            = link_to resolution.action.title,
+              board_action_form_path(@board, resolution.action.id),
+              data: { turbo_frame: "main_content", turbo_action: "advance" },
+              class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+          - else
+            = button_to resolution.action.title,
+              board_action_path(@board, resolution.action.id),
+              method: :post,
+              class: "font-head inline-flex h-10 items-center justify-center rounded border-2 border-black bg-primary px-4 py-2 font-medium text-primary-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
         - else
           %span.inline-flex.flex-col.rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm.text-muted-foreground
             %span.font-head= resolution.action.title

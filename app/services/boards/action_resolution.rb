@@ -2,7 +2,7 @@
 
 module Boards
   class ActionResolution
-    Result = Data.define(:action, :status, :reason, :schema_wrapper, :edit_affordance) do
+    Result = Data.define(:action, :status, :reason, :schema_wrapper, :edit_affordance, :domain_command) do
       def available?
         status == "available"
       end
@@ -27,7 +27,7 @@ module Boards
     end
 
     def call
-      return unavailable("Domain commands are not registered yet.") if action.kind == "invoke_command"
+      return resolve_domain_command if action.kind == "invoke_command"
 
       schema_wrapper = target_schema_wrapper
       return unavailable("Schema #{config.fetch("schema_key")} was not found.") unless schema_wrapper
@@ -44,7 +44,7 @@ module Boards
       )
       return denied(decision.reason, schema_wrapper:, edit_affordance:) unless decision.allowed?
 
-      Result.new(action:, status: "available", reason: nil, schema_wrapper:, edit_affordance:)
+      Result.new(action:, status: "available", reason: nil, schema_wrapper:, edit_affordance:, domain_command: nil)
     end
 
     private
@@ -66,13 +66,44 @@ module Boards
       schema_wrapper.edit_affordances.find_by(title: config["edit_affordance"])
     end
 
+    def resolve_domain_command
+      command = DomainCommands::Registry.fetch(config.fetch("command"), board:, actor:)
+      return unavailable("Domain command #{config.fetch("command")} is not registered.") unless command
+
+      decision = command.decision
+      return denied(decision.reason, domain_command: command) unless decision.allowed?
+
+      Result.new(
+        action:,
+        status: "available",
+        reason: nil,
+        schema_wrapper: nil,
+        edit_affordance: nil,
+        domain_command: command
+      )
+    end
+
     def denied(reason, **attributes)
       status = config.fetch("when_denied", "disabled")
-      Result.new(action:, status:, reason:, schema_wrapper: nil, edit_affordance: nil, **attributes)
+      Result.new(**{
+        action:,
+        status:,
+        reason:,
+        schema_wrapper: nil,
+        edit_affordance: nil,
+        domain_command: nil
+      }.merge(attributes))
     end
 
     def unavailable(reason, **attributes)
-      Result.new(action:, status: "disabled", reason:, schema_wrapper: nil, edit_affordance: nil, **attributes)
+      Result.new(**{
+        action:,
+        status: "disabled",
+        reason:,
+        schema_wrapper: nil,
+        edit_affordance: nil,
+        domain_command: nil
+      }.merge(attributes))
     end
   end
 end

@@ -30,6 +30,22 @@ class CreateBody
       )
       document.update!(head_revision: revision)
       body = Body.create!(body_document: document)
+      Membership.create!(
+        body:,
+        actor:,
+        status: "active",
+        effective_from: Time.current,
+        recorded_by: actor,
+        provenance: { "source" => "body_creation" }
+      )
+      RoleAssignment.create!(
+        actor:,
+        scope: body,
+        role: "chair",
+        effective_from: Time.current,
+        recorded_by: actor,
+        provenance: { "source" => "body_creation" }
+      )
       Result.new(body:, document:, draft: document.draft_for(actor:))
     end
   end

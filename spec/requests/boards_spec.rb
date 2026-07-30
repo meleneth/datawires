@@ -149,6 +149,33 @@ RSpec.describe "Boards", type: :request do
     expect(flash[:alert]).to eq("The actor is not allowed to create document.")
   end
 
+  it "executes registered domain commands from typed board action forms" do
+    board = create(:board)
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "create-body",
+          "kind" => "invoke_command",
+          "title" => "Create body",
+          "config" => { "command" => "create_body" }
+        }
+      ]
+    )
+
+    get board_action_form_path(board, "create-body")
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("command[name]")
+
+    expect {
+      post board_action_path(board, "create-body"), params: { command: { name: "General Assembly" } }
+    }.to change(Body, :count).by(1)
+
+    body = Body.order(:created_at).last
+    expect(response).to redirect_to(document_path(body.body_document))
+    expect(body.memberships.find_by(actor: User.order(:created_at).last)).to be_present
+  end
+
   def configure_actions(board, actions)
     body = board.body.deep_dup
     body["actions"] = actions

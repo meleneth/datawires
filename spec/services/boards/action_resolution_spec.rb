@@ -28,7 +28,7 @@ RSpec.describe Boards::ActionResolution do
     expect(result.edit_affordance).to eq(affordance)
   end
 
-  it "honors hidden authorization denial and keeps command actions unavailable" do
+  it "honors hidden authorization denial and reports unregistered command actions" do
     board = create(:board)
     schema = create(:document, :with_schema_head_revision, domain: board.schema_wrapper.domain, key: "proposal")
     create(:schema_wrapper, document: schema)
@@ -57,7 +57,29 @@ RSpec.describe Boards::ActionResolution do
     expect(denied).to be_hidden
     expect(denied.reason).to eq("The actor is not allowed to create document.")
     expect(command).not_to be_available
-    expect(command.reason).to eq("Domain commands are not registered yet.")
+    expect(command.reason).to eq("Domain command open_meeting is not registered.")
+  end
+
+  it "resolves a registered domain command when its prerequisites are satisfied" do
+    board = create(:board)
+    actor = actor_context(can: true)
+    CreateBody.call(domain: board.schema_wrapper.domain, name: "Assembly", actor: actor.user)
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "submit",
+          "kind" => "invoke_command",
+          "title" => "Submit",
+          "config" => { "command" => "submit_proposal" }
+        }
+      ]
+    )
+
+    result = described_class.call(board:, action: board.projection.actions.first, actor:)
+
+    expect(result).to be_available
+    expect(result.domain_command).to be_a(Boards::DomainCommands::SubmitProposal)
   end
 
   def configure_actions(board, actions)

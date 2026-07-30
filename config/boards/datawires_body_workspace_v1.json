@@ -70,6 +70,15 @@
   ],
   "actions": [
     {
+      "id": "create-body",
+      "kind": "invoke_command",
+      "title": "Create body",
+      "config": {
+        "command": "create_body",
+        "when_denied": "disabled"
+      }
+    },
+    {
       "id": "create-meeting",
       "kind": "invoke_command",
       "title": "Create meeting",

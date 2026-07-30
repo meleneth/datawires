@@ -1,0 +1,27 @@
+= turbo_frame_tag "main_content" do
+  .mx-auto.max-w-2xl
+    = render TypographyComponent.new(as: :h1, text: @action.title)
+    = form_with url: board_action_path(@board, @action.id), method: :post, class: "mt-6 space-y-4" do |form|
+      - @fields.each do |field|
+        .space-y-1
+          = form.label "command[#{field.name}]", field.label, class: "font-head block text-sm font-medium"
+          - if field.type == "select"
+            = form.select "command[#{field.name}]",
+              options_for_select(field.options),
+              {},
+              required: field.required,
+              class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+          - elsif field.type == "textarea"
+            = form.text_area "command[#{field.name}]",
+              required: field.required,
+              rows: 6,
+              class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+          - else
+            = form.text_field "command[#{field.name}]",
+              type: field.type,
+              required: field.required,
+              class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+      .flex.gap-3
+        = form.submit @action.title,
+          class: "font-head inline-flex h-10 cursor-pointer items-center rounded border-2 border-black bg-primary px-4 font-medium text-primary-foreground shadow-md"
+        = link_to "Cancel", board_path(@board), class: "inline-flex h-10 items-center px-3"
