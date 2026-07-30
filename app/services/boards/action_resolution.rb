@@ -12,17 +12,18 @@ module Boards
       end
     end
 
-    def self.call(board:, action:, actor:)
-      new(board:, action:, actor:).call
+    def self.call(board:, action:, actor:, authorizer: Authorization::Policy)
+      new(board:, action:, actor:, authorizer:).call
     end
 
-    def initialize(board:, action:, actor:)
+    def initialize(board:, action:, actor:, authorizer:)
       raise ArgumentError, "board must be a Board" unless board.is_a?(Board)
       raise ArgumentError, "action must be a Boards::Projection::Entry" unless action.is_a?(Boards::Projection::Entry)
 
       @board = board
       @action = action
       @actor = actor
+      @authorizer = authorizer
     end
 
     def call
@@ -36,16 +37,19 @@ module Boards
         return unavailable("Edit affordance #{config["edit_affordance"]} was not found.", schema_wrapper:)
       end
 
-      unless actor&.can?(:create_document, schema_wrapper:, board:)
-        return denied("You cannot create documents with this action.", schema_wrapper:, edit_affordance:)
-      end
+      decision = authorizer.call(
+        actor:,
+        action: :create_document,
+        resource: { schema_wrapper:, board: }
+      )
+      return denied(decision.reason, schema_wrapper:, edit_affordance:) unless decision.allowed?
 
       Result.new(action:, status: "available", reason: nil, schema_wrapper:, edit_affordance:)
     end
 
     private
 
-    attr_reader :board, :action, :actor
+    attr_reader :board, :action, :actor, :authorizer
 
     def config
       action.config

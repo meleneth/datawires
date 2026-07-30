@@ -28,21 +28,31 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
-    @current_user ||= keystone_user || dev_user
+    current_actor.user
   end
 
   helper_method :current_user
 
-  def keystone_user
-    external_id = request_header_value(keystone_id_headers)
-    return nil unless external_id
+  def current_actor
+    @current_actor ||= Identity::ResolveActor.call(claims: identity_claims)
+  end
 
-    User.find_or_initialize_by(external_id: external_id).tap do |user|
-      user.name = keystone_user_name(external_id)
-      user.email = request_header_value(keystone_email_headers)
-      user.avatar = request_header_value(keystone_avatar_headers)
-      user.save! if user.new_record? || user.changed?
-    end
+  helper_method :current_actor
+
+  def identity_claims
+    external_id = request_header_value(keystone_id_headers)
+    return dev_identity_claims unless external_id
+
+    Identity::Claims.new(
+      issuer: ENV.fetch("OIDC_ISSUER", DEFAULT_OIDC_ISSUER),
+      subject: external_id,
+      name: keystone_user_name(external_id),
+      email: request_header_value(keystone_email_headers),
+      avatar: request_header_value(keystone_avatar_headers),
+      groups: comma_separated_header("HTTP_X_FORWARDED_GROUPS"),
+      organization_hints: comma_separated_header("HTTP_X_KEYSTONE_ORGANIZATIONS"),
+      administrative_roles: comma_separated_header("HTTP_X_FORWARDED_ROLES")
+    )
   end
 
   def keystone_user_name(external_id)
@@ -51,11 +61,17 @@ class ApplicationController < ActionController::Base
       external_id
   end
 
-  def dev_user
-    User.find_or_create_by!(id: DEV_USER_ID) do |user|
-      user.name = "devUser"
-      user.avatar = "https://api.dicebear.com/7.x/pixel-art/png?seed=devUser"
-    end
+  def dev_identity_claims
+    Identity::Claims.new(
+      issuer: "datawires:development",
+      subject: DEV_USER_ID,
+      name: "devUser",
+      avatar: "https://api.dicebear.com/7.x/pixel-art/png?seed=devUser"
+    )
+  end
+
+  def comma_separated_header(name)
+    request.headers[name].to_s.split(",").map(&:strip).reject(&:blank?)
   end
 
   def visible_domains

@@ -146,7 +146,7 @@ RSpec.describe "Boards", type: :request do
     }.not_to change(Document.where(schema_document: proposal_schema), :count)
 
     expect(response).to redirect_to(board_path(board))
-    expect(flash[:alert]).to eq("You cannot create documents with this action.")
+    expect(flash[:alert]).to eq("The actor is not allowed to create document.")
   end
 
   def configure_actions(board, actions)

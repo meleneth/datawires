@@ -63,6 +63,18 @@ display name.
 Override those with `KEYSTONE_USER_ID_HEADER`, `KEYSTONE_USER_NAME_HEADER`,
 `KEYSTONE_USER_EMAIL_HEADER`, and `KEYSTONE_USER_AVATAR_HEADER`. `KEYSTONE_URL`
 defaults to `https://keystone.deva.station` for local environment wiring.
+The normalized actor key is the pair of `OIDC_ISSUER` and the selected external
+subject header. Existing `external_id` users are adopted on first matching
+request for migration compatibility. Equal subject strings from different
+issuers remain distinct actors.
+
+Request identity is captured as an immutable claims snapshot containing the
+issuer, subject, profile fields, and optional group, organization, and broad
+administrative-role hints. Those hints identify context only: Datawires
+authorization returns an explicit allow/deny decision with a reason, and later
+domain Memberships and RoleAssignments—not Keycloak groups—will determine
+parliamentary capabilities.
+
 The current user's profile links through oauth2-proxy logout and then Keycloak
 logout. Override its defaults with `OIDC_ISSUER`, `OIDC_CLIENT_ID`, and
 `LOGOUT_REDIRECT_URL`.

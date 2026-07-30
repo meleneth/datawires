@@ -6,6 +6,9 @@ class User < ApplicationRecord
            dependent: :nullify
 
   validates :external_id, uniqueness: true, allow_blank: true
+  validates :identity_subject,
+            uniqueness: { scope: :identity_issuer },
+            allow_blank: true
 
   def visible_domains
     Domain.visible_to(self)

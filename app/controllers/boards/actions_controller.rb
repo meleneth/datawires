@@ -8,7 +8,7 @@ module Boards
       action = board.projection.actions.find { |candidate| candidate.id == params[:id] }
       raise ActiveRecord::RecordNotFound unless action
 
-      resolution = Boards::ActionResolution.call(board:, action:, actor: current_user)
+      resolution = Boards::ActionResolution.call(board:, action:, actor: current_actor)
       unless resolution.available?
         return redirect_to board_path(board), alert: resolution.reason
       end

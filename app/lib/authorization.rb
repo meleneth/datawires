@@ -3,8 +3,13 @@ module Authorization
   class NotAuthorized < StandardError; end
 
   def authorize!(capability, **context)
-    return if Current.user&.can?(capability, **context)
+    decision = Authorization::Policy.call(
+      actor: current_actor,
+      action: capability,
+      resource: context
+    )
+    return decision if decision.allowed?
 
-    raise NotAuthorized, "#{capability} #{context.inspect}"
+    raise NotAuthorized, decision.reason
   end
 end
