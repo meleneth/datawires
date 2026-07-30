@@ -13,6 +13,8 @@ class BoardsController < ApplicationController
         Boards::DocumentCollection.call(board: @board, section:)
       when "meeting_collection"
         Boards::MeetingCollection.call(board: @board, section:)
+      when "proposal_collection"
+        Boards::ProposalCollection.call(board: @board, section:)
       end
       [ section.id, result ]
     end

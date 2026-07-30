@@ -89,12 +89,43 @@ RSpec.describe Boards::BodyValidator do
     )
   end
 
+  it "accepts a proposal collection constrained by derived state" do
+    body["sections"] = [
+      {
+        "id" => "open-proposals",
+        "kind" => "proposal_collection",
+        "title" => "Open proposals",
+        "config" => {
+          "states" => %w[open],
+          "order" => { "by" => "submitted_at", "direction" => "desc" },
+          "limit" => 10
+        }
+      }
+    ]
+
+    expect(validator).to be_valid
+  end
+
+  it "rejects unknown proposal states" do
+    body["sections"] = [
+      {
+        "id" => "proposals",
+        "kind" => "proposal_collection",
+        "title" => "Proposals",
+        "config" => { "states" => %w[adopted] }
+      }
+    ]
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include("sections[0].config.states must contain only: open, decided")
+  end
+
   it "rejects unknown kinds and duplicate ids" do
     body["sections"] << { "id" => "proposals", "kind" => "analytics", "title" => "Other" }
 
     expect(validator).not_to be_valid
     expect(validator.errors).to include(
-      "sections[1].kind must be one of: document_collection, meeting_collection, summary"
+      "sections[1].kind must be one of: document_collection, meeting_collection, proposal_collection, summary"
     )
     expect(validator.errors).to include("sections ids must be unique: proposals")
   end

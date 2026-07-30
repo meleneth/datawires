@@ -273,7 +273,8 @@ the normal entry point for domain users.
       deterministic fallback when no default is selected.
 - [ ] Define version 1 typed board projections for title, description, ordered
       sections, and layout metadata. Initially support document-collection,
-      projection-backed meeting-collection, and summary sections only.
+      projection-backed meeting/proposal collections, and summary sections
+      only.
 - [ ] Constrain collection definitions to schema key, typed filters, typed
       ordering, result limit, result `ViewAffordance`, empty-state copy, and
       navigation target. Reuse document indexes where applicable.
@@ -760,6 +761,9 @@ active procedure.
 - [x] Add a constrained meeting-collection section that selects and orders
       Meeting documents by policy-derived projection status without embedding
       Robert's Rules event names or lifecycle transitions in Board Ruby code.
+- [x] Add a constrained proposal-collection section that derives open/decided
+      state from durable Decision lineage without mutating Proposal documents
+      or interpreting policy-specific dispositions in Board Ruby code.
 - [ ] Seed a default Robert's Rules Board titled `Datawires Board` (or a
       domain-specific title derived from it) with active/upcoming Meeting, open
       Proposals, last 10 adopted Agreements, and last 5 completed Meetings.
