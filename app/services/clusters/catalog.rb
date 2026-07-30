@@ -72,6 +72,7 @@ module Clusters
             {
               "title" => "Schemas",
               "links" => [
+                schema_home_link("Workspace", "Open the Worldbuilder Board.", schema_key: "domain-home-page"),
                 schema_home_link("People", "Characters and other people.", schema_key: "person"),
                 schema_home_link("Places", "Locations in the world.", schema_key: "place"),
                 schema_home_link("Things", "Objects, artifacts, and concepts.", schema_key: "thing"),
@@ -87,7 +88,16 @@ module Clusters
           place_schema,
           thing_schema,
           party_schema,
-          timeline_event_schema
+          timeline_event_schema,
+          registered_schema(Boards::Schema)
+        ],
+        boards: [
+          {
+            schema_key: "domain-home-page",
+            document_key: "worldbuilder-board",
+            title: "Worldbuilder Board",
+            body: Boards::Definitions.worldbuilder_workspace
+          }
         ]
       }
     end

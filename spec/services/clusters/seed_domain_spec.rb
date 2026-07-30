@@ -18,9 +18,19 @@ RSpec.describe Clusters::SeedDomain do
       "Timeline Events"
     )
     expect(DomainHomeLinks.for(domain).flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Workspace",
       "People",
       "Timeline Events"
     )
+
+    home_wrapper = home.schema_document.schema_wrapper
+    board = home_wrapper.default_board
+    expect(board).to have_attributes(title: "Worldbuilder Board", public: true)
+    expect(board.board_document).to have_attributes(
+      key: "worldbuilder-board",
+      schema_document: domain.documents.find_by!(key: Boards::Schema::KEY)
+    )
+    expect(board.body).to eq(Boards::Definitions.worldbuilder_workspace)
 
     timeline_schema = domain.documents.find_by!(key: "timeline-event")
     timeline_body = timeline_schema.body

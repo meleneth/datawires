@@ -22,7 +22,7 @@ RSpec.describe "Domain clusters", type: :request do
         }
       }
     }.to change(Domain, :count).by(1)
-      .and change(SchemaWrapper, :count).by(6)
+      .and change(SchemaWrapper, :count).by(7)
       .and change(EditAffordance, :count).by(6)
       .and change(ViewAffordance, :count).by(3)
 
@@ -35,11 +35,20 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("thing")
     expect(response.body).to include("party")
     expect(response.body).to include("timeline-event")
+    expect(response.body).to include("Workspace")
 
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
     get document_path(home)
     expect(response.body).to include("Edit affordances")
     expect(response.body).to include("Default")
+
+    home_wrapper = home.schema_document.schema_wrapper
+    get schema_path(home_wrapper)
+    expect(response).to redirect_to(board_path(home_wrapper.default_board))
+    follow_redirect!
+    expect(response.body).to include("Worldbuilder Board")
+    expect(response.body).to include("People")
+    expect(response.body).to include("Recent timeline events")
   end
 
   it "creates a repository-mode domain pre-seeded with the roberts rules cluster" do

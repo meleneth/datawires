@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "title": "Worldbuilder Board",
+  "description": "People, places, things, parties, and the events connecting them.",
+  "layout": {
+    "columns": 2
+  },
+  "sections": [
+    {
+      "id": "people",
+      "kind": "document_collection",
+      "title": "People",
+      "config": {
+        "schema_key": "person",
+        "order": { "by": "title", "direction": "asc" },
+        "limit": 20,
+        "navigation": "document",
+        "empty_state": "No people yet."
+      }
+    },
+    {
+      "id": "places",
+      "kind": "document_collection",
+      "title": "Places",
+      "config": {
+        "schema_key": "place",
+        "order": { "by": "title", "direction": "asc" },
+        "limit": 20,
+        "navigation": "document",
+        "empty_state": "No places yet."
+      }
+    },
+    {
+      "id": "things",
+      "kind": "document_collection",
+      "title": "Things",
+      "config": {
+        "schema_key": "thing",
+        "order": { "by": "title", "direction": "asc" },
+        "limit": 20,
+        "navigation": "document",
+        "empty_state": "No things yet."
+      }
+    },
+    {
+      "id": "parties",
+      "kind": "document_collection",
+      "title": "Parties",
+      "config": {
+        "schema_key": "party",
+        "order": { "by": "title", "direction": "asc" },
+        "limit": 20,
+        "navigation": "document",
+        "empty_state": "No parties yet."
+      }
+    },
+    {
+      "id": "timeline",
+      "kind": "document_collection",
+      "title": "Recent timeline events",
+      "config": {
+        "schema_key": "timeline-event",
+        "order": { "by": "body", "path": "/relative_time", "direction": "desc" },
+        "limit": 20,
+        "navigation": "view_affordance",
+        "view_affordance": "Timeline",
+        "empty_state": "No timeline events yet."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "create-person",
+      "kind": "open_edit_affordance",
+      "title": "Create person",
+      "config": { "schema_key": "person", "edit_affordance": "Default" }
+    },
+    {
+      "id": "create-place",
+      "kind": "open_edit_affordance",
+      "title": "Create place",
+      "config": { "schema_key": "place", "edit_affordance": "Default" }
+    },
+    {
+      "id": "create-thing",
+      "kind": "open_edit_affordance",
+      "title": "Create thing",
+      "config": { "schema_key": "thing", "edit_affordance": "Default" }
+    },
+    {
+      "id": "create-party",
+      "kind": "open_edit_affordance",
+      "title": "Create party",
+      "config": { "schema_key": "party", "edit_affordance": "Default" }
+    },
+    {
+      "id": "record-event",
+      "kind": "open_edit_affordance",
+      "title": "Record timeline event",
+      "config": { "schema_key": "timeline-event", "edit_affordance": "Default" }
+    }
+  ]
+}
