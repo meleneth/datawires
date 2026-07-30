@@ -101,6 +101,28 @@ transactional RSpec database.
 
 Known local issue: specs can pass and then exit nonzero because SimpleCov cannot overwrite `coverage/assets/0.13.2/DataTables-1.10.20/images/sort_asc.png`. The failure happens after RSpec reports examples and failures.
 
+## Deployment
+
+Production deploys use the local Kubernetes workflow:
+
+```sh
+./build.sh
+```
+
+`build.sh` is the canonical deployment entry point. It discovers Datawires in
+`../cluster-ops/terraform/datawires.tf`, builds the production Docker image,
+pushes `registry.deva.station/meleneth/datawires`, restarts the
+`default/datawires` Kubernetes Deployment, waits for the rollout to complete,
+and runs:
+
+```sh
+kubectl -n default exec deployment/datawires -- bin/rails db:prepare
+```
+
+Do not deploy Datawires with Kamal. `config/deploy.yml` is an unused
+Rails-generated example and is not the production deployment configuration.
+Use `kubectl` for rollout, pod, log, and migration verification.
+
 ## Domain Model
 
 - `Domain` groups documents. Domains are owned by users and can be public or private.
