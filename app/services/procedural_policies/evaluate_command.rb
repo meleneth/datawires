@@ -4,7 +4,7 @@ module ProceduralPolicies
   class EvaluateCommand
     class Rejected < StandardError; end
 
-    Result = Data.define(:event_payload, :projection_effects)
+    Result = Data.define(:event_payload, :projection_effects, :document_outputs)
 
     def self.call(meeting:, command:, definition:, projection:)
       new(meeting:, command:, definition:, projection:).call
@@ -22,7 +22,8 @@ module ProceduralPolicies
       definition.conditions.each { |condition| evaluate_condition(condition) }
       Result.new(
         event_payload: command.payload.deep_merge(resolve_value(definition.event_payload)),
-        projection_effects: definition.effects.map { |effect| resolve_value(effect) }
+        projection_effects: definition.effects.map { |effect| resolve_value(effect) },
+        document_outputs: definition.document_outputs.map { |output| resolve_value(output) }
       )
     end
 
@@ -96,6 +97,7 @@ module ProceduralPolicies
       when "increment" then increment_value(value)
       when "literal" then value["value"]
       when "meeting_body_id" then meeting.body_id
+      when "meeting_id" then meeting.id
       when "payload" then value["key"] ? command.payload[value["key"]] : command.payload
       when "payload_or_literal" then command.payload[value["key"]].presence || value["value"]
       when "resource" then resources.fetch(value.fetch("resource")).fetch(value.fetch("attribute"))

@@ -273,6 +273,32 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     )
     expect(meeting.projection.pending_question_stack).to be_empty
     expect(meeting.projection.vote_state).to be_nil
+    decision_id = UuidTools.derive(disposition_command_id, "decision")
+    agreement_id = UuidTools.derive(disposition_command_id, "agreement")
+    decision_document = meeting.body.domain.documents.find_by!(key: decision_id)
+    agreement_document = meeting.body.domain.documents.find_by!(key: agreement_id)
+    expect(decision_document.schema_document.key).to eq(Decisions::Schema::KEY)
+    expect(decision_document.body).to include(
+      "decision_id" => decision_id,
+      "meeting_id" => meeting.id,
+      "question_id" => question_id,
+      "question_version" => 2,
+      "disposition" => "adopted",
+      "evidence" => include("vote_id" => main_vote_id)
+    )
+    expect(agreement_document.schema_document.key).to eq(Agreements::Schema::KEY)
+    expect(agreement_document.body).to include(
+      "agreement_id" => agreement_id,
+      "decision_id" => decision_id,
+      "content" => { "text" => "Amended text" },
+      "lineage" => include(
+        "meeting_id" => meeting.id,
+        "question_id" => question_id,
+        "question_version" => 2,
+        "proposal_revision_id" => proposal.submitted_revision_id,
+        "vote_id" => main_vote_id
+      )
+    )
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 

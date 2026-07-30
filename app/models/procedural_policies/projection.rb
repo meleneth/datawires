@@ -13,7 +13,8 @@ module ProceduralPolicies
       :resources,
       :conditions,
       :event_payload,
-      :effects
+      :effects,
+      :document_outputs
     )
 
     def self.build(body)
@@ -39,7 +40,8 @@ module ProceduralPolicies
             resources: definition.fetch("resources", {}).freeze,
             conditions: definition.fetch("conditions", []).freeze,
             event_payload: definition.fetch("event_payload", {}).freeze,
-            effects: definition.fetch("effects", []).freeze
+            effects: definition.fetch("effects", []).freeze,
+            document_outputs: definition.fetch("document_outputs", []).freeze
           )
         ]
       end.freeze

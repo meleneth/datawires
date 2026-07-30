@@ -710,7 +710,7 @@ adopted, a durable authoritative Agreement.
 - [ ] Add a `Decision` schema/model with PendingQuestionVersion, Vote/result or
       unanimous-consent evidence, disposition, authority/rule evaluation,
       announcement, and correction lineage.
-- [ ] Produce an Agreement/Resolution document only from an adopted main
+- [x] Produce an Agreement/Resolution document only from an adopted main
       question's final structured version; link its first immutable Revision to
       Proposal, Motion, amendments, Vote(s), and Decision.
 - [ ] Refine the existing Agreement schema so pre-adoption Proposal states do

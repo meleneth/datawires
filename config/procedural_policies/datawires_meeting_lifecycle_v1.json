@@ -763,6 +763,7 @@
       ],
       "event_payload": {
         "decision_id": {"source": "derived_id", "name": "decision"},
+        "agreement_id": {"source": "derived_id", "name": "agreement"},
         "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
         "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
         "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
@@ -776,6 +777,51 @@
         "disposed_by_id": {"source": "actor_id"},
         "disposed_at": {"source": "timestamp_iso8601"}
       },
+      "document_outputs": [
+        {
+          "type": "decision",
+          "id": {"source": "derived_id", "name": "decision"},
+          "title": {"source": "literal", "value": "Adopted main question"},
+          "body": {
+            "decision_id": {"source": "derived_id", "name": "decision"},
+            "meeting_id": {"source": "meeting_id"},
+            "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+            "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+            "disposition": {"source": "literal", "value": "adopted"},
+            "evidence": {
+              "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+              "vote_result": {"source": "projection_path", "field": "vote_state", "path": "/result"}
+            },
+            "lineage": {
+              "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+              "proposal_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_id"},
+              "proposal_revision_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_revision_id"}
+            }
+          }
+        },
+        {
+          "type": "agreement",
+          "id": {"source": "derived_id", "name": "agreement"},
+          "title": {"source": "literal", "value": "Adopted agreement"},
+          "body": {
+            "agreement_id": {"source": "derived_id", "name": "agreement"},
+            "decision_id": {"source": "derived_id", "name": "decision"},
+            "title": {"source": "literal", "value": "Adopted agreement"},
+            "content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+            "adopted_at": {"source": "timestamp_iso8601"},
+            "lineage": {
+              "meeting_id": {"source": "meeting_id"},
+              "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+              "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+              "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+              "proposal_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_id"},
+              "proposal_revision_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_revision_id"},
+              "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+              "question_versions": {"source": "stack_top", "field": "pending_question_stack", "attribute": "versions"}
+            }
+          }
+        }
+      ],
       "effects": [
         {"op": "stack_pop", "field": "pending_question_stack"},
         {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
@@ -824,6 +870,29 @@
         "disposed_by_id": {"source": "actor_id"},
         "disposed_at": {"source": "timestamp_iso8601"}
       },
+      "document_outputs": [
+        {
+          "type": "decision",
+          "id": {"source": "derived_id", "name": "decision"},
+          "title": {"source": "literal", "value": "Rejected main question"},
+          "body": {
+            "decision_id": {"source": "derived_id", "name": "decision"},
+            "meeting_id": {"source": "meeting_id"},
+            "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+            "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+            "disposition": {"source": "literal", "value": "rejected"},
+            "evidence": {
+              "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+              "vote_result": {"source": "projection_path", "field": "vote_state", "path": "/result"}
+            },
+            "lineage": {
+              "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+              "proposal_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_id"},
+              "proposal_revision_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_revision_id"}
+            }
+          }
+        }
+      ],
       "effects": [
         {"op": "stack_pop", "field": "pending_question_stack"},
         {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}

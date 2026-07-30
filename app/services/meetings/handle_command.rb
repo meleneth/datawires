@@ -57,7 +57,17 @@ module Meetings
           "projection_effects" => evaluation.projection_effects
         }
       )
-      EventStreams::Append.call(stream: meeting.event_stream, command:, events: [ event ])
+      ApplicationRecord.transaction do
+        result = EventStreams::Append.call(stream: meeting.event_stream, command:, events: [ event ])
+        unless result.idempotent?
+          ProceduralPolicies::MaterializeDocuments.call(
+            meeting:,
+            actor: command.actor,
+            outputs: evaluation.document_outputs
+          )
+        end
+        result
+      end
     rescue ProceduralPolicies::EvaluateCommand::Rejected => e
       raise Rejected, e.message
     end

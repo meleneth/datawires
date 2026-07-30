@@ -42,6 +42,7 @@ module ProceduralPolicies
       increment
       literal
       meeting_body_id
+      meeting_id
       payload
       payload_or_literal
       resource
@@ -113,6 +114,7 @@ module ProceduralPolicies
       validate_operations(definition["conditions"], CONDITION_OPERATIONS, prefix, "conditions")
       validate_operations(definition["effects"], EFFECT_OPERATIONS, prefix, "effects")
       validate_bindings(definition["event_payload"], "#{prefix}.event_payload")
+      validate_document_outputs(definition["document_outputs"], prefix)
     ensure
       @current_resources = {}
     end
@@ -141,6 +143,26 @@ module ProceduralPolicies
 
       payload.each do |key, type|
         errors << "#{prefix}.payload.#{key} must use a registered type" unless PAYLOAD_TYPES.include?(type)
+      end
+    end
+
+    def validate_document_outputs(outputs, prefix)
+      return if outputs.nil?
+      unless outputs.is_a?(Array)
+        errors << "#{prefix}.document_outputs must be an array"
+        return
+      end
+
+      outputs.each_with_index do |output, index|
+        field = "#{prefix}.document_outputs[#{index}]"
+        unless output.is_a?(Hash) && MaterializeDocuments::TYPES.key?(output["type"])
+          errors << "#{field}.type must be registered"
+          next
+        end
+        %w[id title body].each do |key|
+          errors << "#{field}.#{key} is required" unless output.key?(key)
+        end
+        validate_bindings(output, field)
       end
     end
 
