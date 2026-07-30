@@ -55,6 +55,7 @@ RSpec.describe Seeds::WorldbuilderDemo do
     expect(home.id).to eq(described_class::DOCUMENT_IDS.fetch("domain-home"))
     expect(home.schema_document.key).to eq("domain-home-page")
     expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Workspace",
       "Global Timeline",
       "Aragorn Timeline",
       "Fellowship Timeline"

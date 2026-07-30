@@ -274,6 +274,7 @@ module Seeds
           {
             "title" => "Explore",
             "links" => [
+              schema_link("Workspace", "Open the Worldbuilder Board.", schema_key: "domain-home-page"),
               view_link("Global Timeline", "The full event sequence.", document_key: "fellowship-forms", schema_key: "timeline-event"),
               schema_link("People", "All character documents.", schema_key: "person"),
               schema_link("Parties", "Groups and current membership.", schema_key: "party"),

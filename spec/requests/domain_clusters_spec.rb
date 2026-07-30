@@ -136,6 +136,7 @@ RSpec.describe "Domain clusters", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Domain Home")
+    expect(response.body).to include("Workspace")
     expect(response.body).to include("Global Timeline")
     expect(response.body).to include("Aragorn Timeline")
     expect(response.body).to include("Fellowship Timeline")
