@@ -9,6 +9,7 @@ class Body < ApplicationRecord
   has_many :role_assignments, as: :scope, dependent: :destroy
   has_many :meetings, dependent: :destroy
   has_many :proposals, dependent: :destroy
+  has_many :procedural_policies, dependent: :destroy
 
   delegate :domain, :key, :title, :body, to: :body_document
 

@@ -43,7 +43,8 @@ class CreateMeeting
         id: meeting_id,
         body:,
         meeting_document: document,
-        event_stream: stream
+        event_stream: stream,
+        procedural_policy: default_policy
       )
       Result.new(meeting:, document:, draft: document.draft_for(actor:))
     end
@@ -76,5 +77,14 @@ class CreateMeeting
     document.update!(head_revision: revision)
     SchemaWrapper.create!(document:)
     document
+  end
+
+  def default_policy
+    @default_policy ||= CreateProceduralPolicy.call(
+      body:,
+      name: Meetings::DefaultPolicy::NAME,
+      definition: Meetings::DefaultPolicy::BODY,
+      actor:
+    )
   end
 end

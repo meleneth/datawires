@@ -68,6 +68,11 @@ class Document < ApplicationRecord
           foreign_key: :proposal_document_id,
           dependent: :restrict_with_exception
 
+  has_one :procedural_policy,
+          class_name: "ProceduralPolicy",
+          foreign_key: :policy_document_id,
+          dependent: :restrict_with_exception
+
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
   has_one :schema_wrapper,

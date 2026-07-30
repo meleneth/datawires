@@ -18,5 +18,13 @@ FactoryBot.define do
     event_stream do
       create(:event_stream, domain: body.domain, stream_type: "meeting", subject_id: id)
     end
+    procedural_policy do
+      CreateProceduralPolicy.call(
+        body:,
+        name: Meetings::DefaultPolicy::NAME,
+        definition: Meetings::DefaultPolicy::BODY,
+        actor: create(:user)
+      )
+    end
   end
 end

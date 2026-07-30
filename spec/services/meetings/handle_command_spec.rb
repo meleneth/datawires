@@ -10,6 +10,8 @@ RSpec.describe Meetings::HandleCommand do
     context = actor_context(actor)
 
     handle(meeting, context, "open_meeting", 0)
+    opened = meeting.event_stream.event_records.last
+    expect(opened.provenance.dig("policy", "revision_id")).to eq(meeting.procedural_policy.policy_document.head_revision_id)
     handle(meeting, context, "establish_attendance", 1, "actor_ids" => [ actor.id ])
     handle(meeting, context, "establish_quorum", 2, "present" => true, "basis" => "members_present")
     handle(meeting, context, "adjourn_meeting", 3)

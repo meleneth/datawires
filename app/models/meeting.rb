@@ -4,6 +4,7 @@ class Meeting < ApplicationRecord
   belongs_to :meeting_document, class_name: "Document"
   belongs_to :body
   belongs_to :event_stream
+  belongs_to :procedural_policy
 
   has_many :role_assignments, as: :scope, dependent: :destroy
 

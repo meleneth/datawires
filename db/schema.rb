@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000006) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -190,10 +190,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000006) do
     t.datetime "created_at", null: false
     t.uuid "event_stream_id", null: false
     t.uuid "meeting_document_id", null: false
+    t.uuid "procedural_policy_id"
     t.datetime "updated_at", null: false
     t.index ["body_id"], name: "index_meetings_on_body_id"
     t.index ["event_stream_id"], name: "index_meetings_on_event_stream_id", unique: true
     t.index ["meeting_document_id"], name: "index_meetings_on_meeting_document_id", unique: true
+    t.index ["procedural_policy_id"], name: "index_meetings_on_procedural_policy_id"
   end
 
   create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -218,6 +220,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000006) do
     t.uuid "room_id", null: false
     t.datetime "updated_at", null: false
     t.index ["room_id"], name: "index_messages_on_room_id"
+  end
+
+  create_table "procedural_policies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "body_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.uuid "policy_document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["body_id", "name"], name: "index_procedural_policies_on_body_id_and_name", unique: true
+    t.index ["body_id"], name: "index_procedural_policies_on_body_id"
+    t.index ["policy_document_id"], name: "index_procedural_policies_on_policy_document_id", unique: true
   end
 
   create_table "proposals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -334,10 +347,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000006) do
   add_foreign_key "meetings", "bodies"
   add_foreign_key "meetings", "documents", column: "meeting_document_id"
   add_foreign_key "meetings", "event_streams"
+  add_foreign_key "meetings", "procedural_policies"
   add_foreign_key "memberships", "bodies"
   add_foreign_key "memberships", "users", column: "actor_id"
   add_foreign_key "memberships", "users", column: "recorded_by_id"
   add_foreign_key "messages", "rooms"
+  add_foreign_key "procedural_policies", "bodies"
+  add_foreign_key "procedural_policies", "documents", column: "policy_document_id"
   add_foreign_key "proposals", "bodies"
   add_foreign_key "proposals", "documents", column: "proposal_document_id"
   add_foreign_key "proposals", "revisions", column: "submitted_revision_id"

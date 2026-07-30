@@ -139,6 +139,11 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
   lineage to the exact submitted `Revision`. Scheduling records that revision
   in the Meeting event stream but deliberately leaves the pending-question
   stack empty; a Proposal is not a Motion or pending business.
+- `ProceduralPolicy` is a schema-backed, versioned policy document attached to
+  a Body and selected by a Meeting. Its typed command definitions select only
+  registered capabilities, allowed lifecycle states, event effects, versions,
+  and payload types. Event provenance records the exact policy document
+  revision used. Policy data cannot name Ruby classes or execute code.
 
 Supported JSON Schema currently means:
 

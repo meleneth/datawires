@@ -4,49 +4,6 @@ module Meetings
   class HandleCommand
     class Rejected < StandardError; end
 
-    COMMANDS = {
-      "open_meeting" => {
-        capability: :open_meeting,
-        event: "MeetingOpened",
-        allowed_statuses: %w[scheduled]
-      },
-      "establish_attendance" => {
-        capability: :chair_action,
-        event: "AttendanceEstablished",
-        allowed_statuses: %w[open]
-      },
-      "establish_quorum" => {
-        capability: :chair_action,
-        event: "QuorumEstablished",
-        allowed_statuses: %w[open]
-      },
-      "adjourn_meeting" => {
-        capability: :chair_action,
-        event: "MeetingAdjourned",
-        allowed_statuses: %w[open]
-      },
-      "request_recognition" => {
-        capability: :request_recognition,
-        event: "RecognitionRequested",
-        allowed_statuses: %w[open]
-      },
-      "recognize_member" => {
-        capability: :chair_action,
-        event: "MemberRecognized",
-        allowed_statuses: %w[open]
-      },
-      "relinquish_floor" => {
-        capability: :request_recognition,
-        event: "FloorRelinquished",
-        allowed_statuses: %w[open]
-      },
-      "schedule_proposal" => {
-        capability: :schedule_proposal,
-        event: "ProposalScheduled",
-        allowed_statuses: %w[scheduled open]
-      }
-    }.freeze
-
     def self.call(meeting:, command:, authorizer: Authorization::Policy)
       new(meeting:, command:, authorizer:).call
     end
@@ -61,28 +18,34 @@ module Meetings
     end
 
     def call
-      definition = COMMANDS[command.type]
+      definition = meeting.procedural_policy.projection.command(command.type)
       raise Rejected, "Unsupported meeting command." unless definition
 
       decision = authorizer.call(
         actor: command.actor,
-        action: definition.fetch(:capability),
+        action: definition.capability,
         resource: { body: meeting.body, meeting:, at: command.timestamp }
       )
       raise Rejected, decision.reason unless decision.allowed?
 
       projection = meeting.projection
-      unless definition.fetch(:allowed_statuses).include?(projection.status)
+      unless definition.allowed_statuses.include?(projection.status)
         raise Rejected, "#{command.type.humanize} is unavailable while the meeting is #{projection.status}."
       end
 
       validate_payload!
       validate_procedure!(projection)
       event = Events::Data.new(
-        type: definition.fetch(:event),
-        version: 1,
+        type: definition.event_type,
+        version: definition.event_version,
         payload: event_payload,
-        provenance: { "authorization" => { "allowed" => true, "capability" => definition.fetch(:capability).to_s } }
+        provenance: {
+          "authorization" => { "allowed" => true, "capability" => definition.capability.to_s },
+          "policy" => {
+            "id" => meeting.procedural_policy.id,
+            "revision_id" => meeting.procedural_policy.policy_document.head_revision_id
+          }
+        }
       )
       EventStreams::Append.call(stream: meeting.event_stream, command:, events: [ event ])
     end
@@ -92,13 +55,17 @@ module Meetings
     attr_reader :meeting, :command, :authorizer
 
     def validate_payload!
-      if command.type == "establish_attendance" && !command.payload["actor_ids"].is_a?(Array)
-        raise Rejected, "Attendance requires actor_ids."
+      definition = meeting.procedural_policy.projection.command(command.type)
+      definition.payload.each do |key, type|
+        value = command.payload[key]
+        valid = case type
+        when "array" then value.is_a?(Array)
+        when "boolean" then [ true, false ].include?(value)
+        when "string" then value.is_a?(String)
+        when "uuid" then UuidTools::FORMAT.match?(value.to_s)
+        end
+        raise Rejected, "#{key.humanize} must be a #{type}." unless valid
       end
-      return unless command.type == "establish_quorum"
-      return if [ true, false ].include?(command.payload["present"])
-
-      raise Rejected, "Quorum requires a boolean present value."
     end
 
     def validate_procedure!(projection)
