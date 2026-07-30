@@ -135,6 +135,10 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
   projection state. The projection retains ordered requests, the one current
   floor holder, grant/end reasons, and participation history; relinquishment
   and adjournment end the floor without rewriting prior events.
+- `Proposal` is a schema-backed document submitted to a `Body` with immutable
+  lineage to the exact submitted `Revision`. Scheduling records that revision
+  in the Meeting event stream but deliberately leaves the pending-question
+  stack empty; a Proposal is not a Motion or pending business.
 
 Supported JSON Schema currently means:
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -220,6 +220,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000005) do
     t.index ["room_id"], name: "index_messages_on_room_id"
   end
 
+  create_table "proposals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "body_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "proposal_document_id", null: false
+    t.datetime "submitted_at", null: false
+    t.uuid "submitted_by_id", null: false
+    t.uuid "submitted_revision_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["body_id"], name: "index_proposals_on_body_id"
+    t.index ["proposal_document_id"], name: "index_proposals_on_proposal_document_id", unique: true
+    t.index ["submitted_by_id"], name: "index_proposals_on_submitted_by_id"
+    t.index ["submitted_revision_id"], name: "index_proposals_on_submitted_revision_id"
+  end
+
   create_table "revisions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "body", null: false
     t.datetime "created_at", null: false
@@ -324,6 +338,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000005) do
   add_foreign_key "memberships", "users", column: "actor_id"
   add_foreign_key "memberships", "users", column: "recorded_by_id"
   add_foreign_key "messages", "rooms"
+  add_foreign_key "proposals", "bodies"
+  add_foreign_key "proposals", "documents", column: "proposal_document_id"
+  add_foreign_key "proposals", "revisions", column: "submitted_revision_id"
+  add_foreign_key "proposals", "users", column: "submitted_by_id"
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"

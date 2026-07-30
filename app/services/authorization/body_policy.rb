@@ -6,6 +6,7 @@ module Authorization
       submit_proposal: %w[member chair secretary temporary_chair],
       request_recognition: %w[member chair secretary temporary_chair],
       create_meeting: %w[chair secretary],
+      schedule_proposal: %w[chair secretary],
       open_meeting: %w[chair temporary_chair],
       record_minutes: %w[secretary],
       vote: %w[member chair secretary temporary_chair],

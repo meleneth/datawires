@@ -63,6 +63,11 @@ class Document < ApplicationRecord
           foreign_key: :meeting_document_id,
           dependent: :restrict_with_exception
 
+  has_one :proposal,
+          class_name: "Proposal",
+          foreign_key: :proposal_document_id,
+          dependent: :restrict_with_exception
+
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
   has_one :schema_wrapper,

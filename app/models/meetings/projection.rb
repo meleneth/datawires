@@ -11,7 +11,9 @@ module Meetings
     :recognition_requests,
     :floor_holder_id,
     :floor_reason,
-    :floor_history
+    :floor_history,
+    :scheduled_proposals,
+    :pending_question_stack
   ) do
     def self.empty
       new(
@@ -24,7 +26,9 @@ module Meetings
         recognition_requests: [],
         floor_holder_id: nil,
         floor_reason: nil,
-        floor_history: []
+        floor_history: [],
+        scheduled_proposals: [],
+        pending_question_stack: []
       )
     end
 
@@ -92,6 +96,15 @@ module Meetings
           floor_reason: nil,
           floor_history: UuidTools.deep_freeze(history)
         )
+      when "ProposalScheduled"
+        scheduled = scheduled_proposals + [
+          {
+            "proposal_id" => record.payload.fetch("proposal_id"),
+            "proposal_revision_id" => record.payload.fetch("proposal_revision_id"),
+            "scheduled_by_id" => record.actor_id
+          }
+        ]
+        attributes.merge!(scheduled_proposals: UuidTools.deep_freeze(scheduled))
       end
       self.class.new(**attributes)
     end
