@@ -661,7 +661,7 @@ threshold rules remain possible.
 - [ ] Add `Vote`, `ElectorateSnapshot`, `Ballot/CastVote`, `VoteRequirement`,
       and `VoteResult` types with immutable links to Meeting revision and the
       exact PendingQuestionVersion presented.
-- [ ] Implement commands/events equivalent to open vote, cast vote, change vote
+- [x] Implement commands/events equivalent to open vote, cast vote, change vote
       where initially permitted, close vote, and announce/certify result.
 - [ ] Initial vertical slice: attributable counted yes/no/abstain voting with
       explicit electorate snapshot, attendance/eligibility, quorum basis,

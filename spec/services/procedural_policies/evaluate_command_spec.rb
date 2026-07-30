@@ -107,6 +107,59 @@ RSpec.describe ProceduralPolicies::EvaluateCommand do
     expect(result.fetch(:vote_state)).to be_nil
   end
 
+  it "resolves rejected-main-question decision evidence from policy data" do
+    meeting = create(:meeting)
+    actor = create(:user)
+    question = {
+      "id" => SecureRandom.uuid,
+      "motion_id" => SecureRandom.uuid,
+      "kind" => "main",
+      "version" => 1,
+      "status" => "result_announced",
+      "proposal_id" => SecureRandom.uuid,
+      "proposal_revision_id" => SecureRandom.uuid,
+      "content" => { "text" => "Final text" },
+      "versions" => [ { "version" => 1, "content" => { "text" => "Final text" } } ]
+    }
+    vote_id = SecureRandom.uuid
+    projection = Meetings::Projection.empty.with(
+      status: "open",
+      pending_question_stack: [ question ],
+      vote_state: {
+        "id" => vote_id,
+        "result" => { "adopted" => false, "tie" => false }
+      }
+    )
+    definition = ProceduralPolicies::Projection
+      .build(ProceduralPolicies::Defaults.meeting_lifecycle)
+      .command("dispose_rejected_main_question")
+    command = Commands::Envelope.new(
+      id: SecureRandom.uuid,
+      type: definition.name,
+      version: definition.command_version,
+      stream_id: meeting.event_stream_id,
+      expected_revision: 0,
+      actor: actor_context(actor),
+      timestamp: Time.current
+    )
+
+    evaluation = described_class.call(meeting:, command:, definition:, projection:)
+    result = ProceduralPolicies::ApplyEffects.call(
+      state: projection.to_h,
+      effects: evaluation.projection_effects
+    )
+
+    expect(evaluation.event_payload).to include(
+      "decision_id" => UuidTools.derive(command.id, "decision"),
+      "question_id" => question.fetch("id"),
+      "final_content" => { "text" => "Final text" },
+      "vote_id" => vote_id,
+      "disposition" => "rejected"
+    )
+    expect(result.fetch(:pending_question_stack)).to be_empty
+    expect(result.fetch(:vote_state)).to be_nil
+  end
+
   def command_definition(entry_id)
     body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
     body["commands"] = {

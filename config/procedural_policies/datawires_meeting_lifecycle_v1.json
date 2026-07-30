@@ -732,6 +732,102 @@
         }},
         {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
       ]
+    },
+    "dispose_adopted_main_question": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MainQuestionAdopted",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "kind",
+          "value": {"source": "literal", "value": "main"},
+          "reason": "The immediately pending question is not a main question."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "result_announced"},
+          "reason": "The main-question result has not been announced."
+        },
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/result/adopted",
+          "value": {"source": "literal", "value": true},
+          "reason": "The announced vote did not adopt the main question."
+        }
+      ],
+      "event_payload": {
+        "decision_id": {"source": "derived_id", "name": "decision"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "proposal_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_id"},
+        "proposal_revision_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_revision_id"},
+        "final_content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+        "question_versions": {"source": "stack_top", "field": "pending_question_stack", "attribute": "versions"},
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "vote_result": {"source": "projection_path", "field": "vote_state", "path": "/result"},
+        "disposition": {"source": "literal", "value": "adopted"},
+        "disposed_by_id": {"source": "actor_id"},
+        "disposed_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_pop", "field": "pending_question_stack"},
+        {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
+      ]
+    },
+    "dispose_rejected_main_question": {
+      "capability": "chair_action",
+      "allowed_statuses": ["open"],
+      "event_type": "MainQuestionRejected",
+      "event_version": 1,
+      "conditions": [
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "kind",
+          "value": {"source": "literal", "value": "main"},
+          "reason": "The immediately pending question is not a main question."
+        },
+        {
+          "op": "stack_top_equals",
+          "field": "pending_question_stack",
+          "match_field": "status",
+          "value": {"source": "literal", "value": "result_announced"},
+          "reason": "The main-question result has not been announced."
+        },
+        {
+          "op": "path_equals",
+          "field": "vote_state",
+          "path": "/result/adopted",
+          "value": {"source": "literal", "value": false},
+          "reason": "The announced vote adopted the main question."
+        }
+      ],
+      "event_payload": {
+        "decision_id": {"source": "derived_id", "name": "decision"},
+        "question_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "id"},
+        "question_version": {"source": "stack_top", "field": "pending_question_stack", "attribute": "version"},
+        "motion_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "motion_id"},
+        "proposal_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_id"},
+        "proposal_revision_id": {"source": "stack_top", "field": "pending_question_stack", "attribute": "proposal_revision_id"},
+        "final_content": {"source": "stack_top", "field": "pending_question_stack", "attribute": "content"},
+        "question_versions": {"source": "stack_top", "field": "pending_question_stack", "attribute": "versions"},
+        "vote_id": {"source": "projection_path", "field": "vote_state", "path": "/id"},
+        "vote_result": {"source": "projection_path", "field": "vote_state", "path": "/result"},
+        "disposition": {"source": "literal", "value": "rejected"},
+        "disposed_by_id": {"source": "actor_id"},
+        "disposed_at": {"source": "timestamp_iso8601"}
+      },
+      "effects": [
+        {"op": "stack_pop", "field": "pending_question_stack"},
+        {"op": "set", "field": "vote_state", "value": {"source": "literal", "value": null}}
+      ]
     }
   }
 }

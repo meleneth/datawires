@@ -224,6 +224,55 @@ RSpec.describe "Introducing a pending question from a Proposal" do
     )
     expect(meeting.projection.vote_state).to be_nil
     expect(meeting.event_stream.event_records.last.event_type).to eq("AmendmentAdopted")
+
+    handle(meeting, chair, "establish_attendance", 21, { "actor_ids" => electorate })
+    main_vote_id = SecureRandom.uuid
+    handle(
+      meeting,
+      chair,
+      "open_vote_on_pending_question",
+      22,
+      {},
+      command_id: main_vote_id
+    )
+    expect(meeting.projection.vote_state).to include(
+      "question_id" => question_id,
+      "question_version" => 2,
+      "electorate_actor_ids" => electorate
+    )
+    handle(meeting, member, "cast_counted_ballot", 23, { "choice" => "yes" })
+    handle(meeting, chair, "cast_counted_ballot", 24, { "choice" => "yes" })
+    handle(meeting, chair, "close_counted_vote", 25)
+    handle(meeting, chair, "announce_counted_vote_result", 26)
+    disposition_command_id = SecureRandom.uuid
+    handle(
+      meeting,
+      chair,
+      "dispose_adopted_main_question",
+      27,
+      {},
+      command_id: disposition_command_id
+    )
+
+    disposition = meeting.event_stream.event_records.last
+    expect(disposition).to have_attributes(
+      event_type: "MainQuestionAdopted",
+      payload: include(
+        "decision_id" => UuidTools.derive(disposition_command_id, "decision"),
+        "question_id" => question_id,
+        "question_version" => 2,
+        "motion_id" => command_id,
+        "proposal_id" => proposal.id,
+        "proposal_revision_id" => proposal.submitted_revision_id,
+        "final_content" => { "text" => "Amended text" },
+        "question_versions" => resumed.last.fetch("versions"),
+        "vote_id" => main_vote_id,
+        "vote_result" => include("adopted" => true),
+        "disposition" => "adopted"
+      )
+    )
+    expect(meeting.projection.pending_question_stack).to be_empty
+    expect(meeting.projection.vote_state).to be_nil
     expect(Meetings::Projection.rebuild(meeting.event_stream.event_records.reload)).to eq(meeting.projection)
   end
 
