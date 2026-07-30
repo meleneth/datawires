@@ -9,3 +9,53 @@
 
 @source inline("col-span-{1..12}");
 @source inline("grid-cols-{1..12}");
+
+/*
+ * Dark application theme built exclusively from the Lospec500 palette:
+ * https://lospec.com/palette-list/lospec500
+ */
+:root {
+  color-scheme: dark;
+
+  --background: 230 27.3% 8.6%;          /* #10121c */
+  --foreground: 21.8 55% 92.2%;         /* #f6e8e0 */
+  --card: 284.2 24.1% 15.5%;            /* #2c1e31 */
+  --card-foreground: 21.8 55% 92.2%;    /* #f6e8e0 */
+  --primary: 36.6 88.9% 57.6%;          /* #f3a833 */
+  --primary-foreground: 230 27.3% 8.6%; /* #10121c */
+  --secondary: 210.2 72.2% 53.5%;       /* #3388de */
+  --secondary-foreground: 230 27.3% 8.6%; /* #10121c */
+  --muted: 244.3 26.2% 31.4%;           /* #3e3b65 */
+  --muted-foreground: 271 46.3% 86.9%;   /* #deceed */
+  --accent: 318.8 42.1% 62.7%;          /* #c878af */
+  --accent-foreground: 230 27.3% 8.6%;  /* #10121c */
+  --destructive: 345.9 62.3% 41.6%;     /* #ac2847 */
+  --destructive-foreground: 0 0% 100%;  /* #ffffff */
+  --border: 243.7 21.2% 45.3%;          /* #5e5b8c */
+
+  --shadow-xs: 1px 1px 0 0 hsl(var(--border));
+  --shadow-sm: 2px 2px 0 0 hsl(var(--border));
+  --shadow: 3px 3px 0 0 hsl(var(--border));
+  --shadow-md: 4px 4px 0 0 hsl(var(--border));
+  --shadow-lg: 6px 6px 0 0 hsl(var(--border));
+  --shadow-xl: 8px 8px 0 0 hsl(var(--border));
+  --shadow-2xl: 12px 12px 0 0 hsl(var(--border));
+}
+
+/*
+ * Existing RetroUI components use black as their structural outline. Keep
+ * their markup stable while bringing those outlines into the app palette.
+ */
+.border-black {
+  border-color: hsl(var(--border));
+}
+
+.stroke-black {
+  stroke: hsl(var(--border));
+}
+
+input,
+select,
+textarea {
+  accent-color: hsl(var(--primary));
+}
