@@ -1,9 +1,31 @@
 # frozen_string_literal: true
 
 module Meetings
-  Projection = Data.define(:revision, :status, :opened_at, :adjourned_at, :attendance_actor_ids, :quorum) do
+  Projection = Data.define(
+    :revision,
+    :status,
+    :opened_at,
+    :adjourned_at,
+    :attendance_actor_ids,
+    :quorum,
+    :recognition_requests,
+    :floor_holder_id,
+    :floor_reason,
+    :floor_history
+  ) do
     def self.empty
-      new(revision: 0, status: "scheduled", opened_at: nil, adjourned_at: nil, attendance_actor_ids: [], quorum: nil)
+      new(
+        revision: 0,
+        status: "scheduled",
+        opened_at: nil,
+        adjourned_at: nil,
+        attendance_actor_ids: [],
+        quorum: nil,
+        recognition_requests: [],
+        floor_holder_id: nil,
+        floor_reason: nil,
+        floor_history: []
+      )
     end
 
     def self.rebuild(records)
@@ -20,7 +42,56 @@ module Meetings
       when "QuorumEstablished"
         attributes.merge!(quorum: record.payload.deep_dup.freeze)
       when "MeetingAdjourned"
-        attributes.merge!(status: "adjourned", adjourned_at: record.occurred_at)
+        history = floor_history.deep_dup
+        if floor_holder_id
+          history.last&.merge!(
+            "ended_at" => record.occurred_at.iso8601,
+            "end_reason" => "meeting_adjourned"
+          )
+        end
+        attributes.merge!(
+          status: "adjourned",
+          adjourned_at: record.occurred_at,
+          recognition_requests: [],
+          floor_holder_id: nil,
+          floor_reason: nil,
+          floor_history: UuidTools.deep_freeze(history)
+        )
+      when "RecognitionRequested"
+        requests = recognition_requests + [
+          {
+            "actor_id" => record.payload.fetch("actor_id"),
+            "reason" => record.payload["reason"],
+            "requested_at" => record.occurred_at.iso8601
+          }.compact
+        ]
+        attributes.merge!(recognition_requests: UuidTools.deep_freeze(requests))
+      when "MemberRecognized"
+        actor_id = record.payload.fetch("actor_id")
+        history = floor_history + [
+          {
+            "actor_id" => actor_id,
+            "reason" => record.payload["reason"],
+            "granted_at" => record.occurred_at.iso8601
+          }.compact
+        ]
+        attributes.merge!(
+          recognition_requests: recognition_requests.reject { |request| request["actor_id"] == actor_id }.freeze,
+          floor_holder_id: actor_id,
+          floor_reason: record.payload["reason"],
+          floor_history: UuidTools.deep_freeze(history)
+        )
+      when "FloorRelinquished"
+        history = floor_history.deep_dup
+        history.last&.merge!(
+          "ended_at" => record.occurred_at.iso8601,
+          "end_reason" => record.payload["reason"].presence || "relinquished"
+        )
+        attributes.merge!(
+          floor_holder_id: nil,
+          floor_reason: nil,
+          floor_history: UuidTools.deep_freeze(history)
+        )
       end
       self.class.new(**attributes)
     end

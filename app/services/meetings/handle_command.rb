@@ -24,6 +24,21 @@ module Meetings
         capability: :chair_action,
         event: "MeetingAdjourned",
         allowed_statuses: %w[open]
+      },
+      "request_recognition" => {
+        capability: :request_recognition,
+        event: "RecognitionRequested",
+        allowed_statuses: %w[open]
+      },
+      "recognize_member" => {
+        capability: :chair_action,
+        event: "MemberRecognized",
+        allowed_statuses: %w[open]
+      },
+      "relinquish_floor" => {
+        capability: :request_recognition,
+        event: "FloorRelinquished",
+        allowed_statuses: %w[open]
       }
     }.freeze
 
@@ -57,10 +72,11 @@ module Meetings
       end
 
       validate_payload!
+      validate_procedure!(projection)
       event = Events::Data.new(
         type: definition.fetch(:event),
         version: 1,
-        payload: command.payload,
+        payload: event_payload,
         provenance: { "authorization" => { "allowed" => true, "capability" => definition.fetch(:capability).to_s } }
       )
       EventStreams::Append.call(stream: meeting.event_stream, command:, events: [ event ])
@@ -78,6 +94,37 @@ module Meetings
       return if [ true, false ].include?(command.payload["present"])
 
       raise Rejected, "Quorum requires a boolean present value."
+    end
+
+    def validate_procedure!(projection)
+      case command.type
+      when "request_recognition"
+        if projection.recognition_requests.any? { |request| request["actor_id"] == command.actor.user.id }
+          raise Rejected, "The actor already has a recognition request."
+        end
+      when "recognize_member"
+        actor_id = command.payload["actor_id"]
+        raise Rejected, "Recognition requires actor_id." if actor_id.blank?
+        raise Rejected, "Another actor currently holds the floor." if projection.floor_holder_id.present?
+        unless projection.recognition_requests.any? { |request| request["actor_id"] == actor_id }
+          raise Rejected, "The actor has not requested recognition."
+        end
+      when "relinquish_floor"
+        unless projection.floor_holder_id == command.actor.user.id
+          raise Rejected, "Only the current floor holder may relinquish the floor."
+        end
+      end
+    end
+
+    def event_payload
+      case command.type
+      when "request_recognition"
+        command.payload.merge("actor_id" => command.actor.user.id)
+      when "relinquish_floor"
+        command.payload.merge("actor_id" => command.actor.user.id)
+      else
+        command.payload
+      end
     end
   end
 end

@@ -131,6 +131,10 @@ Known local issue: specs can pass and then exit nonzero because SimpleCov cannot
 - Initial Meeting lifecycle commands are authorized from effective Body and
   Meeting-scoped roles, procedurally validated against the current projection,
   and appended through the generic optimistic event store.
+- Recognition requests and control of the floor are explicit Meeting events and
+  projection state. The projection retains ordered requests, the one current
+  floor holder, grant/end reasons, and participation history; relinquishment
+  and adjournment end the floor without rewriting prior events.
 
 Supported JSON Schema currently means:
 
