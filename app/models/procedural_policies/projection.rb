@@ -47,5 +47,9 @@ module ProceduralPolicies
     def command(name)
       @commands[name]
     end
+
+    def commands
+      @commands.values
+    end
   end
 end

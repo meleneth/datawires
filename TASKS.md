@@ -519,10 +519,10 @@ state.
       Rules defaults supplied by the cluster's policy documents and contextual
       evaluation by the generic Datawires evaluator; record the policy version
       and result used.
-- [ ] Distinguish general capability to seek/make a motion from current
+- [x] Distinguish general capability to seek/make a motion from current
       procedural prerequisites such as recognition and another actor holding
       the floor.
-- [ ] Expose available, prerequisite-needed, and unavailable commands with
+- [x] Expose available, prerequisite-needed, and unavailable commands with
       reasons and expected effects.
 
 **Invariants:**

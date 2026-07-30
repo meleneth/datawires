@@ -36,7 +36,8 @@ module Meetings
         raise Rejected, "#{command.type.humanize} is unavailable while the meeting is #{projection.status}."
       end
 
-      validate_payload!
+      payload_errors = ProceduralPolicies::ValidatePayload.call(payload: command.payload, definition:)
+      raise Rejected, payload_errors.to_sentence if payload_errors.any?
       evaluation = ProceduralPolicies::EvaluateCommand.call(
         meeting:,
         command:,
@@ -64,19 +65,5 @@ module Meetings
     private
 
     attr_reader :meeting, :command, :authorizer
-
-    def validate_payload!
-      definition = meeting.procedural_policy.projection.command(command.type)
-      definition.payload.each do |key, type|
-        value = command.payload[key]
-        valid = case type
-        when "array" then value.is_a?(Array)
-        when "boolean" then [ true, false ].include?(value)
-        when "string" then value.is_a?(String)
-        when "uuid" then UuidTools::FORMAT.match?(value.to_s)
-        end
-        raise Rejected, "#{key.humanize} must be a #{type}." unless valid
-      end
-    end
   end
 end
