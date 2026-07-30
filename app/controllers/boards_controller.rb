@@ -8,8 +8,11 @@ class BoardsController < ApplicationController
     require_visible_domain!(@domain)
     @projection = @board.projection
     @section_results = @projection.sections.to_h do |section|
-      result = if section.kind == "document_collection"
+      result = case section.kind
+      when "document_collection"
         Boards::DocumentCollection.call(board: @board, section:)
+      when "meeting_collection"
+        Boards::MeetingCollection.call(board: @board, section:)
       end
       [ section.id, result ]
     end

@@ -51,11 +51,51 @@ RSpec.describe Boards::BodyValidator do
     expect(validator).to be_valid
   end
 
+  it "accepts a meeting collection constrained by projection status" do
+    body["sections"] = [
+      {
+        "id" => "recent-meetings",
+        "kind" => "meeting_collection",
+        "title" => "Recent meetings",
+        "config" => {
+          "statuses" => %w[adjourned],
+          "order" => { "by" => "scheduled_at", "direction" => "desc" },
+          "limit" => 5,
+          "navigation" => "document"
+        }
+      }
+    ]
+
+    expect(validator).to be_valid
+  end
+
+  it "rejects an unbounded meeting collection" do
+    body["sections"] = [
+      {
+        "id" => "meetings",
+        "kind" => "meeting_collection",
+        "title" => "Meetings",
+        "config" => {
+          "statuses" => [],
+          "order" => { "by" => "title" }
+        }
+      }
+    ]
+
+    expect(validator).not_to be_valid
+    expect(validator.errors).to include("sections[0].config.statuses must be a non-empty array of strings")
+    expect(validator.errors).to include(
+      "sections[0].config.order.by must be one of: scheduled_at, created_at, updated_at"
+    )
+  end
+
   it "rejects unknown kinds and duplicate ids" do
     body["sections"] << { "id" => "proposals", "kind" => "analytics", "title" => "Other" }
 
     expect(validator).not_to be_valid
-    expect(validator.errors).to include("sections[1].kind must be one of: document_collection, summary")
+    expect(validator.errors).to include(
+      "sections[1].kind must be one of: document_collection, meeting_collection, summary"
+    )
     expect(validator.errors).to include("sections ids must be unique: proposals")
   end
 
