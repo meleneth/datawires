@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_06_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -235,6 +235,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_06_000001) do
     t.index ["policy_document_id"], name: "index_procedural_policies_on_policy_document_id", unique: true
   end
 
+  create_table "project_affordances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "default_board_id"
+    t.uuid "domain_id", null: false
+    t.uuid "project_document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["default_board_id"], name: "index_project_affordances_on_default_board_id"
+    t.index ["domain_id"], name: "index_project_affordances_on_domain_id", unique: true
+    t.index ["project_document_id"], name: "index_project_affordances_on_project_document_id", unique: true
+  end
+
   create_table "proposals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "body_id", null: false
     t.datetime "created_at", null: false
@@ -356,6 +367,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_06_000001) do
   add_foreign_key "messages", "rooms"
   add_foreign_key "procedural_policies", "bodies"
   add_foreign_key "procedural_policies", "documents", column: "policy_document_id"
+  add_foreign_key "project_affordances", "boards", column: "default_board_id", on_delete: :nullify
+  add_foreign_key "project_affordances", "documents", column: "project_document_id"
+  add_foreign_key "project_affordances", "domains"
   add_foreign_key "proposals", "bodies"
   add_foreign_key "proposals", "documents", column: "proposal_document_id"
   add_foreign_key "proposals", "revisions", column: "submitted_revision_id"

@@ -16,6 +16,7 @@ RSpec.describe Clusters::SeedDomain do
     expect(domain.documents.find_by!(key: "place").body).to include(
       "x-datawires-document-key" => '#{kind} - #{name}'
     )
+    expect(domain.reload.project_affordance).to be_nil
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
     expect(home.schema_document.key).to eq("domain-home-page")
     expect(home.schema_document.schema_wrapper.edit_affordances.sole.title).to eq("Default")

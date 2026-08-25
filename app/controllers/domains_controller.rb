@@ -8,6 +8,8 @@ class DomainsController < ApplicationController
 
   # GET /domains/1 or /domains/1.json
   def show
+    @project_affordance = @domain.project_affordance
+    @project_navigation_groups = @project_affordance ? ProjectAffordances::Navigation.for(@project_affordance) : []
     @schemas = SchemaWrapper
       .includes(:document)
       .joins(:document)

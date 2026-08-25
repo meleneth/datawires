@@ -75,6 +75,11 @@ class Document < ApplicationRecord
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
 
+  has_one :project_affordance,
+          foreign_key: :project_document_id,
+          inverse_of: :project_document,
+          dependent: :restrict_with_exception
+
   has_one :schema_wrapper,
         class_name: "SchemaWrapper",
         dependent: :destroy,

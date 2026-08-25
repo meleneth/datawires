@@ -1,5 +1,27 @@
 = turbo_frame_tag "main_content" do
-  = render TypographyComponent.new(as: :h1, text: "#{@domain.name} Domain", html_options: { class: "mb-4" })
+  = render TypographyComponent.new(as: :h1, text: @project_affordance&.title || "#{@domain.name} Domain", html_options: { class: "mb-4" })
+
+  - if @project_affordance&.description.present?
+    %p.mb-4.text-muted-foreground= @project_affordance.description
+
+  - if @project_affordance&.default_board
+    .mb-4
+      = render ButtonComponent.new(href: board_path(@project_affordance.default_board), variant: :default) do
+        Open project board
+
+  - if @project_affordance
+    .mb-4.flex.flex-wrap.gap-2
+      = button_to "Edit project configuration",
+        document_draft_path(@project_affordance.project_document),
+        method: :post,
+        form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
+        class: "font-head inline-flex h-8 items-center rounded border-2 border-black bg-secondary px-3 text-sm shadow-sm"
+  - else
+    .mb-4
+      = button_to "Enable project workspace",
+        domain_project_affordance_path(@domain),
+        method: :post,
+        class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-primary px-4 text-sm text-primary-foreground shadow-sm"
 
   = render CardComponent.new(html_options: { class: "w-full" }) do
     = render CardContentComponent.new do
@@ -15,7 +37,7 @@
 
         .flex.flex-wrap.items-center.gap-3
           = render ButtonComponent.new(href: edit_domain_path(@domain), variant: :secondary, size: :sm) do
-            Edit this domain
+            = @project_affordance ? "Edit project settings" : "Edit this domain"
           = render ButtonComponent.new(href: domains_path, variant: :outline, size: :sm) do
             Back to domains
           = render ButtonComponent.new(href: domain_archive_path(@domain), variant: :outline, size: :sm) do
@@ -40,6 +62,20 @@
                 %p.text-sm.text-destructive= @document.errors[:key].to_sentence
             = render ButtonComponent.new(html_options: { type: :submit }) do
               Create
+
+  - if @project_affordance && @project_navigation_groups.any?
+    .mt-6.grid.gap-4.md:grid-cols-2
+      - @project_navigation_groups.each do |group|
+        = render CardComponent.new do
+          = render CardContentComponent.new do
+            = render TypographyComponent.new(as: :h3, text: group["title"])
+            - if group["links"].any?
+              %ul.mt-3.space-y-2
+                - group["links"].each do |link|
+                  %li
+                    = link_to link["title"], link["href"], class: "font-head underline"
+                    - if link["description"].present?
+                      %p.text-sm.text-muted-foreground= link["description"]
 
   = render "domains/home_links"
   = render "domains/open_drafts"

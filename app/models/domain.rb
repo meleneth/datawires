@@ -2,6 +2,7 @@ class Domain < ApplicationRecord
   has_many :event_streams, dependent: :restrict_with_exception
   has_many :documents, dependent: :restrict_with_exception
   has_many :domain_commits, dependent: :restrict_with_exception
+  has_one :project_affordance, dependent: :destroy, inverse_of: :domain
 
   belongs_to :owner,
              class_name: "User",
@@ -44,6 +45,10 @@ class Domain < ApplicationRecord
 
   def private?
     !public?
+  end
+
+  def project?
+    project_affordance.present?
   end
 
   def visible_to?(user)
