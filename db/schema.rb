@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000007) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_06_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -99,6 +99,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000007) do
   end
 
   create_table "domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.uuid "head_domain_commit_id"
     t.string "name", null: false
@@ -106,6 +107,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000007) do
     t.boolean "public", default: false, null: false
     t.boolean "repository_mode", default: false, null: false
     t.datetime "updated_at", null: false
+    t.index ["archived_at"], name: "index_domains_on_archived_at"
     t.index ["head_domain_commit_id"], name: "index_domains_on_head_domain_commit_id"
     t.index ["name"], name: "index_domains_on_name", unique: true
     t.index ["owner_id", "public"], name: "index_domains_on_owner_id_and_public"

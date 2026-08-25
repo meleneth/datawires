@@ -265,7 +265,7 @@ module Clusters
       schema(
         key: "place",
         title: "Place",
-        required: %w[name],
+        required: %w[kind name],
         properties: {
           "name" => string("Name"),
           "kind" => string("Kind"),
@@ -278,14 +278,16 @@ module Clusters
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
         ]
-      )
+      ).tap do |definition|
+        definition.fetch(:body)[Documents::KeyTemplate::METADATA_KEY] = '#{kind} - #{name}'
+      end
     end
 
     def thing_schema
       schema(
         key: "thing",
         title: "Thing",
-        required: %w[name],
+        required: %w[kind name],
         properties: {
           "name" => string("Name"),
           "kind" => string("Kind"),
@@ -298,7 +300,9 @@ module Clusters
           [ field("/notes", span: 12, widget: "textarea") ],
           [ commit(span: 12) ]
         ]
-      )
+      ).tap do |definition|
+        definition.fetch(:body)[Documents::KeyTemplate::METADATA_KEY] = '#{kind} - #{name}'
+      end
     end
 
     def party_schema

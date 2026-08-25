@@ -53,6 +53,8 @@ RSpec.describe "Draft array items", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Abandon")
+    expect(response.body).to include(document.domain.name)
+    expect(response.body).to include(document.schema_document.title)
     expect(response.body).to include(%(action="#{draft_path(draft)}"))
   end
 

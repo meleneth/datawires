@@ -23,7 +23,11 @@
           - if @domain.repository_mode?
             = render ButtonComponent.new(href: domain_domain_commits_path(@domain), variant: :outline, size: :sm) do
               Repository history
-          = button_to "Destroy this domain", @domain, method: :delete, class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
+          = button_to "Archive this domain",
+            @domain,
+            method: :delete,
+            form: { data: { turbo_confirm: "Are you sure? This domain will be hidden, but its data will be retained for recovery." } },
+            class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
 
         .space-y-3
           = render TypographyComponent.new(as: :h3, text: "Add schema")

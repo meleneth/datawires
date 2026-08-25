@@ -84,6 +84,51 @@ RSpec.describe PublishDraft do
       expect(DocumentIndexes::RebuildJob).to have_been_enqueued.with(doc.id, revision.id)
     end
 
+    it "renders a schema document-key template from the published body" do
+      domain = create(:domain)
+      schema = create(
+        :document,
+        :with_schema_head_revision,
+        domain: domain,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "datawires:clusters/worldbuilding/thing",
+          "type" => "object",
+          "x-datawires-document-key" => '#{kind} - #{name}'
+        }
+      )
+      doc = create(:document, domain: domain, schema_document: schema, key: "document-temporary")
+      draft = create(:draft, document: doc, body: { "kind" => "Artifact", "name" => "Palantir" })
+
+      described_class.call(draft:, message: "publish thing")
+
+      expect(doc.reload.key).to eq("Artifact - Palantir")
+    end
+
+    it "rolls back publishing when a document-key template value is missing" do
+      domain = create(:domain)
+      schema = create(
+        :document,
+        :with_schema_head_revision,
+        domain: domain,
+        head_body: {
+          "$schema" => Document::JSON_SCHEMA_2020_12,
+          "$id" => "datawires:clusters/worldbuilding/thing",
+          "type" => "object",
+          "x-datawires-document-key" => '#{kind} - #{name}'
+        }
+      )
+      doc = create(:document, domain: domain, schema_document: schema, key: "document-temporary")
+      draft = create(:draft, document: doc, body: { "kind" => "Artifact" })
+
+      expect {
+        described_class.call(draft:, message: "publish thing")
+      }.to raise_error(ArgumentError, /template value "name" is missing/)
+
+      expect(doc.reload).to have_attributes(key: "document-temporary", head_revision: nil)
+      expect(draft.reload).to be_persisted
+    end
+
     it "advances domain head commits for repository-mode domains" do
       domain = create(:domain, repository_mode: true)
       doc = create(:document, domain: domain, key: "agreement")

@@ -68,7 +68,7 @@
                       remove_item_path,
                       method: :patch,
                       params: item_link[:remove_params],
-                      data: { turbo_frame: "editor" },
+                      data: { turbo_frame: "editor", turbo_confirm: "Are you sure? Delete this item from the draft?" },
                       class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
   - elsif cards_presentation?
     .grid.grid-cols-1.gap-3.md:grid-cols-2
@@ -103,7 +103,7 @@
                   remove_item_path,
                   method: :patch,
                   params: item_link[:remove_params],
-                  data: { turbo_frame: "editor" },
+                  data: { turbo_frame: "editor", turbo_confirm: "Are you sure? Delete this item from the draft?" },
                   class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"
   - else
     .space-y-2
@@ -137,5 +137,5 @@
                 remove_item_path,
                 method: :patch,
                 params: item_link[:remove_params],
-                data: { turbo_frame: "editor" },
+                data: { turbo_frame: "editor", turbo_confirm: "Are you sure? Delete this item from the draft?" },
                 class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-sm transition-all hover:translate-y-1 hover:shadow-none"

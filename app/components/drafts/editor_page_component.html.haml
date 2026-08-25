@@ -5,6 +5,16 @@
         .space-y-1
           = render TypographyComponent.new(as: :muted, text: "Path")
           .font-mono.text-sm.text-foreground= path_label
+          .flex.flex-wrap.gap-x-4.gap-y-1.text-sm
+            %span
+              %span.text-muted-foreground Domain:
+              = link_to domain.name, domain_path(domain), data: { turbo_frame: "main_content" }, class: "font-medium underline"
+            %span
+              %span.text-muted-foreground Schema:
+              - if schema_document&.schema_wrapper
+                = link_to schema_label, schema_path(schema_document.schema_wrapper), data: { turbo_frame: "main_content" }, class: "font-medium underline"
+              - else
+                %span.font-medium= schema_label
 
         .flex.items-center.justify-between
           = render TypographyComponent.new(as: :h3, text: title)
@@ -13,7 +23,7 @@
             = button_to "Abandon",
               draft_path(draft),
               method: :delete,
-              form: { data: { turbo_frame: "main_content" } },
+              form: { data: { turbo_frame: "main_content", turbo_confirm: "Are you sure? Abandon this draft and its uncommitted changes?" } },
               class: "font-head inline-flex h-8 items-center justify-center rounded border-2 border-black bg-destructive px-3 text-sm font-medium text-destructive-foreground shadow-md transition-all hover:translate-y-1 hover:shadow-none"
             - if immediate_commit?
               = button_to "Commit",

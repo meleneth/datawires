@@ -114,17 +114,40 @@ RSpec.describe "/domains", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested domain" do
+    it "archives the requested domain" do
       domain = Domain.create! valid_attributes
       expect {
         delete domain_url(domain)
-      }.to change(Domain, :count).by(-1)
+      }.to change { domain.reload.archived_at }.from(nil)
+
+      expect(Domain.exists?(domain.id)).to be(true)
     end
 
     it "redirects to the domains list" do
       domain = Domain.create! valid_attributes
       delete domain_url(domain)
       expect(response).to redirect_to(domains_url)
+    end
+
+    it "archives a populated cluster domain while retaining its owned records" do
+      domain = create(:domain)
+      Clusters::SeedDomain.call(
+        domain: domain,
+        cluster_key: Clusters::Catalog::WORLD_BUILDING,
+        actor: create(:user)
+      )
+      document_ids = domain.documents.ids
+      revision_ids = Revision.where(document_id: document_ids).ids
+
+      expect {
+        delete domain_url(domain)
+      }.to change { domain.reload.archived_at }.from(nil)
+
+      expect(response).to redirect_to(domains_url)
+      expect(Document.where(id: document_ids).count).to eq(document_ids.length)
+      expect(Revision.where(id: revision_ids).count).to eq(revision_ids.length)
+      get domain_url(domain)
+      expect(response).to have_http_status(:not_found)
     end
   end
 end

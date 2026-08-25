@@ -24,21 +24,30 @@ class Domain < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
 
+  scope :active, -> { where(archived_at: nil) }
   scope :publicly_visible, -> { where(public: true) }
   scope :owned_by, ->(user) { where(owner: user) }
   scope :visible_to, ->(user) {
-    legacy_visible = where(owner_id: nil)
+    legacy_visible = active.where(owner_id: nil)
     publicly_visible = where(public: true).or(legacy_visible)
 
-    user ? publicly_visible.or(where(owner: user)) : publicly_visible
+    user ? active.merge(publicly_visible.or(where(owner: user))) : active.merge(publicly_visible)
   }
+
+  def archive!
+    update!(archived_at: Time.current)
+  end
+
+  def archived?
+    archived_at.present?
+  end
 
   def private?
     !public?
   end
 
   def visible_to?(user)
-    public? || owner.nil? || (user.present? && owner == user)
+    !archived? && (public? || owner.nil? || (user.present? && owner == user))
   end
 
   def open_drafts

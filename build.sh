@@ -239,6 +239,10 @@ notify_devastation normal "Preparing database" "${project}: applying pending mig
 echo "Preparing database..."
 kubectl -n "$namespace" exec "deployment/${deployment}" -- bin/rails db:prepare
 
+notify_devastation normal "Synchronizing schemas" "${project}: applying base schema updates."
+echo "Synchronizing installed cluster schemas..."
+kubectl -n "$namespace" exec "deployment/${deployment}" -- bin/rails datawires:clusters:sync
+
 trap - EXIT
 notify_devastation low "Build complete" "${project}: deployed ${image}."
 echo "Build complete: ${image}"

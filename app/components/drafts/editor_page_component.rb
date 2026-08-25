@@ -18,6 +18,18 @@ module Drafts
       cursor.path.to_s
     end
 
+    def domain
+      document.domain
+    end
+
+    def schema_document
+      document.schema_document
+    end
+
+    def schema_label
+      schema_document&.title.presence || schema_document&.key || "No schema"
+    end
+
     def commit_path
       page.commit_path
     end

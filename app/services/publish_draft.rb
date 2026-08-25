@@ -32,7 +32,13 @@ class PublishDraft
         created_by: @actor
       )
 
-      @document.update!(head_revision: revision)
+      attributes = { head_revision: revision }
+      rendered_key = Documents::KeyTemplate.resolve(
+        schema_document: @document.schema_document,
+        body: @draft.body
+      )
+      attributes[:key] = rendered_key if rendered_key.present?
+      @document.update!(attributes)
       SyncSchemaWrapperForDocument.call(document: @document)
       create_domain_commit_if_needed
       @draft.destroy!

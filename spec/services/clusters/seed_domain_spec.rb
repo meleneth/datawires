@@ -10,6 +10,12 @@ RSpec.describe Clusters::SeedDomain do
     described_class.call(domain: domain, cluster_key: Clusters::Catalog::WORLD_BUILDING, actor: actor)
 
     expect(domain.documents.where(key: %w[person place thing party timeline-event]).count).to eq(5)
+    expect(domain.documents.find_by!(key: "thing").body).to include(
+      "x-datawires-document-key" => '#{kind} - #{name}'
+    )
+    expect(domain.documents.find_by!(key: "place").body).to include(
+      "x-datawires-document-key" => '#{kind} - #{name}'
+    )
     home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
     expect(home.schema_document.key).to eq("domain-home-page")
     expect(home.schema_document.schema_wrapper.edit_affordances.sole.title).to eq("Default")
