@@ -35,6 +35,31 @@ RSpec.describe "Boards", type: :request do
     expect(response.body).to include("New board")
   end
 
+  it "renders a kanban column with a provider-backed document card" do
+    board = create(:board)
+    document = create(:document, :with_plain_head_revision, domain: board.schema_wrapper.domain, key: "project-brief", title: "Project Brief")
+    configure_board(
+      board,
+      "layout" => { "provider" => "kanban" },
+      "columns" => [
+        {
+          "id" => "doing",
+          "title" => "Doing",
+          "cards" => [
+            { "id" => "brief", "kind" => "document", "title" => "Brief", "config" => { "document_key" => document.key } }
+          ]
+        }
+      ]
+    )
+
+    get board_path(board)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Doing")
+    expect(response.body).to include("Brief")
+    expect(response.body).to include(document_path(document))
+  end
+
   it "renders filtered collections with document navigation and empty states" do
     domain = create(:domain)
     proposal_schema = create(:document, :with_schema_head_revision, domain:, key: "proposal")
@@ -193,8 +218,12 @@ RSpec.describe "Boards", type: :request do
   end
 
   def configure_actions(board, actions)
+    configure_board(board, "actions" => actions)
+  end
+
+  def configure_board(board, attributes)
     body = board.body.deep_dup
-    body["actions"] = actions
+    body.merge!(attributes)
     revision = board.board_document.revisions.create!(
       parent_revision: board.head_revision,
       body:

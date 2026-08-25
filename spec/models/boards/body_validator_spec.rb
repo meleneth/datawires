@@ -51,6 +51,24 @@ RSpec.describe Boards::BodyValidator do
     expect(validator).to be_valid
   end
 
+  it "validates provider-backed layouts and cards" do
+    body["layout"] = { "provider" => "kanban" }
+    body["columns"] = [
+      {
+        "id" => "doing",
+        "title" => "Doing",
+        "cards" => [
+          { "id" => "brief", "kind" => "document", "title" => "Brief", "config" => { "document_key" => "brief" } }
+        ]
+      }
+    ]
+
+    expect(validator).to be_valid
+
+    body["columns"][0]["cards"][0]["kind"] = "not-registered"
+    expect(described_class.new(body).errors).to include("columns[0].cards[0].kind is not registered: not-registered")
+  end
+
   it "accepts a meeting collection constrained by projection status" do
     body["sections"] = [
       {

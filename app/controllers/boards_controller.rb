@@ -7,6 +7,12 @@ class BoardsController < ApplicationController
     @domain = @schema_wrapper.domain
     require_visible_domain!(@domain)
     @projection = @board.projection
+    @layout_provider = Datawires::Providers.layouts.fetch(@projection.layout_provider)
+    @card_results = @projection.columns.flat_map(&:cards).to_h do |card|
+      provider = Datawires::Providers.cards.fetch(card.kind)
+      result = provider ? provider.new(board: @board, card:, actor: current_actor).call : nil
+      [ card.id, result ]
+    end
     @sibling_boards = @schema_wrapper.boards.where.not(id: @board.id).order(:title)
     @section_results = @projection.sections.to_h do |section|
       result = case section.kind

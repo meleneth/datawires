@@ -48,6 +48,7 @@ module Boards
       validate_entries("sections", SECTION_KINDS)
       validate_entries("actions", ACTION_KINDS)
       validate_layout
+      validate_columns
     end
 
     def validate_entries(key, kinds)
@@ -221,9 +222,64 @@ module Boards
 
     def validate_layout
       return if body["layout"].nil?
-      return if body["layout"].is_a?(Hash)
+      unless body["layout"].is_a?(Hash)
+        errors << "layout must be an object"
+        return
+      end
 
-      errors << "layout must be an object"
+      provider = body["layout"].fetch("provider", "kanban")
+      layout_provider = Datawires::Providers.layouts.fetch(provider)
+      if layout_provider
+        errors.concat(layout_provider.validate(body["layout"], path: "layout"))
+      else
+        errors << "layout.provider is not registered: #{provider}"
+      end
+    end
+
+    def validate_columns
+      return unless body.key?("columns")
+
+      columns = body["columns"]
+      return errors << "columns must be an array" unless columns.is_a?(Array)
+
+      ids = []
+      columns.each_with_index do |column, column_index|
+        path = "columns[#{column_index}]"
+        unless column.is_a?(Hash)
+          errors << "#{path} must be an object"
+          next
+        end
+        ids << column["id"]
+        errors << "#{path}.id must be a non-empty string" unless non_empty_string?(column["id"])
+        errors << "#{path}.title must be a non-empty string" unless non_empty_string?(column["title"])
+        validate_cards(column["cards"], path)
+      end
+      duplicates = ids.tally.select { |_id, count| count > 1 }.keys
+      errors << "column ids must be unique: #{duplicates.join(', ')}" if duplicates.any?
+    end
+
+    def validate_cards(cards, path)
+      return errors << "#{path}.cards must be an array" unless cards.is_a?(Array)
+
+      ids = []
+      cards.each_with_index do |card, card_index|
+        card_path = "#{path}.cards[#{card_index}]"
+        unless card.is_a?(Hash)
+          errors << "#{card_path} must be an object"
+          next
+        end
+        ids << card["id"]
+        errors << "#{card_path}.id must be a non-empty string" unless non_empty_string?(card["id"])
+        errors << "#{card_path}.title must be a non-empty string" unless non_empty_string?(card["title"])
+        provider = Datawires::Providers.cards.fetch(card["kind"])
+        if provider
+          errors.concat(provider.validate(card["config"], path: "#{card_path}.config"))
+        else
+          errors << "#{card_path}.kind is not registered: #{card['kind']}"
+        end
+      end
+      duplicates = ids.tally.select { |_id, count| count > 1 }.keys
+      errors << "#{path}.card ids must be unique: #{duplicates.join(', ')}" if duplicates.any?
     end
 
     def non_empty_string?(value)

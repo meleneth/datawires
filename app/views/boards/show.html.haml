@@ -37,6 +37,33 @@
             %span.font-head= resolution.action.title
             %span.text-xs= resolution.reason
 
+  - if @projection.columns.any?
+    %div{ class: @layout_provider.container_class }
+      - @projection.columns.each do |column|
+        %section{ class: @layout_provider.column_class }
+          = render CardComponent.new do
+            = render CardContentComponent.new do
+              = render TypographyComponent.new(as: :h2, text: column.title)
+              .mt-3.space-y-3
+                - column.cards.each do |card|
+                  - result = @card_results[card.id]
+                  .rounded.border-2.border-black.bg-background.p-3.shadow-sm
+                    .font-head.font-medium= result&.title || card.title
+                    - if result&.description.present?
+                      %p.mt-1.text-sm.text-muted-foreground= result.description
+                    - if result&.available?
+                      - if result.href
+                        = link_to "Open", result.href,
+                          data: { turbo_frame: "main_content", turbo_action: "advance" },
+                          class: "mt-3 inline-flex font-head text-sm underline"
+                      - elsif result.action_path
+                        = button_to result.title,
+                          result.action_path,
+                          method: result.action_method,
+                          class: "mt-3 inline-flex h-8 items-center rounded border-2 border-black bg-primary px-3 font-head text-sm text-primary-foreground"
+                    - else
+                      %p.mt-2.text-sm.text-destructive= result&.description || "Card provider is unavailable."
+
   - if @projection.sections.any?
     .grid.gap-4
       - @projection.sections.each do |section|

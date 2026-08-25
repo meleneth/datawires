@@ -63,8 +63,8 @@ These changes conflict with the corrected architecture and must be removed or re
 
 1. **Architectural correction** — remove the uncommitted domain-home promotion behavior; retain only independent project-affordance foundations. Status: completed.
 2. **Project identity and authoring** — independent schema/document/wrapper, creation UI/service, project navigation and settings editing, legacy-domain compatibility, archive coverage. Status: foundation implemented; archive coverage remains.
-3. **Provider infrastructure** — common registries/contracts for cards, layouts, sources, queries/aggregates, renderers, and archive contributors. Status: pending.
-4. **General boards and cards** — multi-layout board DSL and authoring; document, view, query, metric, graph, action, and form card providers. Status: pending.
+3. **Provider infrastructure** — common registries/contracts for cards, layouts, sources, queries/aggregates, renderers, and archive contributors. Status: base registry and card/layout registration implemented; remaining provider contracts pending.
+4. **General boards and cards** — multi-layout board DSL and authoring; document, view, query, metric, graph, action, and form card providers. Status: compatible columns and kanban/grid/list layouts implemented with document/action/form providers; query/metric/graph providers and authoring UI pending.
 5. **Sources and operations** — source/credential/run models, HTTP/JSON adapter, manual runs, polling, leases, retries/backoff, status UI, provenance. Status: pending.
 6. **Typed observations and metrics** — immutable observations, corrections, metric metadata/dimensions, aggregation/time bucketing, derived metrics, rollups, lineage. Status: pending.
 7. **Generalized queries and rendering** — normalized scalar/table/series/graph projections; statistic, sparkline, line, and extensible graph renderers. Status: pending.
@@ -76,6 +76,7 @@ These changes conflict with the corrected architecture and must be removed or re
 
 - Migration `20260825000001` was applied to the disposable test database.
 - Corrected project-affordance and legacy compatibility suite: 26 examples, 0 failures, 12 pre-existing scaffold pendings.
+- Board provider/layout/card compatibility suite: 24 examples, 0 failures.
 
 ## Remaining Gaps
 

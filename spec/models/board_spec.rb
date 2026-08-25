@@ -12,6 +12,7 @@ RSpec.describe Board, type: :model do
 
     expect(board.projection.title).to eq(board.title)
     expect(board.projection.sections).to eq([])
+    expect(board.projection.columns).to eq([])
   end
 
   it "requires the backing document to share the schema domain" do
