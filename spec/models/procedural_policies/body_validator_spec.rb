@@ -112,4 +112,41 @@ RSpec.describe ProceduralPolicies::BodyValidator do
       "commands.open_meeting.event_payload.content.current_version is required"
     )
   end
+
+  it "reports malformed policy and command containers without cascading" do
+    expect(described_class.new(nil).errors).to eq([ "body must be an object" ])
+
+    validator = described_class.new({ "version" => 2, "name" => "", "role_capabilities" => [], "commands" => [] })
+    expect(validator.errors).to contain_exactly(
+      "version must be 1", "name must be a non-empty string", "role_capabilities must be an object",
+      "commands must be an object"
+    )
+
+    validator = described_class.new({ "version" => 1, "name" => "Policy", "role_capabilities" => {},
+      "commands" => { "" => nil } })
+    expect(validator.errors).to contain_exactly("commands. name must be non-empty", "commands. must be an object")
+  end
+
+  it "reports malformed optional command collections in one branch matrix" do
+    body = ProceduralPolicies::Defaults.meeting_lifecycle.deep_dup
+    command = body["commands"]["open_meeting"]
+    command.merge!(
+      "command_version" => "one", "allowed_statuses" => [ "missing" ], "event_type" => "",
+      "event_version" => 0, "payload" => [], "resources" => [], "conditions" => {}, "effects" => {},
+      "event_payload" => { "bad" => { "source" => "unknown" } }, "document_outputs" => {}
+    )
+
+    expect(described_class.new(body).errors).to include(
+      "commands.open_meeting.command_version must be positive",
+      "commands.open_meeting.allowed_statuses must contain known statuses",
+      "commands.open_meeting.event_type must be a non-empty string",
+      "commands.open_meeting.event_version must be positive",
+      "commands.open_meeting.payload must be an object",
+      "commands.open_meeting.resources must be an object",
+      "commands.open_meeting.conditions must be an array",
+      "commands.open_meeting.effects must be an array",
+      "commands.open_meeting.event_payload.bad.source must be registered",
+      "commands.open_meeting.document_outputs must be an array"
+    )
+  end
 end

@@ -18,6 +18,9 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
         "character_level" => {
           "type" => "integer"
         },
+        "score" => {
+          "type" => "number"
+        },
         "notable" => {
           "type" => "boolean"
         },
@@ -135,5 +138,22 @@ RSpec.describe "DraftsController#patch_ptr", type: :request do
         { "name" => "Ink" }
       ]
     )
+  end
+
+  it "coerces numbers and preserves malformed numeric input for validation feedback" do
+    patch patch_ptr_draft_path(draft), params: { ptr: "/score", value: "2.5" }
+    expect(draft.reload.body).to eq("score" => 2.5)
+
+    patch patch_ptr_draft_path(draft), params: { ptr: "/score", value: "invalid" }
+    expect(draft.reload.body).to eq("score" => "invalid")
+  end
+
+  it "deletes blank optional values and prunes their empty parent objects" do
+    draft.update!(body: { "attributes" => { "hair_color" => "brown" } })
+
+    patch patch_ptr_draft_path(draft), params: { ptr: "/attributes/hair_color", value: "" }
+
+    expect(response).to have_http_status(:no_content)
+    expect(draft.reload.body).to eq({})
   end
 end

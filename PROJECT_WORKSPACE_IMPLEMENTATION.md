@@ -81,7 +81,8 @@ These changes conflict with the corrected architecture and must be removed or re
 - Correction/query/graph/archive focused suite: 6 examples, 0 failures.
 - Project-native authoring and compatibility suite: 12 examples, 0 failures.
 - Source network-policy and row-locked scheduler suite: 5 examples, 0 failures.
-- Full RSpec suite: 627 examples, 0 failures, 12 pre-existing scaffold pendings. Line coverage 86.72%; branch coverage 68.70%.
+- Full RSpec suite after the branch-quality pass: 647 examples, 0 failures, 0 pending. Line coverage 88.47%; branch coverage 73.23%.
+- Test-quality pass enabled verifying doubled constant names, retained verified partial doubles, introduced no plain doubles/spies, and replaced 12 inert scaffold pendings with six active domain lifecycle examples. Compact branch matrices cover project navigation/configuration, HTTP source behavior, source failure/provenance, observation aggregates, board/policy validation, pointer boundaries, and draft mutation failures.
 - Zeitwerk eager-load check: passed.
 - RuboCop over all changed handwritten Ruby files: passed; generated `db/schema.rb` retains the repository's existing bracket-style offenses and was not manually reformatted.
 

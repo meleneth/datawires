@@ -127,4 +127,49 @@ RSpec.describe Ptr::Schema do
       expect(ptr.children.map(&:ptr)).to eq([ "/properties/items/items" ])
     end
   end
+
+  it "handles root, scalar, equality, and absent-node boundaries" do
+    root = described_class.root(schema: schema_body)
+    scalar = root.child_property("title")
+    same_scalar = described_class.new(schema: schema_body, ptr: "/properties/title")
+    absent = described_class.new(schema: schema_body, ptr: "/properties/missing")
+
+    expect(root.parent).to be_nil
+    expect(root).not_to be_array_element
+    expect(root).not_to be_object_property
+    expect(scalar).to be_scalar
+    expect(scalar.children).to eq([])
+    expect(scalar).to eq(same_scalar)
+    expect(scalar.hash).to eq(same_scalar.hash)
+    expect(absent.node).to be_nil
+  end
+
+  it "recognizes implicit object and array schemas and missing child definitions" do
+    implicit = { "properties" => { "list" => { "items" => nil }, "empty" => {} } }
+    root = described_class.root(schema: implicit)
+    list = root.child_property("list")
+
+    expect(root).to be_object
+    expect(list).to be_array
+    expect(list.children).to eq([])
+    expect(root.child_property("empty")).to be_scalar
+  end
+
+  it "rejects invalid pointers and traversal through incomplete or scalar schemas" do
+    expect { described_class.new(schema: schema_body, ptr: "invalid") }.to raise_error(
+      Ptr::Schema::InvalidPtrError
+    )
+    expect { described_class.root(schema: schema_body).child_item }.to raise_error(
+      Ptr::Schema::InvalidTraversalError, /not an array/
+    )
+    expect { described_class.new(schema: schema_body, ptr: "/properties/title").child_property("x") }.to raise_error(
+      Ptr::Schema::InvalidTraversalError, /not an object/
+    )
+
+    incomplete = { "type" => "object", "properties" => { "items" => { "type" => "array" } } }
+    json = Ptr::Json.new(body: { "items" => [ 1 ] }, ptr: "/items/0")
+    expect { described_class.from_json(json:, schema: incomplete) }.to raise_error(
+      Ptr::Schema::InvalidTraversalError, /missing items/
+    )
+  end
 end

@@ -48,6 +48,34 @@ RSpec.describe "Draft array items", type: :request do
 
   let(:draft) { create(:draft, document: document, body: {}) }
 
+  it "rejects collection mutations against non-arrays and invalid indices" do
+    patch add_item_draft_path(draft), params: { ptr: "/" }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to eq("target is not an array")
+
+    draft.update!(body: { "items" => [ { "name" => "one" } ] })
+    patch remove_item_draft_path(draft), params: { ptr: "/items", index: 3 }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to eq("item index is out of range")
+
+    patch remove_item_draft_path(draft), params: { ptr: "/items", index: "not-an-index" }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include("invalid value for Integer")
+  end
+
+  it "rejects unsupported and out-of-bounds reorder operations" do
+    draft.update!(body: { "items" => [ { "name" => "one" }, { "name" => "two" } ] })
+
+    { "sideways" => 0, "up" => 0, "down" => 1 }.each do |direction, index|
+      patch reorder_item_draft_path(draft), params: { ptr: "/items", index:, direction: }
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to eq("item cannot be moved #{direction}")
+    end
+
+    patch reorder_item_draft_path(draft), params: { ptr: "/", index: 0, direction: "down" }
+    expect(response.body).to eq("target is not an array")
+  end
+
   it "shows a dangerous abandon button on the draft editor" do
     get draft_path(draft)
 

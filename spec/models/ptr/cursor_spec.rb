@@ -164,4 +164,44 @@ RSpec.describe Ptr::Cursor do
       expect(cursor.seed_item_value).to be_present
     end
   end
+
+  it "describes missing, scalar, object, and array values through their schema" do
+    missing_boolean = described_class.for(body: {}, schema_body:, ptr: "/published")
+    scalar = described_class.for(body:, schema_body:, ptr: "/count")
+    object = described_class.for(body:, schema_body:, ptr: "")
+    array = described_class.for(body:, schema_body:, ptr: "/items")
+
+    expect(missing_boolean.field_value).to be(false)
+    expect(missing_boolean.checkbox_value).to be(false)
+    expect(missing_boolean.value_label).to eq("missing")
+    expect(scalar).to be_scalar
+    expect(scalar.value_label).to eq("3")
+    expect(object.value_label).to eq("present")
+    expect(array.value_label).to eq("1 items")
+    expect(scalar.children).to eq([])
+    expect(scalar.seed_item_value).to be_nil
+  end
+
+  it "infers composite types without schema metadata and handles root boundary methods" do
+    empty_schema = Ptr::Schema.root(schema: {})
+    object = described_class.new(json: Ptr::Json.new(body: {}, ptr: ""), schema: empty_schema)
+    array = described_class.new(json: Ptr::Json.new(body: [], ptr: ""), schema: empty_schema)
+    root = described_class.for(body:, schema_body:)
+
+    expect(object.type).to eq("object")
+    expect(array.type).to eq("array")
+    expect(root.parent).to be_nil
+    expect(root).not_to be_required
+    expect(root).not_to be_array_element
+    expect(root).not_to be_object_property
+  end
+
+  it "accepts document paths when constructing a cursor from a document-like source" do
+    schema_document = instance_double(Document, body: schema_body)
+    source = instance_double(Document, body:, schema_document:)
+
+    cursor = described_class.from_source(source:, path: Documents::Path.new("/items/0/name"))
+
+    expect(cursor).to have_attributes(value: "Alpha", type: "string")
+  end
 end
