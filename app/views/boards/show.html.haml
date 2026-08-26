@@ -48,7 +48,13 @@
                 - column.cards.each do |card|
                   - result = @card_results[card.id]
                   .rounded.border-2.border-black.bg-background.p-3.shadow-sm
-                    .font-head.font-medium= result&.title || card.title
+                    .flex.items-start.justify-between.gap-2
+                      .font-head.font-medium= result&.title || card.title
+                      - if @domain.project?
+                        = button_to "Remove", remove_card_board_configuration_path(@board), method: :delete,
+                          params: { column_id: column.id, card_id: card.id },
+                          form: { data: { turbo_confirm: "Remove this card from the board?" } },
+                          class: "text-xs text-destructive underline"
                     - if result&.description.present?
                       %p.mt-1.text-sm.text-muted-foreground= result.description
                     - if result&.available?
@@ -65,6 +71,45 @@
                           class: "mt-3 inline-flex h-8 items-center rounded border-2 border-black bg-primary px-3 font-head text-sm text-primary-foreground"
                     - else
                       %p.mt-2.text-sm.text-destructive= result&.description || "Card provider is unavailable."
+
+  - if @domain.project?
+    .mt-6.grid.gap-4.lg:grid-cols-3
+      = render CardComponent.new do
+        = render CardContentComponent.new do
+          = render TypographyComponent.new(as: :h3, text: "Board layout")
+          = form_with url: update_layout_board_configuration_path(@board), method: :patch, class: "mt-3 space-y-2" do |form|
+            = form.select :provider, Datawires::Providers.layouts.kinds.map { |kind| [ kind.humanize, kind ] },
+              { selected: @projection.layout_provider }, class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+            = render ButtonComponent.new(html_options: { type: :submit }, size: :sm) do
+              Change layout
+      = render CardComponent.new do
+        = render CardContentComponent.new do
+          = render TypographyComponent.new(as: :h3, text: "Add column")
+          = form_with url: add_column_board_configuration_path(@board), class: "mt-3 space-y-2" do |form|
+            = form.text_field :title, placeholder: "Column title", required: true,
+              class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+            = render ButtonComponent.new(html_options: { type: :submit }, size: :sm) do
+              Add column
+      - if @projection.columns.any?
+        = render CardComponent.new do
+          = render CardContentComponent.new do
+            = render TypographyComponent.new(as: :h3, text: "Add card")
+            = form_with url: add_card_board_configuration_path(@board), class: "mt-3 space-y-2" do |form|
+              = form.select :column_id, @projection.columns.map { |column| [ column.title, column.id ] }, {},
+                class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+              = form.select :kind, Datawires::Providers.cards.kinds.map { |kind| [ kind.humanize, kind ] }, {},
+                class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+              = form.text_field :title, placeholder: "Card title", required: true,
+                class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+              = form.text_field :document_key, placeholder: "Document key"
+              = form.text_field :schema_key, placeholder: "Schema key"
+              = form.text_field :action_id, placeholder: "Board action id"
+              = form.text_field :metric_key, placeholder: "Metric key"
+              = form.text_field :source_id, placeholder: "Source UUID (optional)"
+              = form.select :renderer, Datawires::Providers.renderers.kinds.map { |kind| [ kind.humanize, kind ] },
+                { include_blank: "Renderer (graph cards)" }
+              = render ButtonComponent.new(html_options: { type: :submit }, size: :sm) do
+                Add card
 
   - if @projection.sections.any?
     .grid.gap-4

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resources :domains do
     resource :project_affordance, only: %i[create]
+    resources :project_boards, only: %i[create]
     resource :archive, only: %i[show], controller: :domain_archives
     resources :domain_commits, only: %i[index show]
     resources :schemas, only: %i[index new create]
@@ -26,6 +27,12 @@ Rails.application.routes.draw do
   resources :boards, only: %i[show] do
     get "actions/:id", to: "boards/actions#new", as: :action_form
     post "actions/:id", to: "boards/actions#create", as: :action
+    resource :configuration, only: [], module: :boards do
+      patch :update_layout
+      post :add_column
+      post :add_card
+      delete :remove_card
+    end
   end
 
   resources :documents, only: %i[show] do

@@ -5,6 +5,8 @@
       %p.text-sm.text-muted-foreground= "#{@source.adapter} · #{@source.status}"
     = button_to "Run now", source_source_runs_path(@source), method: :post,
       class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-primary px-4 text-primary-foreground"
+    = button_to "Edit configuration", document_draft_path(@source.source_document), method: :post,
+      class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-secondary px-4"
   - if @source.last_error.present?
     %p.mt-3.text-sm.text-destructive= @source.last_error
   .mt-6

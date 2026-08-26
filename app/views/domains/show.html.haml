@@ -8,6 +8,10 @@
     .mb-4
       = render ButtonComponent.new(href: board_path(@project_affordance.default_board), variant: :default) do
         Open project board
+  - elsif @project_affordance
+    .mb-4
+      = button_to "Create project board", domain_project_boards_path(@domain), method: :post,
+        class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-primary px-4 text-primary-foreground"
 
   - if @project_affordance
     .mb-4.flex.flex-wrap.gap-2
