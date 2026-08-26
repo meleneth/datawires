@@ -180,4 +180,36 @@ RSpec.describe Boards::BodyValidator do
     expect(validator.errors).to include("sections[0].config.limit must be between 1 and 100")
     expect(validator.errors).to include("sections[0].config.view_affordance must be a non-empty string")
   end
+
+  it "reports malformed top-level and entry shapes without cascading exceptions" do
+    expect(described_class.new(nil).errors).to eq([ "body must be an object" ])
+
+    malformed = {
+      "version" => 2, "title" => "", "description" => 7,
+      "layout" => "wide", "sections" => [ nil ], "actions" => {}, "columns" => {}
+    }
+
+    expect(described_class.new(malformed).errors).to contain_exactly(
+      "version must be 1", "title must be a non-empty string", "description must be a string",
+      "sections[0] must be an object", "actions must be an array", "layout must be an object",
+      "columns must be an array"
+    )
+  end
+
+  it "reports malformed columns and cards, including duplicate identifiers" do
+    body["columns"] = [ nil, { "id" => "same", "title" => "", "cards" => [
+      nil,
+      { "id" => "card", "title" => "", "kind" => "missing", "config" => {} },
+      { "id" => "card", "title" => "Again", "kind" => "document", "config" => {} }
+    ] }, { "id" => "same", "title" => "Again", "cards" => "invalid" } ]
+
+    expect(validator.errors).to include(
+      "columns[0] must be an object", "columns[1].title must be a non-empty string",
+      "columns[1].cards[0] must be an object", "columns[1].cards[1].title must be a non-empty string",
+      "columns[1].cards[1].kind is not registered: missing",
+      "columns[1].cards[2].config.document_key must be a non-empty string",
+      "columns[1].card ids must be unique: card", "columns[2].cards must be an array",
+      "column ids must be unique: same"
+    )
+  end
 end
