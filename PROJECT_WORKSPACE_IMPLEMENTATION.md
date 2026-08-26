@@ -13,7 +13,7 @@ Implement a major private-project capability expansion using `Domain` as the pro
 - Presentation becomes provider-based: renderer descriptors register validators, projection builders, templates/components, and optional client controllers. Graph renderers consume a normalized series/graph projection so line, sparkline, and later graph types do not require controller case statements.
 - `Source` is a domain-scoped runtime wrapper around a separate versioned source-configuration document. Source adapter providers own configuration validation, execution, normalization, health/status mapping, and retry classification. HTTP/JSON is the first adapter, not a hard-coded terminal design.
 - Credentials are separate encrypted/runtime records referenced by source configuration identifiers; secrets never enter versioned document bodies, observations, logs, archives, or provenance. Authorization gates credential use and management.
-- Source lifecycle covers draft/publish, enable/disable, manual runs, polling schedules, leases/concurrency, timeout, retry/backoff, run records, status/health, and adapter version. Scheduled dispatch discovers due sources and enqueues executions; manual and scheduled runs share one execution pipeline.
+- Source lifecycle covers draft/publish, enable/disable, manual runs, polling schedules, leases/concurrency, timeout, retry/backoff, run records, status/health, and adapter version. Scheduled dispatch discovers due sources and enqueues executions; manual and scheduled runs share one execution pipeline. HTTP execution rejects private/reserved resolved addresses by default; operators may explicitly allow hosts with `DATAWIRES_SOURCE_ALLOWED_HOSTS`.
 - `Observation` is an append-only typed data plane. Every observation points to source, source configuration revision, source run, adapter/version, observation type/schema, observed/effective/recorded times, dimensions, value/payload, units/metric identity, and provenance. Mutations are prohibited; corrections append superseding/retracting observations.
 - Metric definitions and derived metrics are versioned documents. Metric metadata includes identity, type, unit, dimensions, aggregation semantics, time field, correction policy, and retention/rollup hints. Query execution supports dimension filters/grouping, time windows and bucketing, count/sum/min/max/average/last and extensible aggregates, correction resolution, derived expressions, and materialized rollups tied to exact definition revisions.
 - Query definitions may be embedded in cards or stored as separately versioned query documents. A provider-based query engine returns normalized tables/scalars/series with lineage identifying observation IDs, source/config revisions, metric/query definition revisions, rollup inputs, and execution time.
@@ -70,7 +70,7 @@ These changes conflict with the corrected architecture and must be removed or re
 7. **Generalized queries and rendering** — normalized scalar/table/series/graph projections; statistic, sparkline, line, and extensible graph renderers. Status: normalized correction-aware query results with lineage and provider-backed query/metric/graph cards implemented; line and sparkline use a registered renderer and shared series projection. Additional graph families pending.
 8. **Project-native configuration UI** — integrated project, board/card, source/credential, metric/query, run/status authoring flows. Status: project enable/configuration, default board creation, version-producing layout/column/card operations, source creation/configuration drafts and run/status UI implemented; credential and metric-definition management UI remains.
 9. **Archive and compatibility completion** — export/import contributors, format migration, cluster/demo compatibility, operational-data policy. Status: archive v3 exports/imports project affordances, boards/defaults, source configurations/runs, metric wrappers, observations/corrections and credential requirements without secrets; v2 import remains supported. Provider-contributor dispatch and optional operational-history controls remain.
-10. **Validation and handoff** — focused/full tests, style/security checks, migration and extension documentation, remaining production gaps. Status: pending.
+10. **Validation and handoff** — focused/full tests, style/security checks, migration and extension documentation, remaining production gaps. Status: full RSpec, focused RuboCop, and Zeitwerk checks green; known gaps recorded below.
 
 ## Test Results
 
@@ -79,8 +79,19 @@ These changes conflict with the corrected architecture and must be removed or re
 - Board provider/layout/card compatibility suite: 24 examples, 0 failures.
 - Source/credential/execution/observation suite: 4 examples, 0 failures; request/scheduler coverage pending execution.
 - Correction/query/graph/archive focused suite: 6 examples, 0 failures.
+- Project-native authoring and compatibility suite: 12 examples, 0 failures.
+- Source network-policy and row-locked scheduler suite: 5 examples, 0 failures.
+- Full RSpec suite: 627 examples, 0 failures, 12 pre-existing scaffold pendings. Line coverage 86.72%; branch coverage 68.70%.
+- Zeitwerk eager-load check: passed.
+- RuboCop over all changed handwritten Ruby files: passed; generated `db/schema.rb` retains the repository's existing bracket-style offenses and was not manually reformatted.
 
 ## Remaining Gaps
 
-- Project-affordance archive/export/import coverage remains.
-- Provider, board/card, source, observation/metric/query/rendering, and project-native authoring phases remain.
+- Credential management has encryption and archive-safe requirements but no project-native create/rotate/revoke UI yet.
+- HTTP source validation rejects private and reserved DNS results, but connecting to the validated address directly (while preserving TLS SNI) remains necessary to close the DNS-rebinding interval completely.
+- Due-source dispatch uses row-locked claiming and idempotent scheduled run keys; a dedicated expiring lease is still needed for multi-worker crash recovery after a claim.
+- Derived metric expressions and materialized rollup observations remain; metric definitions currently provide the versioned metadata boundary.
+- Query definitions can be embedded in versioned board cards; a separate reusable query-definition wrapper/editor remains.
+- Line and sparkline are implemented through the generalized renderer boundary; additional graph families remain.
+- Archive v3 covers built-in project workspace records, but archive-contributor provider dispatch and selectable operational-history export remain.
+- Board authoring supports layout/column/card add/remove with full revisions; drag-and-drop reorder and richer per-provider configuration editors remain.
