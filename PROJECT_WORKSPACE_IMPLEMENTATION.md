@@ -6,6 +6,8 @@ Implement a major private-project capability expansion using `Domain` as the pro
 
 Production follow-up: new-domain authoring now exposes Project workspace as an independent selection alongside the existing cluster/application selector. Selecting it installs the versioned project affordance during domain creation; leaving it clear preserves legacy behavior, and it can be combined with any cluster.
 
+Showcase follow-up: `datawires:demos:fairlanes` idempotently installs a public Fairlanes project with versioned planning documents, an operational board, reusable metrics/queries, and append-only sample telemetry carrying exact source-run and configuration-revision provenance. Focused installer coverage passes (1 example, 0 failures).
+
 ## Decisions
 
 - `ProjectAffordance` is a new first-class affordance type: a one-to-one domain wrapper referencing its own separate versioned document and core schema. Its document owns project-specific title, description, navigation, workspace policy, and authoring configuration; the wrapper may identify a default project board. It does not reuse `domain-home` and does not change the meaning of any existing affordance.
