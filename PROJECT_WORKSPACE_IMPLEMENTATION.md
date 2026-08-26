@@ -50,34 +50,27 @@ Provider registrations are centralized configuration, not scattered constants or
 
 ## Correction Record
 
-Work performed under the mistaken domain-home promotion assumption has **not been committed**. It currently includes:
-
-- `Projects::Install` selecting the existing `domain-home` document as the project document and changing its schema.
-- `DomainHomeLinks` preferring the project-affordance document.
-- `Clusters::SeedDomain` automatically installing project affordances by promoting cluster home documents.
-- Project-affordance tests that assert promotion/reuse of `domain-home`.
-
-These changes conflict with the corrected architecture and must be removed or rewritten before implementation continues. The additive `ProjectAffordance` migration/model/schema/validator work may be retained only after its associations and tests are made independent of domain-home.
+An early uncommitted draft incorrectly promoted `domain-home` into the project affordance. That draft was discarded before the first project-workspace commit. The committed implementation uses a dedicated `project-affordance` document and leaves `domain-home`, `DomainHomeLinks`, edit/view affordances, boards, clusters, and application-specific affordances independent. Compatibility tests enforce that separation.
 
 ## Phases
 
 1. **Architectural correction** — remove the uncommitted domain-home promotion behavior; retain only independent project-affordance foundations. Status: completed.
-2. **Project identity and authoring** — independent schema/document/wrapper, creation UI/service, project navigation and settings editing, legacy-domain compatibility, archive coverage. Status: foundation implemented; archive coverage remains.
-3. **Provider infrastructure** — common registries/contracts for cards, layouts, sources, queries/aggregates, renderers, and archive contributors. Status: base registry and card/layout registration implemented; remaining provider contracts pending.
-4. **General boards and cards** — multi-layout board DSL and authoring; document, view, query, metric, graph, action, and form card providers. Status: compatible columns and kanban/grid/list layouts implemented with document/action/form providers; query/metric/graph providers and authoring UI pending.
+2. **Project identity and authoring** — independent schema/document/wrapper, creation UI/service, project navigation and settings editing, legacy-domain compatibility, archive coverage. Status: completed, including archive v3 round-trip and legacy-domain compatibility.
+3. **Provider infrastructure** — common registries/contracts for cards, layouts, sources, queries/aggregates, renderers, and archive contributors. Status: registries exist for every category; card/layout/source/renderer/aggregate dispatch is active. Generic archive-contributor dispatch remains.
+4. **General boards and cards** — multi-layout board DSL and authoring; document, view, query, metric, graph, action, and form card providers. Status: kanban/grid/list layouts and document/action/form/query/metric/graph cards are implemented. Drag-and-drop ordering and richer provider-specific editors remain.
 5. **Sources and operations** — source/credential/run models, HTTP/JSON adapter, manual runs, polling, leases, retries/backoff, status UI, provenance. Status: source/config, encrypted credentials, runs, HTTP/JSON provider, manual/scheduled jobs, retry policy, and basic status UI implemented; credential UI and stronger distributed leases pending.
 6. **Typed observations and metrics** — immutable observations, corrections, metric metadata/dimensions, aggregation/time bucketing, derived metrics, rollups, lineage. Status: versioned metric metadata schema/wrapper, append-only replace/retract corrections, dimension filtering, statistics and time bucketing implemented; derived expressions and materialized rollups pending.
 7. **Generalized queries and rendering** — normalized scalar/table/series/graph projections; statistic, sparkline, line, and extensible graph renderers. Status: normalized correction-aware query results with lineage and provider-backed query/metric/graph cards implemented; line and sparkline use a registered renderer and shared series projection. Additional graph families pending.
-8. **Project-native configuration UI** — integrated project, board/card, source/credential, metric/query, run/status authoring flows. Status: project enable/configuration, default board creation, version-producing layout/column/card operations, source creation/configuration drafts and run/status UI implemented; credential and metric-definition management UI remains.
+8. **Project-native configuration UI** — integrated project, board/card, source/credential, metric/query, run/status authoring flows. Status: project enable/configuration, default board creation, version-producing layout/column/card operations, source creation/configuration drafts and run/status UI implemented. Credential, metric-definition, reusable-query, reorder, and richer provider-specific editors remain.
 9. **Archive and compatibility completion** — export/import contributors, format migration, cluster/demo compatibility, operational-data policy. Status: archive v3 exports/imports project affordances, boards/defaults, source configurations/runs, metric wrappers, observations/corrections and credential requirements without secrets; v2 import remains supported. Provider-contributor dispatch and optional operational-history controls remain.
 10. **Validation and handoff** — focused/full tests, style/security checks, migration and extension documentation, remaining production gaps. Status: full RSpec, focused RuboCop, and Zeitwerk checks green; known gaps recorded below.
 
 ## Test Results
 
 - Migration `20260825000001` was applied to the disposable test database.
-- Corrected project-affordance and legacy compatibility suite: 26 examples, 0 failures, 12 pre-existing scaffold pendings.
+- Corrected project-affordance and legacy compatibility suite: 26 examples, 0 failures at the phase checkpoint; the later quality pass removed all scaffold pendings.
 - Board provider/layout/card compatibility suite: 24 examples, 0 failures.
-- Source/credential/execution/observation suite: 4 examples, 0 failures; request/scheduler coverage pending execution.
+- Source/credential/execution/observation suite: 4 examples, 0 failures at the phase checkpoint; request, scheduler, failure, network-policy, and provenance coverage was added later.
 - Correction/query/graph/archive focused suite: 6 examples, 0 failures.
 - Project-native authoring and compatibility suite: 12 examples, 0 failures.
 - Source network-policy and row-locked scheduler suite: 5 examples, 0 failures.
