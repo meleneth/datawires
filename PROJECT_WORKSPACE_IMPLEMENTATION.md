@@ -8,7 +8,7 @@ Production follow-up: new-domain authoring now exposes Project workspace as an i
 
 Showcase follow-up: `datawires:demos:fairlanes` idempotently installs a public Fairlanes project with versioned planning documents, an operational board, reusable metrics/queries, and append-only sample telemetry carrying exact source-run and configuration-revision provenance. Focused installer coverage passes (1 example, 0 failures).
 
-Fairlanes evidence follow-up: the showcase uses the locally built native executable for three captured FTXUI views and presents them through a registered, reusable image-card provider. The implementation inventory now breaks out shipped skills, generated effects, healing, buffs, debuffs/status lifecycles, placeholders, visual projections, and their runtime evidence. Focused provider/installer/board coverage passes (3 examples, 0 failures).
+Fairlanes evidence follow-up: the showcase uses the locally built native executable for three captured FTXUI views and presents them through a registered, reusable image-card provider. Screenshot bytes live in versioned Datawires document revisions in PostgreSQL and are served through visibility-checked application routes; they are not container filesystem assets. The implementation inventory breaks out shipped skills, generated effects, healing, buffs, debuffs/status lifecycles, placeholders, visual projections, and runtime evidence.
 
 ## Decisions
 

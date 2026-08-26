@@ -155,16 +155,14 @@ module Demos
         "columns" => [
           { "id" => "now", "title" => "Now", "cards" => [
             document_card("brief", "Project brief", "fairlanes-project-brief"),
-            image_card("runtime-overview", "Executable: battle overview", "/demo/fairlanes/runtime-overview.png",
-              "Fairlanes FTXUI multi-party battle overview",
+            image_card("runtime-overview", "Executable: battle overview", "fairlanes-runtime-overview",
               "Local build-linux-debug executable: moon cycles, combatants, ATB, scoped logs, deaths, and learned skills."),
             metric_card("throughput", "Latest encounter throughput", "encounters-per-hour"),
             graph_card("throughput-trend", "14-day encounter throughput", "encounters-per-hour", "line")
           ] },
           { "id" => "systems", "title" => "Game systems", "cards" => [
             document_card("combat", "Combat spine", "fairlanes-combat-spine"),
-            image_card("party-detail", "Executable: party detail", "/demo/fairlanes/runtime-screen-2.png",
-              "Fairlanes FTXUI focused party view",
+            image_card("party-detail", "Executable: party detail", "fairlanes-runtime-party-detail",
               "Focused party projection with inventory, equipment, learned skills, HP/ATB state, and status-effect logs."),
             document_card("skills-effects", "Skills, effects, buffs & debuffs", "fairlanes-skills-effects"),
             document_card("content", "Content balance", "fairlanes-content-balance"),
@@ -172,8 +170,7 @@ module Demos
           ] },
           { "id" => "next", "title" => "Next", "cards" => [
             document_card("roadmap", "Roadmap", "fairlanes-roadmap"),
-            image_card("all-accounts", "Executable: all-account combat", "/demo/fairlanes/runtime-screen-3.png",
-              "Fairlanes FTXUI all-account combat view",
+            image_card("all-accounts", "Executable: all-account combat", "fairlanes-runtime-all-accounts",
               "Eight concurrent account/party projections exercising attacks, healing, poison, bleed, frost, and skill learning."),
             document_card("cycles", "The Three Cycles", "fairlanes-three-cycles"),
             { "id" => "stats", "kind" => "query", "title" => "Encounter statistics",
@@ -192,8 +189,9 @@ module Demos
       { "id" => id, "kind" => "metric", "title" => title, "config" => { "metric_key" => metric_key, "statistic" => "last" } }
     end
 
-    def image_card(id, title, src, alt, caption)
-      { "id" => id, "kind" => "image", "title" => title, "config" => { "src" => src, "alt" => alt, "caption" => caption } }
+    def image_card(id, title, document_key, caption)
+      { "id" => id, "kind" => "image", "title" => title,
+        "config" => { "document_key" => document_key, "caption" => caption } }
     end
 
     def graph_card(id, title, metric_key, renderer)

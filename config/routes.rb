@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   end
 
   resources :documents, only: %i[show] do
+    resource :image, only: %i[show], controller: :document_images
     resource :draft, only: %i[create], module: :documents
     resources :view_affordances, only: %i[show], module: :documents
   end
