@@ -6,8 +6,13 @@ Rails.application.config.to_prepare do
   Datawires::Providers.cards.register("document", "Boards::Cards::DocumentProvider")
   Datawires::Providers.cards.register("action", "Boards::Cards::ActionProvider")
   Datawires::Providers.cards.register("form", "Boards::Cards::FormProvider")
+  Datawires::Providers.cards.register("query", "Boards::Cards::QueryProvider")
+  Datawires::Providers.cards.register("metric", "Boards::Cards::MetricProvider")
+  Datawires::Providers.cards.register("graph", "Boards::Cards::GraphProvider")
   Datawires::Providers.layouts.register("kanban", "Boards::Layouts::KanbanProvider")
   Datawires::Providers.layouts.register("grid", "Boards::Layouts::GridProvider")
   Datawires::Providers.layouts.register("list", "Boards::Layouts::ListProvider")
   Datawires::Providers.sources.register("http_json", "Sources::Adapters::HttpJson")
+  Datawires::Providers.renderers.register("line", "Presentations::SeriesRenderer")
+  Datawires::Providers.renderers.register("sparkline", "Presentations::SeriesRenderer")
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_25_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -222,6 +222,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000002) do
     t.uuid "room_id", null: false
     t.datetime "updated_at", null: false
     t.index ["room_id"], name: "index_messages_on_room_id"
+  end
+
+  create_table "metric_definitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "domain_id", null: false
+    t.string "key", null: false
+    t.uuid "metric_document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id", "key"], name: "index_metric_definitions_on_domain_id_and_key", unique: true
+    t.index ["domain_id"], name: "index_metric_definitions_on_domain_id"
+    t.index ["metric_document_id"], name: "index_metric_definitions_on_metric_document_id", unique: true
   end
 
   create_table "observations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -447,6 +458,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000002) do
   add_foreign_key "memberships", "users", column: "actor_id"
   add_foreign_key "memberships", "users", column: "recorded_by_id"
   add_foreign_key "messages", "rooms"
+  add_foreign_key "metric_definitions", "documents", column: "metric_document_id"
+  add_foreign_key "metric_definitions", "domains"
   add_foreign_key "observations", "domains"
   add_foreign_key "observations", "observations", column: "corrects_observation_id"
   add_foreign_key "observations", "revisions", column: "configuration_revision_id"

@@ -1,0 +1,7 @@
+.mt-3{ data: {
+  controller: "series-chart",
+  series_chart_points_value: result.data.fetch("points").to_json,
+  series_chart_renderer_value: result.data.fetch("renderer"),
+  series_chart_unit_value: result.data.fetch("unit")
+} }
+  .h-36.w-full{ data: { series_chart_target: "chart" } }

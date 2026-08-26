@@ -20,7 +20,8 @@ module Boards
         view = selected_view(document)
         href = view ? document_view_affordance_path(document, view) : document_path(document)
         Result.new(status: "available", title: card.title.presence || document.title.presence || document.key,
-          description: card.description, data: { "document" => document }, href:, action_path: nil, action_method: nil)
+          description: card.description, data: { "document" => document }, href:, action_path: nil, action_method: nil,
+          partial: nil)
       end
 
       private

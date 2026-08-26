@@ -21,7 +21,7 @@ module Boards
 
       def unavailable(message)
         Result.new(status: "unavailable", title: card.title, description: message, data: {}, href: nil,
-          action_path: nil, action_method: nil)
+          action_path: nil, action_method: nil, partial: nil)
       end
     end
   end

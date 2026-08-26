@@ -61,6 +61,35 @@ RSpec.describe "Domain export/import" do
     }.to raise_error(ArgumentError, "unsupported domain archive format")
   end
 
+  it "round trips project, board, source, run, observation, and credential requirements without secrets" do
+    domain = create(:domain, name: "Telemetry")
+    project = Projects::Install.call(domain:)
+    workspace_schema = create(:document, :with_schema_head_revision, domain:, key: "workspace")
+    board = create(:board, schema_wrapper: create(:schema_wrapper, document: workspace_schema))
+    project.update!(default_board: board)
+    credential = SourceCredential.create!(domain:, name: "api", secret: { "headers" => { "X-Api-Key" => "top-secret" } })
+    source = create(:source, domain:, source_credential: credential)
+    run = source.source_runs.create!(configuration_revision: source.head_revision, trigger: "manual",
+      adapter: "http_json", adapter_version: "1", idempotency_key: "archive-run", status: "succeeded",
+      observation_count: 1)
+    source.observations.create!(domain:, source_run: run, configuration_revision: source.head_revision,
+      observation_type: "metric", metric_key: "temperature", numeric_value: 12.5, payload: { "value" => 12.5 },
+      observed_at: Time.current, effective_at: Time.current, recorded_at: Time.current,
+      provenance: { "configuration_revision_id" => source.head_revision.id })
+
+    archive = DomainExports::Export.call(domain:)
+
+    expect(archive["version"]).to eq(3)
+    expect(archive["credential_requirements"]).to eq([ "api" ])
+    expect(archive.to_json).not_to include("top-secret")
+    imported = DomainExports::Import.call(archive:, name: "Telemetry Copy")
+
+    expect(imported.project_affordance.default_board.title).to eq(board.title)
+    expect(imported.sources.sole.source_credential).to be_nil
+    expect(imported.sources.sole.source_runs.sole.configuration_revision).to eq(imported.sources.sole.head_revision)
+    expect(imported.observations.sole.numeric_value).to eq(12.5)
+  end
+
   def uuid_pattern
     /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i
   end

@@ -1,0 +1,3 @@
+.mt-3
+  .font-head.text-3xl= result.data["value"].nil? ? "—" : result.data["value"]
+  .text-xs.text-muted-foreground= result.data["statistic"].to_s.humanize

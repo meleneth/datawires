@@ -52,7 +52,9 @@
                     - if result&.description.present?
                       %p.mt-1.text-sm.text-muted-foreground= result.description
                     - if result&.available?
-                      - if result.href
+                      - if result.partial
+                        = render result.partial, result:
+                      - elsif result.href
                         = link_to "Open", result.href,
                           data: { turbo_frame: "main_content", turbo_action: "advance" },
                           class: "mt-3 inline-flex font-head text-sm underline"

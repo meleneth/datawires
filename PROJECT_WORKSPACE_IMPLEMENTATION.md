@@ -66,10 +66,10 @@ These changes conflict with the corrected architecture and must be removed or re
 3. **Provider infrastructure** — common registries/contracts for cards, layouts, sources, queries/aggregates, renderers, and archive contributors. Status: base registry and card/layout registration implemented; remaining provider contracts pending.
 4. **General boards and cards** — multi-layout board DSL and authoring; document, view, query, metric, graph, action, and form card providers. Status: compatible columns and kanban/grid/list layouts implemented with document/action/form providers; query/metric/graph providers and authoring UI pending.
 5. **Sources and operations** — source/credential/run models, HTTP/JSON adapter, manual runs, polling, leases, retries/backoff, status UI, provenance. Status: source/config, encrypted credentials, runs, HTTP/JSON provider, manual/scheduled jobs, retry policy, and basic status UI implemented; credential UI and stronger distributed leases pending.
-6. **Typed observations and metrics** — immutable observations, corrections, metric metadata/dimensions, aggregation/time bucketing, derived metrics, rollups, lineage. Status: typed immutable observations with configuration/run/adapter provenance implemented; correction/query/metric layers pending.
-7. **Generalized queries and rendering** — normalized scalar/table/series/graph projections; statistic, sparkline, line, and extensible graph renderers. Status: pending.
+6. **Typed observations and metrics** — immutable observations, corrections, metric metadata/dimensions, aggregation/time bucketing, derived metrics, rollups, lineage. Status: versioned metric metadata schema/wrapper, append-only replace/retract corrections, dimension filtering, statistics and time bucketing implemented; derived expressions and materialized rollups pending.
+7. **Generalized queries and rendering** — normalized scalar/table/series/graph projections; statistic, sparkline, line, and extensible graph renderers. Status: normalized correction-aware query results with lineage and provider-backed query/metric/graph cards implemented; line and sparkline use a registered renderer and shared series projection. Additional graph families pending.
 8. **Project-native configuration UI** — integrated project, board/card, source/credential, metric/query, run/status authoring flows. Status: pending.
-9. **Archive and compatibility completion** — export/import contributors, format migration, cluster/demo compatibility, operational-data policy. Status: pending.
+9. **Archive and compatibility completion** — export/import contributors, format migration, cluster/demo compatibility, operational-data policy. Status: archive v3 exports/imports project affordances, boards/defaults, source configurations/runs, metric wrappers, observations/corrections and credential requirements without secrets; v2 import remains supported. Provider-contributor dispatch and optional operational-history controls remain.
 10. **Validation and handoff** — focused/full tests, style/security checks, migration and extension documentation, remaining production gaps. Status: pending.
 
 ## Test Results
@@ -78,6 +78,7 @@ These changes conflict with the corrected architecture and must be removed or re
 - Corrected project-affordance and legacy compatibility suite: 26 examples, 0 failures, 12 pre-existing scaffold pendings.
 - Board provider/layout/card compatibility suite: 24 examples, 0 failures.
 - Source/credential/execution/observation suite: 4 examples, 0 failures; request/scheduler coverage pending execution.
+- Correction/query/graph/archive focused suite: 6 examples, 0 failures.
 
 ## Remaining Gaps
 

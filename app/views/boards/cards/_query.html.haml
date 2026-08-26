@@ -1,0 +1,8 @@
+- query = result.data.fetch("query")
+.mt-3
+  %dl.grid.grid-cols-3.gap-2.text-sm
+    - %w[count min max average last].each do |name|
+      %div
+        %dt.text-xs.text-muted-foreground= name.humanize
+        %dd.font-head= query.statistics[name].nil? ? "—" : query.statistics[name]
+  %p.mt-2.text-xs.text-muted-foreground= "#{query.points.length} point(s)"

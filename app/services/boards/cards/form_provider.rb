@@ -19,7 +19,7 @@ module Boards
 
         Result.new(status: "available", title: card.title, description: card.description,
           data: { "schema_wrapper" => schema.schema_wrapper }, href: nil,
-          action_path: schema_documents_path(schema.schema_wrapper), action_method: :post)
+          action_path: schema_documents_path(schema.schema_wrapper), action_method: :post, partial: nil)
       end
     end
   end

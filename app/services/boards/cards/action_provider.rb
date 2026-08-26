@@ -22,7 +22,7 @@ module Boards
 
         path = resolution.domain_command ? board_action_form_path(board, action.id) : board_action_path(board, action.id)
         Result.new(status: "available", title: card.title, description: card.description, data: {}, href: nil,
-          action_path: path, action_method: resolution.domain_command ? :get : :post)
+          action_path: path, action_method: resolution.domain_command ? :get : :post, partial: nil)
       end
     end
   end

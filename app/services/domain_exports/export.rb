@@ -3,7 +3,7 @@
 module DomainExports
   class Export
     FORMAT = "datawires.domain.archive"
-    VERSION = 2
+    VERSION = 3
 
     def self.call(domain:)
       new(domain:).call
@@ -26,13 +26,21 @@ module DomainExports
         "schema_wrappers" => schema_wrappers_payload,
         "edit_affordances" => edit_affordances_payload,
         "view_affordances" => view_affordances_payload,
+        "boards" => boards_payload,
+        "project_affordance" => project_affordance_payload,
+        "sources" => sources_payload,
+        "metric_definitions" => metric_definitions_payload,
+        "source_runs" => source_runs_payload,
+        "observations" => observations_payload,
+        "credential_requirements" => domain.source_credentials.order(:name).pluck(:name),
         "domain_commits" => domain_commits_payload
       }
     end
 
     private
 
-    attr_reader :domain, :document_refs, :revision_refs, :schema_wrapper_refs, :domain_commit_refs
+    attr_reader :domain, :document_refs, :revision_refs, :schema_wrapper_refs, :domain_commit_refs,
+      :board_refs, :source_refs, :source_run_refs, :observation_refs
 
     def build_refs
       @document_refs = ordered_documents.each_with_index.to_h do |document, index|
@@ -46,6 +54,14 @@ module DomainExports
       end
       @domain_commit_refs = ordered_domain_commits.each_with_index.to_h do |commit, index|
         [ commit.id, "commit-#{index + 1}" ]
+      end
+      @board_refs = boards.each_with_index.to_h { |board, index| [ board.id, "board-#{index + 1}" ] }
+      @source_refs = domain.sources.order(:created_at, :id).each_with_index.to_h { |source, index| [ source.id, "source-#{index + 1}" ] }
+      @source_run_refs = SourceRun.where(source_id: source_refs.keys).order(:created_at, :id).each_with_index.to_h do |run, index|
+        [ run.id, "source-run-#{index + 1}" ]
+      end
+      @observation_refs = domain.observations.order(:recorded_at, :id).each_with_index.to_h do |observation, index|
+        [ observation.id, "observation-#{index + 1}" ]
       end
     end
 
@@ -82,7 +98,8 @@ module DomainExports
       ordered_schema_wrappers.map do |wrapper|
         {
           "ref" => schema_wrapper_refs.fetch(wrapper.id),
-          "document_ref" => document_refs.fetch(wrapper.document_id)
+          "document_ref" => document_refs.fetch(wrapper.document_id),
+          "default_board_ref" => board_refs[wrapper.default_board_id]
         }
       end
     end
@@ -111,6 +128,82 @@ module DomainExports
             "title" => affordance.title
           }
         end
+    end
+
+    def boards_payload
+      boards.map do |board|
+        {
+          "ref" => board_refs.fetch(board.id),
+          "schema_wrapper_ref" => schema_wrapper_refs.fetch(board.schema_wrapper_id),
+          "board_document_ref" => document_refs.fetch(board.board_document_id),
+          "title" => board.title,
+          "public" => board.public?
+        }
+      end
+    end
+
+    def project_affordance_payload
+      project = domain.project_affordance
+      return unless project
+
+      {
+        "project_document_ref" => document_refs.fetch(project.project_document_id),
+        "default_board_ref" => board_refs[project.default_board_id]
+      }
+    end
+
+    def sources_payload
+      domain.sources.order(:created_at, :id).map do |source|
+        {
+          "ref" => source_refs.fetch(source.id),
+          "source_document_ref" => document_refs.fetch(source.source_document_id),
+          "credential_name" => source.source_credential&.name,
+          "enabled" => source.enabled?,
+          "status" => source.status,
+          "next_run_at" => source.next_run_at&.iso8601
+        }
+      end
+    end
+
+    def metric_definitions_payload
+      domain.metric_definitions.order(:key).map do |metric|
+        { "key" => metric.key, "metric_document_ref" => document_refs.fetch(metric.metric_document_id) }
+      end
+    end
+
+    def source_runs_payload
+      SourceRun.where(source_id: source_refs.keys).order(:created_at, :id).map do |run|
+        {
+          "ref" => source_run_refs.fetch(run.id), "source_ref" => source_refs.fetch(run.source_id),
+          "configuration_revision_ref" => revision_refs.fetch(run.configuration_revision_id), "trigger" => run.trigger,
+          "adapter" => run.adapter, "adapter_version" => run.adapter_version, "status" => run.status,
+          "attempt" => run.attempt, "idempotency_key" => run.idempotency_key, "started_at" => run.started_at&.iso8601,
+          "finished_at" => run.finished_at&.iso8601, "observation_count" => run.observation_count,
+          "error_class" => run.error_class, "error_message" => run.error_message, "metadata" => run.metadata
+        }
+      end
+    end
+
+    def observations_payload
+      domain.observations.order(:recorded_at, :id).map do |observation|
+        {
+          "ref" => observation_refs.fetch(observation.id), "source_ref" => source_refs.fetch(observation.source_id),
+          "source_run_ref" => source_run_refs.fetch(observation.source_run_id),
+          "configuration_revision_ref" => revision_refs.fetch(observation.configuration_revision_id),
+          "corrects_observation_ref" => observation_refs[observation.corrects_observation_id],
+          "observation_type" => observation.observation_type, "metric_key" => observation.metric_key,
+          "unit" => observation.unit, "numeric_value" => observation.numeric_value&.to_s,
+          "dimensions" => observation.dimensions, "payload" => observation.payload,
+          "provenance" => observation.provenance.except("source_id", "source_document_id", "configuration_revision_id", "source_run_id").merge(
+            "source_ref" => source_refs.fetch(observation.source_id),
+            "source_document_ref" => document_refs.fetch(observation.source.source_document_id),
+            "configuration_revision_ref" => revision_refs.fetch(observation.configuration_revision_id),
+            "source_run_ref" => source_run_refs.fetch(observation.source_run_id)
+          ), "observed_at" => observation.observed_at.iso8601,
+          "effective_at" => observation.effective_at.iso8601, "recorded_at" => observation.recorded_at.iso8601,
+          "correction_kind" => observation.correction_kind
+        }
+      end
     end
 
     def domain_commits_payload
@@ -150,6 +243,10 @@ module DomainExports
 
     def ordered_domain_commits
       @ordered_domain_commits ||= domain.domain_commits.includes(:domain_commit_documents).order(:created_at, :id).to_a
+    end
+
+    def boards
+      @boards ||= Board.joins(schema_wrapper: :document).where(documents: { domain_id: domain.id }).order(:title, :id).to_a
     end
   end
 end

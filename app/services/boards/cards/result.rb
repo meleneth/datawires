@@ -2,7 +2,7 @@
 
 module Boards
   module Cards
-    Result = Data.define(:status, :title, :description, :data, :href, :action_path, :action_method) do
+    Result = Data.define(:status, :title, :description, :data, :href, :action_path, :action_method, :partial) do
       def available?
         status == "available"
       end
