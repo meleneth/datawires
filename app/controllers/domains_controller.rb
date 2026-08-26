@@ -44,6 +44,8 @@ class DomainsController < ApplicationController
     respond_to do |format|
       if @domain.save
         Clusters::SeedDomain.call(domain: @domain, cluster_key: cluster_key_param, actor: current_user)
+        Projects::Install.call(domain: @domain, actor: current_user, title: @domain.name,
+          description: "Project workspace") if project_workspace_param?
         format.html { redirect_to @domain, notice: "Domain was successfully created." }
         format.json { render :show, status: :created, location: @domain }
       else
@@ -90,5 +92,9 @@ class DomainsController < ApplicationController
 
   def cluster_key_param
     params.dig(:domain, :cluster_key).presence
+  end
+
+  def project_workspace_param?
+    ActiveModel::Type::Boolean.new.cast(params.dig(:domain, :project_workspace))
   end
 end

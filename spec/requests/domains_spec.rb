@@ -10,6 +10,7 @@ RSpec.describe "/domains", type: :request do
     expect(response).to be_successful
     get new_domain_url
     expect(response).to be_successful
+    expect(response.body).to include("Project workspace")
     get domain_url(domain)
     expect(response).to be_successful
   end
@@ -22,6 +23,22 @@ RSpec.describe "/domains", type: :request do
     domain = Domain.find_by!(name: "Signals")
     expect(response).to redirect_to(domain_url(domain))
     expect(domain.owner.name).to eq("devUser")
+    expect(domain.project_affordance).to be_nil
+  end
+
+  it "creates a domain with an independently selected project workspace" do
+    expect {
+      post domains_url, params: {
+        domain: { name: "Signals", public: false, cluster_key: Clusters::Catalog::WORLD_BUILDING,
+                  project_workspace: "1" }
+      }
+    }.to change(ProjectAffordance, :count).by(1)
+
+    domain = Domain.find_by!(name: "Signals")
+    expect(response).to redirect_to(domain_url(domain))
+    expect(domain.project_affordance).to be_present
+    expect(domain.project_affordance.title).to eq("Signals")
+    expect(domain.documents.find_by(key: "person")).to be_present
   end
 
   it "rejects unknown clusters before persistence" do

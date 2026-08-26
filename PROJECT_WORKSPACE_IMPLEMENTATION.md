@@ -4,6 +4,8 @@
 
 Implement a major private-project capability expansion using `Domain` as the project boundary and versioned Datawires documents as configuration. `ProjectAffordance` is additive: it must coexist with, and must not promote, replace, adapt, subsume, or reinterpret, domain-home, `DomainHomeLinks`, edit affordances, view affordances, boards, or application-specific affordances.
 
+Production follow-up: new-domain authoring now exposes Project workspace as an independent selection alongside the existing cluster/application selector. Selecting it installs the versioned project affordance during domain creation; leaving it clear preserves legacy behavior, and it can be combined with any cluster.
+
 ## Decisions
 
 - `ProjectAffordance` is a new first-class affordance type: a one-to-one domain wrapper referencing its own separate versioned document and core schema. Its document owns project-specific title, description, navigation, workspace policy, and authoring configuration; the wrapper may identify a default project board. It does not reuse `domain-home` and does not change the meaning of any existing affordance.

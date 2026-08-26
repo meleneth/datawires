@@ -25,6 +25,12 @@
           options_for_select(@cluster_options || Clusters::Catalog.options),
           id: "domain_cluster_key",
           class: "flex h-10 w-full rounded border-2 border-black bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-all focus-visible:outline-hidden focus-visible:shadow-md"
+      .flex.items-center.gap-2
+        = check_box_tag form.field_name(:project_workspace), "1",
+          ActiveModel::Type::Boolean.new.cast(params.dig(:domain, :project_workspace)),
+          id: "domain_project_workspace",
+          class: "h-4 w-4 rounded border-2 border-black text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+        = render LabelComponent.new(text: "Project workspace", for_id: "domain_project_workspace")
   .pt-2
     = render ButtonComponent.new(html_options: { type: :submit }) do
       Save domain
