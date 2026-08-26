@@ -134,7 +134,14 @@ module Demos
 
     def ensure_board(project)
       existing = project.project_document.schema_document.schema_wrapper.boards.find_by(title: "Fairlanes Command Deck")
-      return existing if existing
+      if existing
+        if existing.body != board_definition
+          revision = existing.board_document.revisions.create!(body: board_definition, parent_revision: existing.head_revision,
+            message: "Refresh Fairlanes command deck", created_by: actor)
+          existing.board_document.update!(head_revision: revision)
+        end
+        return existing
+      end
 
       CreateBoard.call(schema_wrapper: project.project_document.schema_document.schema_wrapper,
         title: "Fairlanes Command Deck", actor:, definition: board_definition).board
@@ -148,16 +155,26 @@ module Demos
         "columns" => [
           { "id" => "now", "title" => "Now", "cards" => [
             document_card("brief", "Project brief", "fairlanes-project-brief"),
+            image_card("runtime-overview", "Executable: battle overview", "/demo/fairlanes/runtime-overview.png",
+              "Fairlanes FTXUI multi-party battle overview",
+              "Local build-linux-debug executable: moon cycles, combatants, ATB, scoped logs, deaths, and learned skills."),
             metric_card("throughput", "Latest encounter throughput", "encounters-per-hour"),
             graph_card("throughput-trend", "14-day encounter throughput", "encounters-per-hour", "line")
           ] },
           { "id" => "systems", "title" => "Game systems", "cards" => [
             document_card("combat", "Combat spine", "fairlanes-combat-spine"),
+            image_card("party-detail", "Executable: party detail", "/demo/fairlanes/runtime-screen-2.png",
+              "Fairlanes FTXUI focused party view",
+              "Focused party projection with inventory, equipment, learned skills, HP/ATB state, and status-effect logs."),
+            document_card("skills-effects", "Skills, effects, buffs & debuffs", "fairlanes-skills-effects"),
             document_card("content", "Content balance", "fairlanes-content-balance"),
             graph_card("survival", "Party survival trend", "party-survival-rate", "area")
           ] },
           { "id" => "next", "title" => "Next", "cards" => [
             document_card("roadmap", "Roadmap", "fairlanes-roadmap"),
+            image_card("all-accounts", "Executable: all-account combat", "/demo/fairlanes/runtime-screen-3.png",
+              "Fairlanes FTXUI all-account combat view",
+              "Eight concurrent account/party projections exercising attacks, healing, poison, bleed, frost, and skill learning."),
             document_card("cycles", "The Three Cycles", "fairlanes-three-cycles"),
             { "id" => "stats", "kind" => "query", "title" => "Encounter statistics",
               "description" => "Daily buckets with exact source revision lineage.",
@@ -173,6 +190,10 @@ module Demos
 
     def metric_card(id, title, metric_key)
       { "id" => id, "kind" => "metric", "title" => title, "config" => { "metric_key" => metric_key, "statistic" => "last" } }
+    end
+
+    def image_card(id, title, src, alt, caption)
+      { "id" => id, "kind" => "image", "title" => title, "config" => { "src" => src, "alt" => alt, "caption" => caption } }
     end
 
     def graph_card(id, title, metric_key, renderer)
@@ -194,6 +215,16 @@ module Demos
           summary: "Ruby-authored declarations generate reviewed C++ runtime tables and topology reports.",
           bullets: [ "69 skill definitions", "71 monster declarations", "69 common and 2 rare woodland monsters",
             "Progression runs from Field Mouse (5 HP) to Null Kraken (430 HP)", "Starfire Anomaly brings Starblaze, Flame Wave, and Gravity Sigh" ] },
+        "fairlanes-skills-effects" => { title: "Skills, effects, buffs & debuffs", status: "active",
+          summary: "The generated declaration set separates shipped runtime behavior from explicitly visible placeholders.",
+          bullets: [ "69 skills: Observe/Flee plus direct, group, healing, status, and decal-driven behaviors",
+            "Handwritten behaviors: Thump, Eviscerate, Poison, Cold Snap, Flame Strike, Flame Wave, Observe, and Flee",
+            "Generated damage: Joltspasm, Rocks Fall, Blood Bloom, Ice Splitter, Gravity Sigh, Starblaze, and 30+ strike/group skills",
+            "Healing/cleanse: Mercyburst, Mercywave, Field Dressing, Reboot Pulse, and Clearbell",
+            "Implemented debuffs: Poison, Frozen/Cold Snap, and Dire Bleed with lifecycle cleanup",
+            "Declared buffs/wards: Cinder Veil, Rime Armor, Overcharge, Choirguard, Clock Up, Pack Howl, Shell Guard, Battle Focus, Armor Plate, and Checksum Ward",
+            "Declared control/debuff effects: Whiteout, Hush Hex, Miasma Cloud, Weight of Tuesday, Smoke Screen, Signal Jam, Blue Screen, Web Snare, Gnat Cloud, and Signal Flare",
+            "10 visual projections: FlameWave, Shock, RocksFall, PoisonCloud, HolyNova, BloodBloom, FrostCrack, VoidRipple, Starfire, and Observe" ] },
         "fairlanes-roadmap" => { title: "Roadmap", status: "planned",
           summary: "Turn the simulation into a legible, surprising world without moving authority into presentation code.",
           bullets: [ "Promote placeholder effects into runtime behavior", "Balance skill observation and learning probabilities",

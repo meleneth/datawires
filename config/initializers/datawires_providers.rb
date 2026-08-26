@@ -9,6 +9,7 @@ Rails.application.config.to_prepare do
   Datawires::Providers.cards.register("query", "Boards::Cards::QueryProvider")
   Datawires::Providers.cards.register("metric", "Boards::Cards::MetricProvider")
   Datawires::Providers.cards.register("graph", "Boards::Cards::GraphProvider")
+  Datawires::Providers.cards.register("image", "Boards::Cards::ImageProvider")
   Datawires::Providers.layouts.register("kanban", "Boards::Layouts::KanbanProvider")
   Datawires::Providers.layouts.register("grid", "Boards::Layouts::GridProvider")
   Datawires::Providers.layouts.register("list", "Boards::Layouts::ListProvider")

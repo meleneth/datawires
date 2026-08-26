@@ -1,0 +1,6 @@
+- image = result.data
+.mt-3
+  = link_to image.fetch("src"), target: "_blank", rel: "noopener", class: "block" do
+    = image_tag image.fetch("src"), alt: image.fetch("alt"), class: "w-full rounded border border-black object-cover"
+  - if image["caption"].present?
+    %p.mt-2.text-xs.text-muted-foreground= image["caption"]
