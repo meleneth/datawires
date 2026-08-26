@@ -39,6 +39,45 @@ module Boards
       end
     end
 
+    def move_column
+      mutate("Reorder board columns") do |body|
+        columns = body.fetch("columns", [])
+        if params[:target_column_id].present?
+          move_before!(columns, params.expect(:column_id), params.expect(:target_column_id))
+        else
+          move_entry!(columns, params.expect(:column_id), params.expect(:direction))
+        end
+      end
+    end
+
+    def move_card
+      mutate("Reorder board cards") do |body|
+        source = Array(body["columns"]).find { |column| column["id"] == params.expect(:column_id) }
+        raise ArgumentError, "board column was not found" unless source
+
+        target_id = params[:target_column_id].presence || source["id"]
+        target = Array(body["columns"]).find { |column| column["id"] == target_id }
+        raise ArgumentError, "target board column was not found" unless target
+
+        card = source.fetch("cards").find { |candidate| candidate["id"] == params.expect(:card_id) }
+        raise ArgumentError, "board card was not found" unless card
+
+        if target == source && params[:target_card_id].present?
+          move_before!(source["cards"], card["id"], params.expect(:target_card_id))
+        elsif target == source
+          move_entry!(source["cards"], card["id"], params.expect(:direction))
+        else
+          source["cards"].delete(card)
+          target_card = target["cards"].find { |candidate| candidate["id"] == params[:target_card_id] }
+          if target_card
+            target["cards"].insert(target["cards"].index(target_card), card)
+          else
+            target["cards"] << card
+          end
+        end
+      end
+    end
+
     private
 
     def set_board
@@ -64,9 +103,37 @@ module Boards
     end
 
     def card_config
-      raw = params.permit(:document_key, :view_affordance, :schema_key, :action_id, :metric_key, :source_id,
-        :renderer, :statistic, :aggregate, :bucket_seconds).to_h
-      raw.compact_blank
+      raw = params.permit(:document_key, :view_affordance, :schema_key, :action_id, :metric_key, :query_key, :source_id,
+        :renderer, :statistic, :aggregate, :bucket_seconds, :window_seconds, :dimensions).to_h.compact_blank
+      if raw["dimensions"].present?
+        parsed = JSON.parse(raw["dimensions"])
+        raise ArgumentError, "dimensions must be a JSON object" unless parsed.is_a?(Hash)
+
+        raw["dimensions"] = parsed
+      end
+      raw
+    rescue JSON::ParserError
+      raise ArgumentError, "dimensions must be valid JSON"
+    end
+
+    def move_entry!(entries, id, direction)
+      index = entries.index { |entry| entry["id"] == id }
+      raise ArgumentError, "board item was not found" unless index
+
+      target = direction == "up" ? index - 1 : index + 1 if %w[up down].include?(direction)
+      raise ArgumentError, "board item cannot be moved #{direction}" unless target&.between?(0, entries.length - 1)
+
+      entries[index], entries[target] = entries[target], entries[index]
+    end
+
+    def move_before!(entries, id, target_id)
+      entry = entries.find { |candidate| candidate["id"] == id }
+      target = entries.find { |candidate| candidate["id"] == target_id }
+      raise ArgumentError, "board item was not found" unless entry && target
+      return if entry == target
+
+      entries.delete(entry)
+      entries.insert(entries.index(target), entry)
     end
   end
 end
