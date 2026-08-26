@@ -20,6 +20,10 @@ module Datawires
       providers.keys.freeze
     end
 
+    def unregister(kind)
+      providers.delete(kind.to_s)
+    end
+
     private
 
     attr_reader :providers
@@ -36,6 +40,10 @@ module Datawires
       @layouts ||= ProviderRegistry.new
     end
 
+    def sections
+      @sections ||= ProviderRegistry.new
+    end
+
     def sources
       @sources ||= ProviderRegistry.new
     end
@@ -50,6 +58,10 @@ module Datawires
 
     def archive_contributors
       @archive_contributors ||= ProviderRegistry.new
+    end
+
+    def derived_operations
+      @derived_operations ||= ProviderRegistry.new
     end
   end
 end

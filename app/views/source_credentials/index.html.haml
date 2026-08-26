@@ -1,0 +1,15 @@
+= turbo_frame_tag "main_content" do
+  .flex.items-center.justify-between
+    = render TypographyComponent.new(as: :h1, text: "Credentials")
+    = render ButtonComponent.new(href: new_domain_source_credential_path(@domain), size: :sm) do
+      New credential
+  .mt-4.grid.gap-3
+    - @credentials.each do |credential|
+      = render CardComponent.new do
+        = render CardContentComponent.new do
+          = link_to credential.name, edit_domain_source_credential_path(@domain, credential), class: "font-head underline"
+          %p.text-sm.text-muted-foreground= credential.active? ? "Active" : "Revoked"
+          - if credential.rotated_at
+            %p.text-xs.text-muted-foreground= "Rotated #{credential.rotated_at}"
+    - if @credentials.empty?
+      %p.text-muted-foreground No credentials configured. Secret material is encrypted and excluded from archives.

@@ -1,0 +1,8 @@
+= turbo_frame_tag "main_content" do
+  .flex.items-center.justify-between
+    = render TypographyComponent.new(as: :h1, text: "Metrics")
+    = render ButtonComponent.new(href: new_domain_metric_definition_path(@domain), size: :sm) do
+      New metric
+  %ul.mt-4.space-y-2
+    - @metrics.each do |metric|
+      %li= link_to "#{metric.body['title']} (#{metric.key})", domain_metric_definition_path(@domain, metric), class: "font-head underline"

@@ -1,0 +1,12 @@
+= form_with model: [@domain, @credential], class: "mt-4 max-w-xl space-y-4" do |form|
+  %div
+    = form.label :name, class: "block text-sm font-medium"
+    = form.text_field :name, required: true, class: "w-full rounded border-2 border-black px-3 py-2"
+  %div
+    = form.label :secret, @credential.persisted? ? "Replacement authorization value (leave blank to retain)" : "Authorization value", class: "block text-sm font-medium"
+    = form.password_field :secret, required: !@credential.persisted?, autocomplete: "new-password", class: "w-full rounded border-2 border-black px-3 py-2"
+  = form.submit @credential.persisted? ? "Update / rotate" : "Create credential", class: "font-head rounded border-2 border-black bg-primary px-4 py-2"
+  - if @credential.persisted? && @credential.active?
+    = form.submit "Revoke", name: "source_credential[revoke]", value: "1",
+      class: "font-head rounded border-2 border-black bg-destructive px-4 py-2 text-destructive-foreground",
+      data: { turbo_confirm: "Revoke this credential? Assigned source runs will fail until another credential is selected." }

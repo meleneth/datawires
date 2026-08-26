@@ -1,0 +1,11 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: "New metric")
+  = form_with url: domain_metric_definitions_path(@domain), scope: :metric, class: "mt-4 max-w-xl space-y-3" do |form|
+    - %i[key title description unit dimensions derived_inputs rollup_bucket_seconds].each do |field|
+      %div
+        = form.label field, class: "block text-sm font-medium"
+        = form.text_field field, required: %i[key title].include?(field), class: "w-full rounded border-2 border-black px-3 py-2"
+    = form.select :value_type, options_for_select(%w[number count]), {}, class: "rounded border-2 border-black px-3 py-2"
+    = form.select :aggregation, options_for_select(%w[average count sum min max last]), {}, class: "rounded border-2 border-black px-3 py-2"
+    = form.select :derived_operation, options_for_select([["Recorded metric", ""], ["Add", "add"], ["Subtract", "subtract"], ["Multiply", "multiply"], ["Divide", "divide"]]), {}, class: "rounded border-2 border-black px-3 py-2"
+    = form.submit "Create metric", class: "font-head rounded border-2 border-black bg-primary px-4 py-2"

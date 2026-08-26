@@ -7,9 +7,14 @@ Rails.application.routes.draw do
     resources :schemas, only: %i[index new create]
     resources :documents, only: %i[index show]
     resources :sources, only: %i[index new create show]
+    resources :source_credentials, except: %i[show destroy]
+    resources :metric_definitions, only: %i[index new create show] do
+      post :rollup, on: :member
+    end
+    resources :query_definitions, only: %i[index new create show]
   end
   resources :domain_archives, only: %i[create]
-  resources :sources, only: [] do
+  resources :sources, only: %i[update] do
     resources :source_runs, only: %i[create], shallow: true
   end
 
@@ -32,6 +37,8 @@ Rails.application.routes.draw do
       post :add_column
       post :add_card
       delete :remove_card
+      patch :move_column
+      patch :move_card
     end
   end
 

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class SourcesController < ApplicationController
-  before_action :set_domain
+  before_action :set_domain, except: :update
+  before_action :set_source, only: :update
 
   def index
     @sources = @domain.sources.includes(:source_credential, source_document: :head_revision).order(:created_at)
@@ -29,6 +30,14 @@ class SourcesController < ApplicationController
   def show
     @source = @domain.sources.includes(:source_credential, source_document: :head_revision).find(params[:id])
     @runs = @source.source_runs.includes(:configuration_revision).order(created_at: :desc).limit(20)
+    @credentials = @domain.source_credentials.active.order(:name)
+  end
+
+  def update
+    credential = source_params[:source_credential_id].presence &&
+      @domain.source_credentials.active.find(source_params[:source_credential_id])
+    @source.update!(source_credential: credential)
+    redirect_to domain_source_path(@domain, @source), notice: "Source credential was updated."
   end
 
   private
@@ -38,7 +47,12 @@ class SourcesController < ApplicationController
   end
 
   def source_params
-    params.expect(source: %i[title url every_seconds metric_key unit value_pointer observed_at_pointer])
+    params.expect(source: %i[title url every_seconds metric_key unit value_pointer observed_at_pointer source_credential_id])
+  end
+
+  def set_source
+    @source = Source.find(params.expect(:id))
+    @domain = require_visible_domain!(@source.domain)
   end
 
   def schedule_params

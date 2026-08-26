@@ -14,8 +14,10 @@ RSpec.describe Sources::NetworkPolicy do
   it "accepts public destinations and explicit operator allowlists" do
     allow(Resolv).to receive(:getaddresses).with("public.test").and_return([ "8.8.8.8" ])
     expect(described_class.validate!(URI("https://public.test/data"))).to be(true)
+    expect(described_class.resolve!(URI("https://public.test/data"))).to eq("8.8.8.8")
 
     allow(described_class).to receive(:allowed_hosts).and_return([ "internal.test" ])
+    allow(Resolv).to receive(:getaddresses).with("internal.test").and_return([ "127.0.0.1" ])
     expect(described_class.validate!(URI("https://internal.test/data"))).to be(true)
   end
 end

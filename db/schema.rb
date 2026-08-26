@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -300,6 +300,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
     t.index ["submitted_revision_id"], name: "index_proposals_on_submitted_revision_id"
   end
 
+  create_table "query_definitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "domain_id", null: false
+    t.string "key", null: false
+    t.uuid "query_document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id", "key"], name: "index_query_definitions_on_domain_id_and_key", unique: true
+    t.index ["domain_id"], name: "index_query_definitions_on_domain_id"
+    t.index ["query_document_id"], name: "index_query_definitions_on_query_document_id", unique: true
+  end
+
   create_table "revisions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "body", null: false
     t.datetime "created_at", null: false
@@ -351,6 +362,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
     t.uuid "domain_id", null: false
     t.text "encrypted_payload", null: false
     t.string "name", null: false
+    t.datetime "revoked_at"
+    t.datetime "rotated_at"
     t.datetime "updated_at", null: false
     t.index ["domain_id", "name"], name: "index_source_credentials_on_domain_id_and_name", unique: true
     t.index ["domain_id"], name: "index_source_credentials_on_domain_id"
@@ -388,6 +401,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
     t.datetime "last_failed_at"
     t.datetime "last_started_at"
     t.datetime "last_succeeded_at"
+    t.string "lease_token"
+    t.datetime "leased_until"
     t.datetime "next_run_at"
     t.uuid "source_credential_id"
     t.uuid "source_document_id", null: false
@@ -395,6 +410,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
     t.datetime "updated_at", null: false
     t.index ["domain_id"], name: "index_sources_on_domain_id"
     t.index ["enabled", "next_run_at"], name: "index_sources_on_enabled_and_next_run_at"
+    t.index ["leased_until"], name: "index_sources_on_leased_until"
     t.index ["source_credential_id"], name: "index_sources_on_source_credential_id"
     t.index ["source_document_id"], name: "index_sources_on_source_document_id", unique: true
   end
@@ -474,6 +490,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000003) do
   add_foreign_key "proposals", "documents", column: "proposal_document_id"
   add_foreign_key "proposals", "revisions", column: "submitted_revision_id"
   add_foreign_key "proposals", "users", column: "submitted_by_id"
+  add_foreign_key "query_definitions", "documents", column: "query_document_id"
+  add_foreign_key "query_definitions", "domains"
   add_foreign_key "revisions", "documents"
   add_foreign_key "revisions", "revisions", column: "parent_revision_id"
   add_foreign_key "revisions", "users", column: "created_by_id"

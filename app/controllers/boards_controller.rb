@@ -15,18 +15,8 @@ class BoardsController < ApplicationController
     end
     @sibling_boards = @schema_wrapper.boards.where.not(id: @board.id).order(:title)
     @section_results = @projection.sections.to_h do |section|
-      result = case section.kind
-      when "document_collection"
-        Boards::DocumentCollection.call(board: @board, section:)
-      when "meeting_collection"
-        Boards::MeetingCollection.call(board: @board, section:)
-      when "proposal_collection"
-        Boards::ProposalCollection.call(board: @board, section:)
-      when "membership_collection"
-        Boards::MembershipCollection.call(board: @board, section:, actor: current_actor)
-      when "role_assignment_collection"
-        Boards::RoleAssignmentCollection.call(board: @board, section:, actor: current_actor)
-      end
+      provider = Datawires::Providers.sections.fetch(section.kind)
+      result = provider&.call(board: @board, section:, actor: current_actor)
       [ section.id, result ]
     end
     @action_resolutions = @projection.actions.map do |action|

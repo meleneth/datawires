@@ -62,14 +62,9 @@ module Observations
     end
 
     def aggregate_values(values)
-      case aggregate
-      when "count" then values.length.to_f
-      when "sum" then values.sum
-      when "min" then values.min
-      when "max" then values.max
-      when "last" then values.last
-      else values.sum / values.length
-      end
+      provider = Datawires::Providers.aggregates.fetch(aggregate) ||
+        Datawires::Providers.aggregates.fetch("average")
+      provider.call(values)
     end
 
     def lineage(rows)

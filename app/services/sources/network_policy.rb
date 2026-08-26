@@ -16,13 +16,18 @@ module Sources
     ].freeze
 
     def self.validate!(uri)
-      return true if allowed_hosts.include?(uri.host)
+      resolve!(uri)
+      true
+    end
 
+    def self.resolve!(uri)
       addresses = Resolv.getaddresses(uri.host)
       raise UnsafeAddress, "source host did not resolve" if addresses.empty?
-      raise UnsafeAddress, "source host resolves to a private or reserved address" if addresses.any? { |value| blocked?(value) }
+      unless allowed_hosts.include?(uri.host)
+        raise UnsafeAddress, "source host resolves to a private or reserved address" if addresses.any? { |value| blocked?(value) }
+      end
 
-      true
+      addresses.first
     end
 
     def self.allowed_hosts

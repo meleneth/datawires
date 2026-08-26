@@ -20,8 +20,19 @@ module Metrics
         "dimensions" => { "type" => "array", "items" => { "type" => "string" } },
         "aggregation" => { "enum" => %w[count sum min max average last] },
         "correction_policy" => { "const" => "latest" },
-        "rollup" => { "type" => "object" },
-        "derived" => { "type" => "object" }
+        "rollup" => {
+          "type" => "object", "required" => %w[bucket_seconds],
+          "properties" => { "bucket_seconds" => { "type" => "integer", "minimum" => 1 } },
+          "additionalProperties" => false
+        },
+        "derived" => {
+          "type" => "object", "required" => %w[operation inputs],
+          "properties" => {
+            "operation" => { "enum" => %w[add subtract multiply divide] },
+            "inputs" => { "type" => "array", "minItems" => 2, "items" => { "type" => "string" } }
+          },
+          "additionalProperties" => false
+        }
       },
       "additionalProperties" => false
     }.freeze

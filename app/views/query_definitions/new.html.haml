@@ -1,0 +1,9 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: "New query")
+  = form_with url: domain_query_definitions_path(@domain), scope: :query, class: "mt-4 max-w-xl space-y-3" do |form|
+    - %i[key title description metric_key window_seconds bucket_seconds].each do |field|
+      %div
+        = form.label field, class: "block text-sm font-medium"
+        = form.text_field field, required: %i[key title metric_key].include?(field), class: "w-full rounded border-2 border-black px-3 py-2"
+    = form.select :aggregate, options_for_select(%w[average count sum min max last]), {}, class: "rounded border-2 border-black px-3 py-2"
+    = form.submit "Create query", class: "font-head rounded border-2 border-black bg-primary px-4 py-2"

@@ -91,6 +91,20 @@ RSpec.describe Sources::Execute do
     )
   end
 
+  it "refuses to disclose or use a revoked credential" do
+    source = create_source
+    credential = SourceCredential.new(domain: source.domain, name: "revoked")
+    credential.secret = { "headers" => { "Authorization" => "secret" } }
+    credential.save!
+    source.update!(source_credential: credential)
+    credential.revoke!
+
+    expect {
+      described_class.call(source:, trigger: "manual", idempotency_key: "revoked")
+    }.to raise_error(SourceCredential::RevokedError)
+    expect(source.reload.status).to eq("failed")
+  end
+
   def create_source(config: {}, schedule: nil, adapter: "spec")
     domain = create(:domain)
     schema = create(:document, :with_schema_head_revision, domain:, key: Sources::Schema::KEY, head_body: Sources::Schema::BODY)

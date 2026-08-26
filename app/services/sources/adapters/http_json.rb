@@ -29,13 +29,15 @@ module Sources
 
       def call
         uri = URI.parse(configuration.fetch("url"))
-        Sources::NetworkPolicy.validate!(uri)
+        address = Sources::NetworkPolicy.resolve!(uri)
         request = Net::HTTP::Get.new(uri)
         headers.each { |name, value| request[name] = value }
-        response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
-          open_timeout: configuration.fetch("open_timeout", 5), read_timeout: configuration.fetch("read_timeout", 15)) do |http|
-          http.request(request)
-        end
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.ipaddr = address
+        http.use_ssl = uri.scheme == "https"
+        http.open_timeout = configuration.fetch("open_timeout", 5)
+        http.read_timeout = configuration.fetch("read_timeout", 15)
+        response = http.start { |connection| connection.request(request) }
         raise ResponseError, "HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
         payload = JSON.parse(response.body)

@@ -30,7 +30,10 @@ module Sources
       started_at = Time.current
       run.update!(status: "running", started_at:)
       source.update!(status: "running", last_started_at: started_at)
-      result = provider.new(configuration: revision.body.fetch("config"), credential: source.source_credential&.secret).call
+      credential = source.source_credential
+      raise SourceCredential::RevokedError, "source credential is revoked" if credential && !credential.active?
+
+      result = provider.new(configuration: revision.body.fetch("config"), credential: credential&.secret).call
       observations = append_observations(run:, revision:, items: result.items)
       finished_at = Time.current
       run.update!(status: "succeeded", finished_at:, observation_count: observations.length, metadata: result.metadata)

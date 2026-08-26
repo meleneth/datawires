@@ -1,0 +1,8 @@
+= turbo_frame_tag "main_content" do
+  .flex.items-center.justify-between
+    = render TypographyComponent.new(as: :h1, text: "Queries")
+    = render ButtonComponent.new(href: new_domain_query_definition_path(@domain), size: :sm) do
+      New query
+  %ul.mt-4.space-y-2
+    - @queries.each do |query|
+      %li= link_to "#{query.body['title']} (#{query.key})", domain_query_definition_path(@domain, query), class: "font-head underline"

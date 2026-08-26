@@ -77,6 +77,8 @@ class Document < ApplicationRecord
   has_one :source, foreign_key: :source_document_id, inverse_of: :source_document, dependent: :restrict_with_exception
   has_one :metric_definition, foreign_key: :metric_document_id, inverse_of: :metric_document,
           dependent: :restrict_with_exception
+  has_one :query_definition, foreign_key: :query_document_id, inverse_of: :query_document,
+          dependent: :restrict_with_exception
 
   has_one :project_affordance,
           foreign_key: :project_document_id,

@@ -9,6 +9,14 @@
       class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-secondary px-4"
   - if @source.last_error.present?
     %p.mt-3.text-sm.text-destructive= @source.last_error
+  .mt-4
+    = form_with model: @source, url: source_path(@source), method: :patch, class: "flex items-end gap-2" do |form|
+      %div
+        = form.label :source_credential_id, "Credential", class: "block text-sm font-medium"
+        = form.select :source_credential_id,
+          options_for_select([["None", ""]] + @credentials.map { |credential| [credential.name, credential.id] }, @source.source_credential_id),
+          {}, class: "rounded border-2 border-black bg-background px-3 py-2"
+      = form.submit "Assign", class: "font-head h-10 rounded border-2 border-black bg-secondary px-4"
   .mt-6
     = render TypographyComponent.new(as: :h2, text: "Runs")
     %ul.mt-3.space-y-2

@@ -21,6 +21,25 @@ class Source < ApplicationRecord
     body["adapter"].to_s
   end
 
+  def acquire_execution_lease(now: Time.current, ttl: 5.minutes)
+    with_lock do
+      return if leased_until&.>(now)
+
+      token = SecureRandom.uuid
+      update!(lease_token: token, leased_until: now + ttl)
+      token
+    end
+  end
+
+  def release_execution_lease(token)
+    with_lock do
+      return false unless lease_token == token
+
+      update!(lease_token: nil, leased_until: nil)
+      true
+    end
+  end
+
   private
 
   def source_document_must_share_domain

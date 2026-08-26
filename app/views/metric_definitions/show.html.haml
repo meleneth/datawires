@@ -1,0 +1,9 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: @metric.body["title"])
+  %p.text-muted-foreground= @metric.body["description"]
+  %pre.mt-4.overflow-auto.rounded.border-2.border-black.bg-card.p-4= JSON.pretty_generate(@metric.body)
+  = button_to "Edit versioned definition", document_draft_path(@metric.metric_document), method: :post,
+    class: "mt-4 font-head rounded border-2 border-black bg-secondary px-4 py-2"
+  - if @metric.body["derived"]
+    = button_to "Materialize rollup", rollup_domain_metric_definition_path(@domain, @metric), method: :post,
+      class: "mt-4 font-head rounded border-2 border-black bg-primary px-4 py-2"
