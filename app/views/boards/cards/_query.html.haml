@@ -4,5 +4,5 @@
     - %w[count min max average last].each do |name|
       %div
         %dt.text-xs.text-muted-foreground= name.humanize
-        %dd.font-head= query.statistics[name].nil? ? "—" : query.statistics[name]
+        %dd.font-head= format_board_statistic(query.statistics[name])
   %p.mt-2.text-xs.text-muted-foreground= "#{query.points.length} point(s)"
