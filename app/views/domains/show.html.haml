@@ -22,6 +22,12 @@
         class: "font-head inline-flex h-8 items-center rounded border-2 border-black bg-secondary px-3 text-sm shadow-sm"
       = render ButtonComponent.new(href: domain_sources_path(@domain), variant: :outline, size: :sm) do
         Sources
+      = render ButtonComponent.new(href: domain_source_credentials_path(@domain), variant: :outline, size: :sm) do
+        Credentials
+      = render ButtonComponent.new(href: domain_metric_definitions_path(@domain), variant: :outline, size: :sm) do
+        Metrics
+      = render ButtonComponent.new(href: domain_query_definitions_path(@domain), variant: :outline, size: :sm) do
+        Queries
   - else
     .mb-4
       = button_to "Enable project workspace",
@@ -46,8 +52,12 @@
             = @project_affordance ? "Edit project settings" : "Edit this domain"
           = render ButtonComponent.new(href: domains_path, variant: :outline, size: :sm) do
             Back to domains
-          = render ButtonComponent.new(href: domain_archive_path(@domain), variant: :outline, size: :sm) do
-            Export archive
+          = render ButtonComponent.new(href: domain_archive_path(@domain), variant: :outline, size: :sm,
+            html_options: { data: { turbo: false } }) do
+            Export full archive
+          = render ButtonComponent.new(href: domain_archive_path(@domain, operational_history: false), variant: :outline, size: :sm,
+            html_options: { data: { turbo: false } }) do
+            Export configuration only
           - if @domain.repository_mode?
             = render ButtonComponent.new(href: domain_domain_commits_path(@domain), variant: :outline, size: :sm) do
               Repository history

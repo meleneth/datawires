@@ -79,7 +79,7 @@ RSpec.describe "Domain export/import" do
 
     archive = DomainExports::Export.call(domain:)
 
-    expect(archive["version"]).to eq(3)
+    expect(archive["version"]).to eq(4)
     expect(archive["credential_requirements"]).to eq([ "api" ])
     expect(archive.to_json).not_to include("top-secret")
     imported = DomainExports::Import.call(archive:, name: "Telemetry Copy")
@@ -88,6 +88,34 @@ RSpec.describe "Domain export/import" do
     expect(imported.sources.sole.source_credential).to be_nil
     expect(imported.sources.sole.source_runs.sole.configuration_revision).to eq(imported.sources.sole.head_revision)
     expect(imported.observations.sole.numeric_value).to eq(12.5)
+  end
+
+  it "round trips reusable queries, dispatches extension contributors, and can omit operational history" do
+    contributor = Class.new do
+      const_set(:VERSION, 1)
+      define_singleton_method(:export) { |domain:| { "domain_name" => domain.name } }
+      define_singleton_method(:import) { |domain:, payload:| domain.update!(public: payload["make_public"] == true) }
+    end
+    Datawires::Providers.archive_contributors.register("spec", contributor)
+    domain = create(:domain, name: "Definitions")
+    query = VersionedDefinitions::Create.call(domain:, actor: domain.owner, schema: Queries::Schema,
+      key: "latest", title: "Latest", wrapper_class: QueryDefinition, document_association: :query_document,
+      body: { "version" => 1, "key" => "latest", "title" => "Latest", "metric_key" => "temperature",
+        "aggregate" => "last" })
+    source = create(:source, domain:)
+    source.source_runs.create!(configuration_revision: source.head_revision, trigger: "manual",
+      adapter: source.adapter, adapter_version: "1", idempotency_key: "excluded")
+
+    archive = DomainExports::Export.call(domain:, include_operational_history: false)
+
+    expect(archive).to include("source_runs" => [], "observations" => [])
+    expect(archive.dig("extensions", "spec", "payload")).to eq("domain_name" => "Definitions")
+    archive["extensions"]["spec"]["payload"] = { "make_public" => true }
+    imported = DomainExports::Import.call(archive:, name: "Definitions Copy")
+    expect(imported.query_definitions.sole.body).to eq(query.body)
+    expect(imported).to be_public
+  ensure
+    Datawires::Providers.archive_contributors.unregister("spec")
   end
 
   def uuid_pattern

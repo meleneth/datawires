@@ -3,16 +3,17 @@
 module DomainExports
   class Export
     FORMAT = "datawires.domain.archive"
-    VERSION = 3
+    VERSION = 4
 
-    def self.call(domain:)
-      new(domain:).call
+    def self.call(domain:, include_operational_history: true)
+      new(domain:, include_operational_history:).call
     end
 
-    def initialize(domain:)
+    def initialize(domain:, include_operational_history:)
       raise ArgumentError, "domain must be a Domain" unless domain.is_a?(Domain)
 
       @domain = domain
+      @include_operational_history = include_operational_history
     end
 
     def call
@@ -30,16 +31,18 @@ module DomainExports
         "project_affordance" => project_affordance_payload,
         "sources" => sources_payload,
         "metric_definitions" => metric_definitions_payload,
+        "query_definitions" => query_definitions_payload,
         "source_runs" => source_runs_payload,
         "observations" => observations_payload,
         "credential_requirements" => domain.source_credentials.order(:name).pluck(:name),
-        "domain_commits" => domain_commits_payload
+        "domain_commits" => domain_commits_payload,
+        "extensions" => extension_payloads
       }
     end
 
     private
 
-    attr_reader :domain, :document_refs, :revision_refs, :schema_wrapper_refs, :domain_commit_refs,
+    attr_reader :domain, :include_operational_history, :document_refs, :revision_refs, :schema_wrapper_refs, :domain_commit_refs,
       :board_refs, :source_refs, :source_run_refs, :observation_refs
 
     def build_refs
@@ -57,10 +60,12 @@ module DomainExports
       end
       @board_refs = boards.each_with_index.to_h { |board, index| [ board.id, "board-#{index + 1}" ] }
       @source_refs = domain.sources.order(:created_at, :id).each_with_index.to_h { |source, index| [ source.id, "source-#{index + 1}" ] }
-      @source_run_refs = SourceRun.where(source_id: source_refs.keys).order(:created_at, :id).each_with_index.to_h do |run, index|
+      runs = include_operational_history ? SourceRun.where(source_id: source_refs.keys).order(:created_at, :id) : SourceRun.none
+      @source_run_refs = runs.each_with_index.to_h do |run, index|
         [ run.id, "source-run-#{index + 1}" ]
       end
-      @observation_refs = domain.observations.order(:recorded_at, :id).each_with_index.to_h do |observation, index|
+      observations = include_operational_history ? domain.observations.order(:recorded_at, :id) : Observation.none
+      @observation_refs = observations.each_with_index.to_h do |observation, index|
         [ observation.id, "observation-#{index + 1}" ]
       end
     end
@@ -171,7 +176,15 @@ module DomainExports
       end
     end
 
+    def query_definitions_payload
+      domain.query_definitions.order(:key).map do |query|
+        { "key" => query.key, "query_document_ref" => document_refs.fetch(query.query_document_id) }
+      end
+    end
+
     def source_runs_payload
+      return [] unless include_operational_history
+
       SourceRun.where(source_id: source_refs.keys).order(:created_at, :id).map do |run|
         {
           "ref" => source_run_refs.fetch(run.id), "source_ref" => source_refs.fetch(run.source_id),
@@ -185,6 +198,8 @@ module DomainExports
     end
 
     def observations_payload
+      return [] unless include_operational_history
+
       domain.observations.order(:recorded_at, :id).map do |observation|
         {
           "ref" => observation_refs.fetch(observation.id), "source_ref" => source_refs.fetch(observation.source_id),
@@ -203,6 +218,13 @@ module DomainExports
           "effective_at" => observation.effective_at.iso8601, "recorded_at" => observation.recorded_at.iso8601,
           "correction_kind" => observation.correction_kind
         }
+      end
+    end
+
+    def extension_payloads
+      Datawires::Providers.archive_contributors.kinds.index_with do |kind|
+        provider = Datawires::Providers.archive_contributors.fetch(kind)
+        { "version" => provider::VERSION, "payload" => provider.export(domain:) }
       end
     end
 

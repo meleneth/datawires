@@ -4,7 +4,8 @@ class DomainArchivesController < ApplicationController
   before_action :set_domain, only: :show
 
   def show
-    archive = DomainExports::Export.call(domain: @domain)
+    archive = DomainExports::Export.call(domain: @domain,
+      include_operational_history: params[:operational_history] != "false")
     send_data(
       JSON.pretty_generate(archive),
       filename: "#{@domain.name.parameterize.presence || "domain"}-archive.json",

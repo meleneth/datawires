@@ -29,10 +29,12 @@ module DomainExports
         create_project_affordance!(domain, documents, boards)
         sources = create_sources!(domain, documents)
         create_metric_definitions!(domain, documents)
+        create_query_definitions!(domain, documents)
         source_runs = create_source_runs!(sources, revisions)
         create_observations!(domain, sources, source_runs, revisions)
         commits = create_domain_commits!(domain, documents, revisions)
         attach_domain_head!(domain, commits)
+        import_extensions!(domain)
         domain
       end
     end
@@ -44,7 +46,7 @@ module DomainExports
     def validate_archive!
       return if archive.is_a?(Hash) &&
                 archive["format"] == DomainExports::Export::FORMAT &&
-                [ 2, DomainExports::Export::VERSION ].include?(archive["version"])
+                [ 2, 3, DomainExports::Export::VERSION ].include?(archive["version"])
 
       raise ArgumentError, "unsupported domain archive format"
     end
@@ -164,6 +166,23 @@ module DomainExports
       archive.fetch("metric_definitions", []).each do |payload|
         MetricDefinition.create!(domain:, key: payload.fetch("key"),
           metric_document: documents.fetch(payload.fetch("metric_document_ref")))
+      end
+    end
+
+    def create_query_definitions!(domain, documents)
+      archive.fetch("query_definitions", []).each do |payload|
+        QueryDefinition.create!(domain:, key: payload.fetch("key"),
+          query_document: documents.fetch(payload.fetch("query_document_ref")))
+      end
+    end
+
+    def import_extensions!(domain)
+      archive.fetch("extensions", {}).each do |kind, envelope|
+        provider = Datawires::Providers.archive_contributors.fetch(kind)
+        raise ArgumentError, "archive contributor is not registered: #{kind}" unless provider
+        raise ArgumentError, "unsupported #{kind} archive contributor version" unless envelope["version"] == provider::VERSION
+
+        provider.import(domain:, payload: envelope["payload"])
       end
     end
 
