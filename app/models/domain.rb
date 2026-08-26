@@ -1,5 +1,8 @@
 class Domain < ApplicationRecord
   has_many :event_streams, dependent: :restrict_with_exception
+  has_many :sources, dependent: :restrict_with_exception
+  has_many :source_credentials, dependent: :restrict_with_exception
+  has_many :observations, dependent: :restrict_with_exception
   has_many :documents, dependent: :restrict_with_exception
   has_many :domain_commits, dependent: :restrict_with_exception
   has_one :project_affordance, dependent: :destroy, inverse_of: :domain

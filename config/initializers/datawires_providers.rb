@@ -9,4 +9,5 @@ Rails.application.config.to_prepare do
   Datawires::Providers.layouts.register("kanban", "Boards::Layouts::KanbanProvider")
   Datawires::Providers.layouts.register("grid", "Boards::Layouts::GridProvider")
   Datawires::Providers.layouts.register("list", "Boards::Layouts::ListProvider")
+  Datawires::Providers.sources.register("http_json", "Sources::Adapters::HttpJson")
 end

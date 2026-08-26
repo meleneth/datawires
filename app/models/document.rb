@@ -74,6 +74,7 @@ class Document < ApplicationRecord
           dependent: :restrict_with_exception
 
   has_one :external_document, dependent: :destroy, inverse_of: :document
+  has_one :source, foreign_key: :source_document_id, inverse_of: :source_document, dependent: :restrict_with_exception
 
   has_one :project_affordance,
           foreign_key: :project_document_id,

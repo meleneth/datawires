@@ -1,0 +1,9 @@
+= turbo_frame_tag "main_content" do
+  = render TypographyComponent.new(as: :h1, text: "New HTTP/JSON Source")
+  = form_with url: domain_sources_path(@domain), scope: :source, class: "mt-4 space-y-4" do |form|
+    - { title: "Title", url: "HTTP(S) URL", every_seconds: "Polling interval (seconds, optional)", metric_key: "Metric key", unit: "Unit", value_pointer: "Value JSON Pointer", observed_at_pointer: "Observed-at JSON Pointer" }.each do |field, label|
+      .space-y-1
+        = form.label field, label, class: "font-head text-sm"
+        = form.text_field field, class: "w-full rounded border-2 border-black bg-background px-3 py-2"
+    = render ButtonComponent.new(html_options: { type: :submit }) do
+      Create source

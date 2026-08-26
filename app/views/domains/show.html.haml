@@ -16,6 +16,8 @@
         method: :post,
         form: { data: { turbo_frame: "main_content", turbo_action: "advance" } },
         class: "font-head inline-flex h-8 items-center rounded border-2 border-black bg-secondary px-3 text-sm shadow-sm"
+      = render ButtonComponent.new(href: domain_sources_path(@domain), variant: :outline, size: :sm) do
+        Sources
   - else
     .mb-4
       = button_to "Enable project workspace",

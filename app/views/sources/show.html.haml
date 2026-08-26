@@ -1,0 +1,18 @@
+= turbo_frame_tag "main_content" do
+  .flex.flex-wrap.items-center.justify-between.gap-3
+    %div
+      = render TypographyComponent.new(as: :h1, text: @source.body["title"])
+      %p.text-sm.text-muted-foreground= "#{@source.adapter} · #{@source.status}"
+    = button_to "Run now", source_source_runs_path(@source), method: :post,
+      class: "font-head inline-flex h-9 items-center rounded border-2 border-black bg-primary px-4 text-primary-foreground"
+  - if @source.last_error.present?
+    %p.mt-3.text-sm.text-destructive= @source.last_error
+  .mt-6
+    = render TypographyComponent.new(as: :h2, text: "Runs")
+    %ul.mt-3.space-y-2
+      - @runs.each do |run|
+        %li.rounded.border-2.border-black.bg-card.p-3
+          .font-head= "#{run.trigger} · #{run.status}"
+          .text-xs.text-muted-foreground= "Config revision #{run.configuration_revision_id} · #{run.observation_count} observations"
+          - if run.error_message.present?
+            .text-sm.text-destructive= run.error_message

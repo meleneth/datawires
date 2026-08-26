@@ -1,0 +1,13 @@
+= turbo_frame_tag "main_content" do
+  .flex.items-center.justify-between.gap-3
+    = render TypographyComponent.new(as: :h1, text: "Sources")
+    = render ButtonComponent.new(href: new_domain_source_path(@domain), size: :sm) do
+      New HTTP/JSON source
+  .mt-4.grid.gap-3
+    - @sources.each do |source|
+      = render CardComponent.new do
+        = render CardContentComponent.new do
+          = link_to source.body["title"], domain_source_path(@domain, source), class: "font-head text-lg underline"
+          %p.text-sm.text-muted-foreground= "#{source.adapter} · #{source.status}"
+    - if @sources.empty?
+      = render TypographyComponent.new(as: :muted, text: "No sources configured.")

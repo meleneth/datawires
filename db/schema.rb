@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -224,6 +224,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
     t.index ["room_id"], name: "index_messages_on_room_id"
   end
 
+  create_table "observations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "configuration_revision_id", null: false
+    t.string "correction_kind"
+    t.uuid "corrects_observation_id"
+    t.datetime "created_at", null: false
+    t.jsonb "dimensions", default: {}, null: false
+    t.uuid "domain_id", null: false
+    t.datetime "effective_at", null: false
+    t.string "metric_key"
+    t.decimal "numeric_value"
+    t.string "observation_type", null: false
+    t.datetime "observed_at", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.jsonb "provenance", default: {}, null: false
+    t.datetime "recorded_at", null: false
+    t.uuid "source_id", null: false
+    t.uuid "source_run_id", null: false
+    t.string "unit"
+    t.datetime "updated_at", null: false
+    t.index ["configuration_revision_id"], name: "index_observations_on_configuration_revision_id"
+    t.index ["corrects_observation_id"], name: "index_observations_on_corrects_observation_id"
+    t.index ["dimensions"], name: "index_observations_on_dimensions", using: :gin
+    t.index ["domain_id"], name: "index_observations_on_domain_id"
+    t.index ["metric_key", "observed_at"], name: "index_observations_on_metric_key_and_observed_at"
+    t.index ["source_id", "observed_at"], name: "index_observations_on_source_id_and_observed_at"
+    t.index ["source_id"], name: "index_observations_on_source_id"
+    t.index ["source_run_id"], name: "index_observations_on_source_run_id"
+  end
+
   create_table "procedural_policies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "body_id", null: false
     t.datetime "created_at", null: false
@@ -306,6 +335,59 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
     t.index ["document_id"], name: "index_schema_wrappers_on_document_id", unique: true
   end
 
+  create_table "source_credentials", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "domain_id", null: false
+    t.text "encrypted_payload", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id", "name"], name: "index_source_credentials_on_domain_id_and_name", unique: true
+    t.index ["domain_id"], name: "index_source_credentials_on_domain_id"
+  end
+
+  create_table "source_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "adapter", null: false
+    t.string "adapter_version", null: false
+    t.integer "attempt", default: 1, null: false
+    t.uuid "configuration_revision_id", null: false
+    t.datetime "created_at", null: false
+    t.string "error_class"
+    t.text "error_message"
+    t.datetime "finished_at"
+    t.string "idempotency_key", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.integer "observation_count", default: 0, null: false
+    t.uuid "source_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "pending", null: false
+    t.string "trigger", null: false
+    t.uuid "triggered_by_id"
+    t.datetime "updated_at", null: false
+    t.index ["configuration_revision_id"], name: "index_source_runs_on_configuration_revision_id"
+    t.index ["source_id", "idempotency_key"], name: "index_source_runs_on_source_id_and_idempotency_key", unique: true
+    t.index ["source_id"], name: "index_source_runs_on_source_id"
+    t.index ["triggered_by_id"], name: "index_source_runs_on_triggered_by_id"
+  end
+
+  create_table "sources", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "domain_id", null: false
+    t.boolean "enabled", default: true, null: false
+    t.text "last_error"
+    t.datetime "last_failed_at"
+    t.datetime "last_started_at"
+    t.datetime "last_succeeded_at"
+    t.datetime "next_run_at"
+    t.uuid "source_credential_id"
+    t.uuid "source_document_id", null: false
+    t.string "status", default: "idle", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id"], name: "index_sources_on_domain_id"
+    t.index ["enabled", "next_run_at"], name: "index_sources_on_enabled_and_next_run_at"
+    t.index ["source_credential_id"], name: "index_sources_on_source_credential_id"
+    t.index ["source_document_id"], name: "index_sources_on_source_document_id", unique: true
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "avatar"
     t.datetime "created_at", null: false
@@ -365,6 +447,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
   add_foreign_key "memberships", "users", column: "actor_id"
   add_foreign_key "memberships", "users", column: "recorded_by_id"
   add_foreign_key "messages", "rooms"
+  add_foreign_key "observations", "domains"
+  add_foreign_key "observations", "observations", column: "corrects_observation_id"
+  add_foreign_key "observations", "revisions", column: "configuration_revision_id"
+  add_foreign_key "observations", "source_runs"
+  add_foreign_key "observations", "sources"
   add_foreign_key "procedural_policies", "bodies"
   add_foreign_key "procedural_policies", "documents", column: "policy_document_id"
   add_foreign_key "project_affordances", "boards", column: "default_board_id", on_delete: :nullify
@@ -381,6 +468,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_000001) do
   add_foreign_key "role_assignments", "users", column: "recorded_by_id"
   add_foreign_key "schema_wrappers", "boards", column: "default_board_id", on_delete: :nullify
   add_foreign_key "schema_wrappers", "documents"
+  add_foreign_key "source_credentials", "domains"
+  add_foreign_key "source_runs", "revisions", column: "configuration_revision_id"
+  add_foreign_key "source_runs", "sources"
+  add_foreign_key "source_runs", "users", column: "triggered_by_id"
+  add_foreign_key "sources", "documents", column: "source_document_id"
+  add_foreign_key "sources", "domains"
+  add_foreign_key "sources", "source_credentials"
   add_foreign_key "view_affordances", "documents", column: "view_document_id"
   add_foreign_key "view_affordances", "schema_wrappers"
 end

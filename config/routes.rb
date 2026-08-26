@@ -5,8 +5,12 @@ Rails.application.routes.draw do
     resources :domain_commits, only: %i[index show]
     resources :schemas, only: %i[index new create]
     resources :documents, only: %i[index show]
+    resources :sources, only: %i[index new create show]
   end
   resources :domain_archives, only: %i[create]
+  resources :sources, only: [] do
+    resources :source_runs, only: %i[create], shallow: true
+  end
 
   resources :schemas, only: %i[show] do
     resources :documents, only: %i[create], module: :schemas
