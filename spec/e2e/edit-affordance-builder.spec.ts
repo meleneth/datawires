@@ -36,7 +36,7 @@ test('builds and refines a schema-backed edit affordance', async ({ page }) => {
   await expect(page.locator('#edit_affordance_builder_rows').getByText('/name', { exact: true })).toBeVisible();
 
   await fieldPath.selectOption('/bio');
-  await widget.selectOption('textarea');
+  await widget.selectOption('rich_text');
   await span.fill('8');
   await help.fill('Revised help.');
   await placeholder.fill('Long form copy');
@@ -47,7 +47,7 @@ test('builds and refines a schema-backed edit affordance', async ({ page }) => {
 
   await expect(editor.getByRole('heading', { name: 'Field 1' })).toBeVisible();
   await expect(fieldPath).toHaveValue('/bio');
-  await expect(widget).toHaveValue('textarea');
+  await expect(widget).toHaveValue('rich_text');
   await expect(span).toHaveValue('8');
   await expect(help).toHaveValue('Revised help.');
   await expect(placeholder).toHaveValue('Long form copy');
@@ -61,7 +61,7 @@ test('builds and refines a schema-backed edit affordance', async ({ page }) => {
   await page.getByRole('link', { name: 'Open field' }).click();
   await expect(editor.getByRole('heading', { name: 'Field 1' })).toBeVisible();
   await expect(fieldPath).toHaveValue('/bio');
-  await expect(widget).toHaveValue('textarea');
+  await expect(widget).toHaveValue('rich_text');
   await expect(span).toHaveValue('8');
   await expect(help).toHaveValue('Revised help.');
   await expect(placeholder).toHaveValue('Long form copy');

@@ -5,6 +5,7 @@ module Drafts
     attr_reader :draft, :projected_field, :edit_affordance_id
 
     delegate :cursor, :label, :widget, :help, :placeholder, :display, :reference, to: :projected_field
+    delegate :lexxy_rich_textarea_tag, to: :helpers
 
     def initialize(draft:, field:, edit_affordance_id: nil)
       @draft = draft
@@ -22,6 +23,8 @@ module Drafts
         :number_field
       when :textarea, :base64_image
         :text_area
+      when :rich_text
+        :lexxy_rich_text_area
       else
         :text_field
       end
@@ -71,6 +74,10 @@ module Drafts
 
     def reference?
       input_kind == :reference
+    end
+
+    def rich_text?
+      input_kind == :rich_text
     end
 
     def wrapper_class
@@ -149,6 +156,9 @@ module Drafts
         base.merge(class: input_html_class, value: field_value).merge(placeholder_options)
       when :text_area
         base.merge(class: textarea_html_class, value: field_value).merge(placeholder_options)
+      when :lexxy_rich_text_area
+        base.merge(class: "lexxy-content", value: field_value, attachments: false,
+          rows: compact? ? 4 : 8, aria: { label: label_text }).merge(placeholder_options)
       when :check_box
         base.merge(checked: checkbox_value)
       else
@@ -171,6 +181,8 @@ module Drafts
       case input_kind
       when :checkbox, :select, :reference
         "change->autosave#submit"
+      when :rich_text
+        "lexxy:change->autosave#queue lexxy:blur->autosave#submit"
       else
         "input->autosave#queue change->autosave#submit"
       end

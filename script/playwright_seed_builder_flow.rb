@@ -20,6 +20,7 @@ schema_body = {
     "bio" => {
       "type" => "string",
       "title" => "Bio",
+      "contentMediaType" => "text/html",
       "description" => "Long form profile copy."
     },
     "status" => {
@@ -83,6 +84,10 @@ result.draft.update!(
 
 path = Rails.application.routes.url_helpers.draft_edit_affordance_builder_path(result.draft)
 schema_path = Rails.application.routes.url_helpers.schema_path(schema_wrapper)
+rich_text_document = domain.documents.find_or_create_by!(key: "playwright-rich-text", schema_document: schema_document)
+rich_text_draft = rich_text_document.draft_for(actor: actor)
+rich_text_draft.update!(body: { "name" => "Rich text profile", "bio" => "<p>Existing <em>biography</em></p>" })
+rich_text_path = Rails.application.routes.url_helpers.draft_path(rich_text_draft)
 new_affordance_title = begin
   existing_titles = schema_wrapper.edit_affordances.pluck(:title)
   if existing_titles.exclude?("Default")
@@ -100,6 +105,7 @@ File.write(
   JSON.pretty_generate(
     "builderPath" => path,
     "schemaPath" => schema_path,
+    "richTextDraftPath" => rich_text_path,
     "newAffordanceTitle" => new_affordance_title
   )
 )

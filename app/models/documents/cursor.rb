@@ -137,6 +137,8 @@ module Documents
         :checkbox
       when "integer", "number"
         :number
+      when "string"
+        schema_node["contentMediaType"] == "text/html" ? :rich_text : :text
       else
         :text
       end

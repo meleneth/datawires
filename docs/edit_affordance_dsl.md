@@ -170,6 +170,17 @@ Supported widgets today:
 - `select`
 - `text`
 - `textarea`
+- `rich_text` (Lexxy)
+
+`rich_text` edits an HTML string stored directly in the JSON document, using the
+same per-field autosave and draft publishing flow as other widgets. It supports
+formatting, links, lists, and code; file attachments are disabled. Read-only
+rich-text fields render sanitized HTML. Custom view affordances consuming these
+fields should also sanitize HTML before rendering it.
+
+Generated editors infer `rich_text` for string properties with
+`"contentMediaType": "text/html"`. Explicit `rich_text` widgets can also be chosen
+in the affordance builder. Use `text` or `textarea` for plain text or source code.
 
 `auto` lets schema metadata choose the editor. Arrays render through the current collection/list editor.
 

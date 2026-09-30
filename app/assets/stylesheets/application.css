@@ -11,3 +11,30 @@
 turbo-frame {
   display: block;
 }
+
+lexxy-editor,
+.lexxy-content {
+  --lexxy-color-ink: hsl(var(--foreground));
+  --lexxy-color-ink-medium: hsl(var(--muted-foreground));
+  --lexxy-color-ink-light: hsl(var(--muted-foreground));
+  --lexxy-color-ink-lighter: hsl(var(--border));
+  --lexxy-color-ink-lightest: hsl(var(--muted));
+  --lexxy-color-ink-inverted: hsl(var(--background));
+  --lexxy-color-accent-dark: hsl(var(--primary));
+  --lexxy-color-accent-medium: hsl(var(--secondary));
+  --lexxy-color-accent-light: hsl(var(--muted));
+  --lexxy-color-accent-lightest: hsl(var(--card));
+  --lexxy-color-canvas: hsl(var(--background));
+  --lexxy-color-text: hsl(var(--foreground));
+  --lexxy-color-text-subtle: hsl(var(--muted-foreground));
+  --lexxy-color-link: hsl(var(--primary));
+  --lexxy-color-code-bg: hsl(var(--muted));
+  --lexxy-color-selected: hsl(var(--muted));
+  --lexxy-color-selected-hover: hsl(var(--card));
+}
+
+lexxy-editor {
+  border: 2px solid hsl(var(--border));
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}

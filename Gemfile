@@ -81,6 +81,8 @@ gem "rubocop-rspec", "~> 3.9", group: :development
 
 gem "importmap-rails", "~> 2.2"
 
+gem "lexxy", "~> 0.9.21"
+
 gem "view_component", "~> 4.2"
 
 gem "retroui-rails", path: "vendor/gems/retroui-rails", require: "retro_ui/rails"

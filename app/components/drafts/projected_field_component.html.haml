@@ -9,6 +9,8 @@
     .rounded.border-2.border-black.bg-muted.px-3.py-2.text-sm.text-muted-foreground{ id: dom_id }
       - if base64_image? && base64_image_src.present?
         = image_tag base64_image_src, alt: label_text, class: "max-h-80 w-auto rounded border-2 border-black bg-background object-contain"
+      - elsif rich_text?
+        .lexxy-content= sanitize(field_value.to_s)
       - else
         = value_preview
   - else

@@ -9,7 +9,7 @@ module Drafts
     MESSAGE_MODES = %w[hidden inline_optional inline_required].freeze
     SCREEN_MODES = %w[page full_width].freeze
     WIDTHS = %w[narrow medium large full].freeze
-    WIDGETS = %w[auto text textarea number checkbox select array base64_image reference].freeze
+    WIDGETS = %w[auto text textarea rich_text number checkbox select array base64_image reference].freeze
     COLLECTION_BINDING_OPTIONS = [
       [ "Property", "property" ],
       [ "Reference label", "reference_label" ],
@@ -827,7 +827,7 @@ module Drafts
       all_cells_for(body).each do |cell|
         next unless field_cell?(cell)
         next unless long_text_ptr?(cell.dig("binding", "ptr"))
-        next if cell["widget"] == "textarea"
+        next if %w[textarea rich_text].include?(cell["widget"])
 
         cell["widget"] = "textarea"
         cell["span"] = 12 if cell["span"].to_i < 12
@@ -838,7 +838,7 @@ module Drafts
 
     def long_text_cells(body)
       all_cells_for(body).select do |cell|
-        field_cell?(cell) && long_text_ptr?(cell.dig("binding", "ptr")) && cell["widget"] != "textarea"
+        field_cell?(cell) && long_text_ptr?(cell.dig("binding", "ptr")) && !%w[textarea rich_text].include?(cell["widget"])
       end
     end
 
@@ -961,6 +961,7 @@ module Drafts
     end
 
     def suggested_widget_for(entry)
+      return "rich_text" if entry.widget == "rich_text"
       return "textarea" if long_text_ptr?(entry.ptr)
       return "array" if entry.array?
       return "select" if enum_entry?(entry)
@@ -985,7 +986,7 @@ module Drafts
     end
 
     def suggested_span_for(entry)
-      return 12 if entry.array? || suggested_widget_for(entry) == "textarea"
+      return 12 if entry.array? || %w[textarea rich_text].include?(suggested_widget_for(entry))
 
       entry.required? ? 6 : DEFAULT_FIELD_SPAN
     end
