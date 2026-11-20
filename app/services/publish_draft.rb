@@ -64,7 +64,7 @@ class PublishDraft
   end
 
   def deep_dup_json(value)
-    Marshal.load(Marshal.dump(value))
+    value.deep_dup
   end
 
   def create_domain_commit_if_needed
