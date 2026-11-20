@@ -6,13 +6,13 @@ module Ui
       primary: :default,
       warning: :secondary,
       danger: :destructive,
-      subtle: :outline,
+      subtle: :outline
     }.freeze
 
     SIZES = {
       sm: :sm,
       md: :md,
-      lg: :lg,
+      lg: :lg
     }.freeze
 
     def initialize(tone: :primary, size: :md, disabled: false, type: :button, **html_options)

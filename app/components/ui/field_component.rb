@@ -7,7 +7,7 @@ module Ui
       focus: { frame: "border-black bg-card shadow-md", label: "text-foreground", hint: "text-muted-foreground", error: "text-destructive" },
       dirty: { frame: "border-black bg-secondary", label: "text-secondary-foreground", hint: "text-secondary-foreground", error: "text-destructive" },
       error: { frame: "border-black bg-destructive", label: "text-destructive-foreground", hint: "text-destructive-foreground", error: "text-destructive-foreground" },
-      disabled: { frame: "border-black bg-muted", label: "text-muted-foreground", hint: "text-muted-foreground", error: "text-destructive" },
+      disabled: { frame: "border-black bg-muted", label: "text-muted-foreground", hint: "text-muted-foreground", error: "text-destructive" }
     }.freeze
 
     def initialize(
@@ -93,9 +93,9 @@ module Ui
     def normalize_errors(errors)
       case errors
       when nil then []
-      when String then [errors]
+      when String then [ errors ]
       when Array then errors.compact.map(&:to_s)
-      else [errors.to_s]
+      else [ errors.to_s ]
       end
     end
   end

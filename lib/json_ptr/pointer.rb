@@ -37,7 +37,7 @@ module JsonPtr
     end
 
     def child(token_unescaped)
-      self.class.new(@tokens + [UnescapedToken.new(token_unescaped)])
+      self.class.new(@tokens + [ UnescapedToken.new(token_unescaped) ])
     end
 
     def parent
