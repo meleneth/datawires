@@ -52,6 +52,44 @@ RSpec.describe ViewAffordances::BodyValidator do
     expect(validator).to be_valid
   end
 
+  describe "related document views" do
+    let(:valid_body) do
+      {
+        "version" => 1,
+        "title" => "Board",
+        "renderer" => "related_documents",
+        "config" => {
+          "schema_key" => "task",
+          "foreign_key" => "project_key",
+          "group_by" => "status",
+          "groups" => %w[backlog doing done],
+          "create_label" => "Create Task"
+        }
+      }
+    end
+
+    it "accepts a configured related-document view" do
+      expect(validator_for(valid_body)).to be_valid
+    end
+
+    it "requires a config object and both relationship fields" do
+      expect(validator_for(valid_body.except("config")).errors).to include("config must be an object")
+      expect(validator_for(valid_body.merge("config" => {})).errors).to include(
+        "config/schema_key is required", "config/foreign_key is required"
+      )
+    end
+
+    it "rejects invalid grouping and creation metadata" do
+      body = valid_body.deep_dup
+      body["config"].merge!("group_by" => 1, "groups" => [ "doing", 2 ], "create_label" => 9)
+      expect(validator_for(body).errors).to include(
+        "config/group_by must be a string",
+        "config/groups must be an array of strings",
+        "config/create_label must be a string"
+      )
+    end
+  end
+
   it "requires a JSON object body" do
     validator = validator_for([])
 
@@ -73,7 +111,7 @@ RSpec.describe ViewAffordances::BodyValidator do
     unsupported = validator_for("version" => 1, "renderer" => "force_graph")
 
     expect(missing.errors).to include("renderer is required")
-    expect(unsupported.errors).to include("renderer must be one of: timeline_d3, mud_player, mud_choice_player")
+    expect(unsupported.errors).to include("renderer must be one of: timeline_d3, mud_player, mud_choice_player, related_documents")
   end
 
   it "validates MUD player renderer metadata" do
