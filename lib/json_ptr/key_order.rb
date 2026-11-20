@@ -22,7 +22,7 @@ module JsonPtr
 
     def sort_key(k)
       s = k.to_s
-      [@priority_index.fetch(s, @priority_fallback), s]
+      [ @priority_index.fetch(s, @priority_fallback), s ]
     end
   end
 end
