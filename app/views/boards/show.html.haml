@@ -38,11 +38,11 @@
             %span.text-xs= resolution.reason
 
   - if @projection.columns.any?
-    %div{ class: @layout_provider.container_class, data: { controller: @domain.project? ? "board-sort" : nil,
+    %div{ class: ERB::Util.html_escape(@layout_provider.container_class), data: { controller: @domain.project? ? "board-sort" : nil,
       board_sort_column_url_value: @domain.project? ? move_column_board_configuration_path(@board) : nil,
       board_sort_card_url_value: @domain.project? ? move_card_board_configuration_path(@board) : nil } }
       - @projection.columns.each_with_index do |column, column_index|
-        %section{ class: @layout_provider.column_class, draggable: @domain.project?, data: {
+        %section{ class: ERB::Util.html_escape(@layout_provider.column_class), draggable: @domain.project?, data: {
           action: @domain.project? ? "dragstart->board-sort#dragStart dragover->board-sort#dragOver drop->board-sort#drop" : nil,
           board_sort_type: "column", board_sort_id: column.id } }
           = render CardComponent.new do
