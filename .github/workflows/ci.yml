@@ -88,3 +88,27 @@ jobs:
 
       - name: Run RSpec
         run: bundle exec rspec
+
+  container_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Verify runtime versions match
+        run: |
+          set -euo pipefail
+          ruby_version="$(cat .ruby-version)"
+          grep -Fx "ARG RUBY_VERSION=${ruby_version}" Dockerfile
+          grep -Fx "ARG RUBY_VERSION=${ruby_version}" .devcontainer/Dockerfile
+
+      - name: Verify stable container image tags exist
+        run: |
+          set -euo pipefail
+          docker buildx imagetools inspect docker.io/library/ruby:4.0.10-slim >/dev/null
+          docker buildx imagetools inspect mcr.microsoft.com/devcontainers/base:ubuntu26.04 >/dev/null
+          docker buildx imagetools inspect docker.io/library/postgres:16.16-trixie >/dev/null
+          docker buildx imagetools inspect docker.io/library/postgres:17.12-trixie >/dev/null
+
+      - name: Validate development Compose specification
+        run: docker compose -f .devcontainer/docker-compose.yml config --quiet

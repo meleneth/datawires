@@ -94,7 +94,6 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
   require "simplecov"
-  require "simplecov-html"
 
   SimpleCov.start "rails" do
     enable_coverage :branch
