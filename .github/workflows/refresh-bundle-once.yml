@@ -1,0 +1,45 @@
+name: Refresh bundle lockfile once
+
+on:
+  push:
+    branches:
+      - feature/board-contextual-document-creation
+    paths:
+      - .github/workflows/refresh-bundle-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/board-contextual-document-creation
+          persist-credentials: true
+
+      - name: Install project Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: false
+
+      - name: Resolve latest compatible dependencies
+        run: bundle update
+
+      - name: Verify bundle
+        run: bundle check
+
+      - name: Commit lockfile to feature branch
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- Gemfile.lock; then
+            echo "Gemfile.lock already current within Gemfile constraints"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Gemfile.lock
+          git commit -m "Refresh Gemfile.lock to latest compatible gem versions"
+          git push origin HEAD:feature/board-contextual-document-creation
