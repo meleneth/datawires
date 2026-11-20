@@ -25,7 +25,8 @@ module Boards
 
       document, draft = Documents::CreateFromSchema.call(
         schema_wrapper: resolution.schema_wrapper,
-        actor: current_user
+        actor: current_user,
+        initial_values: initial_values_for(@action.config)
       )
       redirect_to draft_path(
         draft,
@@ -46,6 +47,24 @@ module Boards
 
     def resolve_action
       Boards::ActionResolution.call(board: @board, action: @action, actor: current_actor)
+    end
+
+    def initial_values_for(config)
+      values = config.fetch("initial_values", {})
+      return {} if values.empty?
+
+      source_key = config["source_document_key"]
+      source_document = @board.schema_wrapper.domain.documents.find_by(key: source_key) if source_key.present?
+
+      values.transform_values do |value|
+        next value unless value.is_a?(Hash)
+
+        unless value == { "source" => "document_key" } && source_document
+          raise ArgumentError, "Source document for contextual creation was not found."
+        end
+
+        source_document.key
+      end
     end
 
     def command_parameters(command)
