@@ -98,7 +98,7 @@ class SchemaMutations
 
       node["required"] =
         if required
-          req | [name]
+          req | [ name ]
         else
           req.reject { |x| x == name }
         end

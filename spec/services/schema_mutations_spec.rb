@@ -21,7 +21,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => { "name" => { "type" => "string" } },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.ensure_object_root!(body)
@@ -29,7 +29,7 @@ RSpec.describe SchemaMutations do
       expect(body).to eq(
         "type" => "object",
         "properties" => { "name" => { "type" => "string" } },
-        "required" => ["name"],
+        "required" => [ "name" ],
       )
     end
 
@@ -49,7 +49,7 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => {},
-            "required" => [],
+            "required" => []
           }
         }
       )
@@ -61,7 +61,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "name", type: "string", required: false)
@@ -76,7 +76,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "name", type: "string", required: true)
@@ -84,14 +84,14 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]).to eq(
         "name" => { "type" => "string" }
       )
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "adds an object property with object defaults" do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "address", type: "object", required: false)
@@ -107,7 +107,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "tags", type: "array", required: false)
@@ -125,10 +125,10 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => {},
-            "required" => [],
+            "required" => []
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(
@@ -142,7 +142,7 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]["address"]["properties"]).to eq(
         "city" => { "type" => "string" }
       )
-      expect(body["properties"]["address"]["required"]).to eq(["city"])
+      expect(body["properties"]["address"]["required"]).to eq([ "city" ])
     end
 
     it "raises if the property already exists" do
@@ -151,7 +151,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -163,7 +163,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -183,7 +183,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -204,9 +204,9 @@ RSpec.describe SchemaMutations do
         "type" => "object",
         "properties" => {
           "name" => { "type" => "string" },
-          "age" => { "type" => "integer" },
+          "age" => { "type" => "integer" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.remove_property!(body, name: "name")
@@ -225,12 +225,12 @@ RSpec.describe SchemaMutations do
             "type" => "object",
             "properties" => {
               "city" => { "type" => "string" },
-              "zip" => { "type" => "string" },
+              "zip" => { "type" => "string" }
             },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.remove_property!(body, at: "/properties/address", name: "city")
@@ -249,7 +249,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.rename_property!(body, old_name: "name", new_name: "full_name")
@@ -257,7 +257,7 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]).to eq(
         "full_name" => { "type" => "string" }
       )
-      expect(body["required"]).to eq(["full_name"])
+      expect(body["required"]).to eq([ "full_name" ])
     end
 
     it "renames a nested property" do
@@ -269,10 +269,10 @@ RSpec.describe SchemaMutations do
             "properties" => {
               "city" => { "type" => "string" }
             },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.rename_property!(
@@ -285,14 +285,14 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]["address"]["properties"]).to eq(
         "municipality" => { "type" => "string" }
       )
-      expect(body["properties"]["address"]["required"]).to eq(["municipality"])
+      expect(body["properties"]["address"]["required"]).to eq([ "municipality" ])
     end
 
     it "raises if the old property is missing" do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -305,9 +305,9 @@ RSpec.describe SchemaMutations do
         "type" => "object",
         "properties" => {
           "name" => { "type" => "string" },
-          "full_name" => { "type" => "string" },
+          "full_name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -323,7 +323,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "name", type: "integer")
@@ -339,7 +339,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "metadata" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "metadata", type: "object")
@@ -357,7 +357,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "tags" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "tags", type: "array")
@@ -375,10 +375,10 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => { "city" => { "type" => "string" } },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "address", type: "string")
@@ -392,7 +392,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -408,12 +408,12 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.set_required!(body, name: "name", required: true)
 
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "does not duplicate required entries" do
@@ -422,12 +422,12 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.set_required!(body, name: "name", required: true)
 
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "removes a property from required" do
@@ -436,7 +436,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.set_required!(body, name: "name", required: false)
@@ -453,15 +453,15 @@ RSpec.describe SchemaMutations do
             "properties" => {
               "city" => { "type" => "string" }
             },
-            "required" => [],
+            "required" => []
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.set_required!(body, at: "/properties/address", name: "city", required: true)
 
-      expect(body["properties"]["address"]["required"]).to eq(["city"])
+      expect(body["properties"]["address"]["required"]).to eq([ "city" ])
     end
   end
 end# spec/services/schema_mutations_spec.rb
@@ -487,7 +487,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => { "name" => { "type" => "string" } },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.ensure_object_root!(body)
@@ -495,7 +495,7 @@ RSpec.describe SchemaMutations do
       expect(body).to eq(
         "type" => "object",
         "properties" => { "name" => { "type" => "string" } },
-        "required" => ["name"],
+        "required" => [ "name" ],
       )
     end
 
@@ -515,7 +515,7 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => {},
-            "required" => [],
+            "required" => []
           }
         }
       )
@@ -527,7 +527,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "name", type: "string", required: false)
@@ -542,7 +542,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "name", type: "string", required: true)
@@ -550,14 +550,14 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]).to eq(
         "name" => { "type" => "string" }
       )
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "adds an object property with object defaults" do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "address", type: "object", required: false)
@@ -573,7 +573,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(body, name: "tags", type: "array", required: false)
@@ -591,10 +591,10 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => {},
-            "required" => [],
+            "required" => []
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.add_property!(
@@ -608,7 +608,7 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]["address"]["properties"]).to eq(
         "city" => { "type" => "string" }
       )
-      expect(body["properties"]["address"]["required"]).to eq(["city"])
+      expect(body["properties"]["address"]["required"]).to eq([ "city" ])
     end
 
     it "raises if the property already exists" do
@@ -617,7 +617,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -629,7 +629,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -649,7 +649,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -670,9 +670,9 @@ RSpec.describe SchemaMutations do
         "type" => "object",
         "properties" => {
           "name" => { "type" => "string" },
-          "age" => { "type" => "integer" },
+          "age" => { "type" => "integer" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.remove_property!(body, name: "name")
@@ -691,12 +691,12 @@ RSpec.describe SchemaMutations do
             "type" => "object",
             "properties" => {
               "city" => { "type" => "string" },
-              "zip" => { "type" => "string" },
+              "zip" => { "type" => "string" }
             },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.remove_property!(body, at: "/properties/address", name: "city")
@@ -715,7 +715,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.rename_property!(body, old_name: "name", new_name: "full_name")
@@ -723,7 +723,7 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]).to eq(
         "full_name" => { "type" => "string" }
       )
-      expect(body["required"]).to eq(["full_name"])
+      expect(body["required"]).to eq([ "full_name" ])
     end
 
     it "renames a nested property" do
@@ -735,10 +735,10 @@ RSpec.describe SchemaMutations do
             "properties" => {
               "city" => { "type" => "string" }
             },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.rename_property!(
@@ -751,14 +751,14 @@ RSpec.describe SchemaMutations do
       expect(body["properties"]["address"]["properties"]).to eq(
         "municipality" => { "type" => "string" }
       )
-      expect(body["properties"]["address"]["required"]).to eq(["municipality"])
+      expect(body["properties"]["address"]["required"]).to eq([ "municipality" ])
     end
 
     it "raises if the old property is missing" do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -771,9 +771,9 @@ RSpec.describe SchemaMutations do
         "type" => "object",
         "properties" => {
           "name" => { "type" => "string" },
-          "full_name" => { "type" => "string" },
+          "full_name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -789,7 +789,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "name", type: "integer")
@@ -805,7 +805,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "metadata" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "metadata", type: "object")
@@ -823,7 +823,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "tags" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "tags", type: "array")
@@ -841,10 +841,10 @@ RSpec.describe SchemaMutations do
           "address" => {
             "type" => "object",
             "properties" => { "city" => { "type" => "string" } },
-            "required" => ["city"],
+            "required" => [ "city" ]
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.change_property_type!(body, name: "address", type: "string")
@@ -858,7 +858,7 @@ RSpec.describe SchemaMutations do
       body = {
         "type" => "object",
         "properties" => {},
-        "required" => [],
+        "required" => []
       }
 
       expect do
@@ -874,12 +874,12 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.set_required!(body, name: "name", required: true)
 
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "does not duplicate required entries" do
@@ -888,12 +888,12 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.set_required!(body, name: "name", required: true)
 
-      expect(body["required"]).to eq(["name"])
+      expect(body["required"]).to eq([ "name" ])
     end
 
     it "removes a property from required" do
@@ -902,7 +902,7 @@ RSpec.describe SchemaMutations do
         "properties" => {
           "name" => { "type" => "string" }
         },
-        "required" => ["name"],
+        "required" => [ "name" ]
       }
 
       described_class.set_required!(body, name: "name", required: false)
@@ -919,15 +919,15 @@ RSpec.describe SchemaMutations do
             "properties" => {
               "city" => { "type" => "string" }
             },
-            "required" => [],
+            "required" => []
           }
         },
-        "required" => [],
+        "required" => []
       }
 
       described_class.set_required!(body, at: "/properties/address", name: "city", required: true)
 
-      expect(body["properties"]["address"]["required"]).to eq(["city"])
+      expect(body["properties"]["address"]["required"]).to eq([ "city" ])
     end
   end
 end
