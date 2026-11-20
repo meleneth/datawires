@@ -35,7 +35,7 @@ RSpec.describe JsonPtr do
 
     it "parses escaped segments into unescaped tokens" do
       p = described_class.parse("/properties/foo~1bar/~0tilde")
-      expect(p.tokens.map(&:unescaped)).to eq(["properties", "foo/bar", "~tilde"])
+      expect(p.tokens.map(&:unescaped)).to eq([ "properties", "foo/bar", "~tilde" ])
       expect(p.to_s).to eq("/properties/foo~1bar/~0tilde")
     end
 
@@ -76,12 +76,12 @@ RSpec.describe JsonPtr do
     end
 
     it "indexes arrays using integer tokens" do
-      doc = { a: [10, 20, 30] }
+      doc = { a: [ 10, 20, 30 ] }
       expect(described_class.get(doc, "/a/1")).to eq(20)
     end
 
     it "returns nil for non-integer array token" do
-      doc = { a: [10, 20, 30] }
+      doc = { a: [ 10, 20, 30 ] }
       expect(described_class.get(doc, "/a/nope")).to be_nil
     end
 
@@ -102,11 +102,11 @@ RSpec.describe JsonPtr do
     end
 
     it "immutably sets a value in an array" do
-      doc = { a: [10, 20, 30] }
+      doc = { a: [ 10, 20, 30 ] }
       updated = described_class.set(doc, "/a/1", 999)
 
-      expect(updated).to eq(a: [10, 999, 30])
-      expect(doc).to eq(a: [10, 20, 30])
+      expect(updated).to eq(a: [ 10, 999, 30 ])
+      expect(doc).to eq(a: [ 10, 20, 30 ])
     end
 
     it "raises if parent path is missing (no autovivify in v1)" do
@@ -138,7 +138,7 @@ RSpec.describe JsonPtr do
         "type" => "object",
         "title" => "Hello",
         "properties" => { "b" => 2, "a" => 1 },
-        "a" => 0,
+        "a" => 0
       }
 
       # Collect only first-level child pointers
@@ -153,12 +153,12 @@ RSpec.describe JsonPtr do
         "/type",
         "/properties",
         "/a",
-        "/z",
+        "/z"
       ])
     end
 
     it "enumerates arrays by index order" do
-      doc = { a: [10, 20] }
+      doc = { a: [ 10, 20 ] }
       ptrs = []
       described_class.each_pointer(doc) do |ptr, _|
         ptrs << ptr.to_s
