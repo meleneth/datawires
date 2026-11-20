@@ -10,8 +10,8 @@
         %h2.font-head.font-bold.mb-3= group.humanize
         - items.each do |item|
           .rounded.border.border-black.bg-background.p-3.mb-2
-            = link_to item.title.presence || item.body["title"].presence || item.key,
-              document_path(item),
+            = link_to item.title.presence || item.body["name"].presence || item.body["title"].presence || item.key,
+              (item.schema_record&.view_affordances&.find_by(title: "Details") ? document_view_affordance_path(item, item.schema_record.view_affordances.find_by(title: "Details")) : document_path(item)),
               class: "font-head underline",
               data: { turbo_frame: "main_content", turbo_action: "advance" }
             - if item.body["description"].present?
