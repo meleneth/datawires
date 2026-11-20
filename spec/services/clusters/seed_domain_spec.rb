@@ -258,6 +258,50 @@ RSpec.describe Clusters::SeedDomain do
     end
   end
 
+  it "seeds reusable task management schemas and context-aware views idempotently" do
+    domain = create(:domain)
+    actor = create(:user)
+
+    described_class.call(domain:, cluster_key: Clusters::Catalog::TASK_MANAGEMENT, actor:)
+
+    schemas = domain.documents.where(key: %w[project task note])
+    expect(schemas.count).to eq(3)
+    expect(schemas.map { |document| document.schema_wrapper.edit_affordances.sole.title }).to eq([ "Default" ] * 3)
+    expect(domain.documents.find_by!(key: "domain-home-page")).to be_present
+
+    project = domain.documents.find_by!(key: "project")
+    task = domain.documents.find_by!(key: "task")
+    note = domain.documents.find_by!(key: "note")
+
+    expect(project.schema_wrapper.view_affordances.sole.body).to include(
+      "renderer" => "related_documents",
+      "config" => include("schema_key" => "task", "foreign_key" => "project_key", "create_label" => "Create Task")
+    )
+    expect(task.schema_wrapper.view_affordances.sole.body).to include(
+      "renderer" => "related_documents",
+      "config" => include("schema_key" => "note", "foreign_key" => "task_key", "create_label" => "Create Note")
+    )
+    expect(note.schema_wrapper.view_affordances).to be_empty
+
+    task_cells = task.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten
+    note_cells = note.schema_wrapper.edit_affordances.sole.body.fetch("screens").first.fetch("rows").flatten
+    expect(reference_cell_for(task_cells, "/project_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "project", "index_type" => "identity")
+    )
+    expect(reference_cell_for(note_cells, "/task_key")).to include(
+      "widget" => "reference",
+      "reference" => include("schema_key" => "task", "index_type" => "identity")
+    )
+
+    counts = [ domain.documents.count, EditAffordance.joins(:schema_wrapper).where(schema_wrappers: { document_id: schemas.select(:id) }).count,
+      ViewAffordance.joins(:schema_wrapper).where(schema_wrappers: { document_id: schemas.select(:id) }).count ]
+    described_class.call(domain:, cluster_key: Clusters::Catalog::TASK_MANAGEMENT, actor:)
+    expect([ domain.documents.count,
+      EditAffordance.joins(:schema_wrapper).where(schema_wrappers: { document_id: schemas.select(:id) }).count,
+      ViewAffordance.joins(:schema_wrapper).where(schema_wrappers: { document_id: schemas.select(:id) }).count ]).to eq(counts)
+  end
+
   it "does nothing for blank clusters" do
     domain = create(:domain)
 
