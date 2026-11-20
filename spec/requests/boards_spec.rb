@@ -217,6 +217,65 @@ RSpec.describe "Boards", type: :request do
     expect(response.body).to include(board_path(administration))
   end
 
+  it "creates a task with a parent project reference from the board action" do
+    board = create(:board)
+    domain = board.schema_wrapper.domain
+    project_schema = create(:document, :with_schema_head_revision, domain:, key: "tm-project")
+    task_schema = create(:document, :with_schema_head_revision, domain:, key: "tm-task")
+    create(:schema_wrapper, document: task_schema)
+    create(:document, :with_head_revision, domain:, schema_document: project_schema, key: "launch", head_body: { "name" => "Launch" })
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "create-task",
+          "kind" => "open_edit_affordance",
+          "title" => "Create Task",
+          "config" => {
+            "schema_key" => "tm-task",
+            "source_document_key" => "launch",
+            "initial_values" => { "project_key" => { "source" => "document_key" } }
+          }
+        }
+      ]
+    )
+
+    expect {
+      post board_action_path(board, "create-task")
+    }.to change(Document.where(schema_document: task_schema), :count).by(1)
+
+    created = Document.where(schema_document: task_schema).order(:created_at).last
+    expect(created.body).to eq("project_key" => "launch")
+    expect(response).to redirect_to(draft_path(Draft.order(:created_at).last))
+  end
+
+  it "rejects a contextual create action when the source document is missing" do
+    board = create(:board)
+    domain = board.schema_wrapper.domain
+    task_schema = create(:document, :with_schema_head_revision, domain:, key: "tm-task")
+    create(:schema_wrapper, document: task_schema)
+    configure_actions(
+      board,
+      [
+        {
+          "id" => "create-task",
+          "kind" => "open_edit_affordance",
+          "title" => "Create Task",
+          "config" => {
+            "schema_key" => "tm-task",
+            "source_document_key" => "missing-project",
+            "initial_values" => { "project_key" => { "source" => "document_key" } }
+          }
+        }
+      ]
+    )
+
+    expect {
+      post board_action_path(board, "create-task")
+    }.not_to change(Document, :count)
+    expect(response).to redirect_to(board_path(board))
+  end
+
   def configure_actions(board, actions)
     configure_board(board, "actions" => actions)
   end
