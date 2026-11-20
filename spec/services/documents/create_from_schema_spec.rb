@@ -25,6 +25,7 @@ RSpec.describe Documents::CreateFromSchema do
   end
 
   it "rejects non-object initial values before creating a document" do
+    wrapper
     before_count = Document.count
     expect {
       described_class.call(schema_wrapper: wrapper, actor:, initial_values: [ "invalid" ])
