@@ -24,7 +24,7 @@ services:
       - "3000:3000"
 
   db:
-    image: postgres:16
+    image: postgres:16.16-trixie
     restart: unless-stopped
     environment:
       POSTGRES_DB: datawires_development
