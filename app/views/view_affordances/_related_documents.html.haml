@@ -1,0 +1,22 @@
+- if projection.data.fetch("schema_found")
+  .mb-4
+    = button_to projection.data.fetch("create_label"),
+      create_related_document_view_affordance_path(document, view_affordance),
+      method: :post,
+      class: "font-head inline-flex h-10 items-center rounded border-2 border-black bg-primary px-4 text-primary-foreground"
+  .flex.flex-wrap.items-start.gap-4
+    - projection.data.fetch("groups").each do |group, items|
+      .min-w-64.flex-1.rounded.border-2.border-black.p-4
+        %h2.font-head.font-bold.mb-3= group.humanize
+        - items.each do |item|
+          .rounded.border.border-black.bg-background.p-3.mb-2
+            = link_to item.title.presence || item.body["title"].presence || item.key,
+              document_path(item),
+              class: "font-head underline",
+              data: { turbo_frame: "main_content", turbo_action: "advance" }
+            - if item.body["description"].present?
+              %p.text-sm= item.body["description"]
+        - if items.empty?
+          %p.text-sm.text-muted-foreground No documents yet.
+- else
+  %p.text-destructive= "Schema #{projection.data.fetch('schema_key')} was not found."
