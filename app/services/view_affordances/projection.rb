@@ -11,6 +11,8 @@ module ViewAffordances
         TimelineD3Projection.call(document:, view_affordance:)
       when "mud_player"
         MudPlayerProjection.call(document:, view_affordance:)
+      when "related_documents"
+        RelatedDocumentsProjection.call(document:, view_affordance:)
       when "mud_choice_player"
         MudChoicePlayerProjection.call(document:, view_affordance:)
       else
