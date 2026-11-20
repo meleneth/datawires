@@ -105,6 +105,7 @@ RSpec.describe "Related document affordances", type: :request do
     ).and_return(false)
 
     project
+    project
     expect {
       post create_related_document_view_affordance_path(project, view)
     }.not_to change(Document, :count)
