@@ -8,6 +8,8 @@
 
   - if @projection.renderer == "timeline_d3"
     = render "view_affordances/timeline_d3", projection: @projection
+  - elsif @projection.renderer == "related_documents"
+    = render "view_affordances/related_documents", projection: @projection, document: @document, view_affordance: @view_affordance
   - elsif @projection.renderer == "mud_player"
     = render "view_affordances/mud_player", projection: @projection
   - elsif @projection.renderer == "mud_choice_player"

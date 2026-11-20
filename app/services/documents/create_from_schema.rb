@@ -2,16 +2,18 @@
 
 module Documents
   class CreateFromSchema
-    def self.call(schema_wrapper:, actor: nil)
-      new(schema_wrapper:, actor:).call
+    def self.call(schema_wrapper:, actor: nil, initial_values: {})
+      new(schema_wrapper:, actor:, initial_values:).call
     end
 
-    def initialize(schema_wrapper:, actor:)
+    def initialize(schema_wrapper:, actor:, initial_values:)
       raise ArgumentError, "schema_wrapper must be a SchemaWrapper" unless schema_wrapper.is_a?(SchemaWrapper)
 
       @schema_wrapper = schema_wrapper
       @schema = schema_wrapper.document
       @actor = actor
+      raise ArgumentError, "initial_values must be an object" unless initial_values.is_a?(Hash)
+      @initial_values = initial_values.deep_dup
     end
 
     def call
@@ -44,7 +46,7 @@ module Documents
     end
 
     def initial_body
-      {}
+      @initial_values.deep_dup
     end
   end
 end

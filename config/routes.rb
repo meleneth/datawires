@@ -45,7 +45,9 @@ Rails.application.routes.draw do
   resources :documents, only: %i[show] do
     resource :image, only: %i[show], controller: :document_images
     resource :draft, only: %i[create], module: :documents
-    resources :view_affordances, only: %i[show], module: :documents
+    resources :view_affordances, only: %i[show], module: :documents do
+      post :create_related, on: :member
+    end
   end
 
   resources :drafts, only: %i[show destroy] do
