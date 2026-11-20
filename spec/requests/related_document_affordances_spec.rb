@@ -105,7 +105,6 @@ RSpec.describe "Related document affordances", type: :request do
     ).and_return(false)
 
     project
-    project
     expect {
       post create_related_document_view_affordance_path(project, view)
     }.not_to change(Document, :count)
@@ -118,6 +117,7 @@ RSpec.describe "Related document affordances", type: :request do
     view = create_view(schema_wrapper: project_wrapper, title: "Missing", config: {
       "schema_key" => "does-not-exist", "foreign_key" => "project_key"
     })
+    project
     expect {
       post create_related_document_view_affordance_path(project, view)
     }.not_to change(Document, :count)
@@ -144,6 +144,7 @@ RSpec.describe "Related document affordances", type: :request do
     )
     view.view_document.update!(head_revision: revision)
 
+    project
     expect {
       post create_related_document_view_affordance_path(project, view)
     }.not_to change(Document, :count)
