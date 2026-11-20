@@ -1286,7 +1286,7 @@ module Drafts
     end
 
     def deep_dup_json(value)
-      Marshal.load(Marshal.dump(value))
+      value.deep_dup
     end
 
     def builder_path(tab: "builder", screen_id: @screen_id)
