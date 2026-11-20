@@ -104,6 +104,7 @@ RSpec.describe "Related document affordances", type: :request do
       :create_document, schema_wrapper: task_wrapper
     ).and_return(false)
 
+    project
     expect {
       post create_related_document_view_affordance_path(project, view)
     }.not_to change(Document, :count)
@@ -128,9 +129,8 @@ RSpec.describe "Related document affordances", type: :request do
     view = project_view
     task = create_task(project_key: project.key, key: "alpha-task")
 
-    expect {
-      post create_related_document_view_affordance_path(task, view)
-    }.to raise_error(ActiveRecord::RecordNotFound)
+    post create_related_document_view_affordance_path(task, view)
+    expect(response).to have_http_status(:not_found)
   end
 
   it "does not allow contextual creation for a renderer that is not related_documents" do
