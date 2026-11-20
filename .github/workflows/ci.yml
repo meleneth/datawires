@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17.12-trixie
         env:
           POSTGRES_USER: datawires
           POSTGRES_PASSWORD: datawires
