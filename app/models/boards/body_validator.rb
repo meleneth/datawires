@@ -94,31 +94,8 @@ module Boards
       when "open_edit_affordance"
         errors << "#{prefix}.schema_key must be a non-empty string" unless non_empty_string?(config["schema_key"])
         errors << "#{prefix}.edit_affordance must be a string" unless config["edit_affordance"].nil? || config["edit_affordance"].is_a?(String)
-        validate_initial_values(config, prefix)
       when "invoke_command"
         errors << "#{prefix}.command must be a non-empty string" unless non_empty_string?(config["command"])
-      end
-    end
-
-    def validate_initial_values(config, prefix)
-      values = config["initial_values"]
-      return if values.nil?
-
-      unless values.is_a?(Hash)
-        errors << "#{prefix}.initial_values must be an object"
-        return
-      end
-
-      values.each do |property, value|
-        errors << "#{prefix}.initial_values keys must be non-empty strings" unless non_empty_string?(property)
-        next unless value.is_a?(Hash)
-
-        errors << "#{prefix}.initial_values.#{property} supports only document_key bindings" unless value == { "source" => "document_key" }
-        errors << "#{prefix}.source_document_key is required for document_key bindings" unless non_empty_string?(config["source_document_key"])
-      end
-
-      if config.key?("source_document_key") && !non_empty_string?(config["source_document_key"])
-        errors << "#{prefix}.source_document_key must be a non-empty string"
       end
     end
 
