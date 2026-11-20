@@ -3,7 +3,7 @@
 module ViewAffordances
   class BodyValidator
     SUPPORTED_VERSIONS = [ 1 ].freeze
-    SUPPORTED_RENDERERS = %w[timeline_d3 mud_player mud_choice_player].freeze
+    SUPPORTED_RENDERERS = %w[timeline_d3 mud_player mud_choice_player related_documents].freeze
 
     attr_reader :body
 
@@ -29,6 +29,7 @@ module ViewAffordances
       validate_string(errors, body, "title", "title")
       validate_renderer(errors)
       validate_config(errors)
+      validate_related_documents(errors) if body["renderer"] == "related_documents"
 
       errors
     end
@@ -73,6 +74,24 @@ module ViewAffordances
       validate_string(errors, config, "item_schema_key", "config/item_schema_key")
       validate_string(errors, config, "start_room_key", "config/start_room_key")
       validate_string(errors, config, "choice_room_schema_key", "config/choice_room_schema_key")
+    end
+
+    def validate_related_documents(errors)
+      config = body["config"]
+      return unless config.is_a?(Hash)
+
+      %w[schema_key foreign_key].each do |key|
+        errors << "config/#{key} is required" unless config[key].is_a?(String) && config[key].present?
+      end
+      if config.key?("group_by") && !config["group_by"].is_a?(String)
+        errors << "config/group_by must be a string"
+      end
+      if config.key?("groups") && !(config["groups"].is_a?(Array) && config["groups"].all? { |value| value.is_a?(String) })
+        errors << "config/groups must be an array of strings"
+      end
+      if config.key?("create_label") && !config["create_label"].is_a?(String)
+        errors << "config/create_label must be a string"
+      end
     end
 
     def validate_string(errors, object, key, path)
