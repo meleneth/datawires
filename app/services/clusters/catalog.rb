@@ -7,18 +7,20 @@ module Clusters
     WORLD_BUILDING = "worldbuilding"
     ROBERTS_RULES = "roberts-rules"
     PRIVATE_MUD = "private-mud"
+    TASK_MANAGEMENT = "task-management"
 
     def options
       [
         [ "Blank", "" ],
         [ "Worldbuilding tools", WORLD_BUILDING ],
         [ "Robert's Rules of Order", ROBERTS_RULES ],
-        [ "Private MUD authoring", PRIVATE_MUD ]
+        [ "Private MUD authoring", PRIVATE_MUD ],
+        [ "Task management", TASK_MANAGEMENT ]
       ]
     end
 
     def include?(key)
-      key.blank? || key == WORLD_BUILDING || key == ROBERTS_RULES || key == PRIVATE_MUD
+      key.blank? || key == WORLD_BUILDING || key == ROBERTS_RULES || key == PRIVATE_MUD || key == TASK_MANAGEMENT
     end
 
     def definition_for(key)
@@ -26,8 +28,163 @@ module Clusters
       return worldbuilding if key == WORLD_BUILDING
       return roberts_rules if key == ROBERTS_RULES
       return private_mud if key == PRIVATE_MUD
+      return task_management if key == TASK_MANAGEMENT
 
       raise ArgumentError, "unknown cluster: #{key}"
+    end
+
+
+    def task_management
+      {
+        key: TASK_MANAGEMENT,
+        name: "Task management",
+        repository_mode: false,
+        home: {
+          "title" => "Task Management Home",
+          "groups" => [
+            {
+              "title" => "Work",
+              "links" => [
+                schema_home_link("Projects", "Projects and their task boards.", schema_key: "project"),
+                schema_home_link("Tasks", "Work items belonging to projects.", schema_key: "task"),
+                schema_home_link("Notes", "Notes and updates belonging to tasks.", schema_key: "note")
+              ]
+            }
+          ]
+        },
+        schemas: [
+          domain_home_page_schema(cluster_key: TASK_MANAGEMENT),
+          task_management_project_schema,
+          task_management_task_schema,
+          task_management_note_schema
+        ]
+      }
+    end
+
+    def task_management_project_schema
+      schema(
+        cluster_key: TASK_MANAGEMENT,
+        key: "project",
+        title: "Project",
+        required: %w[name],
+        properties: {
+          "name" => string("Name"),
+          "description" => string("Description"),
+          "status" => enum_string("Status", %w[planned active on_hold completed archived]),
+          "lead" => string("Project lead"),
+          "start_date" => string("Start date"),
+          "due_date" => string("Due date")
+        },
+        rows: [
+          [ field("/name", span: 8), field("/status", span: 4) ],
+          [ field("/description", span: 12, widget: "textarea") ],
+          [ field("/lead", span: 6), field("/due_date", span: 6) ],
+          [ field("/start_date", span: 6) ],
+          [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          related_documents_view_affordance(
+            key: "project-task-board-view-affordance",
+            title: "Project task board view affordance",
+            affordance_title: "Board",
+            schema_key: "task",
+            foreign_key: "project_key",
+            group_by: "status",
+            groups: %w[backlog todo in_progress in_review blocked done],
+            create_label: "Create Task"
+          )
+        ]
+      )
+    end
+
+    def task_management_task_schema
+      schema(
+        cluster_key: TASK_MANAGEMENT,
+        key: "task",
+        title: "Task",
+        required: %w[title project_key],
+        properties: {
+          "title" => string("Title"),
+          "description" => string("Description"),
+          "project_key" => string("Project"),
+          "status" => enum_string("Status", %w[backlog todo in_progress in_review blocked done]),
+          "priority" => enum_string("Priority", %w[lowest low medium high highest]),
+          "task_type" => enum_string("Type", %w[task bug story epic]),
+          "assignee" => string("Assignee"),
+          "due_date" => string("Due date"),
+          "rank" => integer("Rank"),
+          "labels" => {
+            "type" => "array",
+            "title" => "Labels",
+            "default" => [],
+            "items" => string("Label")
+          }
+        },
+        rows: [
+          [ field("/title", span: 8), field("/status", span: 4) ],
+          [ reference_field("/project_key", span: 8, schema_key: "project", placeholder: "Select project"), field("/priority", span: 4) ],
+          [ field("/description", span: 12, widget: "textarea") ],
+          [ field("/assignee", span: 4), field("/task_type", span: 4), field("/due_date", span: 4) ],
+          [ field("/rank", span: 4, widget: "number") ],
+          [ array_field("/labels", span: 12, item_title: value_label_binding, item_subtitle: none_binding) ],
+          [ commit(span: 12) ]
+        ],
+        view_affordances: [
+          related_documents_view_affordance(
+            key: "task-notes-view-affordance",
+            title: "Task notes view affordance",
+            affordance_title: "Details",
+            schema_key: "note",
+            foreign_key: "task_key",
+            create_label: "Create Note"
+          )
+        ]
+      )
+    end
+
+    def task_management_note_schema
+      schema(
+        cluster_key: TASK_MANAGEMENT,
+        key: "note",
+        title: "Note",
+        required: %w[task_key content],
+        properties: {
+          "task_key" => string("Task"),
+          "content" => string("Content"),
+          "author" => string("Author"),
+          "kind" => enum_string("Kind", %w[comment update decision]),
+          "created_at" => string("Created at")
+        },
+        rows: [
+          [ reference_field("/task_key", span: 8, schema_key: "task", placeholder: "Select task"), field("/kind", span: 4) ],
+          [ field("/content", span: 12, widget: "textarea") ],
+          [ field("/author", span: 8), field("/created_at", span: 4) ],
+          [ commit(span: 12) ]
+        ]
+      )
+    end
+
+    def related_documents_view_affordance(key:, title:, affordance_title:, schema_key:, foreign_key:, create_label:, group_by: nil, groups: [])
+      {
+        key: key,
+        title: title,
+        affordance_title: affordance_title,
+        body: {
+          "version" => 1,
+          "renderer" => "related_documents",
+          "title" => affordance_title,
+          "config" => {
+            "schema_key" => schema_key,
+            "foreign_key" => foreign_key,
+            "create_label" => create_label
+          }.tap do |config|
+            if group_by.present?
+              config["group_by"] = group_by
+              config["groups"] = groups
+            end
+          end
+        }
+      }
     end
 
     def private_mud
