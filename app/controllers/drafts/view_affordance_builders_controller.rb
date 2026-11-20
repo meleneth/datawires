@@ -129,7 +129,7 @@ module Drafts
     end
 
     def deep_dup_json(value)
-      Marshal.load(Marshal.dump(value))
+      value.deep_dup
     end
 
     def preview_document
