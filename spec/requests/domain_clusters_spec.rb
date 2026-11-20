@@ -11,6 +11,7 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("Worldbuilding tools")
     expect(response.body).to include("Robert&#39;s Rules of Order")
     expect(response.body).to include("Private MUD authoring")
+    expect(response.body).to include("Task management")
   end
 
   it "creates a domain pre-seeded with the worldbuilding cluster" do
@@ -110,6 +111,35 @@ RSpec.describe "Domain clusters", type: :request do
     expect(response.body).to include("mud-item")
     expect(response.body).to include("mud-world")
     expect(response.body).to include("mud-choice-room")
+  end
+
+  it "creates a selectable task management domain with schema-backed creation and views" do
+    expect {
+      post domains_path, params: {
+        domain: {
+          name: "Engineering Projects",
+          cluster_key: Clusters::Catalog::TASK_MANAGEMENT
+        }
+      }
+    }.to change(Domain, :count).by(1)
+      .and change(SchemaWrapper, :count).by(4)
+      .and change(EditAffordance, :count).by(4)
+      .and change(ViewAffordance, :count).by(2)
+
+    domain = Domain.find_by!(name: "Engineering Projects")
+    expect(response).to redirect_to(domain_path(domain))
+    follow_redirect!
+    expect(response.body).to include("project", "task", "note")
+
+    project_schema = domain.documents.find_by!(key: "project")
+    task_schema = domain.documents.find_by!(key: "task")
+    expect(project_schema.schema_wrapper.view_affordances.sole.title).to eq("Board")
+    expect(task_schema.schema_wrapper.view_affordances.sole.title).to eq("Details")
+
+    home = domain.documents.find_by!(key: DomainHomeLinks::DOCUMENT_KEY)
+    expect(home.body.fetch("groups").flat_map { |group| group.fetch("links") }.pluck("title")).to include(
+      "Projects", "Tasks", "Notes"
+    )
   end
 
   it "rejects unknown clusters without creating the domain" do
