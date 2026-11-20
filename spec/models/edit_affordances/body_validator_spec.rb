@@ -418,7 +418,7 @@ RSpec.describe EditAffordances::BodyValidator do
     )
 
     expect(validator.errors).to include(
-      "rows/0/0/widget must be one of: array, auto, base64_image, checkbox, number, reference, select, text, textarea"
+      "rows/0/0/widget must be one of: array, auto, base64_image, checkbox, number, reference, rich_text, select, text, textarea"
     )
   end
 
