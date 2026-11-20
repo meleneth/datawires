@@ -78,7 +78,10 @@ module ViewAffordances
 
     def validate_related_documents(errors)
       config = body["config"]
-      return unless config.is_a?(Hash)
+      unless config.is_a?(Hash)
+        errors << "config must be an object" if config.nil?
+        return
+      end
 
       %w[schema_key foreign_key].each do |key|
         errors << "config/#{key} is required" unless config[key].is_a?(String) && config[key].present?
