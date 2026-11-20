@@ -1,6 +1,6 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+FROM mcr.microsoft.com/devcontainers/base:ubuntu26.04
 
-ARG RUBY_VERSION=4.0.1
+ARG RUBY_VERSION=4.0.10
 
 RUN apt-get update && apt-get install -y \
     build-essential \
